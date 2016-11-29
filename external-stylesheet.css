@@ -1,0 +1,285 @@
+body {
+	font-family: Microsoft JhengHei;
+	font-size: 14px;
+}
+iframe{
+	border: none;
+}
+.basicBlock{
+	margin-top:10px;
+	margin-bottom:10px;
+}
+.Center{
+	text-align: center;
+}
+/*一般按鈕*/
+button,.button{
+	-moz-box-shadow:inset 0px 1px 0px 0px #ffffff;
+	-webkit-box-shadow:inset 0px 1px 0px 0px #ffffff;
+	box-shadow:inset 0px 1px 0px 0px #ffffff;
+	background:-webkit-gradient(linear, left top, left bottom, color-stop(0.05, #ffffff), color-stop(1, #f6f6f6));
+	background:-moz-linear-gradient(top, #ffffff 5%, #f6f6f6 100%);
+	background:-webkit-linear-gradient(top, #ffffff 5%, #f6f6f6 100%);
+	background:-o-linear-gradient(top, #ffffff 5%, #f6f6f6 100%);
+	background:-ms-linear-gradient(top, #ffffff 5%, #f6f6f6 100%);
+	background:linear-gradient(to bottom, #ffffff 5%, #f6f6f6 100%);
+	filter:progid:DXImageTransform.Microsoft.gradient(startColorstr='#ffffff', endColorstr='#f6f6f6',GradientType=0);
+	background-color:#ffffff;
+	border: 1px solid #dcdcdc;
+	display:inline-block;
+	cursor:pointer;
+	color:#666666;
+	font-size: 12px;
+	padding:2px 3px;
+	text-decoration:none;
+	text-shadow:0px 1px 0px #ffffff;
+	behavior: url(tool/PIE.htc);
+}
+button:hover,.button:hover {
+	background:-webkit-gradient(linear, left top, left bottom, color-stop(0.05, #f6f6f6), color-stop(1, #ffffff));
+	background:-moz-linear-gradient(top, #f6f6f6 5%, #ffffff 100%);
+	background:-webkit-linear-gradient(top, #f6f6f6 5%, #ffffff 100%);
+	background:-o-linear-gradient(top, #f6f6f6 5%, #ffffff 100%);
+	background:-ms-linear-gradient(top, #f6f6f6 5%, #ffffff 100%);
+	background:linear-gradient(to bottom, #f6f6f6 5%, #ffffff 100%);
+	filter:progid:DXImageTransform.Microsoft.gradient(startColorstr='#f6f6f6', endColorstr='#ffffff',GradientType=0);
+	background-color:#f6f6f6;
+	border: 1px solid #AAAAAA;
+	behavior: url(tool/PIE.htc);
+}
+
+/*深色按鈕*/
+.darkButton {
+	-webkit-box-shadow:inset 0px 0px 0px 0px #b3b3b3;
+	box-shadow:inset 0px 0px 0px 0px #b3b3b3;
+	-moz-box-shadow:inset 0px 1px 0px 0px #999999;
+	-webkit-box-shadow:inset 0px 1px 0px 0px #999999;
+	box-shadow:inset 0px 1px 0px 0px #999999;
+	background:-webkit-gradient(linear, left top, left bottom, color-stop(0.05, #aaaaaa), color-stop(1, #999999));
+	background:-moz-linear-gradient(top, #aaaaaa 5%, #999999 100%);
+	background:-webkit-linear-gradient(top, #aaaaaa 5%, #999999 100%);
+	background:-o-linear-gradient(top, #aaaaaa 5%, #999999 100%);
+	background:-ms-linear-gradient(top, #aaaaaa 5%, #999999 100%);
+	background:linear-gradient(to bottom, #aaaaaa 5%, #999999 100%);
+	filter:progid:DXImageTransform.Microsoft.gradient(startColorstr='#aaaaaa', endColorstr='#999999',GradientType=0);
+	background-color:#aaaaaa;
+	text-indent:0;
+	border:1px solid #7a7a7a;
+	display:inline-block;
+	color:#ffffff;
+	font-weight:normal;
+	font-style:normal;
+	text-decoration:none;
+	text-shadow:0px 0px 0px #ffffff;
+	text-align:center;
+	padding:2px 2px;
+	margin-left:2px;
+}.darkButton:hover {
+	background:-webkit-gradient(linear, left top, left bottom, color-stop(0.05, #777777), color-stop(1, #706e70));
+	background:-moz-linear-gradient(top, #777777 5%, #706e70 100%);
+	background:-webkit-linear-gradient(top, #777777 5%, #706e70 100%);
+	background:-o-linear-gradient(top, #777777 5%, #706e70 100%);
+	background:-ms-linear-gradient(top, #777777 5%, #706e70 100%);
+	background:linear-gradient(to bottom, #777777 5%, #706e70 100%);
+	filter:progid:DXImageTransform.Microsoft.gradient(startColorstr='#777777', endColorstr='#706e70',GradientType=0);
+	background-color:#706e70;
+	border: 1px solid #AAAAAA;
+	behavior: url(tool/PIE.htc);
+}
+
+/*X關閉按鈕*/
+.closeButton{
+	background-image:url(tool/pic/close_button.gif); 
+	width:21px; height:21px; 
+	float: right; 
+	margin-bottom: 12px;
+}
+
+/* 設定placeholder提示字的文字顏色 */
+:-moz-placeholder,::-webkit-input-placeholder{
+  color: #bfbfbf;
+}
+.placeholder{
+	color: #bfbfbf;
+}
+
+input[type="text"],input[type="password"],input[type="number"]{
+    outline: none;
+    border: 1px solid #AAAAAA;
+    color: #3F3F3F;
+    -webkit-border-radius: 2px;
+    -moz-border-radius: 2px;
+    border-radius: 2px;
+    -webkit-transition: background 0.2s linear, box-shadow 0.6s linear;
+    -moz-transition: background 0.2s linear, box-shadow 0.6s linear;
+    -o-transition: background 0.2s linear, box-shadow 0.6s linear;
+    transition: background 0.2s linear, box-shadow 0.6s linear;
+	behavior: url(tool/PIE.htc);
+}
+
+input[type="text"]:focus,input[type="password"]:focus,input[type="number"]:focus{
+    background: #F7F7F7;
+    border: dashed 1px #969696;
+    -webkit-box-shadow: 2px 2px 7px #E8E8E8 inset;
+    -moz-box-shadow: 2px 2px 7px #E8E8E8 inset;
+    box-shadow: 2px 2px 7px #E8E8E8 inset;
+	behavior: url(tool/PIE.htc);
+}
+
+/*搜尋欄和查詢按鈕樣式設定*/
+.searchInput,.searchInput:focus  { 
+    background: #FFF url(tool/pic/search.png) no-repeat 4px 4px; 
+	border:1px solid #adc5cf !important; 
+    outline:0; 
+    padding-left: 25px;
+	padding-right: 75px;
+    height:21px; 
+    width: 350px; 
+	vertical-align:bottom;
+} 
+
+.searchSubmit,.searchSubmit:focus { 
+	margin: 0;
+	padding:0px 20px;
+	width:75px;
+	height:25px;
+	position:relative; 
+	left:-75px;
+	border:1px solid #adc5cf;
+	background: #e4f1f9; /* Old browsers */
+	background: -moz-linear-gradient(top, #e4f1f9 0%, #d5e7f3 100%); /* FF3.6+ */
+	background: -webkit-gradient(linear, left top, left bottom, color-stop(0%,#e4f1f9), color-stop(100%,#d5e7f3)); /* Chrome,Safari4+ */
+	background: -webkit-linear-gradient(top, #e4f1f9 0%,#d5e7f3 100%); /* Chrome10+,Safari5.1+ */
+	background: -o-linear-gradient(top, #e4f1f9 0%,#d5e7f3 100%); /* Opera 11.10+ */
+	background: -ms-linear-gradient(top, #e4f1f9 0%,#d5e7f3 100%); /* IE10+ */
+	background: linear-gradient(top, #e4f1f9 0%,#d5e7f3 100%); /* W3C */
+	filter: progid:DXImageTransform.Microsoft.gradient( startColorstr='#e4f1f9', endColorstr='#d5e7f3',GradientType=0 ); /* IE6-9 */
+	color:#7da2aa;
+	cursor: pointer;
+	vertical-align:bottom;
+} 
+
+.searchSubmit_noLeft,.searchSubmit_noLeft:focus { 
+	margin: 0;
+	padding:0px 20px;
+	width:75px;
+	height:25px;
+	position:relative; 
+	border:1px solid #adc5cf;
+	background: #e4f1f9; /* Old browsers */
+	background: -moz-linear-gradient(top, #e4f1f9 0%, #d5e7f3 100%); /* FF3.6+ */
+	background: -webkit-gradient(linear, left top, left bottom, color-stop(0%,#e4f1f9), color-stop(100%,#d5e7f3)); /* Chrome,Safari4+ */
+	background: -webkit-linear-gradient(top, #e4f1f9 0%,#d5e7f3 100%); /* Chrome10+,Safari5.1+ */
+	background: -o-linear-gradient(top, #e4f1f9 0%,#d5e7f3 100%); /* Opera 11.10+ */
+	background: -ms-linear-gradient(top, #e4f1f9 0%,#d5e7f3 100%); /* IE10+ */
+	background: linear-gradient(top, #e4f1f9 0%,#d5e7f3 100%); /* W3C */
+	filter: progid:DXImageTransform.Microsoft.gradient( startColorstr='#e4f1f9', endColorstr='#d5e7f3',GradientType=0 ); /* IE6-9 */
+	color:#7da2aa;
+	cursor: pointer;
+	vertical-align:bottom;
+} 
+
+select{
+   -webkit-appearance: button;
+   -webkit-border-radius: 2px;
+   -webkit-user-select: none;
+   -webkit-linear-gradient(#FAFAFA, #F4F4F4 40%, #E5E5E5);
+   background-position: 97% center;
+   background-repeat: no-repeat;
+   border: 1px solid #dcdcdc;
+   color: #555;
+   text-overflow: ellipsis;
+   white-space: nowrap;
+   height:25px;
+   vertical-align:bottom;
+}
+
+/*field樣式設定*/
+fieldset{
+	border-color: #AAAAAA;
+	border-width: 2px;
+	border-style: solid;
+	padding: 10px;
+}
+
+fieldset legend {
+	margin: 5px 0 0 ;
+	text-align: left;
+	color:#888888;
+}
+
+/*table設定*/
+table{
+word-break:break-all;
+}
+
+table td,table th{
+	padding:0px;
+	border-color: #AAAAAA;
+}
+.styledTable{
+	border-collapse:collapse; 
+	border-color: #AAAAAA;
+	border-width: 2px;
+	border-style: solid;
+}
+.styledTable td,.styledTable th{ 
+	padding:2px; border:#AAAAAA 1px solid;
+}
+.styledTable tr{
+		background: #f5f5f5;
+}
+.styledTable input{ 
+	width: 100%;
+}
+
+.styledTable2{
+	border-color: #A9CEFA;
+	border-width: 2px;
+	border-style: solid;
+}
+.styledTable2>tbody>tr>td.styledTable2>thead>tr>td{ 
+	padding:2px;
+}
+.styledTable2>tbody>tr>th,.styledTable2>thead>tr>th{ 
+	padding:2px;
+	background: #A9CEFA;
+}
+
+.BlockDataGrid div{
+	-moz-border-radius:10px;
+	-webkit-border-radius:10px;
+	border-radius:10px;
+	display:inline-block;
+	color:#ffffff;
+	padding:0px 0px;
+	text-decoration:none;
+	text-shadow:0px 1px 0px #2f6627;
+	behavior:url(tool/PIE.htc);
+}
+
+/*autocomplete combox樣式設定*/
+.custom-combobox {
+	margin-right : 30px;
+	position : relative;
+	display : inline-block;
+}
+.custom-combobox-toggle {
+	position: absolute;
+	top: 0;
+	bottom: 0;
+	margin-left: -1px;
+	padding: 0;
+}
+.custom-combobox-input {
+	margin : 0;
+	padding : 5px 10px;
+}
+.ui-autocomplete {
+	max-height: 300px;
+	overflow-y: auto;
+	/* prevent horizontal scrollbar */
+	overflow-x: hidden;
+	/* add padding to account for vertical scrollbar */
+	padding-right: 20px;
+}

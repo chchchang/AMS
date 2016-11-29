@@ -1,0 +1,14 @@
+<configuration xmlns="http://logging.apache.org/log4php/">
+	<appender name="myFileAppender" class="LoggerAppenderDailyFile">
+		<param name="file" value="D:/xampp/htdocs/AMS/0b7d6e5a265d20715443e19a1f7609c6/log/AMS.log.%s" />
+		<param name="datePattern" value="Y-m-d" />
+		<layout class="LoggerLayoutPattern">
+			<param name="conversionPattern" value="%date{Y-m-d H:i:s:u} %level From:%server{REMOTE_ADDR}:%server{REMOTE_PORT} %.1024msg%n" />
+		</layout>
+	</appender>
+	
+	<logger name="main">
+		<level value="ALL" />
+		<appender_ref ref="myFileAppender" />
+	</logger>
+</configuration>
