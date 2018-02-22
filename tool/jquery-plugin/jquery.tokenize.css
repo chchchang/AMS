@@ -147,7 +147,7 @@ div.Tokenize ul.Dropdown {
 
 div.Tokenize ul.Dropdown li {
     padding: 5px 20px;
-    overflow: hidden;
+    overflow: auto;/******啟用卷軸使的全部字串可見*/
     cursor: pointer;
 }
 

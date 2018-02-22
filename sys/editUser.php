@@ -47,7 +47,7 @@
 	$sortBy=isset($_GET['sortBy'])&&array_search($_GET['sortBy'],array('使用者識別碼','使用者帳號','使用者姓名','使用者電話'))!==false?$_GET['sortBy']:'使用者識別碼';
 	$sortType=isset($_GET['sortType'])&&$_GET['sortType']==='decrease'?'decrease':'increase';
 	$sql='
-		SELECT 使用者識別碼,使用者帳號,使用者姓名,使用者電話
+		SELECT 使用者識別碼,使用者帳號,使用者姓名,使用者電話,啟用
 		FROM 使用者
 		WHERE 使用者識別碼 LIKE ? OR 使用者帳號 LIKE ? OR 使用者姓名 LIKE ? OR 使用者電話 LIKE ?
 		ORDER BY '.$sortBy.' '.($sortType==='increase'?'ASC':'DESC').',使用者識別碼
@@ -74,9 +74,9 @@
 	
 	$DG1_data=array();
 	while($row=$res->fetch_assoc()) {
-		$DG1_data[]=array(array($row['使用者識別碼']),array($row['使用者帳號']),array($row['使用者姓名']),array($row['使用者電話']),array('修改','button'));
+		$DG1_data[]=array(array($row['使用者識別碼']),array($row['使用者帳號']),array($row['使用者姓名']),array($row['使用者電話']),array($row['啟用']==1?'啟用':'停用'),array('修改','button'),array($row['啟用']==1?'停用':'啟用','button'));
 	}
-	$DG1_header=array('使用者識別碼','使用者帳號','使用者姓名','使用者電話','修改');
+	$DG1_header=array('使用者識別碼','使用者帳號','使用者姓名','使用者電話','狀態','修改','切換所訂狀態');
 	$DG1_header=json_encode($DG1_header,JSON_UNESCAPED_UNICODE);
 	$DG1_data=json_encode($DG1_data,JSON_UNESCAPED_UNICODE);
 ?>
@@ -109,12 +109,30 @@
 			};
 			DG1.buttonCellOnClick=function(y,x,row) {
 				if(!this.is_collapsed()) {
-					this.collapse_row(y);
-					$('input[name=使用者識別碼]').val(row[0][0]);
-					$('input[name=使用者帳號]').val(row[1][0]);
-					$('input[name=使用者姓名]').val(row[2][0]);
-					$('input[name=使用者電話]').val(row[3][0]);
-					$('form[method=post]').show(500);
+					if(row[x][0]=='修改'){
+						this.collapse_row(y);
+						$('input[name=使用者識別碼]').val(row[0][0]);
+						$('input[name=使用者帳號]').val(row[1][0]);
+						$('input[name=使用者姓名]').val(row[2][0]);
+						$('input[name=使用者電話]').val(row[3][0]);
+						$('form[method=post]').show(500);
+					}
+					else if(row[x][0]=='停用'){
+						$.post('ajaxToDb_user.php',{'method':'停用使用者','使用者識別碼':row[0][0]},
+							function(data){
+								alert(data);
+								 location.reload();
+							}
+						);
+					}
+					else if(row[x][0]=='啟用'){
+						$.post('ajaxToDb_user.php',{'method':'啟用使用者','使用者識別碼':row[0][0]},
+							function(data){
+								alert(data);
+								 location.reload();
+							}
+						);
+					}
 				}
 				else {
 					this.uncollapse(y);

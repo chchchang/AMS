@@ -1,4 +1,5 @@
 <?php 
+	date_default_timezone_set("Asia/Taipei");
 	header("Content-Type:text/html; charset=utf-8");
 	require_once dirname(__FILE__).'/tool/MyDB.php';
 	require_once dirname(__FILE__).'/tool/MyLogger.php';
@@ -6,7 +7,7 @@
 	//define('HOME','order/851/');
 	define('GLUE','$');
 	$my=new MyDB(true);
-	
+	$logger=new MyLogger();
 	static $RESPONSECODE = array(
     200=>'OK',
 	400=>'Bad Request',
@@ -53,7 +54,7 @@
 					JOIN 版位 ON 託播單.版位識別碼 = 版位.版位識別碼
 					JOIN 版位 版位類型 ON 版位類型.版位識別碼 = 版位.上層版位識別碼
 				WHERE 
-					版位類型.版位名稱 IN ("首頁banner","專區banner","專區vod","頻道short EPG banner")
+					版位類型.版位名稱 IN ("首頁banner","專區banner","專區vod","頻道short EPG banner","barker頻道")
 			';
 		if(!$stmt=$my->prepare($sql)) {
 			eixtWhitCode(500);
@@ -150,15 +151,23 @@
 				,"materialId"
 				,"bnrTransId1"
 				,"bnrTransId2"
+				,"bnrTransId3"
+				,"bnrTransId4"
 				)
 				;
 		fwrite($file,implode(GLUE,$header)."\n");
 		
 		$sql='	SELECT  託播單.託播單識別碼
-				,託播單.版位識別碼
+				,CASE 
+					WHEN 額外版位.版位識別碼 IS NULL THEN 版位.版位識別碼
+					ELSE 額外版位.版位識別碼
+				END AS 版位識別碼
 				,版位類型.版位識別碼 AS 版位類型識別碼
 				,版位類型.版位名稱 AS 版位類型名稱
-				,版位.版位名稱
+				,CASE 
+					WHEN 額外版位.版位名稱 IS NULL THEN 版位.版位名稱
+					ELSE 額外版位.版位名稱
+				END AS 版位名稱
 				,託播單.委刊單識別碼
 				,託播單CSMS群組識別碼
 				,廣告期間開始時間
@@ -177,13 +186,15 @@
 				FROM 託播單
 					JOIN 版位 ON 託播單.版位識別碼 = 版位.版位識別碼
 					JOIN 版位 版位類型 ON 版位類型.版位識別碼 = 版位.上層版位識別碼
+					LEFT JOIN 託播單投放版位 ON 託播單.託播單識別碼 = 託播單投放版位.託播單識別碼 AND 託播單投放版位.ENABLE=1		
+					LEFT JOIN 版位 額外版位 ON 額外版位.版位識別碼 = 託播單投放版位.版位識別碼
 					JOIN 委刊單 ON 託播單.委刊單識別碼 = 委刊單.委刊單識別碼
 					JOIN 託播單素材 ON 託播單.託播單識別碼 = 託播單素材.託播單識別碼
 					LEFT JOIN 素材 ON 託播單素材.素材識別碼 = 素材.素材識別碼
 					JOIN 使用者 C ON 託播單.CREATED_PEOPLE = C.使用者識別碼
 					LEFT JOIN 使用者 U ON 託播單.LAST_UPDATE_PEOPLE =U.使用者識別碼
 				WHERE
-					版位類型.版位名稱 IN ("首頁banner","專區banner","專區vod","頻道short EPG banner")
+					版位類型.版位名稱 IN ("首頁banner","專區banner","專區vod","頻道short EPG banner","barker頻道")
 			';
 		if(!$stmt=$my->prepare($sql)) {
 			eixtWhitCode(500);
@@ -219,7 +230,7 @@
 			$sql='	SELECT 版位其他參數名稱,託播單其他參數值
 				FROM 託播單其他參數,託播單,版位,版位其他參數
 				WHERE 託播單.託播單識別碼 = 託播單其他參數.託播單識別碼 AND 託播單.版位識別碼 = 版位.版位識別碼 AND 版位.上層版位識別碼 = 版位其他參數.版位識別碼 
-				AND 版位其他參數.版位其他參數順序 = 託播單其他參數.託播單其他參數順序 AND 版位其他參數名稱 IN ("bakadschdDisplayMax","bannerTransactionId1","bannerTransactionId2","bakadschdDisplaySequence")
+				AND 版位其他參數.版位其他參數順序 = 託播單其他參數.託播單其他參數順序 AND 版位其他參數名稱 IN ("bakadschdDisplayMax","bannerTransactionId1","bannerTransactionId2","bannerTransactionId3","bannerTransactionId4","bakadschdDisplaySequence")
 				AND 託播單.託播單識別碼 = ?
 			';
 			if(!$stmt=$my->prepare($sql)) {
@@ -234,7 +245,7 @@
 			if(!$res1=$stmt->get_result()){
 				eixtWhitCode(500);
 			}
-			$orderParam=array("bakadschdDisplayMax"=>NULL,"bannerTransactionId1"=>NULL,"bannerTransactionId2"=>NULL,"bakadschdDisplaySequence"=>NULL);
+			$orderParam=array("bakadschdDisplayMax"=>NULL,"bannerTransactionId1"=>NULL,"bannerTransactionId2"=>NULL,"bannerTransactionId3"=>NULL,"bannerTransactionId4"=>NULL,"bakadschdDisplaySequence"=>NULL);
 			while($row1 = $res1->fetch_assoc()){
 				$orderParam[$row1['版位其他參數名稱']]=$row1['託播單其他參數值'];
 			}
@@ -287,9 +298,23 @@
 			
 			$orderParam = array_map('n2s',$orderParam);
 			$positionParam = array_map('n2s',$positionParam);
+			$oid=$row['託播單CSMS群組識別碼'];
+			if($row['版位類型名稱']=='barker頻道')
+				$oid=$row['託播單識別碼'];
+			
+			//若是可展開的banner廣告，從點擊開啟位址中頗析展開的圖片素材識別碼
+			if(($row['點擊後開啟類型']=="COVER_A" || $row['點擊後開啟類型']=="COVER_B") && ($location == 'N'||$location == 'C'||$location == 'S')){
+				$parapart =  explode('#',$row['點擊後開啟位址']);
+				$cover_pic_fileName = $parapart[1];//0100005187#_____AMS_5187.png#NONE => _____AMS_5187.png
+				$cover_pic_fileName = explode('.',$cover_pic_fileName)[0];//_____AMS_5187.png =>_____AMS_5187
+				$cover_pic = str_replace('_____AMS_5187','',$cover_pic_fileName);//_____AMS_5187=>5187
+			}
+			else{
+				$cover_pic = 'NULL';
+			}
 			$temp = array(
 				$row['委刊單識別碼'],
-				$row['託播單CSMS群組識別碼'],
+				$oid,
 				$row['版位類型名稱'],
 				$row['版位名稱'],
 				(isset($positionParam['adSizetype'])?$positionParam['adSizetype']:'NULL'),
@@ -309,6 +334,7 @@
 				($location=='N'?$orderParam['bakadschdDisplayMax']:'NULL'),
 				($location=='C'?$orderParam['bakadschdDisplayMax']:'NULL'),
 				($location=='S'?$orderParam['bakadschdDisplayMax']:'NULL'),
+				$cover_pic,
 				$orderParam['bakadschdDisplaySequence'],
 				$row['CREATED_TIME'],
 				$row['填單者'],
@@ -316,7 +342,9 @@
 				$row['修改者'],
 				$row['素材識別碼'],
 				$orderParam['bannerTransactionId1'],
-				$orderParam['bannerTransactionId2']
+				$orderParam['bannerTransactionId2'],
+				$orderParam['bannerTransactionId3'],
+				$orderParam['bannerTransactionId4']
 			);
 			fwrite($file,implode(GLUE,$temp)."\n");
 	
@@ -344,7 +372,7 @@
 					JOIN 產業類型 ON 產業類型.產業類型識別碼 = 素材.產業類型識別碼
 					JOIN 產業類型 上層產業類型 ON 上層產業類型.產業類型識別碼 = 產業類型.上層產業類型識別碼
 				WHERE 
-					版位類型.版位名稱 IN ("首頁banner","專區banner","專區vod","頻道short EPG banner")
+					版位類型.版位名稱 IN ("首頁banner","專區banner","專區vod","頻道short EPG banner","barker頻道")
 			';
 		if(!$stmt=$my->prepare($sql)) {
 			eixtWhitCode(500);

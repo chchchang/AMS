@@ -363,6 +363,12 @@
 <!doctype html>
 <html>
 <head>
+<style type="text/css">
+.statement {
+	font-size:8px;
+	color: gray;
+}
+</style>
 <meta http-equiv="Content-Type" content="text/html; charset=utf-8">
 <?php
 	include('tool/sameOriginXfsBlock.php');
@@ -660,6 +666,9 @@ $(document).ready(function(){
 </script>
 </head>
 <body>
+<div class ='statement'>中華電信股份有限公司版權所有，本系統為公司之重要資產，非經授權，不得使用；離座時請跳離畫面，以確保資料之保密性與安全性 <br>
+您現在存取的是中華電信股份有限公司之系統，所有的系統使用情形將會受到監控與記錄，使用本系統表示您已同意被監控與記錄，並遵守相關法規及公司規定。如未經授權使用本系統，本公司將可能採取法律行動。</div>
+<hr>
 <h1>託播單尚未確定：</h1>
 <div id="DG1"></div>
 <hr>

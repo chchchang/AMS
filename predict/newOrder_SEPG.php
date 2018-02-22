@@ -710,8 +710,9 @@
 			changeMonth: true,
 			changeYear: true,
 			monthNames: ["1","2","3","4","5","6","7","8","9","10","11","12"],
-			monthNamesShort: ["1","2","3","4","5","6","7","8","9","10","11","12"],
-			minDate: d.yyyymmdd()+' 00:00:00'});
+			monthNamesShort: ["1","2","3","4","5","6","7","8","9","10","11","12"]
+			//,minDate: d.yyyymmdd()+' 00:00:00'
+			});
 	}
 
 	//儲存託播單

@@ -1,6 +1,6 @@
 <?php
-	date_default_timezone_set("Asia/Taipei");
 	header("Content-Type:text/html; charset=utf-8");
+	date_default_timezone_set("Asia/Taipei");
 	header("X-Frame-Options: DENY");
 	include("Config.php");
 	require_once dirname(__FILE__).'/tool/MyLogger.php';
@@ -9,52 +9,129 @@
 	
 	$msg='';
 	session_start();
-	
-	if(isset($_POST['id'])&&isset($_POST['password'])) {
-		$my=new mysqli(Config::DB_HOST,Config::DB_USER,Config::DB_PASSWORD,Config::DB_NAME);
-		if($my->connect_errno) {
-			$logger->error('無法連線到資料庫，錯誤代碼('.$my->connect_errno.')、錯誤訊息('.$my->connect_error.')。');
-			exit('無法連線到資料庫，請聯絡系統管理員！');
+	if(isset($_POST['csrftoken'])&&isset($_SESSION['AMS']['SESSIONTOKEN'])){
+		if($_POST['csrftoken']==$_SESSION['AMS']['SESSIONTOKEN']){
+			if(isset($_POST['user'])&&isset($_POST['magicword'])) {
+				$my=new mysqli(Config::DB_HOST,Config::DB_USER,Config::DB_PASSWORD,Config::DB_NAME);
+				if($my->connect_errno) {
+					$logger->error('無法連線到資料庫，錯誤代碼('.$my->connect_errno.')、錯誤訊息('.$my->connect_error.')。');
+					exit('無法連線到資料庫，請聯絡系統管理員！');
+				}
+				
+				if(!$my->set_charset('utf8')) {
+					$logger->error('無法設定資料庫連線字元集為utf8，錯誤代碼('.$my->errno.')、錯誤訊息('.$my->error.')。');
+					exit('無法設定資料庫連線字元集為utf8，請聯絡系統管理員！');
+				}
+				
+				$sql='SELECT * FROM 使用者 WHERE 使用者帳號=?';
+				if(!$stmt=$my->prepare($sql)) {
+					$logger->error('無法準備statement，錯誤代碼('.$my->errno.')、錯誤訊息('.$my->error.')。');
+					exit('無法準備statement，請聯絡系統管理員！');
+				}
+				if(!$stmt->bind_param('s',$_POST['user'])) {
+					$logger->error('無法繫結資料，錯誤代碼('.$stmt->errno.')、錯誤訊息('.$stmt->error.')。');
+					exit('無法繫結資料，請聯絡系統管理員！');
+				}
+				
+				if(!$stmt->execute()) {
+					$logger->error('無法執行statement，錯誤代碼('.$stmt->errno.')、錯誤訊息('.$stmt->error.')。');
+					exit('無法執行statement，請聯絡系統管理員！');
+				}
+				
+				if(!$res=$stmt->get_result()) {
+					$logger->error('無法取得結果集，錯誤代碼('.$stmt->errno.')、錯誤訊息('.$stmt->error.')。');
+					exit('無法取得結果集，請聯絡系統管理員！');
+				}
+				
+				if($row=$res->fetch_assoc()) {
+					if($row['啟用'] == 1){
+						//判斷密碼是否正確
+						$mcw = $_POST['magicword'];
+						$md5pd=md5('AMS_USER_PASSWORD_'.$_POST['magicword']);
+						if($row['使用者密碼'] == $md5pd){
+							$logger->info('使用者帳號('.$row['使用者帳號'].')登入成功！');
+							$_SESSION['AMS']['ID']=$row['使用者帳號'];
+							$_SESSION['AMS']['使用者帳號']=$row['使用者帳號'];
+							$_SESSION['AMS']['使用者姓名']=$row['使用者姓名'];
+							$_SESSION['AMS']['使用者識別碼']=$row['使用者識別碼'];
+							$_SESSION['AMS']['LOGINFAIL'][$row['使用者帳號']]=0;
+							//簡查密碼強度
+							$strength = 0;
+							//小寫
+							if(preg_match("/([a-z]+)/", $mcw)) {
+							$strength++;
+							}
+							// 大寫
+							if(preg_match("/([A-Z]+)/", $mcw)) {
+							$strength++;
+							}
+							// 數字
+							if(preg_match("/([0-9]+)/", $mcw)) {
+							$strength++;
+							}
+							//其他字元
+							if(preg_match("/([\W_])+/", $mcw)) {
+								$strength++;
+							}
+							// 長度
+							if (strlen($mcw) < 8) $strength=0;
+							switch($strength) {
+								case 0:
+								case 1:
+								case 2:
+									$msg='<script>alert("您的密碼強度不足，提醒您登入後記得修改密碼。");location.replace("index.php");</script>';
+								break;
+								case 3:
+								case 4:
+									$date =  date("Y-m-d H:i:s",strtotime("-3 months"));
+									if($date > $row['CREATED_TIME'] && $date > $row['LAST_UPDATE_TIME'])
+										$msg='<script>alert("您的密碼已有段時間未變動，提醒您記得定期修改密碼。");location.replace("index.php");</script>';
+									else
+										$msg='<script>location.replace("index.php");</script>';
+								break;
+							}
+						}
+						else{
+							//密碼錯誤 記錄登入失敗次數
+							if(!isset($_SESSION['AMS']['LOGINFAIL'][$row['使用者帳號']]))
+								$_SESSION['AMS']['LOGINFAIL'][$row['使用者帳號']]=0;
+							if(++$_SESSION['AMS']['LOGINFAIL'][$row['使用者帳號']]>=3){
+								//登入失敗次數過多
+								$sql='UPDATE 使用者 SET 啟用=0 WHERE 使用者帳號=?';
+								if(!$stmt=$my->prepare($sql)) {
+									$logger->error('無法準備statement，錯誤代碼('.$my->errno.')、錯誤訊息('.$my->error.')。');
+									exit('無法準備statement，請聯絡系統管理員！');
+								}
+								if(!$stmt->bind_param('s',$_POST['user'])) {
+									$logger->error('無法繫結資料，錯誤代碼('.$stmt->errno.')、錯誤訊息('.$stmt->error.')。');
+									exit('無法繫結資料，請聯絡系統管理員！');
+								}
+								if(!$stmt->execute()) {
+									$logger->error('無法執行statement，錯誤代碼('.$stmt->errno.')、錯誤訊息('.$stmt->error.')。');
+									exit('無法執行statement，請聯絡系統管理員！');
+								}
+							}	
+							$msg='<script>alert("帳號或密碼錯誤，請重新輸入！");</script>';					
+						}
+					}
+					else{
+						$msg='<script>alert("此帳號已停用，請聯絡系統管理人");</script>';
+						$logger->warn('已被停用的使用者帳號('.$row['使用者帳號'].')嘗試登入');
+					}
+				}
+				else {
+					$msg='<script>alert("帳號或密碼錯誤，請重新輸入！");</script>';
+					$logger->info('使用者帳號('.$row['使用者帳號'].')登入失敗');
+				}
+			}
 		}
-		
-		if(!$my->set_charset('utf8')) {
-			$logger->error('無法設定資料庫連線字元集為utf8，錯誤代碼('.$my->errno.')、錯誤訊息('.$my->error.')。');
-			exit('無法設定資料庫連線字元集為utf8，請聯絡系統管理員！');
-		}
-		
-		$sql='SELECT * FROM 使用者 WHERE 使用者帳號=? AND 使用者密碼=?';
-		if(!$stmt=$my->prepare($sql)) {
-			$logger->error('無法準備statement，錯誤代碼('.$my->errno.')、錯誤訊息('.$my->error.')。');
-			exit('無法準備statement，請聯絡系統管理員！');
-		}
-		$md5pd=md5('AMS_USER_PASSWORD_'.$_POST['password']);
-		if(!$stmt->bind_param('ss',$_POST['id'],$md5pd)) {
-			$logger->error('無法繫結資料，錯誤代碼('.$stmt->errno.')、錯誤訊息('.$stmt->error.')。');
-			exit('無法繫結資料，請聯絡系統管理員！');
-		}
-		
-		if(!$stmt->execute()) {
-			$logger->error('無法執行statement，錯誤代碼('.$stmt->errno.')、錯誤訊息('.$stmt->error.')。');
-			exit('無法執行statement，請聯絡系統管理員！');
-		}
-		
-		if(!$res=$stmt->get_result()) {
-			$logger->error('無法取得結果集，錯誤代碼('.$stmt->errno.')、錯誤訊息('.$stmt->error.')。');
-			exit('無法取得結果集，請聯絡系統管理員！');
-		}
-		
-		if($row=$res->fetch_assoc()) {
-			$logger->info('使用者帳號('.$row['使用者帳號'].')登入成功！');
-			$_SESSION['AMS']['ID']=$row['使用者帳號'];
-			$_SESSION['AMS']['使用者帳號']=$row['使用者帳號'];
-			$_SESSION['AMS']['使用者姓名']=$row['使用者姓名'];
-			$_SESSION['AMS']['使用者識別碼']=$row['使用者識別碼'];
-			$msg='<script>location.replace("index.php");</script>';
-		}
-		else {
-			$msg='<script>alert("帳號或密碼錯誤，請重新輸入！");</script>';
+		else{
+			exit('非法登入!');
 		}
 	}
+	require_once dirname(__FILE__).'/tool/phpExtendFunction.php';
+	$_token = md5(uniqid(PHPExtendFunction::myrand(), true));
+	$_SESSION['AMS']['SESSIONTOKEN']=$_token;
 ?>
 <!DOCTYPE html>
 <head>
@@ -102,7 +179,7 @@ form label {
 }
 
 
-form input#id,form input#password{
+form input#user,form input#magicword{
 	float: center; 
 	margin:5px 0 0 10px;
 	background: #F1F1F1 url(http://html-generator.weebly.com/files/theme/input-text-40.png) no-repeat;
@@ -116,23 +193,22 @@ form input#id,form input#password{
     -moz-box-shadow: 0 1px 1px #ccc inset, 0 1px 0 #fff;
     -webkit-box-shadow: 0 1px 1px #CCC inset, 0 1px 0 #FFF;
     box-shadow: 0 1px 1px #CCC inset, 0 1px 0 #FFF;
-	behavior: url(tool/PIE.htc);
 }
 
-form input#id{
+form input#user{
 	background: #F1F1F1 url(tool/pic/user.png) no-repeat;
 }
 
-form input#password{
+form input#magicword{
 	background: #F1F1F1 url(tool/pic/password.png) no-repeat;
 }
 
-form input#submit {
+form input#check {
 	margin-right:0px;
 	float: right; 
 }
 
-#submit{
+#check{
 	background:url(tool/pic/login.png);
 	background-repeat: no-repeat;
 	width:30px;
@@ -141,7 +217,7 @@ form input#submit {
 	border:0px;
 	cursor:pointer;
 }
-#submit:hover {
+#check:hover {
 	background-color:#dfdfdf;
 }
 
@@ -213,9 +289,10 @@ $(function(){
 	<br>
 	<fieldset>
 	<p>請登入系統</p>
-		<input  id="id"  type="text" name="id" placeholder="USER"/><br>
-		<input  id="password"  type="password" name="password" placeholder="Password"/><br>
-		<input type="submit" name="submit" id="submit" value=""/>
+		<input  id="user"  type="text" name="user" placeholder="USER"/><br>
+		<input  id="magicword"  type="password" name="magicword" placeholder="Password"/><br>
+		 <input type="hidden" name="csrftoken" value="<?=$_token?>"/><br>
+		<input type="submit" id="check" value=""/>
 	</fieldset>
 </form>
 <?=$msg?>

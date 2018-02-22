@@ -40,7 +40,7 @@ class PHPExtendFunction{
 	}
 	
 	//安全亂數
-	function myrand ($min=null,$max=null) {
+	public static function myrand ($min=null,$max=null) {
 		$min = isset($min)?$min:0;
 		$max = isset($max)?$max:getrandmax();
 		$range = $max-$min;
@@ -57,6 +57,33 @@ class PHPExtendFunction{
 		return $min+$rnd;
 	}
 
-
+	//連接API取的結果
+	public static function connec_to_Api($url,$method,$postvars){
+		$postvars = (isset($postvars)) ? $postvars : null;
+		// 建立CURL連線
+		$ch = curl_init();
+		curl_setopt($ch,CURLOPT_URL,$url);
+		curl_setopt($ch, CURLOPT_CUSTOMREQUEST, $method);
+		curl_setopt($ch,CURLOPT_POSTFIELDS,$postvars);
+		curl_setopt($ch,CURLOPT_RETURNTRANSFER,1);
+		curl_setopt($ch, CURLOPT_TIMEOUT, 500);
+		//curl_setopt($ch, CURLOPT_HEADER, true);
+		$apiResult = curl_exec($ch);
+		if(curl_errno($ch))
+		{
+			curl_close($ch);
+			return array('success'=>false,'errorno'=>curl_errno($ch));
+		}
+		curl_close($ch);
+		return array('success'=>true,'data'=>$apiResult);
+	}
+	
+	//將NULL轉為字串
+	public static function n2s($str){
+		if($str == null)
+			return 'NULL';
+		else
+			return $str;
+	}
 }
 ?>

@@ -1,5 +1,6 @@
 <?php
 	header("X-Frame-Options: SAMEORIGIN");
+	date_default_timezone_set("Asia/Taipei");
 	require_once dirname(__FILE__).'/../MyDB.php';
 	require_once dirname(__FILE__).'/../MyLogger.php';
 	

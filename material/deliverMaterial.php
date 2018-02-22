@@ -1,6 +1,8 @@
 <?php
 	require '../tool/auth/auth.php';
 	define('PAGE_SIZE',10);
+	define("MATERIAL_FOLDER", Config::GET_MATERIAL_FOLDER());
+	define("MATERIAL_FOLDER_URL", Config::GET_MATERIAL_FOLDER_URL(dirname(__FILE__).'\\'));
 	
 	if(isset($_POST['action'])){
 		if($_POST['action']==='getMateral'){
@@ -81,6 +83,7 @@
 				$mnameA=explode('.',$row['素材原始檔名']);
 				$DG_body[]=array(array($row['素材識別碼']),array($row['素材名稱']),array($row['素材說明']),array($row['素材原始檔名']),
 				array('<img src="../tool/pic/'.($row['是否曾經派送']==NULL||$row['是否曾經派送']=='[]'?'Circle_Red.png':'Circle_Green.png').'">','html'),
+				//array('<img class="dgImg" src="'.MATERIAL_FOLDER_URL.$row['素材識別碼'].'.'.end($mnameA).'?'.time().'" alt="'.$row['素材識別碼'].':'.$row['素材原始檔名'].'" style="max-width:100%;max-height:100%;border:0;">','html'),
 				array('<img class="dgImg" src="uploadedFile/'.$row['素材識別碼'].'.'.end($mnameA).'?'.time().'" alt="'.$row['素材識別碼'].':'.$row['素材原始檔名'].'" style="max-width:100%;max-height:100%;border:0;">','html'),
 				array(''),array('取得北區','button'),array('派送北區','button'),array(''),array('取得中區','button'),array('派送中區','button'),array(''),array('取得南區','button'),array('派送南區','button'));
 			}
@@ -100,10 +103,10 @@
 			}
 			recordResult($_POST['素材識別碼'],$hostRes);
 			header('Content-Type: application/json');
-			exit(json_encode(array('area'=>$_POST['area'],'type'=>$_POST['type'],'remote'=>$_POST['remote'],'result'=>$result)));
+			exit(json_encode(array('area'=>$_POST['area'],'type'=>$_POST['type'],'remote'=>$_POST['remote'],'result'=>$hostRes)));
 		}
 		else if(($_POST['action']==='putAll')&&isset($_POST['area'])&&(array_search($_POST['area'],array('OMP_N','OMP_C','OMP_S'))!==false)&&isset($_POST['local'])&&isset($_POST['remote'])){
-			$本地路徑='/opt/lampp/htdocs/AMS/material/uploadedFile/';
+			$本地路徑=MATERIAL_FOLDER;
 			if(is_file($本地路徑.$_POST['local'])===false){
 				header('Content-Type: application/json');
 				exit(json_encode(array('error'=>'找不到指定素材，可能是素材未到位或檔案遺失，請上傳後再派送。')));
@@ -119,7 +122,7 @@
 			}
 			recordResult($_POST['素材識別碼'],$hostRes);
 			header('Content-Type: application/json');
-			exit(json_encode(array('error'=>'','area'=>$_POST['area'],'type'=>$_POST['type'],'local'=>$_POST['local'],'remote'=>$_POST['remote'],'result'=>$result)));
+			exit(json_encode(array('error'=>'','area'=>$_POST['area'],'type'=>$_POST['type'],'local'=>$_POST['local'],'remote'=>$_POST['remote'],'result'=>$hostRes)));
 		}
 	}
 	
@@ -233,7 +236,7 @@ $(document).ready(function(){
 				$.post(null,{action:'isAllFile',area:area,type:'EPG',remote:remote,'素材識別碼':mid},function(json2){
 					var buff='';
 					for(var i in json.result)
-						buff+='<img src="../tool/pic/'+((json.result[i]&&json2.result[i])?'Circle_Green.png':'Circle_Red.png')+'">';
+						buff+='<img src="../tool/pic/'+((json.result[i]&&json2.result[i])?'Circle_Green.png':'Circle_Red.png')+'"  title="'+i+'">';
 					$(狀態node).unmask();
 					$(event.target).unmask();
 					狀態node.innerHTML=buff;
@@ -258,7 +261,7 @@ $(document).ready(function(){
 						else{
 							var buff='';
 							for(var i in json.result)
-								buff+='<img src="../tool/pic/'+((json.result[i]&&json2.result[i])?'Circle_Green.png':'Circle_Red.png')+'">';
+								buff+='<img src="../tool/pic/'+((json.result[i]&&json2.result[i])?'Circle_Green.png':'Circle_Red.png')+'" title="'+i+'">';
 							$(狀態node).unmask();
 							$(event.target).unmask();
 							狀態node.innerHTML=buff;

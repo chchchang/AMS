@@ -132,7 +132,7 @@ button{
 			</td></tr>
 			<tr class="fileM"><th>上傳的素材檔案:</th><td><input type="text" id="素材原始檔名" value = "" style="width:200px" readonly><img id="fileExist" src=""><a id ="fileCheckText" style="font-size:9px"></a>
 			<form action="ajaxUploadingFile.php" method="post" enctype="multipart/form-data"  class="fileM" id ="uploadFileForm">
-				<input type="hidden" name="max_file_size" value="268435456">
+				<input type="hidden" name="max_file_size" value="800000000">
 				<input type="file" name="fileToUpload" id="fileToUpload">
 				</form>
 			<button id="clearFile">取消素材</button>

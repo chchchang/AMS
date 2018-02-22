@@ -11,8 +11,8 @@
 		$logger->error('無法設定資料庫連線字元集為utf8，錯誤代碼('.$my->errno.')、錯誤訊息('.$my->error.')。');
 		exit(json_encode(array('無法設定資料庫連線字元集為utf8，請聯絡系統管理員！'),JSON_UNESCAPED_UNICODE));
 	}
-	
-	
+	define("MATERIAL_FOLDER", Config::GET_MATERIAL_FOLDER());
+	define("MATERIAL_FOLDER_URL", Config::GET_MATERIAL_FOLDER_URL(dirname(__FILE__).'\\'));
 	
 	if( isset($_POST['action']) && $_POST['action'] != '' ){
 		switch($_POST['action']){
@@ -179,7 +179,7 @@
 		
 		if($feedback['素材原始檔名']!=null&&$feedback['素材原始檔名']!=''){
 			$explodeFileName=explode(".",$feedback['素材原始檔名']);
-			$feedback["檔案存在"]= file_exists('uploadedFile/'.$feedback['素材識別碼'].".".$explodeFileName[count($explodeFileName)-1]);
+			$feedback["檔案存在"]= file_exists(MATERIAL_FOLDER.$feedback['素材識別碼'].".".$explodeFileName[count($explodeFileName)-1]);
 		}
 		
 		echo json_encode($feedback,JSON_UNESCAPED_UNICODE);
@@ -303,7 +303,7 @@
 		
 		//上傳素材檔案
 		if(isset($_POST['新素材檔案上傳'])){
-			$tempDir='uploadedFile';
+			$tempDir=MATERIAL_FOLDER_URL;
 			if(!file_exists ($tempDir)){
 				if (!mkdir($tempDir, 0777, true)) 
 					exit(json_encode(array("success" => false,"message" => "檔案資料夾建立失敗"),JSON_UNESCAPED_UNICODE));
@@ -358,7 +358,7 @@
 		echo urldecode(json_encode($feedback));
 		
 		if(isset($_POST['新素材檔案上傳']))
-			rename($tempDir.'/'.hash('ripemd160',iconv('UTF-8', 'UCS-4', $_POST["素材原始檔名"])).'.'.end($explodeFileName),'uploadedFile/'.$stmt->insert_id.".".$explodeFileName[count($explodeFileName)-1]);
+			rename($tempDir.'/'.hash('ripemd160',iconv('UTF-8', 'UCS-4', $_POST["素材原始檔名"])).'.'.end($explodeFileName),MATERIAL_FOLDER_URL.$stmt->insert_id.".".$explodeFileName[count($explodeFileName)-1]);
 	}
 	
 	//取得產業類型
@@ -704,7 +704,7 @@
 		//若需要重新上傳檔案
 		if(isset($_POST['新素材檔案上傳'])){
 			//上傳檔案
-			$tempDir='uploadedFile';
+			$tempDir=MATERIAL_FOLDER_URL;
 			if(!file_exists ($tempDir)){
 				if (!mkdir($tempDir, 0777, true)) {
 					$my->rollback();
@@ -721,7 +721,7 @@
 			$value["圖片素材高度"] = $filedata[1];
 			
 			//將 圖片素材派送結果 影片派送時間 與 影片媒體編號 	影片媒體編號北/南 設為NULL  標記為未派送素材
-			$sql.=",圖片素材派送結果=NULL,影片派送時間=NULL,影片媒體編號=NULL,影片媒體編號北=NULL,影片媒體編號南=NULL";
+			$sql.=",圖片素材派送結果=NULL,影片派送時間=NULL,影片媒體編號=NULL,影片媒體編號北=NULL,影片媒體編號南=NULL,CAMPS影片派送時間=NULL,CAMPS影片媒體編號=NULL";
 		}
 
 		$sql.=" WHERE 素材識別碼=?";
@@ -757,9 +757,9 @@
 		$logger->info('使用者識別碼:'.$_SESSION['AMS']['使用者識別碼'].'修改素材(識別碼:'.$_POST['素材識別碼'].')');
 		if(isset($_POST['新素材檔案上傳'])){
 			if($_POST['新素材檔案上傳']=='copy')
-				copy($tempfile,'uploadedFile/'.intval($_POST['素材識別碼']).".".$explodeFileName[count($explodeFileName)-1]);
+				copy($tempfile,MATERIAL_FOLDER_URL.intval($_POST['素材識別碼']).".".$explodeFileName[count($explodeFileName)-1]);
 			else
-				rename($tempfile,'uploadedFile/'.intval($_POST['素材識別碼']).".".$explodeFileName[count($explodeFileName)-1]);
+				rename($tempfile,MATERIAL_FOLDER_URL.intval($_POST['素材識別碼']).".".$explodeFileName[count($explodeFileName)-1]);
 		}
 		$my->commit();
 		$my->close();
@@ -798,7 +798,7 @@
 		$fileType = end($fileType);
 		//取得檔案名稱(識別碼.附檔名)
 		$fileName = $_POST['素材識別碼'].'.'.$fileType;
-		$filePath = 'uploadedFile/'.$fileName;
+		$filePath = MATERIAL_FOLDER_URL.$fileName;
 		//檢查檔案是否存在
 		if(!file_exists($filePath)){
 			//檔案不存在

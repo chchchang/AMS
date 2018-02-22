@@ -39,7 +39,7 @@
 		}
 		//委刊單SELECTION的選項
 		else if($_POST['method']=='getOrderListSelection'){
-			$sql = 'SELECT 委刊單名稱,委刊單識別碼 FROM 委刊單 WHERE 廣告主識別碼=?';
+			$sql = 'SELECT 委刊單名稱,委刊單識別碼 FROM 委刊單 WHERE 廣告主識別碼=? ORDER BY 委刊單識別碼 DESC';
 			
 			if(!$stmt=$my->prepare($sql)) {
 				$logger->error('無法準備statement，錯誤代碼('.$my->errno.')、錯誤訊息('.$my->error.')。');

@@ -1,3 +1,4 @@
+<script type="text/javascript" src="newOrder_VSM.js?<?=time()?>"></script>
 <script>
 //********設定
 	if(typeof(positionTypeId)=='undefined')
@@ -8,7 +9,14 @@
 		alert('請設定action');
 	if(typeof(changedOrderId)=='undefined')
 		alert('請設定changedOrderId');
-	
+	//ajax監控
+	var runningajaxnum=0;
+	$( document ).ajaxStart(function() {
+		runningajaxnum++;
+	});
+	$( document ).ajaxStop(function() {
+		runningajaxnum--;
+	});
 	Date.prototype.yyyymmdd = function() {
 		var yyyy = this.getFullYear().toString();
 		var mm = (this.getMonth()+1).toString(); // getMonth() is zero-based
@@ -40,6 +48,7 @@
 	var materialObj = {};
 	
 	//DATE PICKER
+	var deadlinePreDay = 5;//往前推算幾個工作日，在showval()中會被板位設定改變
 	var d = new Date();
 	$( "#StartDate" ).datetimepicker({	
 		dateFormat: "yy-mm-dd",
@@ -49,9 +58,21 @@
 		changeYear: true,
 		monthNames: ["1","2","3","4","5","6","7","8","9","10","11","12"],
 		monthNamesShort: ["1","2","3","4","5","6","7","8","9","10","11","12"],
-		minDate: d.yyyymmdd()+' 00:00:00',
+		//minDate: d.yyyymmdd()+' 00:00:00',
 		onClose: function( selectedDate ) {
 			$( "#EndDate" ).datepicker( "option", "minDate", selectedDate );
+		},
+		onSelect: function(dateText) {
+			//選擇廣告開始日期後，預約日期推算
+			var s =$("#StartDate").val().split(" ")[0].split('-')
+			var deadline = new Date(parseInt(s[0],10),parseInt(s[1],10)-1,parseInt(s[2],10),00,00,00);
+			for(var i =deadlinePreDay; i >0;i--){
+				deadline.addDays(-1);
+				while(deadline.getDay()==6||deadline.getDay()==0){
+					deadline.addDays(-1);
+				}
+			}
+			$('#Deadline').val(deadline.getFullYear()+'-'+addLeadingZero(2,deadline.getMonth()+1)+'-'+addLeadingZero(2,deadline.getDate()));
 		}
 	});
 	$( "#EndDate" ).datetimepicker({
@@ -74,7 +95,7 @@
 								changeYear: true,
 								monthNames: ["1","2","3","4","5","6","7","8","9","10","11","12"],
 								monthNamesShort: ["1","2","3","4","5","6","7","8","9","10","11","12"],
-								minDate: 0,
+								//minDate: 0,
 								});
 	
 	//新增時段
@@ -114,7 +135,7 @@
 			changeYear: true,
 			monthNames: ["1","2","3","4","5","6","7","8","9","10","11","12"],
 			monthNamesShort: ["1","2","3","4","5","6","7","8","9","10","11","12"],
-			minDate: d.yyyymmdd()+' 00:00:00',
+			//minDate: d.yyyymmdd()+' 00:00:00',
 			onClose: function( selectedDate ) {
 				$( "#EndDate"+$(this).attr('time') ).datepicker( "option", "minDate", selectedDate );
 			}
@@ -142,37 +163,17 @@
 		$st.val(dst);
 		if(ded!=null)
 		$ed.val(ded);
-		//設定聯動廣告
-		if($('#連動廣告1').length){
+		//設定連動廣告
+		//if($('#連動廣告1').length){
+		if($('.連動廣告').length){
 			$st.focusout(function() {
-				m_setConnectOrder({
-					'1':$.isArray($('#連動廣告1').val())?$('#連動廣告1').val():[],
-					'2':$.isArray($('#連動廣告2').val())?$('#連動廣告2').val():[]
-				});
+				m_setConnectOrder(getObjectForSetConnectOrder());
 			});
 			$ed.focusout(function() {
-				m_setConnectOrder({
-					'1':$.isArray($('#連動廣告1').val())?$('#連動廣告1').val():[],
-					'2':$.isArray($('#連動廣告2').val())?$('#連動廣告2').val():[]
-				});
+				m_setConnectOrder(getObjectForSetConnectOrder());
 			});
 			$dbt.click(function() {
-				m_setConnectOrder({
-					'1':$.isArray($('#連動廣告1').val())?$('#連動廣告1').val():[],
-					'2':$.isArray($('#連動廣告2').val())?$('#連動廣告2').val():[]
-				});
-			});
-		}
-
-		if($('#前置連動').length){
-			$st.focusout(function() {
-				m_sepgConnect($('#前置連動').val());
-			});
-			$ed.focusout(function() {
-				m_sepgConnect($('#前置連動').val());
-			});
-			$dbt.click(function() {
-				m_sepgConnect($('#前置連動').val());
+				m_setConnectOrder(getObjectForSetConnectOrder());
 			});
 		}
 		
@@ -183,7 +184,8 @@
 	function initialPositionSetting(positionId){
 		$('#configTbody,#materialTbody').empty();
 		materialObj = {};
-		$.ajax({
+		var promise =
+			$.ajax({
 			async: false,
 			type : "POST",
 			url :ajaxtodbPath,
@@ -208,12 +210,10 @@
 						
 						var $inputtd = $('<td/>').appendTo($tr);
 						//連動廣告客制化
-						if(config['版位其他參數名稱']=='bannerTransactionId1'||config['版位其他參數名稱']=='bannerTransactionId2'){
-							var connectIndex = 1;
-							if (config['版位其他參數名稱']=='bannerTransactionId2')
-							connectIndex = 2;
-							
-							var $連動 = $('<select  id="連動廣告'+connectIndex+'"  multiple="multiple"  class ="tokenize configValue" order='+i+' />');
+						var paraName = config['版位其他參數名稱'];
+						if(paraName.startsWith('bannerTransactionId')){
+							var connectIndex = paraName.replace('bannerTransactionId','');										
+							var $連動 = $('<select  id="連動廣告'+connectIndex+'"  multiple="multiple"  class ="tokenize configValue 連動廣告" order='+i+' />');
 							$inputtd.append($連動);
 							$('#連動廣告'+connectIndex).tokenize({
 									placeholder:"輸入CSMS群組識別碼或關鍵字選擇可連動的託播單"
@@ -221,29 +221,23 @@
 									,newElements:false,
 									onAddToken: 
 										function(value, text, e){
-											var order1 =$('#連動廣告1').attr('order');
-											var order2 =$('#連動廣告2').attr('order');
-											otherConfigObj[order1] = ($('#連動廣告1').val()!=null)?$('#連動廣告1').val().join(','):'';
-											otherConfigObj[order2] = ($('#連動廣告2').val()!=null)?$('#連動廣告2').val().join(','):'';
-											if(otherConfigObj[order1]!=''){
-												$('#是否新增'+order1).prop('checked',true);
-											}
-											if(otherConfigObj[order2]!=''){
-												$('#是否新增'+order2).prop('checked',true);
-											}
+											$.each($('select.連動廣告'),function(){
+												var order =$(this).attr('order');
+												otherConfigObj[order] = ($(this).val()!=null)?$(this).val().join(','):'';
+												if(otherConfigObj[order]!=''){
+													$('#是否新增'+order).prop('checked',true);
+												}
+											});
 										},
 									onRemoveToken: 
 										function(value, text, e){
-											var order1 =$('#連動廣告1').attr('order');
-											var order2 =$('#連動廣告2').attr('order');
-											otherConfigObj[order1] = ($('#連動廣告1').val()!=null)?$('#連動廣告1').val().join(','):'';
-											otherConfigObj[order2] = ($('#連動廣告2').val()!=null)?$('#連動廣告2').val().join(','):'';
-											if(otherConfigObj[order1]!=''){
-												$('#是否新增'+order1).prop('checked',true);
-											}
-											if(otherConfigObj[order2]!=''){
-												$('#是否新增'+order2).prop('checked',true);
-											}
+											$.each($('select.連動廣告'),function(){
+												var order =$(this).attr('order');
+												otherConfigObj[order] = ($(this).val()!=null)?$(this).val().join(','):'';
+												if(otherConfigObj[order]!=''){
+													$('#是否新增'+order).prop('checked',true);
+												}
+											});
 										}
 								});				
 						}
@@ -333,26 +327,18 @@
 						}
 					}
 					
-					if($('#連動廣告1').length!=0||$('#連動廣告2').length!=0){
+					//if($('#連動廣告1').length!=0 ||$('#連動廣告2').length!=0||$('#連動廣告3').length!=0 ||$('#連動廣告4').length!=0){
+					if($('.連動廣告')){
 						//時段全選按鈕
 						$('#allTimeBtn,#noTimeBtn').click(function(){
-							m_setConnectOrder({
-								'1':$.isArray($('#連動廣告1').val())?$('#連動廣告1').val():[],
-								'2':$.isArray($('#連動廣告2').val())?$('#連動廣告2').val():[]
-							});
+							m_setConnectOrder(getObjectForSetConnectOrder());
 						});
 						//連動託播單設定
 						$( "input[name='hours']" ).change(function() {
-							m_setConnectOrder({
-								'1':$.isArray($('#連動廣告1').val())?$('#連動廣告1').val():[],
-								'2':$.isArray($('#連動廣告2').val())?$('#連動廣告2').val():[]
-							});
+							m_setConnectOrder(getObjectForSetConnectOrder());
 						});
 						$( "#StartDate,#EndDate").focusout(function() {
-							m_setConnectOrder({
-								'1':$.isArray($('#連動廣告1').val())?$('#連動廣告1').val():[],
-								'2':$.isArray($('#連動廣告2').val())?$('#連動廣告2').val():[]
-							});
+							m_setConnectOrder(getObjectForSetConnectOrder());
 						});		
 					}
 					//設定素材
@@ -383,28 +369,49 @@
 							})
 						).appendTo($tr)
 						//點擊後開啟類型
+						var ptn = $("#positiontype").text();
+						if(ptn.startsWith('單一平台')){
+							$('<td/>').append(
+							$('<select order='+i+' id="點擊後開啟類型'+i+'" class="linkType"/>')
+								.append($('<option value="">NONE</option>'))
+								.append($('<option value="internal">internal</option>'))
+								.append($('<option value="external">external</option>'))
+								.append($('<option value="app">app</option>'))
+								.append($('<option value="Vod">Vod</option>'))
+								.append($('<option value="Channel">Channel</option>'))
+								.append($('<option value="coverImageIdV">SEPG直向覆蓋圖片</option>'))
+								.append($('<option value="coverImageIdH">SEPG橫向覆蓋圖片</option>'))
+								.appendTo($tr).change(function(){
+									materialObj[$(this).attr('order')]['點擊後開啟類型'] = $(this).val();
+								}).val('NONE')
+							).appendTo($tr)
+						}
+						else{
 						$('<td/>').append(
-							$('<select order='+i+' id="點擊後開啟類型'+i+'"/>')
-							.append($('<option value="NONE">NONE</option>'))
-							.append($('<option value="OVA_SERVICE">OVA_SERVICE</option>'))
-							.append($('<option value="OVA_CATEGORY">OVA_CATEGORY</option>'))
-							.append($('<option value="OVA_VOD_CONTENT">OVA_VOD_CONTENT</option>'))
-							.append($('<option value="OVA_CHANNEL">OVA_CHANNEL</option>'))
-							.appendTo($tr).change(function(){
-								materialObj[$(this).attr('order')]['點擊後開啟類型'] = $(this).val();
-								//專區vodSH與HD素材設定強制同步
-								if($("#positiontype").text()=='專區vod'){
-									for(var i in materialObj){
-										materialObj[i]['點擊後開啟類型'] =  $(this).val();
-										$('#點擊後開啟類型'+i).val(materialObj[i].點擊後開啟類型);
+							$('<select order='+i+' id="點擊後開啟類型'+i+'" class="linkType"/>')
+								.append($('<option value="NONE">NONE</option>'))
+								.append($('<option value="OVA_SERVICE">OVA_SERVICE</option>'))
+								.append($('<option value="OVA_CATEGORY">OVA_CATEGORY</option>'))
+								.append($('<option value="OVA_VOD_CONTENT">OVA_VOD_CONTENT</option>'))
+								.append($('<option value="OVA_CHANNEL">OVA_CHANNEL</option>'))
+								.append($('<option value="COVER_A">COVER_A</option>'))
+								.append($('<option value="COVER_B">COVER_B</option>'))
+								.appendTo($tr).change(function(){
+									materialObj[$(this).attr('order')]['點擊後開啟類型'] = $(this).val();
+									//專區vodSH與HD素材設定強制同步
+									if($("#positiontype").text()=='專區vod'){
+										for(var i in materialObj){
+											materialObj[i]['點擊後開啟類型'] =  $(this).val();
+											$('#點擊後開啟類型'+i).val(materialObj[i].點擊後開啟類型);
+										}
 									}
-								}
-							}).val('NONE')
-						).appendTo($tr)
+								}).val('NONE')
+							).appendTo($tr)
+						}
 						materialObj[i]['點擊後開啟類型'] = 'NONE';
 						//點擊後開啟位址
 						$('<td/>').append(
-							$('<input type ="text" order='+i+' id="點擊後開啟位址'+i+'">').appendTo($tr).change(function(){
+							$('<input type ="text" order='+i+' id="點擊後開啟位址'+i+'" class="linkValue">').appendTo($tr).change(function(){
 								materialObj[$(this).attr('order')]['點擊後開啟位址'] = $(this).val();
 								//專區vodSH與HD素材設定強制同步
 								if($("#positiontype").text()=='專區vod'){
@@ -443,11 +450,27 @@
 						$("select").prop('disabled', true);
 						$("#MaterialGroup,#Material,.combobox").combobox('disable');
 						if($("#連動廣告1").length>0)
+						if($(".連動廣告").length>0)
 						$(".tokenize").data('tokenize').disable();
 					}
 				}
 			}
 		});
+		promise.done(
+			function(){
+				$.getScript("newOrder_SEPGBanner_cover_extend.js");
+			}
+		)
+	}
+	
+	function getObjectForSetConnectOrder(){
+		var re  ={
+			'1':$.isArray($('#連動廣告1').val())?$('#連動廣告1').val():[],
+			'2':$.isArray($('#連動廣告2').val())?$('#連動廣告2').val():[],
+			'3':$.isArray($('#連動廣告3').val())?$('#連動廣告3').val():[],
+			'4':$.isArray($('#連動廣告4').val())?$('#連動廣告4').val():[]
+			};
+		return re;
 	}
 	
 	//連動廣告設定
@@ -455,23 +478,27 @@
 		//是否強制設定已選擇託播單的參數，若為true，則就算不在候選名單內，也會設定已選token
 		if(typeof(forceSet) == 'undefined')
 			forceSet = false;
-		
 		var dateObj=[];
 		$('#durationTb tr').each(function(){
 			var stt = $(this).find(' input:eq(0)').val();
 			var edt = $(this).find(' input:eq(1)').val();
 			dateObj.push({'StartDate':stt,'EndDate':edt});
 		});
-		//檢查有哪些區域
-		var areas =[];				
-		$.each($('#position option[selected]'),function(){
-			var area = $(this).text().split('_');
-			area = area[area.length-1];
-			if($.inArray(area,areas)==-1){
-				areas.push(area);
-			}
-		});
-		setConnectOrder('../order/newOrder.php',ids,dateObj,[getHours()],areas,forceSet);
+		if($('#positiontype').text()=='專區vod'){
+			//檢查有哪些區域
+			var areas =[];				
+			$.each($('#position option[selected]'),function(){
+				var area = $(this).text().split('_');
+				area = area[area.length-1];
+				if($.inArray(area,areas)==-1){
+					areas.push(area);
+				}
+			});
+			setConnectOrder('../order/newOrder.php',ids,dateObj,[getHours()],areas,forceSet);
+		}
+		else{
+			setConnectOrderVSM('../order/ajaxForVSM.php',ids,dateObj,[getHours()],forceSet);
+		}
 	}
 	
 	function m_sepgConnect(id){
@@ -594,20 +621,16 @@
 		,onAddToken:function(value, text, e){
 			if(action=='new')
 			setSCNPosition([value]);
-			if($('#連動廣告1').length != 0 && $('#position').attr('lock')=='false'){
-				m_setConnectOrder({
-					'1':$.isArray($('#連動廣告1').val())?$('#連動廣告1').val():[],
-					'2':$.isArray($('#連動廣告2').val())?$('#連動廣告2').val():[]
-				});
+			//if($('#連動廣告1').length != 0 && $('#position').attr('lock')=='false'){
+			if($('.連動廣告').length != 0 && $('#position').attr('lock')=='false'){
+				m_setConnectOrder(getObjectForSetConnectOrder());
 			}
 		}
 		,onRemoveToken:function(value, e){
 			removeSCNPosition([value]);
-			if($('#連動廣告1').length != 0  && $('#position').attr('lock')=='false'){
-				m_setConnectOrder({
-					'1':$.isArray($('#連動廣告1').val())?$('#連動廣告1').val():[],
-					'2':$.isArray($('#連動廣告2').val())?$('#連動廣告2').val():[]
-				});
+			//if($('#連動廣告1').length != 0  && $('#position').attr('lock')=='false'){
+			if($('.連動廣告').length != 0  && $('#position').attr('lock')=='false'){
+				m_setConnectOrder(getObjectForSetConnectOrder());
 			}
 		}
 	});
@@ -662,19 +685,6 @@
 			$(this).prop("checked", false);
 		});
 	});
-	//選擇廣告開始日期後，預約日期推算
-	var deadlinePreDay = 5;//往前推算幾個工作日，在showval()中會被板位設定改變
-	$('#StartDate').change(function(){
-		var s =$("#StartDate").val().split(" ")[0].split('-')
-		var deadline = new Date(parseInt(s[0],10),parseInt(s[1],10)-1,parseInt(s[2],10),00,00,00);
-		for(var i =deadlinePreDay; i >0;i--){
-			deadline.addDays(-1);
-			while(deadline.getDay()==6||deadline.getDay()==0){
-				deadline.addDays(-1);
-			}
-		}
-		$('#Deadline').val(deadline.getFullYear()+'-'+addLeadingZero(2,deadline.getMonth()+1)+'-'+addLeadingZero(2,deadline.getDate()));
-	});
 	
 	//還原輸入的資料/資料庫中的資料
 	function clearInput(){
@@ -690,8 +700,9 @@
 					jdata.託播單群組識別碼 = '';
 					jdata.託播單CSMS群組識別碼 = '';
 					}
+					jdata['版位識別碼'] = String(jdata['版位識別碼']).split(',');
 					showVal(jdata)
-					if(!selectOrder&&jdata.託播單狀態識別碼!=0&&jdata.託播單狀態識別碼!=3&&jdata.託播單狀態識別碼!=6&& action == 'update'){
+					if(!selectOrder&&jdata.託播單狀態識別碼!=0&&jdata.託播單狀態識別碼!=3&&jdata.託播單狀態識別碼!=6&& action != 'update'){
 						$("button").hide();
 						$("input").not('.ui-autocomplete-input').prop('disabled', true);
 						$("select").not('#MaterialGroup,#Material').prop('disabled', true);
@@ -712,6 +723,11 @@
 	
 	//顯示資料
 	function showVal(jdata){
+			//若有其他AJAX在執行，暫停0.3秒後在繼續顯示
+			if(runningajaxnum>0){
+				setTimeout(function(){showVal(jdata);}, 300);
+				return 0;
+			}
 			//若是有群組的暫存託播單，使用全體資料
 			if(typeof(jdata.群組廣告期間開始時間)!='undefined')
 				jdata.廣告期間開始時間 = jdata.群組廣告期間開始時間;
@@ -727,9 +743,9 @@
 			//設定版位資料
 			positionTypeId = jdata['版位類型識別碼'];
 			/*var pid = ($.isArray(jdata["版位識別碼"]))?jdata["版位識別碼"][0]:jdata["版位識別碼"];*/
-			initialPositionSetting(positionTypeId);
 			$("#positiontype").text(jdata["版位類型名稱"]);
 			$("#positiontype").val(jdata["版位類型識別碼"]);
+			initialPositionSetting(positionTypeId);
 			$("#csmsGroupID").text((typeof(jdata.託播單CSMS群組識別碼)!='undefined'&&jdata.託播單CSMS群組識別碼!=null)?jdata.託播單CSMS群組識別碼:'');
 			//**多選
 			if ($('#position').val()==null){
@@ -770,7 +786,7 @@
 					$('input[name="hours"]')[hours[i]].checked = true;
 			}
 			//其他參數
-			var connectIds={'1':[],'2':[]};//連動廣告用
+			var connectIds={'1':[],'2':[],'3':[],'4':[]};//連動廣告用
 			if(typeof(jdata['其他參數'])!='undefined'){
 				for( var i in jdata['其他參數']){
 					if(typeof(jdata['其他參數_原始'])!='undefined' && typeof(jdata['其他參數_原始'][i])!='undefined')
@@ -790,15 +806,24 @@
 						$('#configTbody tr td input[id = "configValue'+i+'"]').prop('disabled',false);
 					}
 					
-					if($('#參數名稱'+i).text()=='連動廣告1' && $('#positiontype').text() == '專區vod')
-						connectIds['1'] = otherConfigObj[i].split(',');
-					else if($('#參數名稱'+i).text()=='連動廣告2' && $('#positiontype').text() == '專區vod')
-						connectIds['2'] = otherConfigObj[i].split(',');
+					if($('#參數名稱'+i).text().startsWith('連動廣告') && $('#positiontype').text() == '專區vod'){
+						var 連動廣告編號 = $('#參數名稱'+i).text().replace('連動廣告','');
+						connectIds[連動廣告編號] = otherConfigObj[i].split(',');
+					}
+					/*else if($('#參數名稱'+i).text()=='連動廣告2' && $('#positiontype').text() == '專區vod')
+						connectIds['2'] = otherConfigObj[i].split(',');*/
 					else if($('#參數名稱'+i).text()=='前置廣告連動')
 						m_sepgConnect(otherConfigObj[i]);
+					else if($('#參數名稱'+i).text().startsWith('bannerTransactionId')){
+						var 連動廣告編號 = $('#參數名稱'+i).text().replace('連動廣告','');
+						connectIds[連動廣告編號] = otherConfigObj[i].split(',');
+					}
 				}
-				if($('#連動廣告1').length != 0)
+				//if($('#連動廣告1').length != 0)
+				if($('.連動廣告').length != 0)
 					m_setConnectOrder(connectIds,true);
+				
+				
 			}
 			//素材
 			if(typeof(jdata['素材'])!='undefined'){
@@ -827,6 +852,7 @@
 		//**多選 若非或修改佔存新增託播單，關閉多選功能
 		if(action!="new" && action!="edit"){
 			$("#position").data('tokenize').disable();
+			$('#clearPosition').hide();
 		}
 		
 		if(action=="info"||action=="orderInDb"||action=="orderFromApi"){
@@ -865,7 +891,3 @@
 	}
 	
  </script>
- 
- 
-</body>
-</html>

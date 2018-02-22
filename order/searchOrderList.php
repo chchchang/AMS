@@ -162,11 +162,11 @@
 		$('#datagrid').html('');
 		var bypost={};
 		if(typeof(option.search)!='undefined'&&option.search==true)
-			bypost={method:'OrderListInfo',searchBy:$('#searchOrderList').val(),pageNo:1,order:'委刊單識別碼',asc:'ASC'};
+			bypost={method:'OrderListInfo',searchBy:$('#searchOrderList').val(),pageNo:1,order:'委刊單識別碼',asc:'DESC'};
 		else if(typeof(option.ownerId)!='undefined')
-			bypost={method:'OrderListInfoByAdOwner',pageNo:1,order:'委刊單識別碼',asc:'ASC',廣告主識別碼:option.ownerId};
+			bypost={method:'OrderListInfoByAdOwner',pageNo:1,order:'委刊單識別碼',asc:'DESC',廣告主識別碼:option.ownerId};
 		else if(typeof(option.orderListId)!='undefined')
-			bypost={method:'OrderListInfoByID',pageNo:1,order:'委刊單識別碼',asc:'ASC',委刊單識別碼:option.orderListId};
+			bypost={method:'OrderListInfoByID',pageNo:1,order:'委刊單識別碼',asc:'DESC',委刊單識別碼:option.orderListId};
 		$.post('editOrderListByPage.php',bypost,function(json){
 				json.header.push('託播單資訊','委刊單詳細資訊');
 				for(var row in json.data){

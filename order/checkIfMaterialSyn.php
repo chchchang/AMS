@@ -3,20 +3,37 @@
 	require_once dirname(__FILE__).'/../tool/MyDB.php';	
 	require_once dirname(__FILE__).'/../tool/MyLogger.php';
 	require_once dirname(__FILE__).'/../tool/OracleDB.php';
+	if (!defined('MATERIAL_FOLDER'))
+		define("MATERIAL_FOLDER", Config::GET_MATERIAL_FOLDER());
 	class checkIfMaterialSyn{
 		public static function checkIfSyn($config){
 			$my = new MyDB(true);;
 			$area = $config['區域'];
 			$mid = $config['素材識別碼'];
 			return(json_encode(['success'=>true]));
-			if($area==='N')
-				$oracleDB=new OracleDB(Config::OMP_N_ORACLE_DB_USER,Config::OMP_N_ORACLE_DB_PASSWORD,Config::OMP_N_ORACLE_DB_CONN_STR);
-			else if($area==='C')
-				$oracleDB=new OracleDB(Config::OMP_C_ORACLE_DB_USER,Config::OMP_C_ORACLE_DB_PASSWORD,Config::OMP_C_ORACLE_DB_CONN_STR);
-			else if($area==='S')
-				$oracleDB=new OracleDB(Config::OMP_S_ORACLE_DB_USER,Config::OMP_S_ORACLE_DB_PASSWORD,Config::OMP_S_ORACLE_DB_CONN_STR);
+						
+			if($area==='N'){
+				$DB_U = Config::OMP_N_ORACLE_DB_USER;
+				$DB_T_O = Config::OMP_N_ORACLE_DB_TABLE_OWNER;
+				$DB_P = Config::OMP_N_ORACLE_DB_PASSWORD;
+				$DB_S = Config::OMP_N_ORACLE_DB_CONN_STR;
+			}
+			else if($area==='C'){
+				$DB_U = Config::OMP_C_ORACLE_DB_USER;
+				$DB_T_O = Config::OMP_C_ORACLE_DB_TABLE_OWNER;
+				$DB_P = Config::OMP_C_ORACLE_DB_PASSWORD;
+				$DB_S = Config::OMP_C_ORACLE_DB_CONN_STR;
+			}
+			else if($area==='S'){
+				$DB_U = Config::OMP_S_ORACLE_DB_USER;
+				$DB_T_O = Config::OMP_S_ORACLE_DB_TABLE_OWNER;
+				$DB_P = Config::OMP_S_ORACLE_DB_PASSWORD;
+				$DB_S = Config::OMP_S_ORACLE_DB_CONN_STR;
+			}
 			else 
 				return(json_encode(['success'=>true]));
+		
+			$oracleDB=new OracleDB($DB_U,$DB_P,$DB_S);
 
 			$sql='	SELECT 素材名稱,素材類型名稱,素材原始檔名
 					FROM 素材,素材類型
@@ -43,11 +60,11 @@
 				case '影片':
 					$sql =
 					"SELECT COUNT(*) AS C
-					FROM OVA_VOD_CONTENT
+					FROM ".$DB_T_O.".OVA_VOD_CONTENT
 					WHERE VODCNT_TITLE=:TITLE";
 					
 					$vars=array(
-						array('bv_name'=>':TITLE','variable'=>'_____AMS_'.$mid.'_'.md5_file('../material/uploadedFile/'.$mid.'.'.$type))
+						array('bv_name'=>':TITLE','variable'=>'_____AMS_'.$mid.'_'.md5_file(MATERIAL_FOLDER.$mid.'.'.$type))
 					);
 					
 					$result=$oracleDB->getResultArray($sql,$vars);

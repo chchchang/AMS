@@ -329,6 +329,7 @@
 		var dd  = this.getDate().toString();
 		return yyyy +'-'+ (mm[1]?mm:"0"+mm[0]) +'-'+ (dd[1]?dd:"0"+dd[0]); // padding
 	};
+	var deadlinePreDay = 5;//預約到期日期到數天數
 //********設定
 	$("#tabs").tabs({
 		activate: function(event, ui) {
@@ -499,19 +500,6 @@
 			$(this).prop("checked", false);
 		});
 	});
-	//選擇廣告開始日期後，預約日期推算
-	var deadlinePreDay = 5;
-	$('#StartDate').change(function(){
-		var s =$("#StartDate").val().split(" ")[0].split('-')
-		var deadline = new Date(parseInt(s[0],10),parseInt(s[1],10)-1,parseInt(s[2],10),00,00,00);
-		for(var i =deadlinePreDay; i >0;i--){
-			deadline.addDays(-1);
-			while(deadline.getDay()==6||deadline.getDay()==0){
-				deadline.addDays(-1);
-			}
-		}
-		$('#Deadline').val(deadline.getFullYear()+'-'+addLeadingZero(2,deadline.getMonth()+1)+'-'+addLeadingZero(2,deadline.getDate()));
-	});
 	//託播單名稱自動完成搜尋
 	$('#Name').autocomplete({
 		source :function( request, response ) {
@@ -538,7 +526,7 @@
 		$('#configTbody,#materialTbody').empty();
 		otherConfigObj = {};
 		materialObj = {};
-		$.ajax({
+		var promise = $.ajax({
 			async: false,
 			type : "POST",
 			url :ajaxtodbPath,
@@ -564,10 +552,9 @@
 						
 						var $inputtd = $('<td/>').appendTo($tr);
 						//連動廣告客制化
-						if(config['版位其他參數名稱']=='bannerTransactionId1'||config['版位其他參數名稱']=='bannerTransactionId2'){
-							var connectIndex = 1;
-							if (config['版位其他參數名稱']=='bannerTransactionId2')
-							connectIndex = 2;
+						var paraName = config['版位其他參數名稱'];
+						if(paraName.startsWith('bannerTransactionId')){
+							var connectIndex = paraName.replace('bannerTransactionId','');
 							
 							var $連動 = $('<select  id="連動廣告'+connectIndex+'"  multiple="multiple"  class ="tokenize configValue" order='+i+' />').val(config['版位其他參數預設值']);
 							$inputtd.append($連動);
@@ -577,29 +564,23 @@
 									,newElements:false,
 									onAddToken: 
 										function(value, text, e){
-											var order1 =$('#連動廣告1').attr('order');
-											var order2 =$('#連動廣告2').attr('order');
-											otherConfigObj[order1] = ($('#連動廣告1').val()!=null)?$('#連動廣告1').val().join(','):'';
-											otherConfigObj[order2] = ($('#連動廣告2').val()!=null)?$('#連動廣告2').val().join(','):'';
-											if(otherConfigObj[order1]!=''){
-												$('#是否新增'+order1).prop('checked',true);
-											}
-											if(otherConfigObj[order2]!=''){
-												$('#是否新增'+order2).prop('checked',true);
-											}
+											$.each($('select.連動廣告'),function(){
+												var order =$(this).attr('order');
+												otherConfigObj[order] = ($(this).val()!=null)?$(this).val().join(','):'';
+												if(otherConfigObj[order]!=''){
+													$('#是否新增'+order).prop('checked',true);
+												}
+											});
 										},
 									onRemoveToken: 
 										function(value, text, e){
-											var order1 =$('#連動廣告1').attr('order');
-											var order2 =$('#連動廣告2').attr('order');
-											otherConfigObj[order1] = ($('#連動廣告1').val()!=null)?$('#連動廣告1').val().join(','):'';
-											otherConfigObj[order2] = ($('#連動廣告2').val()!=null)?$('#連動廣告2').val().join(','):'';
-											if(otherConfigObj[order1]!=''){
-												$('#是否新增'+order1).prop('checked',true);
-											}
-											if(otherConfigObj[order2]!=''){
-												$('#是否新增'+order2).prop('checked',true);
-											}
+											$.each($('select.連動廣告'),function(){
+												var order =$(this).attr('order');
+												otherConfigObj[order] = ($(this).val()!=null)?$(this).val().join(','):'';
+												if(otherConfigObj[order]!=''){
+													$('#是否新增'+order).prop('checked',true);
+												}
+											});
 										}
 								});				
 						}
@@ -689,29 +670,17 @@
 							}
 						}
 					}
-					if($('#連動廣告1').length!=0||$('#連動廣告2').length!=0){
-						m_setConnectionOrder({									
-							'1':$.isArray($('#連動廣告1').val())?$('#連動廣告1').val():[],
-							'2':$.isArray($('#連動廣告2').val())?$('#連動廣告2').val():[]
-						});
+					if($('#連動廣告1').length!=0 ||$('#連動廣告2').length!=0||$('#連動廣告3').length!=0 ||$('#連動廣告4').length!=0){
+						m_setConnectionOrder(getObjectForSetConnectOrder());
 						//時段全選按鈕
 						$('#allTimeBtn,#noTimeBtn').click(function(){
-							m_setConnectionOrder({									
-								'1':$.isArray($('#連動廣告1').val())?$('#連動廣告1').val():[],
-								'2':$.isArray($('#連動廣告2').val())?$('#連動廣告2').val():[]
-							});
+							m_setConnectionOrder(getObjectForSetConnectOrder());
 						});
 						$( "input[name='hours'],#StartDateCB,#EndDateCB,#hoursCB" ).change(function() {
-							m_setConnectionOrder({									
-								'1':$.isArray($('#連動廣告1').val())?$('#連動廣告1').val():[],
-								'2':$.isArray($('#連動廣告2').val())?$('#連動廣告2').val():[]
-							});
+							m_setConnectionOrder(getObjectForSetConnectOrder());
 						});
 						$( "#StartDate,#EndDate").focusout(function() {
-							m_setConnectionOrder({									
-								'1':$.isArray($('#連動廣告1').val())?$('#連動廣告1').val():[],
-								'2':$.isArray($('#連動廣告2').val())?$('#連動廣告2').val():[]
-							});
+							m_setConnectionOrder(getObjectForSetConnectOrder());
 						});	
 						
 					}
@@ -737,22 +706,56 @@
 						).appendTo($tr)
 						//點擊後開啟類型
 						$('<th/>').append($('<input type ="checkbox" name="updateCheckBox" id="materialCTypeCB'+i+'" class="materialCB">')).appendTo($tr);
-						$('<td/>').append(
+						if(json.版位類型名稱  == '頻道short EPG banner'){
+							$('<td/>').append(
+								$('<select order='+i+' id="點擊後開啟類型'+i+'"/>')
+								.append($('<option value="NONE">NONE</option>'))
+								.append($('<option value="OVA_SERVICE">OVA_SERVICE</option>'))
+								.append($('<option value="OVA_CATEGORY">OVA_CATEGORY</option>'))
+								.append($('<option value="OVA_VOD_CONTENT">OVA_VOD_CONTENT</option>'))
+								.append($('<option value="OVA_CHANNEL">OVA_CHANNEL</option>'))
+								.append($('<option value="COVER_A">COVER_A</option>'))
+								.append($('<option value="COVER_B">COVER_B</option>'))
+								.appendTo($tr).change(function(){
+									materialObj[$(this).attr('order')]['點擊後開啟類型'] = $(this).val();
+								}).val('NONE')
+							).appendTo($tr)
+						}
+						else if(json.版位類型名稱  == 'barker頻道'){
 							$('<select order='+i+' id="點擊後開啟類型'+i+'"/>')
+							.append($('<option value="NONE">NONE</option>'))
+							.append($('<option value="internal">internal</option>'))
+							.append($('<option value="external">external</option>'))
+							.append($('<option value="app">app</option>'))
+							.append($('<option value="Vod">Vod</option>'))
+							.append($('<option value="Channel">Channel</option>'))
+							.appendTo($tr).change(function(){
+								materialObj[$(this).attr('order')]['點擊後開啟類型'] = $(this).val();
+							}).val('NONE')
+						}
+						else{
+							$('<select order='+i+' id="點擊後開啟類型'+i+'" class="linkType"/>')
 							.append($('<option value="NONE">NONE</option>'))
 							.append($('<option value="OVA_SERVICE">OVA_SERVICE</option>'))
 							.append($('<option value="OVA_CATEGORY">OVA_CATEGORY</option>'))
 							.append($('<option value="OVA_VOD_CONTENT">OVA_VOD_CONTENT</option>'))
 							.append($('<option value="OVA_CHANNEL">OVA_CHANNEL</option>'))
+							.append($('<option value="COVER_A">COVER_A</option>'))
+							.append($('<option value="COVER_B">COVER_B</option>'))
+							.append($('<option value="internal">internal</option>'))
+							.append($('<option value="external">external</option>'))
+							.append($('<option value="app">app</option>'))
+							.append($('<option value="Vod">Vod</option>'))
+							.append($('<option value="Channel">Channel</option>'))
 							.appendTo($tr).change(function(){
 								materialObj[$(this).attr('order')]['點擊後開啟類型'] = $(this).val();
-							}).val('NONE')
-						).appendTo($tr)
+							}).val('NONE')							
+						}
 						materialObj[i]['點擊後開啟類型'] = 'NONE';
 						//點擊後開啟位址
 						$('<th/>').append($('<input type ="checkbox" name="updateCheckBox" id="materialCAdCB'+i+'" class="materialCB">')).appendTo($tr);
 						$('<td/>').append(
-							$('<input type ="text" order='+i+' id="點擊後開啟位址'+i+'">').appendTo($tr).change(function(){
+							$('<input type ="text" order='+i+' id="點擊後開啟位址'+i+'" class="linkValue">').appendTo($tr).change(function(){
 								materialObj[$(this).attr('order')]['點擊後開啟位址'] = $(this).val();
 							})
 							.autocomplete({
@@ -782,6 +785,22 @@
 				}
 			}
 		});
+		
+		promise.done(
+			function(){
+				console.log('done');
+				$.getScript("newOrder_SEPGBanner_cover_extend.js");
+			}
+		)
+	}
+	function getObjectForSetConnectOrder(){
+		var re  ={
+			'1':$.isArray($('#連動廣告1').val())?$('#連動廣告1').val():[],
+			'2':$.isArray($('#連動廣告2').val())?$('#連動廣告2').val():[],
+			'3':$.isArray($('#連動廣告3').val())?$('#連動廣告3').val():[],
+			'4':$.isArray($('#連動廣告4').val())?$('#連動廣告4').val():[]
+			};
+		return re;
 	}
 	//依照多組日期設定連動管告
 	function m_setConnectionOrder(ids){
@@ -838,9 +857,21 @@
 			changeYear: true,
 			monthNames: ["1","2","3","4","5","6","7","8","9","10","11","12"],
 			monthNamesShort: ["1","2","3","4","5","6","7","8","9","10","11","12"],
-			minDate: d.yyyymmdd()+' 00:00:00',
+			//minDate: d.yyyymmdd()+' 00:00:00',
 			onClose: function( selectedDate ) {
 				$( "#EndDate" ).datepicker( "option", "minDate", selectedDate );
+			},
+			onSelect: function(dateText) {
+				//選擇廣告開始日期後，預約日期推算
+				var s =$("#StartDate").val().split(" ")[0].split('-')
+				var deadline = new Date(parseInt(s[0],10),parseInt(s[1],10)-1,parseInt(s[2],10),00,00,00);
+				for(var i =deadlinePreDay; i >0;i--){
+					deadline.addDays(-1);
+					while(deadline.getDay()==6||deadline.getDay()==0){
+						deadline.addDays(-1);
+					}
+				}
+				$('#Deadline').val(deadline.getFullYear()+'-'+addLeadingZero(2,deadline.getMonth()+1)+'-'+addLeadingZero(2,deadline.getDate()));
 			}
 		});
 		$( "#EndDate" ).datetimepicker({
@@ -863,7 +894,7 @@
 			changeYear: true,
 			monthNames: ["1","2","3","4","5","6","7","8","9","10","11","12"],
 			monthNamesShort: ["1","2","3","4","5","6","7","8","9","10","11","12"],
-			minDate: 0
+			//minDate: 0
 		});		
 	}
 	
@@ -930,16 +961,22 @@
 			if(typeof(jdata['其他參數'])!='undefined'){
 				var connectAd1=[];
 				var connectAd2=[];
+				var connectAd3=[];
+				var connectAd4=[];
 				for( var i in otherConfigObj){
 					if($('#參數名稱'+i).text()=='連動廣告1')
 						connectAd1 = otherConfigObj[i].split(',');
 					else if($('#參數名稱'+i).text()=='連動廣告2')
 						connectAd2 = otherConfigObj[i].split(',');
+					else if($('#參數名稱'+i).text()=='連動廣告3')
+						connectAd3 = otherConfigObj[i].split(',');
+					else if($('#參數名稱'+i).text()=='連動廣告4')
+						connectAd4 = otherConfigObj[i].split(',');
 					else if($('#參數名稱'+i).text()=='前置廣告連動')
 						m_setSEPGConnection(otherConfigObj[i]);
 				}
 				if($('#連動廣告1').length!=0 ||$('#連動廣告2').length!=0)
-					m_setConnectionOrder({'1':connectAd1,'2':connectAd2});
+					m_setConnectionOrder({'1':connectAd1,'2':connectAd2,'3':connectAd3,'4':connectAd4});
 			}
 			
 			configOption();
@@ -1116,6 +1153,8 @@
 							}
 						});
 						//素材檢查與設定
+						if(json.素材.length==0)
+							json.素材 = {};
 						$.each(materialObj,function(key,value){
 							if(typeof(json.素材[key])=='undefined'){
 								//若有修改素材參數，但尚未建立過該順序的託播單素材
@@ -1141,14 +1180,20 @@
 														
 														if(!$('#materialClickableCB'+key).prop('checked')){
 															json.素材[key].可否點擊=material.可否點擊;
+															if(typeof(json.素材[key].可否點擊)=='undefined')
+																json.素材[key].可否點擊=0;
 														}
 														
 														if(!$('#materialCAdCB'+key).prop('checked')){
 															json.素材[key].點擊後開啟位址=material.點擊後開啟位址;
+															if(typeof(json.素材[json.素材[key].點擊後開啟位址])=='undefined')
+																json.素材[key].點擊後開啟位址 = null;
 														}
 														
 														if(!$('#materialCTypeCB'+key).prop('checked')){
 															json.素材[key].點擊後開啟類型=material.點擊後開啟類型;
+															if(typeof(json.素材[json.素材[key].點擊後開啟類型])=='undefined')
+																json.素材[key].點擊後開啟類型 = 'NONE';
 														}
 														break;
 													}
@@ -1179,9 +1224,11 @@
 							//專區vod強至同步sd與hd的素材屬性
 							if(json.版位類型名稱 == '專區vod'){
 								for(var i in json.素材){
-									json.素材[i].可否點擊 = json.素材[key].可否點擊;
-									json.素材[i].點擊後開啟位址 = json.素材[key].點擊後開啟位址;
-									json.素材[i].點擊後開啟類型 = json.素材[key].點擊後開啟類型;
+									if(typeof(json.素材[key])!='undefined'){
+										json.素材[i].可否點擊 = json.素材[key].可否點擊;
+										json.素材[i].點擊後開啟位址 = json.素材[key].點擊後開啟位址;
+										json.素材[i].點擊後開啟類型 = json.素材[key].點擊後開啟類型;
+									}
 								}
 							}
 						});
@@ -1243,9 +1290,24 @@
 							json =json[0];
 							updatedOrders.push(json);
 						}
+						else if(json.版位類型名稱  == 'barker頻道'){
+							var mcount = 0;
+							for(var id in json['素材']){
+								if(json['素材'][id]['素材識別碼']!=0)
+									mcount ++;
+								else
+									json['素材'][id]['素材識別碼']='';
+							}
+							if(mcount>1){
+								$('#uploadResult_f').append('<p>託播單'+json.託播單識別碼+' 修改失敗: 修改CAMPS投放系統之託播單時不可同時設定HD與SD影片素材</p>');
+								return 0;
+							}
+							else
+							updatedOrders.push(json);
+						}
 						else{
 							updatedOrders.push(json);
-						}	
+						}
 					}	
 				});//end of ajax
 			}

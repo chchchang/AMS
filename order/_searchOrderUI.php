@@ -1,10 +1,10 @@
 
 <div id="_searchOUI_tabs">
   <ul>
-    <li><a href="#_searchOUI_tabs-1">設定走期條件</a></li>
-    <li><a href="#_searchOUI_tabs-2">設定廣告主/委刊單條件</a></li>
-	<li><a href="#_searchOUI_tabs-3">設定版位類型/版位條件</a></li>
-	<li><a href="#_searchOUI_tabs-4">設定素材條件</a></li>
+    <li id ='_searchOUI_tabs_li-1' ><a href="#_searchOUI_tabs-1">設定走期條件</a></li>
+    <li id ='_searchOUI_tabs_li-2' ><a href="#_searchOUI_tabs-2">設定廣告主/委刊單條件</a></li>
+	<li id ='_searchOUI_tabs_li-3' ><a href="#_searchOUI_tabs-3">設定版位類型/版位條件</a></li>
+	<li id ='_searchOUI_tabs_li-4' ><a href="#_searchOUI_tabs-4">設定素材條件</a></li>
   </ul>
 	<div id ='_searchOUI_tabs-1'>
 		開始日期:<input type="text" id="_searchOUI_startDate"></input> 結束日期:<input type="text" id="_searchOUI_endDate"></input>

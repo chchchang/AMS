@@ -18,13 +18,17 @@
 				否則index即為2，但此時需考慮include、include_once、require、require_once亦被視為函數呼叫，故要忽略。
 			*/
 			$tmp=debug_backtrace(DEBUG_BACKTRACE_IGNORE_ARGS);
-			if(isset($tmp[2])&&(array_search($tmp[2]['function'],array('include','include_once','require','require_once'))===false))
+			/*if(isset($tmp[2])&&(array_search($tmp[2]['function'],array('include','include_once','require','require_once'))===false))
 				$tmp=$tmp[2];
 			else {
 				$tmp=$tmp[1];
 				$tmp['function']=null;
+			}*/
+			$prestr="";
+			for($i=1;$i<count($tmp);$i++){
+				@$prestr.='[Method:'.$tmp[$i]['function'].'(at '.$tmp[$i]['file'].' line '.$tmp[$i]['line'].')]';
 			}
-			$str='Method:'.$tmp['function'].'(at '.$tmp['file'].' line '.$tmp['line'].') Message:'.$str;
+			$str=$prestr.' Message:'.$str;
 			$str=str_replace("\r",'\r',$str);
 			$str=str_replace("\n",'\n',$str);
 			$this->logger->$type($str);

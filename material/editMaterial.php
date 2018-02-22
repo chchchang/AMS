@@ -24,7 +24,7 @@
 				//移除素材原始檔案
 				$fileNameA=explode('.',$mresult['素材原始檔名']);
 				//為了避免path manipulation,使用資料庫中取得的素材識別碼而非POST的素材識別碼
-				$file = 'uploadedFile/'.$mresult['素材識別碼'].'.'.end($fileNameA);
+				$file = Config::GET_MATERIAL_FOLDER().$mresult['素材識別碼'].'.'.end($fileNameA);
 				if(file_exists($file))
 					unlink($file);
 				

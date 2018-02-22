@@ -66,7 +66,7 @@
 				<td><input id="fPicRadio" type="radio" name="fileRadio" value="圖片" checked>圖片<input type="radio" name="fileRadio" value="影片">影片
 				<input type="text" id="素材原始檔名" value = "" style="width:200px" readonly><img id="fileExist" src=""><a id ="fileCheckText" style="font-size:9px"></a>
 				<form action="ajaxUploadingFile.php" method="post" enctype="multipart/form-data"  class="fileM" id ="uploadFileForm">
-					<input type="hidden" name="max_file_size" value="268435456">
+					<input type="hidden" name="max_file_size" value="800000000">
 					<input type="file" name="fileToUpload" id="fileToUpload"></form>
 				<button id="clearFile">取消素材</button>
 				<a id = 'mtypeMessage'>(接受gif/jpeg/png/jpg檔案)</a>
@@ -547,7 +547,7 @@ $( "#saveBtn" ).click(function(event) {
 });	
 
 function uploadFile(){
-	var ext = $('#fileToUpload').val().split('.').pop().toLowerCase();
+	/*var ext = $('#fileToUpload').val().split('.').pop().toLowerCase();
 	var type =$("input[name='fileRadio']:checked").val();
 	switch(type){
 		case '圖片':		
@@ -562,7 +562,46 @@ function uploadFile(){
 				return 0;
 			}
 			break;
+	}*/
+	var control = document.getElementById("fileToUpload");
+	var type =$("input[name='materailRadio']:checked").val();
+	switch(type){
+		case '文字':
+			break;
+		case '圖片':
+			var file = control.files[0];
+			var ext = file.name.split('.').pop().toLowerCase();
+			var headerType = file.type;
+			var tempIndex = $.inArray(ext, ['gif','png','jpg','jpeg']);
+			if( tempIndex == -1) {	
+				alert('檔案類型錯誤!');
+				return 0;
+			}
+			var headerTypes = ['image/gif','image/png','image/jpeg','image/jpeg'];
+			if(headerTypes[tempIndex]!= headerType) {	
+				alert('檔案header定義類型錯誤!');
+				return 0;
+			}
+			
+		
+			break;
+		case '影片':
+			var file = control.files[0];
+			var ext = file.name.split('.').pop().toLowerCase();
+			var headerType = file.type;
+			var tempIndex = $.inArray(ext, ['ts','mpg']);
+			if(tempIndex == -1) {	
+				alert('檔案類型錯誤!');
+				return 0;
+			}
+			var headerTypes = ['video/vnd.dlna.mpeg-tts','video/mpeg'];
+			if(headerTypes[tempIndex]!= headerType) {	
+				alert('檔案header定義類型錯誤!'+headerTypes[tempIndex]+headerType);
+				return 0;
+			}
+			break;
 	}
+	
 	var options = { 
 		// target:        '#output1',   // target element(s) to be updated with server response 
         //beforeSubmit:  showRequest,  // pre-submit callback 

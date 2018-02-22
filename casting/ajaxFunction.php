@@ -8,6 +8,30 @@
 			$hours=array();
 			if(!isset($_POST['startTime'])) $_POST['startTime']=date('Y-m-d');
 			if(!isset($_POST['endTime'])) $_POST['endTime']=date('Y-m-d',strtotime('+2 day'));
+			$orderData=[];
+			//*****多版位
+			$sql='
+				SELECT 託播單名稱,託播單.託播單識別碼,廣告可被播出小時時段,廣告期間開始時間,廣告期間結束時間,託播單CSMS群組識別碼,託播單狀態識別碼
+				,託播單送出行為識別碼,託播單送出後是否成功,託播單送出後內部錯誤訊息
+				,版位類型.版位名稱 AS 版位類型名稱
+				FROM 託播單 
+				JOIN 託播單投放版位 ON 託播單.託播單識別碼=託播單投放版位.託播單識別碼 AND 託播單投放版位.ENABLE=1		
+				JOIN 版位 ON 託播單投放版位.版位識別碼=版位.版位識別碼
+				JOIN 版位 版位類型 ON 版位類型.版位識別碼 = 版位.上層版位識別碼
+				WHERE 
+				版位.版位識別碼=? AND ((廣告期間開始時間 BETWEEN ? AND ?) OR (廣告期間結束時間 BETWEEN ? AND ?) OR (廣告期間開始時間<=? AND 廣告期間結束時間>=?))
+				AND 託播單.託播單狀態識別碼 IN ('.(isset($_POST['待確認排程'])?'6':'0,1,2,3,4').')
+				ORDER BY 委刊單識別碼,託播單.託播單識別碼
+			';
+			$res = $my->getResultArray($sql,'issssss',$_POST['版位識別碼'],$_POST['startTime'],$_POST['endTime'],$_POST['startTime'],$_POST['endTime'],$_POST['startTime'],$_POST['endTime']);
+			//print_r($res);
+			if($res==null)
+				$res = [];
+			foreach($res as $row) {
+				if(!isset($orderData[$row['託播單識別碼']]))
+					$orderData[$row['託播單識別碼']] = $row;
+			}
+			//*****
 			$sql='
 				SELECT 託播單名稱,託播單識別碼,廣告可被播出小時時段,廣告期間開始時間,廣告期間結束時間,託播單CSMS群組識別碼,託播單狀態識別碼
 				,託播單送出行為識別碼,託播單送出後是否成功,託播單送出後內部錯誤訊息
@@ -34,8 +58,12 @@
 			if(!$res=$stmt->get_result()) {
 				exit('無法取得結果集，請聯絡系統管理員！');
 			}
-			
 			while($row=$res->fetch_assoc()) {
+				if(!isset($orderData[$row['託播單識別碼']]))
+					$orderData[$row['託播單識別碼']] = $row;
+			}
+			//while($row=$res->fetch_assoc()) {
+			foreach($orderData as $row) {
 				$ptn = $row['版位類型名稱'];
 				$hours=array();
 				$row['廣告可被播出小時時段']=explode(',',$row['廣告可被播出小時時段']);

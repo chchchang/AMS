@@ -2,6 +2,10 @@
 	//前置設定
 	include('../tool/auth/authAJAX.php');
 	define('PAGE_SIZE',10);
+	$material_folder = Config::GET_MATERIAL_FOLDER();
+	$material_folder_url = Config::GET_MATERIAL_FOLDER_URL(dirname(__FILE__).'\\');
+	//$pppp=dirname(__FILE__);
+	//exit($material_folder_url.' '.$material_folder.' '.$pppp);
 	if(isset($_POST['method'])){
 		if($_POST['method']=='DATAGRID素材資訊'){
 			$orders=array();
@@ -111,7 +115,7 @@
 						$exists = false;
 					else if($row['素材類型名稱']=='圖片'){
 						$explodeFileName=explode(".",$row['素材原始檔名']);
-						$exists= file_exists('uploadedFile/'.$row['素材識別碼'].".".$explodeFileName[count($explodeFileName)-1]);
+						$exists= file_exists($material_folder_url.$row['素材識別碼'].".".$explodeFileName[count($explodeFileName)-1]);
 					}
 					
 					if(!$exists){
@@ -119,7 +123,7 @@
 						$orders[]=array(array($row['素材識別碼'],'html'),array($start.(($row['素材群組識別碼']==null)?'':$row['素材群組識別碼']).$end,'html')
 						,array($start.$row['素材類型名稱'].$end,'html'),array($start.$row['素材名稱'].$end,'html')
 						,array('','html')
-						,($row['素材類型名稱']=='圖片')?array('<img class ="dgImg" src="uploadedFile/'.$row['素材識別碼'].'?'.time().
+						,($row['素材類型名稱']=='圖片')?array('<img class ="dgImg" src="'.$material_folder_url.$row['素材識別碼'].'?'.time().
 						'" alt="'.$row['素材識別碼'].':'.$row['素材原始檔名'].'"style="max-width:100%;max-height:100%;border:0;">','html'):array('','text')
 						,array($start.(($row['圖片素材寬度']==null)?'':$row['圖片素材寬度']).$end,'html'),array($start.(($row['圖片素材高度']==null)?'':$row['圖片素材高度']).$end,'html')
 						,array($start.(($row['影片素材秒數']==null)?'':$row['影片素材秒數']).$end,'html'),array(($row['有效開始時間']==null)?'':$row['有效開始時間'],'text'),array(($row['有效結束時間']==null)?'':$row['有效結束時間'],'text')
@@ -135,7 +139,7 @@
 						$explodeFileName=explode(".",$row['素材原始檔名']);
 						$orders[]=array(array($row['素材識別碼'],'text'),array(($row['素材群組識別碼']==null)?'':$row['素材群組識別碼'],'text'),array($row['素材類型名稱'],'text'),array($row['素材名稱'],'text')
 						,array(($row['文字素材內容']==null)?'':$row['文字素材內容'],'text')
-						,($row['素材類型名稱']=='圖片')?array('<img class ="dgImg" src="uploadedFile/'.$row['素材識別碼'].'.'.end($explodeFileName).'?'.time().
+						,($row['素材類型名稱']=='圖片')?array('<img class ="dgImg" src="'.$material_folder_url.$row['素材識別碼'].'.'.end($explodeFileName).'?'.time().
 						'" alt="'.$row['素材識別碼'].':'.$row['素材原始檔名'].'" style="max-width:100%;max-height:100%;border:0;">','html'):array('','text')
 						,array(($row['圖片素材寬度']==null)?'':$row['圖片素材寬度'],'text'),array(($row['圖片素材高度']==null)?'':$row['圖片素材高度'],'text')
 						,array(($row['影片素材秒數']==null)?'':$row['影片素材秒數'],'text'),array(($row['有效開始時間']==null)?'':$row['有效開始時間'],'text'),array(($row['有效結束時間']==null)?'':$row['有效結束時間'],'text')
@@ -193,7 +197,7 @@
 						$exists = false;
 					else if($row['素材類型名稱']=='圖片'){
 						$explodeFileName=explode(".",$row['素材原始檔名']);
-						$exists= file_exists('uploadedFile/'.$row['素材識別碼'].".".$explodeFileName[count($explodeFileName)-1]);
+						$exists= file_exists($material_folder_url.$row['素材識別碼'].".".$explodeFileName[count($explodeFileName)-1]);
 					}
 					if(!$exists){
 						$totalRowCount++;
@@ -202,7 +206,7 @@
 							$orders[]=array(array($row['素材識別碼'],'text'),array($start.(($row['素材群組識別碼']==null)?'':$row['素材群組識別碼']).$end,'html')
 							,array($start.$row['素材類型名稱'].$end,'html'),array($start.$row['素材名稱'].$end,'html')
 							,array('','html')
-							,($row['素材類型名稱']=='圖片')?array('<img class ="dgImg" src="uploadedFile/'.$row['素材識別碼'].'?'.time().'" alt="'.$row['素材識別碼'].':'.$row['素材原始檔名'].'" style="max-width:100%;max-height:100%;border:0;">','html'):array('','text')
+							,($row['素材類型名稱']=='圖片')?array('<img class ="dgImg" src="'.$material_folder_url.$row['素材識別碼'].'?'.time().'" alt="'.$row['素材識別碼'].':'.$row['素材原始檔名'].'" style="max-width:100%;max-height:100%;border:0;">','html'):array('','text')
 							,array($start.(($row['圖片素材寬度']==null)?'':$row['圖片素材寬度']).$end,'html'),array($start.(($row['圖片素材高度']==null)?'':$row['圖片素材高度']).$end,'html')
 							,array($start.(($row['影片素材秒數']==null)?'':$row['影片素材秒數']).$end,'html')
 							);

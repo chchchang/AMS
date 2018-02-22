@@ -72,6 +72,7 @@
 <script type="text/javascript" src="../tool/datagrid/CDataGrid.js"></script>
 <script type="text/javascript" src="../tool/autoCompleteComboBox.js"></script>
 <script src="../tool/jquery.loadmask.js"></script>
+<script type="text/javascript" src="../tool/jquery-plugin/jquery.placeholder.min.js"></script>
 <link rel="stylesheet" type="text/css" href="<?=$SERVER_SITE.Config::PROJECT_ROOT?>tool/jquery.loadmask.css" />
 <link rel='stylesheet' type='text/css' href='<?=$SERVER_SITE.Config::PROJECT_ROOT?>external-stylesheet.css'/>
 <style type="text/css">
@@ -139,7 +140,7 @@ u{
 					<button id="editOrderList" class ="darkButton">修改</button> <button id="clearOrderList" class ="darkButton">清空</button> <button id="viewOrderList" class ="darkButton">詳細資料</button></td></tr>
 		
 		<tr><th colspan="3">現有託播單列表</th></tr>
-		<tr><td colspan="3"><div id = "orderListDG"></div><td></tr>
+		<tr><td colspan="3"><div id = "searchOrders"><?php include('_searchOrderUI.php');?></div><div id = "orderListDG"></div><td></tr>
 		
 		<tr><th colspan="3">新增的託播單暫存列表</th></tr>
 		<tr><td colspan="3">
@@ -156,7 +157,8 @@ u{
 //***版位/排程表相關***//
 	var ajaxtodbPath = "ajaxToDB_Order.php";
 	var selectorData=new Array();//紀錄版位類型/版位資料
-	$("#dateDiv,#newOrderBtn").hide();
+	$("#dateDiv,#newOrderBtn,#searchOrders").hide();
+	$('#_searchOUI_tabs_li-2,#_searchOUI_tabs-2').remove();
 	
 	//設定版位選項
 	$.post('',{method:'getPositionTypeSelection'}
@@ -400,6 +402,7 @@ u{
 				$("#ordername").text("");
 				$("#orderListId").text("");
 				$("#orderListDG").empty();
+				$('#searchOrders').hide();
 			}
 		});
 		//廣告主詳細資料
@@ -453,6 +456,7 @@ u{
 					"clearOrderList":1
 				});
 				$("#orderListDG").empty();
+				$('#searchOrders').hide();
 			}
 		});
 		//檢視委刊單
@@ -479,6 +483,7 @@ u{
 			$("#orderListId").text("");
 			$.post("orderSession.php",{"":1})
 			$("#orderListDG").empty();
+			$('#searchOrders').hide();
 		}
 		dialog.dialog( "close" );
 	}
@@ -494,6 +499,7 @@ u{
 			$("#ordername").text("");
 			$("#orderListId").text("");
 			$("#orderListDG").empty();
+			$('#searchOrders').hide();
 		}
 		dialog.dialog( "close" );
 	}
@@ -650,8 +656,11 @@ u{
 		for(var j in savedOrder){
 			var order = savedOrder[j];
 			if(order['tempGroupInSession'] == tempGid ){
-				if($.inArray(order['版位識別碼'],pidList)==-1)
-					pidList.push(order['版位識別碼']);
+				pids = order['版位識別碼'].split(',');
+				for(index in pids){
+					if($.inArray(pids[index],pidList)==-1)
+						pidList.push(pids[index]);
+				}
 				if($.inArray(order['群組廣告期間開始時間']+','+order['群組廣告期間結束時間'],durationList)==-1)
 					durationList.push(order['群組廣告期間開始時間']+','+order['群組廣告期間結束時間']);			
 			}
@@ -850,19 +859,31 @@ u{
 	
 	//設定委刊單下的託播單資料
 	function setOrderList(){		
-		TDG = new OrderDataGrid();				
+		showOrderDG();
 	}
 	
 	/**建立現有託播表單**/
+	//顯示搜尋的託播單列表
+	function showOrderDG(){
+		TDG = new OrderDataGrid();
+	}
 	function OrderDataGrid(){
 		$("#orderListDG").empty();
-		//query用共同參數
+		$('#searchOrders').show();
 		var bypost={
-			委刊單識別碼:$("#orderListId").text()
-			,pageNo:1
-			,order:'託播單識別碼'
-			,asc:'DESC'
-		};
+				searchBy:$('#_searchOUI_searchOrder').val()
+				,委刊單識別碼:$("#orderListId").text()
+				,開始時間:$('#_searchOUI_startDate').val()
+				,結束時間:$('#_searchOUI_endDate').val()
+				,狀態:$('#_searchOUI_orderStateSelectoin').val()
+				,版位類型識別碼:$('#_searchOUI_positiontype').val()
+				,版位識別碼:$('#_searchOUI_position').val()
+				,素材識別碼:$('#_searchOUI_material').val()
+				,素材群組識別碼:$('#_searchOUI_materialGroup').val()
+				,pageNo:1
+				,order:'託播單識別碼'
+				,asc:'DESC'
+			};
 		var mydg;
 		//取得資料
 		bypost['method']='OrderInfoBySearch';

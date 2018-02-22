@@ -162,11 +162,11 @@
 						
 			if($row['影片畫質識別碼']==1){
 				$sd = $row;
-				$SD影片 = '_____AMS_'.$row['素材識別碼'].'_'.md5_file('../material/uploadedFile/'.$row['素材識別碼'].'.'.$type);
+				$SD影片 = '_____AMS_'.$row['素材識別碼'].'_'.md5_file(Config::GET_MATERIAL_FOLDER().$row['素材識別碼'].'.'.$type);
 			}
 			else if($row['影片畫質識別碼']==2){
 				$hd = $row;
-				$HD影片 = '_____AMS_'.$row['素材識別碼'].'_'.md5_file('../material/uploadedFile/'.$row['素材識別碼'].'.'.$type);
+				$HD影片 = '_____AMS_'.$row['素材識別碼'].'_'.md5_file(Config::GET_MATERIAL_FOLDER().$row['素材識別碼'].'.'.$type);
 			}
 		}
 		
@@ -271,6 +271,54 @@
 				$bannerTransactionId2[] = $result->fetch_assoc()['託播單名稱'];
 			}
 		}
+		//連動廣告3
+		$bannerTransactionId3 = [];
+		if($orderSetting['bannerTransactionId3'] != '' && $orderSetting['bannerTransactionId3']!=null){
+			$t2 = explode(',',$orderSetting['bannerTransactionId3']);
+			foreach($t2 as $csmsId){
+				$sql = 'SELECT 託播單.託播單名稱
+				FROM 託播單,版位
+				WHERE 託播單CSMS群組識別碼 = ? AND 版位名稱 LIKE "%IAP"
+					';
+				if(!$stmt=$my->prepare($sql)) {
+					eixtWhitCode(500);
+				}
+				if(!$stmt->bind_param('i',$csmsId)) {
+					eixtWhitCode(500);
+				}
+				if(!$stmt->execute()) {
+					eixtWhitCode(500);
+				}
+				if(!$result=$stmt->get_result()){
+					eixtWhitCode(500);
+				}
+				$bannerTransactionId3[] = $result->fetch_assoc()['託播單名稱'];
+			}
+		}
+		//連動廣告4
+		$bannerTransactionId4 = [];
+		if($orderSetting['bannerTransactionId4'] != '' && $orderSetting['bannerTransactionId4']!=null){
+			$t2 = explode(',',$orderSetting['bannerTransactionId4']);
+			foreach($t2 as $csmsId){
+				$sql = 'SELECT 託播單.託播單名稱
+				FROM 託播單,版位
+				WHERE 託播單CSMS群組識別碼 = ? AND 版位名稱 LIKE "%IAP"
+					';
+				if(!$stmt=$my->prepare($sql)) {
+					eixtWhitCode(500);
+				}
+				if(!$stmt->bind_param('i',$csmsId)) {
+					eixtWhitCode(500);
+				}
+				if(!$stmt->execute()) {
+					eixtWhitCode(500);
+				}
+				if(!$result=$stmt->get_result()){
+					eixtWhitCode(500);
+				}
+				$bannerTransactionId4[] = $result->fetch_assoc()['託播單名稱'];
+			}
+		}
 		
 		$data[]=array(
 			'bakadschdTransactionId'=>$order['託播單CSMS群組識別碼'],
@@ -292,7 +340,9 @@
 			'bakadschdDisplaySequence'=>$orderSetting['bakadschdDisplaySequence'],
 			'bakadschdDisplayMax'=>$orderSetting['bakadschdDisplayMax'],
 			'bannerTransactionId1'=>implode(',',$bannerTransactionId1),
-			'bannerTransactionId2'=>implode(',',$bannerTransactionId2)
+			'bannerTransactionId2'=>implode(',',$bannerTransactionId2),
+			'bannerTransactionId3'=>implode(',',$bannerTransactionId3),
+			'bannerTransactionId4'=>implode(',',$bannerTransactionId4)
 			);
 	}
 	header('Content-Type: application/json');

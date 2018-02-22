@@ -25,15 +25,18 @@
 				orderInfo_852();
 				break;
 			case "851產生檔案":
+				require_once 'ajaxToAPI_CSMS.php';
 				produceFileBetch_851(isset($_POST['APIAction'])?$_POST['APIAction']:'send');
 				break;
 			case "851託播單資料":
+				require_once 'ajaxToAPI_CSMS.php';
 				orderInfo_851();
 				break;
 			case "群組託播單":
 				groupingOrder();
 				break;
 			case "批次產生檔案"://csms
+				require_once 'ajaxToAPI_CSMS.php';
 				produceFileBetch_851(isset($_POST['APIAction'])?$_POST['APIAction']:'send');
 				break;
 		}
@@ -65,7 +68,20 @@
 			case "專區banner":
 			//case "頻道short EPG banner":
 			case "專區vod":
+			case "Vod+廣告":
+				require_once 'ajaxToAPI_CSMS.php';
 				produceFile_851('send');
+				break;
+			case "barker頻道":
+				require_once 'ajaxToAPI_CAMPS.php';
+				sendOrder_CAMPS($_POST["託播單識別碼"]);
+				break;
+			case "單一平台banner":
+			case "單一平台barker_vod":
+			case "單一平台EPG":
+			case "單一平台marquee":
+				require_once 'ajaxToAPI_VSM.php';
+				sendOrder_VSM($_POST["託播單識別碼"]);
 				break;
 			default:{
 				recordResult('insert',1,null,null);
@@ -171,7 +187,7 @@
 	
 	//檢查素材用
 	function m_chckMaterial($id){
-		$CSMSPTN = ['首頁banner','專區banner','專區vod','頻道short EPG banner'];
+		$CSMSPTN = ['首頁banner','專區banner','專區vod','頻道short EPG banner','Vod+廣告'];
 		$my=new MyDB(true);
 		$sql = "SELECT COUNT(*) AS count FROM 託播單素材 WHERE 託播單識別碼 = ? AND 素材識別碼 = 0";
 		if(!$stmt=$my->prepare($sql)) {
@@ -190,7 +206,7 @@
 		if($row['count']>0){
 			return array("success"=>false,"message"=>'必選素材未選擇。');
 		}
-		
+		//檢查是否未填必選素材
 		$sql='
 			SELECT
 				版位類型.版位名稱 版位類型名稱,版位.版位名稱,COUNT(1) 未填必填素材筆數
@@ -221,10 +237,41 @@
 
 		$row=$res->fetch_assoc();
 		
+		//barker頻道不檢查素材
+		if($row['版位類型名稱']=='barker頻道' || $row['版位類型名稱']=='三碼快速鍵'){
+			return array("success"=>true,"message"=>'success');
+		}
+		
 		if($row['未填必填素材筆數']!=0)
 			return array("success"=>false,"message"=>'必選素材未選擇。');
-			
-		$sql = "SELECT 素材原始檔名,素材.素材識別碼,素材類型名稱,影片媒體編號,圖片素材派送結果
+		
+		//檢查是否有選擇素材
+		$sql='
+			SELECT
+				COUNT(1) MaterialCount
+			FROM
+				託播單素材 
+			WHERE
+				託播單識別碼=?
+		';
+		if(!$stmt=$my->prepare($sql)) {
+			exit(json_encode(array("success"=>false,"message"=>'無法準備statement，請聯絡系統管理員！','id'=>$_POST["託播單識別碼"]),JSON_UNESCAPED_UNICODE));
+		}
+		if(!$stmt->bind_param('i',$id)) {
+			exit(json_encode(array("success"=>false,"message"=>'無法繫結資料，請聯絡系統管理員！','id'=>$_POST["託播單識別碼"]),JSON_UNESCAPED_UNICODE));
+		}
+		if(!$stmt->execute()) {
+			exit(json_encode(array("success"=>false,"message"=>'無法執行statement，請聯絡系統管理員！','id'=>$_POST["託播單識別碼"]),JSON_UNESCAPED_UNICODE));
+		}
+		if(!$res=$stmt->get_result()){
+			exit(json_encode(array("success"=>false,"message"=>'無法取得結果集，請聯絡系統管理員！','id'=>$_POST["託播單識別碼"]),JSON_UNESCAPED_UNICODE));
+		}
+		$res=$res->fetch_assoc();
+		if($res['MaterialCount']==0)
+			return array("success"=>false,"message"=>'未選擇任何素材。');
+		
+		//逐一檢查素材	
+		$sql = "SELECT 素材原始檔名,素材.素材識別碼,素材類型名稱,影片媒體編號,圖片素材派送結果,CAMPS影片媒體編號
 			FROM 素材,託播單素材,素材類型 WHERE 託播單識別碼 = ? AND 素材.素材識別碼 = 託播單素材.素材識別碼 AND 素材.素材類型識別碼=素材類型.素材類型識別碼";
 		if(!$stmt=$my->prepare($sql)) {
 			exit(json_encode(array("dbError"=>'無法準備statement，請聯絡系統管理員！'),JSON_UNESCAPED_UNICODE));
@@ -238,7 +285,6 @@
 		if(!$res = $stmt->get_result()){
 			exit(json_encode(array("dbError"=>'無法取得結果，請聯絡系統管理員'),JSON_UNESCAPED_UNICODE));
 		}
-		//逐一檢查素材
 		while($row2 = $res->fetch_assoc()){
 			$area=explode("_",$row['版位名稱']);
 			$area = $area[count($area)-1];
@@ -255,41 +301,64 @@
 			//確認素材是否被派送
 			if($row2['素材類型名稱']=='影片'){
 				//檢查影片是否派送
-				if($row2['影片媒體編號']==null || $row2['影片媒體編號']==''){
-					return array("success"=>false,"message"=>'素材尚未派送');
-				}
-				$explodeFileName=explode(".",$row2['素材原始檔名']);
-				$fileName='../material/uploadedFile/'.$row2['素材識別碼'].".".$explodeFileName[count($explodeFileName)-1];
-				$exists= file_exists($fileName);
-				if(!$exists){
-					return array("success"=>false,"message"=>'素材尚未派送');
-				}else{
-					$片名='_____AMS_'.$row2['素材識別碼'].'_'.md5_file($fileName);
-					$url='http://172.17.251.83:82/PTS/pts_media_status.php?v_id=2305&source='.$片名;
-					$ch=curl_init($url);
-					curl_setopt($ch,CURLOPT_RETURNTRANSFER,true);
-					$xml=simplexml_load_string(curl_exec($ch));
-					$mediaId=(string)$xml->mediaId;
-					if($area == 'N')
-						$status=(string)$xml->chtnStatus;
-					else if($area == 'C')
-						$status=(string)$xml->chtcStatus;
-					else if($area == 'S')
-						$status=(string)$xml->chtsStatus;	
-					else
-						$status = 1;
+				if($row['版位類型名稱']=='前置廣告投放系統' || $row['版位類型名稱']=='專區vod'){
+					if($row2['影片媒體編號']==null || $row2['影片媒體編號']==''){
+						return array("success"=>false,"message"=>'素材尚未派送至自動派片系統');
+					}
+					$explodeFileName=explode(".",$row2['素材原始檔名']);
+					$fileName= Config::GET_MATERIAL_FOLDER().$row2['素材識別碼'].".".$explodeFileName[count($explodeFileName)-1];
+					$exists= file_exists($fileName);
+					if(!$exists){
+						return array("success"=>false,"message"=>'素材尚未派送');
+					}else{
+						$片名='_____AMS_'.$row2['素材識別碼'].'_'.md5_file($fileName);
+						//$url='http://172.17.251.83:82/PTS/pts_media_status.php?v_id=2305&source='.$片名;
+						$url=Config::PMS_SEARCH_URL.$片名;
+						$ch=curl_init($url);
+						curl_setopt($ch,CURLOPT_RETURNTRANSFER,true);
+						$xmlString= curl_exec($ch);
+						if(curl_errno($ch))
+						{
+							$logger->error('錯誤代號:'.curl_errno($ch).'無法連接API:'.$url);
+							curl_close($ch);
+						}
+						//移除多餘空白字元
+						$xmlString = preg_replace('~\s*(<([^-->]*)>[^<]*<!--\2-->|<[^>]*>)\s*~','$1',$xmlString);
+						$xml=simplexml_load_string($xmlString);
+						$mediaId=(string)$xml->mediaId;
+						if($area == 'N')
+							$status=(string)$xml->chtnStatus;
+						else if($area == 'C')
+							$status=(string)$xml->chtcStatus;
+						else if($area == 'S')
+							$status=(string)$xml->chtsStatus;	
+						else
+							$status = 1;
+							
+						if(intval($status)!=1)
+							return array("success"=>false,"message"=>'對應區域的伺服器尚未派送素材');
 						
-					if(intval($status)!=1)
-						return array("success"=>false,"message"=>'對應區域的伺服器尚未派送素材');
-					
+					}
 				}
+				//barker不檢查素材
 			}else if($row2['素材類型名稱']=='圖片'){
 				//版位類型
 				if($row['版位類型名稱']=='頻道short EPG banner')
 					$type = 'EPG';
 				else if($row['版位類型名稱']=='專區banner' || $row['版位類型名稱']=='首頁banner')
 					$type = '專區';
-					
+				else if($row['版位類型名稱']=='單一平台banner'||$row['版位類型名稱']=='單一平台EPG'){
+					require_once '../tool/SFTP.php';
+					foreach(Config::$FTP_SERVERS['VSM'] as $server){
+						$遠端路徑=$server['圖片素材路徑'];
+						$fileName ='_____AMS_'.$row2['素材識別碼'].'.'.end(explode(".",$row2['素材原始檔名']));
+						$isfile =SFTP::isFile($server['host'],$server['username'],$server['password'],$遠端路徑.$fileName);
+						if(!$isfile)
+						return array("success"=>false,"message"=>'素材尚未派送到VSM');
+					}
+					return array("success"=>true,"message"=>'success');
+				}
+				
 				if($area=='IAP')
 				{
 					//IAP版位目前沒有素材伺服器，不需檢查
@@ -316,9 +385,9 @@
 					'素材識別碼'=>$row2['素材識別碼'],
 					'區域'=>$area
 					];
-				$checkResult = json_decode(checkIfMaterialSyn::checkIfSyn($byPost));
+				/*$checkResult = json_decode(checkIfMaterialSyn::checkIfSyn($byPost));
 				if(!$checkResult->success)
-					return array("success"=>false,"message"=>'CSMS尚未同步素材');
+					return array("success"=>false,"message"=>'CSMS尚未同步素材');*/
 			}
 			//*!*!*!staging end
 		}
@@ -354,8 +423,24 @@
 			case "專區banner":
 			//case "頻道short EPG banner":
 			case "專區vod":
+			case "Vod+廣告":
+				require_once 'ajaxToAPI_CSMS.php';
 				produceFile_851('delete');
 				break;
+			case 'barker頻道':
+				require_once 'ajaxToAPI_CAMPS.php';
+				cancelOrder_CAMPS($_POST["託播單識別碼"]);
+				break;
+			case "單一平台banner":
+			case "單一平台barker_vod":
+			case "單一平台marquee":
+				require_once 'ajaxToAPI_VSM.php';
+				cancelOrder_VSM($_POST["託播單識別碼"]);
+				break;
+			case "單一平台EPG":
+				require_once 'ajaxToAPI_VSM.php';
+				cancelEPGOrder_VSM($_POST["託播單識別碼"]);
+					break;
 			default:{
 				recordResult('delete',1,null,null);
 				changeOrderSate('取消送出',array($_POST["託播單識別碼"]));
@@ -364,14 +449,17 @@
 	}
 	
 	//連接API取的結果
-	function connec_to_Api($url,$postvars){
+	function connec_to_Api($url,$method,$postvars){
 		global $logger;
+		$postvars = (isset($postvars)) ? $postvars : null;
 		// 建立CURL連線
 		$ch = curl_init();
 		curl_setopt($ch,CURLOPT_URL,$url);
+		curl_setopt($ch, CURLOPT_CUSTOMREQUEST, $method);
 		curl_setopt($ch,CURLOPT_POSTFIELDS,$postvars);
 		curl_setopt($ch,CURLOPT_RETURNTRANSFER,1);
 		curl_setopt($ch, CURLOPT_TIMEOUT, 500);
+		//curl_setopt($ch, CURLOPT_HEADER, true);
 		$apiResult = curl_exec($ch);
 		if(curl_errno($ch))
 		{
@@ -422,6 +510,9 @@
 			exit(json_encode(array("success"=>false,"message"=>'無法取得結果集，請聯絡系統管理員！','id'=>$_POST["託播單識別碼"]),JSON_UNESCAPED_UNICODE));
 		}
 		$result1=$res->fetch_assoc();
+		//簡查是否有使用HD素材
+		if(mysqli_num_rows($res)>1)
+			$result1HD=$res->fetch_assoc();
 		
 		//再取得版位類型、版位、託播單其他參數，並依序被取代。
 		$sql='
@@ -451,7 +542,8 @@
 		}
 		
 		//介接用餐數
-		$orderByPost=array(
+		$orderByPost=
+		array(
 			'ext'=>$result3['ext'],
 			'ams_sid'=>$result1['版位識別碼'],
 			'ams_vid'=>$_POST['託播單識別碼'],
@@ -467,6 +559,8 @@
 			'iaps'=>$result1['影片媒體編號南'],
 			'iapn'=>$result1['影片媒體編號北']
 		);
+		if(isset($result1HD['影片媒體編號']))
+			$orderByPost['hd'] = $result1HD['影片媒體編號'];
 		if(isset($result3['pre']))
 			$orderByPost['pre'] = $result3['pre'];
 		$postvars = http_build_query($orderByPost);
@@ -479,7 +573,7 @@
 		$checkurl = $API852Url.'/mod/AD/api/vod';
 		$checkPostvars = http_build_query($checkByPost);
 		// 建立CURL連線
-		if(!$apiResult=connec_to_Api($checkurl,$checkPostvars)){
+		if(!$apiResult=connec_to_Api($checkurl,'POST',$checkPostvars)){
 			$logger->error('無法連接前置廣告投放系統送出託播單API');
 			exit(json_encode(array("success"=>false,"message"=>'無法連接前置廣告投放系統送出託播單API','id'=>$_POST["託播單識別碼"]),JSON_UNESCAPED_UNICODE));	
 		}
@@ -489,7 +583,7 @@
 				//存在，使用update
 				$url = $API852Url.'/mod/AD/api/vod/update';
 				// 建立CURL連線
-				if(!$apiResult=connec_to_Api($url,$postvars)){
+				if(!$apiResult=connec_to_Api($url,'POST',$postvars)){
 					$logger->error('無法連接前置廣告投放系統送出託播單API');
 					exit(json_encode(array("success"=>false,"message"=>'無法連接前置廣告投放系統送出託播單API','id'=>$_POST["託播單識別碼"]),JSON_UNESCAPED_UNICODE));	
 				}
@@ -521,7 +615,7 @@
 			else{
 				//不存在，使用insert
 				// 建立CURL連線
-				if(!$apiResult=connec_to_Api($url,$postvars)){
+				if(!$apiResult=connec_to_Api($url,'POST',$postvars)){
 					$logger->error('無法連接前置廣告投放系統送出託播單API');
 					exit(json_encode(array("success"=>false,"message"=>'無法連接前置廣告投放系統送出託播單API','id'=>$_POST["託播單識別碼"]),JSON_UNESCAPED_UNICODE));	
 				}
@@ -561,7 +655,7 @@
 		//檢查託播單是否存在
 		$checkurl = $API852Url.'/mod/AD/api/vod';
 		// 建立CURL連線
-		if(!$apiResult=connec_to_Api($checkurl,$checkPostvars)){
+		if(!$apiResult=connec_to_Api($checkurl,'POST',$checkPostvars)){
 			$logger->error('無法連接前置廣告投放系統送出託播單API');
 			exit(json_encode(array("success"=>false,"message"=>'無法連接前置廣告投放系統送出託播單API','id'=>$_POST["託播單識別碼"]),JSON_UNESCAPED_UNICODE));	
 		}
@@ -664,7 +758,7 @@
 		$byPost=array('ext'=>$result3['ext'],'ams_vid'=>$_POST['託播單識別碼'],'mark'=>0);
 		$postvars = http_build_query($byPost);
 		// 建立CURL連線
-		if(!$apiResult=connec_to_Api($url,$postvars)){
+		if(!$apiResult=connec_to_Api($url,'POST',$postvars)){
 			$logger->error('無法連接前置廣告投放系統送出託播單API');
 			exit(json_encode(array("success"=>false,"message"=>'無法連接前置廣告投放系統送出託播單API','id'=>$_POST["託播單識別碼"]),JSON_UNESCAPED_UNICODE));	
 		}
@@ -678,7 +772,7 @@
 			$byPost=array('ext'=>$result3['ext'],'ams_sid'=>$result3['版位識別碼'],'ams_vid'=>$_POST['託播單識別碼']);
 			$postvars = http_build_query($byPost);
 			// 建立CURL連線
-			if(!$apiResult=connec_to_Api($url,$postvars)){
+			if(!$apiResult=connec_to_Api($url,'POST',$postvars)){
 				$logger->error('無法連接前置廣告投放系統送出託播單API');
 				exit(json_encode(array("success"=>false,"message"=>'無法連接前置廣告投放系統送出託播單API','id'=>$_POST["託播單識別碼"]),JSON_UNESCAPED_UNICODE));	
 			}
@@ -775,7 +869,7 @@
 		$byPost=array('ext'=>$config['ext']['value'],'ams_sid'=>$config['版位識別碼'],'ams_vid'=>$_POST['託播單識別碼']);
 		$postvars = http_build_query($byPost);
 		// 建立CURL連線
-		if(!$apiResult=connec_to_Api($url,$postvars)){
+		if(!$apiResult=connec_to_Api($url,'POST',$postvars)){
 			$logger->error('無法連接前置廣告投放系統送出託播單API');
 			exit(json_encode(array("success"=>false,"message"=>'無法連接前置廣告投放系統送出託播單API','id'=>$_POST["託播單識別碼"]),JSON_UNESCAPED_UNICODE));	
 		}
@@ -960,672 +1054,13 @@
 		}
 	}
 	
-	function orderInfo_851(){
-		global $logger, $my;
-		$oData = $_POST['orderInfo'];
-		//取的版位資料
-		$sql = 'SELECT 版位.版位名稱,版位類型.版位識別碼 AS 版位類型識別碼
-			FROM 版位,版位 版位類型
-			WHERE 版位.版位識別碼 = ? AND 版位.上層版位識別碼 = 版位類型.版位識別碼
-			';
-		if(!$stmt=$my->prepare($sql)) {
-			exit(json_encode(array("success"=>false,'message'=>'資料庫錯誤','id'=>$vod->ams_vid),JSON_UNESCAPED_UNICODE));
-		}
-		if(!$stmt->bind_param('i',$oData['版位識別碼'])) {
-			exit(json_encode(array("success"=>false,'message'=>'資料庫錯誤','id'=>$vod->ams_vid),JSON_UNESCAPED_UNICODE));
-		}
-		if(!$stmt->execute()) {
-			exit(json_encode(array("success"=>false,'message'=>'資料庫錯誤','id'=>$vod->ams_vid),JSON_UNESCAPED_UNICODE));
-		}
-		if(!$res=$stmt->get_result()){
-			return(array("dbError"=>'無法取得結果集，請聯絡系統管理員！'));
-		}
-		$row = $res->fetch_assoc();
-		
-		$orderInfo=array();
-		$orderInfo['版位類型名稱'] = $oData['版位類型名稱'];
-		$orderInfo['版位類型識別碼'] = $row['版位類型識別碼'];
-		$orderInfo['版位名稱'] = $row['版位名稱'];
-		$orderInfo['版位識別碼'] = $oData['版位識別碼'];
-		$orderInfo['售價']='';
-		$orderInfo['預約到期時間']='';
-				
-		$config = array();
-		//取得版位類型介接參數
-		$sql = 'SELECT 版位其他參數預設值,版位其他參數名稱,版位其他參數順序
-			FROM 版位,版位其他參數
-			WHERE 版位.上層版位識別碼 = 版位其他參數.版位識別碼 AND 是否版位專用=0 AND 版位.版位識別碼 = ?
-			';
-		if(!$stmt=$my->prepare($sql)) {
-			exit(json_encode(array("success"=>false,'message'=>'資料庫錯誤','id'=>$_POST["託播單識別碼"]),JSON_UNESCAPED_UNICODE));
-		}
-		if(!$stmt->bind_param('i',$oData['版位識別碼'])) {
-			exit(json_encode(array("success"=>false,'message'=>'資料庫錯誤','id'=>$_POST["託播單識別碼"]),JSON_UNESCAPED_UNICODE));
-		}
-		if(!$stmt->execute()) {
-			exit(json_encode(array("success"=>false,'message'=>'資料庫錯誤','id'=>$_POST["託播單識別碼"]),JSON_UNESCAPED_UNICODE));
-		}
-		if(!$res=$stmt->get_result()){
-			return(array("dbError"=>'無法取得結果集，請聯絡系統管理員！'));
-		}
-		while($row = $res->fetch_assoc()){
-			$config[$row['版位其他參數名稱']]['value']=$row['版位其他參數預設值'];
-			$config[$row['版位其他參數名稱']]['order']=$row['版位其他參數順序'];
-		}
-		//取得版位介接參數
-		$sql = 'SELECT 版位其他參數預設值,版位其他參數名稱,版位其他參數順序
-			FROM 版位,版位其他參數
-			WHERE 版位.版位識別碼 = 版位其他參數.版位識別碼 AND 是否版位專用=0 AND 版位.版位識別碼 = ?
-			';
-		if(!$stmt=$my->prepare($sql)) {
-			exit(json_encode(array("success"=>false,'message'=>'資料庫錯誤','id'=>$_POST["託播單識別碼"]),JSON_UNESCAPED_UNICODE));
-		}
-		if(!$stmt->bind_param('i',$oData['版位識別碼'])) {
-			exit(json_encode(array("success"=>false,'message'=>'資料庫錯誤','id'=>$_POST["託播單識別碼"]),JSON_UNESCAPED_UNICODE));
-		}
-		if(!$stmt->execute()) {
-			exit(json_encode(array("success"=>false,'message'=>'資料庫錯誤','id'=>$_POST["託播單識別碼"]),JSON_UNESCAPED_UNICODE));
-		}
-		if(!$res=$stmt->get_result()){
-			return(array("dbError"=>'無法取得結果集，請聯絡系統管理員！'));
-		}
-		while($row = $res->fetch_assoc()){
-			$config[$row['版位其他參數名稱']]['value']=$row['版位其他參數預設值'];
-			$config[$row['版位其他參數名稱']]['order']=$row['版位其他參數順序'];
-		}
-		if(!$stmt=$my->prepare($sql)) {
-			exit(json_encode(array("success"=>false,'message'=>'資料庫錯誤','id'=>$vod->ams_vid),JSON_UNESCAPED_UNICODE));
-		}
-		if(!$stmt->bind_param('i',$oData['版位識別碼'])) {
-			exit(json_encode(array("success"=>false,'message'=>'資料庫錯誤','id'=>$vod->ams_vid),JSON_UNESCAPED_UNICODE));
-		}
-		if(!$stmt->execute()) {
-			exit(json_encode(array("success"=>false,'message'=>'資料庫錯誤','id'=>$vod->ams_vid),JSON_UNESCAPED_UNICODE));
-		}
-		if(!$res=$stmt->get_result()){
-			return(array("dbError"=>'無法取得結果集，請聯絡系統管理員！'));
-		}
-		$row = $res->fetch_assoc();
-		
-		if($oData['版位類型名稱']=="首頁banner"||$oData['版位類型名稱']=="專區banner"){
-			$orderInfo['託播單名稱'] =$oData['AD_NAME'];
-			$orderInfo['廣告期間開始時間'] = $oData['SCHD_START_DATE'];
-			$orderInfo['廣告期間結束時間'] = $oData['SCHD_END_DATE'];
-			$orderInfo['廣告可被播出小時時段'] = $oData['hours'];
-			$orderInfo['其他參數'][$config['adType']['order']]=$oData['AD_TYPE'];
-			//取得素材資訊
-			$sql = 'SELECT 素材名稱	FROM 素材 WHERE 素材識別碼 = ?';
-			if($res = $my->getResultArray($sql,'i',$oData['AD_CODE']))
-				$materialName = $res[0]['素材名稱'];
-			else 
-				$materialName ='';
-			$openAdd='';
-			if($oData['LINK_TYPE']=='OVA_SERVICE')
-				$openAdd=$oData['LINK_SRVC_RECID'];
-			else if($oData['LINK_TYPE']=='OVA_CATEGORY')
-				$openAdd=$oData['LINK_CAT_RECID'];
-			else if($oData['LINK_TYPE']=='OVA_VOD_CONTENT')
-				$openAdd=$oData['LINK_VODCNT_RECID'];	
-			else if($oData['LINK_TYPE']=='OVA_CHANNEL')
-				$openAdd=$oData['LINK_CHAN_RECID'];	
-			$orderInfo['素材']=array(1=>array('素材識別碼'=>$oData['AD_CODE'],'可否點擊'=>($openAdd=='')?0:1,'點擊後開啟類型'=>$oData['LINK_TYPE'],'點擊後開啟位址'=>$openAdd,'素材名稱'=>$materialName));
-		}
-		else if($oData['版位類型名稱']=="專區vod"){
-			$orderInfo['託播單名稱'] ='';
-			$orderInfo['廣告期間開始時間'] = $oData['BAKADSCHD_START_DATE'];
-			$orderInfo['廣告期間結束時間'] = $oData['BAKADSCHD_END_DATE'];
-			$orderInfo['廣告可被播出小時時段'] = $oData['hours'];
-			$orderInfo['其他參數'][$config['bakadDisplayMax']['order']]=$oData['BAKAD_DISPLAY_MAX'];
-			$orderInfo['其他參數'][$config['bakadschdDisplayMax']['order']]=$oData['BAKADSCHD_DISPLAY_MAX'];
-			$orderInfo['其他參數'][$config['bakadschdDisplaySequence']['order']]=$oData['BAKADSCHD_DISPLAY_SEQUENCE'];
-			$orderInfo['其他參數'][$config['bannerTransactionId1']['order']]=$oData['TRANSACTION_ID1'];
-			$orderInfo['其他參數'][$config['bannerTransactionId2']['order']]=$oData['TRANSACTION_ID2'];
-			
-			//取得版位類型影片畫質設定
-			$fq=array();
-			$sql = 'SELECT 素材順序,影片畫質名稱 FROM 版位素材類型,影片畫質 WHERE 版位識別碼 = ? AND 版位素材類型.影片畫質識別碼 = 影片畫質.影片畫質識別碼';
-			if(!$res = $my->getResultArray($sql,'i',$orderInfo['版位類型識別碼']))$res=[];
-			foreach($res as $row)
-				$fq[$row['影片畫質名稱']]=$row['素材順序'];
-				
-			$openAdd='';
-			if($oData['LINK_TYPE']=='OVA_SERVICE')
-				$openAdd=$oData['LINK_SRVC_RECID'];
-			else if($oData['LINK_TYPE']=='OVA_CATEGORY')
-				$openAdd=$oData['LINK_CAT_RECID'];
-			else if($oData['LINK_TYPE']=='OVA_VOD_CONTENT')
-				$openAdd=$oData['LINK_VODCNT_RECID'];	
-			else if($oData['LINK_TYPE']=='OVA_CHANNEL')
-				$openAdd=$oData['LINK_CHAN_RECID'];	
-			
-			//取得素材資訊
-			$sql = 'SELECT 素材名稱	FROM 素材 WHERE 素材識別碼 = ?';
-			
-			if($oData['SD_VODCNT_RECID']!=null){
-				if($res = $my->getResultArray($sql,'i',$oData['SD_VODCNT_RECID']))
-				$materialName = $res[0]['素材名稱'];
-				else 
-				$materialName ='';
-				$orderInfo['素材']=array($fq['SD']=>array('素材識別碼'=>$oData['SD_VODCNT_RECID'],'可否點擊'=>($openAdd=='')?0:1,'點擊後開啟類型'=>$oData['LINK_TYPE'],'點擊後開啟位址'=>$openAdd,'素材名稱'=>$materialName));
-			}else{
-				if($res = $my->getResultArray($sql,'i',$oData['HD_VODCNT_RECID']))
-				$materialName = $res[0]['素材名稱'];
-				else 
-				$materialName ='';
-				$orderInfo['素材']=array($fq['HD']=>array('素材識別碼'=>$oData['HD_VODCNT_RECID'],'可否點擊'=>($openAdd=='')?0:1,'點擊後開啟類型'=>$oData['LINK_TYPE'],'點擊後開啟位址'=>$openAdd,'素材名稱'=>$materialName));
-			}
-		
-		}
-		else if($oData['版位類型名稱']=="頻道short EPG banner"){
-			$orderInfo['託播單名稱'] =$oData['AD_NAME'];
-			$orderInfo['廣告期間開始時間'] = $oData['SEPG_START_DATE'];
-			$orderInfo['廣告期間結束時間'] = $oData['SEPG_END_DATE'];
-			$orderInfo['廣告可被播出小時時段'] = $oData['hours'];
-			$orderInfo['其他參數'][$config['adType']['order']]=$oData['AD_TYPE'];
-			$orderInfo['其他參數'][$config['sepgDefaultFlag']['order']]=$oData['SEPG_DEFAULT_FLAG'];
-			//取得素材資訊
-			$sql = 'SELECT 素材名稱	FROM 素材 WHERE 素材識別碼 = ?';
-			if($res = $my->getResultArray($sql,'i',$oData['AD_CODE']))
-				$materialName = $res[0]['素材名稱'];
-			else 
-				$materialName ='';
-			$openAdd='';
-			if($oData['LINK_TYPE']=='OVA_SERVICE')
-				$openAdd=$oData['LINK_SRVC_RECID'];
-			else if($oData['LINK_TYPE']=='OVA_CATEGORY')
-				$openAdd=$oData['LINK_CAT_RECID'];
-			else if($oData['LINK_TYPE']=='OVA_VOD_CONTENT')
-				$openAdd=$oData['LINK_VODCNT_RECID'];	
-			else if($oData['LINK_TYPE']=='OVA_CHANNEL')
-				$openAdd=$oData['LINK_CHAN_RECID'];	
-			$orderInfo['素材']=array(1=>array('素材識別碼'=>$oData['AD_CODE'],'可否點擊'=>($openAdd=='')?0:1,'點擊後開啟類型'=>$oData['LINK_TYPE'],'點擊後開啟位址'=>$openAdd,'素材名稱'=>$materialName));
-		}		
-			
-		exit(json_encode(array("success"=>true,'orderInfo'=>$orderInfo),JSON_UNESCAPED_UNICODE));
-	}
-	
-		//產生851用的excel檔案
-	function produceFile_851($action = null){
-		global $API852Url,$logger,$my;
-		if(!isset($action))
-			$action = 'send';
-		$sql='
-			SELECT
-				版位類型.版位名稱 版位類型名稱
-			FROM
-				託播單
-				INNER JOIN 版位 ON 版位.版位識別碼=託播單.版位識別碼
-				INNER JOIN 版位 版位類型 ON 版位類型.版位識別碼=版位.上層版位識別碼
-			WHERE
-				託播單.託播單識別碼=?
-			';
-		if(!$stmt=$my->prepare($sql)) {
-			exit(json_encode(array("success"=>false,'message'=>'資料庫錯誤','id'=>$_POST["託播單識別碼"]),JSON_UNESCAPED_UNICODE));
-		}
-		if(!$stmt->bind_param('i',$_POST['託播單識別碼'])) {
-			exit(json_encode(array("success"=>false,'message'=>'資料庫錯誤','id'=>$_POST["託播單識別碼"]),JSON_UNESCAPED_UNICODE));
-		}
-		if(!$stmt->execute()) {
-			exit(json_encode(array("success"=>false,'message'=>'資料庫錯誤','id'=>$_POST["託播單識別碼"]),JSON_UNESCAPED_UNICODE));
-		}
-		if(!$res=$stmt->get_result()){
-			return(array("dbError"=>'無法取得結果集，請聯絡系統管理員！'));
-		}
-		$result=$res->fetch_assoc();
-		switch($result['版位類型名稱']){
-			case '首頁banner':
-			case '專區banner':
-				$forExcel[]=['transactionId','adCode','adType','adName','adLinkType','adLinkValue','adImgOff','adSizetype','serCode','bnrSequence','schdStartDate','schdEndDate','assignStartTime','assignEndTime'];
-				break;
-			case '頻道short EPG banner':
-				$forExcel[]=['sepgTransactionId','sepgOvaChannel','adCode','adType','adName','adLinkType','adLinkValue','adImgOff','sepgDefaultFlag','sepgStartDate','sepgEndDate','sepgAssignStartTime','sepgAssignEndTime'];
-				break;
-			case '專區vod':
-				$forExcel[]=['bakadschdTransactionId','sdVodcntTitle','hdVodcntTitle','bakadDisplayMax','linkType','linkValue','serCode','bakadschdStartDate','bakadschdEndDate','bakadschdAssignStartTime','bakadschdAssignEndTime'
-				,'bakadschdDisplaySequence','bakadschdDisplayMax','bannerTransactionId1','bannerTransactionId2'];
-				break;
-		}
-		$forExcel[]=getExcelData($_POST["託播單識別碼"]);
-		//輸出
-		OutputExcel::outputAll('851/'.$_POST["託播單識別碼"],$forExcel);
-		//FTP上傳
-		$localfile='../order/851/'.$_POST["託播單識別碼"].'.xls';			
-		if(is_file($localfile)===false){
-			exit(json_encode(array("success"=>false,'message'=>'找不到介接檔案'.$localfile.'，請重新派送。'.$本地路徑,'id'=>$_POST["託播單識別碼"])));
-		}
-		$uploadingMeta = getUploadingMeta($_POST["託播單識別碼"]);
-		if($uploadingMeta['area']=='IAP'){
-			recordResult(($action=='send')?'insert':'delete',1,null,null);
-			changeOrderSate(($action=='send')?'送出':'取消送出',isset($_POST['ids'])?$_POST['ids']:array($_POST['託播單識別碼']));	
-		}
-		else{
-			fileToFTP($result['版位類型名稱'],$uploadingMeta,$_POST["託播單識別碼"],$localfile,$action);		
-			if(isset($_POST['ids']))
-				changeOrderSate('待處理',$_POST['ids']);
-			else
-				changeOrderSate('待處理',array($_POST['託播單識別碼']));
-		}
-		
-	}
-	
-	//批次送出
-	function produceFileBetch_851($action = null){
-		global $API852Url,$logger,$my;
-		if(!isset($action))
-			$action = 'send';
-		//處理產生檔案用參數
-		$forExcel=array();
-		switch($_POST['ptName']){
-			case '首頁banner':
-			case '專區banner':
-				$forExcel[]=['transactionId','adCode','adType','adName','adLinkType','adLinkValue','adImgOff','adSizetype','serCode','bnrSequence','schdStartDate','schdEndDate','assignStartTime','assignEndTime'];
-				break;
-			case '頻道short EPG banner':
-				$forExcel[]=['sepgTransactionId','sepgOvaChannel','adCode','adType','adName','adLinkType','adLinkValue','adImgOff','sepgDefaultFlag','sepgStartDate','sepgEndDate','sepgAssignStartTime','sepgAssignEndTime'];
-				break;
-			case '專區vod':
-				$forExcel[]=['bakadschdTransactionId','sdVodcntTitle','hdVodcntTitle','bakadDisplayMax','linkType','linkValue','serCode','bakadschdStartDate','bakadschdEndDate','bakadschdAssignStartTime','bakadschdAssignEndTime'
-				,'bakadschdDisplaySequence','bakadschdDisplayMax','bannerTransactionId1','bannerTransactionId2'];
-				break;
-		}
-		
-		if($_POST['ptName'] == '頻道short EPG banner'){
-			$temp = [];
-			foreach($_POST['ids'] as $id){
-				if(count($temp)==0)
-					$temp = getExcelData($id);
-				else{
-					$index = array_search('sepgOvaChannel', $forExcel[0]);
-					$temp[$index].=','.getExcelData($id)[$index];
-				}
-			}
-			$forExcel[]=$temp;
-		}
-		else
-		foreach($_POST['ids'] as $id){
-			$forExcel[]=getExcelData($id);
-		}
-		
-		//輸出
-		OutputExcel::outputAll('851/'.implode(',',$_POST['ids']),$forExcel);
-		//FTP上傳
-		$ids = implode(',',$_POST['ids']);
-		$localfile='../order/851/'.$ids.'.xls';			
-		if(is_file($localfile)===false){
-			exit(json_encode(array("success"=>false,'message'=>'找不到介接檔案，請重新派送。'.$本地路徑,'id'=>$ids)));
-		}
-		$uploadingMeta = getUploadingMeta($_POST['ids'][0]);
-		if($uploadingMeta['area']=='IAP'){
-			recordResult(($action=='send')?'insert':'delete',1,null,null);
-			changeOrderSate(($action=='send')?'送出':'取消送出',$_POST['ids']);
-		}
-		else{
-			fileToFTP($_POST['ptName'],$uploadingMeta,$ids,$localfile,$action);
-			changeOrderSate('待處理',$_POST['ids']);
-		}
-	}
-	
-	function fileToFTP($ptN,$uploadingMeta,$ids,$localfile,$action){
-		switch($ptN){
-			case '首頁banner':
-			case '專區banner':
-				$fileName = 'csad';
-				break;
-			case '頻道short EPG banner':
-				$fileName = 'sepg';
-				break;
-			case '專區vod':
-				$fileName = 'barkerad';
-				break;
-		}
-		$CSMSFTP =Config::$FTP_SERVERS['CSMS_'.$uploadingMeta['area']];
-		//送出檔案
-		if($action == 'send')
-			$remotefile = $CSMSFTP[0]['待處理資料夾路徑'].'/'.$fileName.'.'.$uploadingMeta['sendAction'].'.'.$uploadingMeta['gId'].'.xls';
-		else
-			$remotefile = $CSMSFTP[0]['待處理資料夾路徑'].'/'.$fileName.'.delete.'.$uploadingMeta['gId'].'.xls';
-		$result=FTP::putAll($CSMSFTP,$localfile,$remotefile);
-		$downloadfile = '../order/851/'.$ids.'_check.xls' ;
-		if(!FTP::get($CSMSFTP[0]['host'],$CSMSFTP[0]['username'],$CSMSFTP[0]['password'],$downloadfile,'./'.$remotefile)){
-			exit(json_encode(array("success"=>false,'message'=>'介接檔案上傳失敗','id'=>$ids)));
-		}
-		if(!PHPExtendFunction::isFilesSame($localfile,$downloadfile))
-			exit(json_encode(array("success"=>false,'message'=>'介接檔案上傳失敗','id'=>$ids)));
-		//刪除下載回來比較的檔案
-		unlink($downloadfile);
-		//刪除本地檔案
-		//unlink($localfile);
-		if(!FTP::rename($CSMSFTP[0]['host'],$CSMSFTP[0]['username'],$CSMSFTP[0]['password'],'./'.$remotefile,'./'.$remotefile.'.fin'))
-			exit(json_encode(array("success"=>false,'message'=>'介接檔案上傳失敗:檔案已存在','id'=>$ids)));
-	}
-	
-	//取得excel檔案資料
-	function getExcelData($id){
-		global $API852Url,$logger,$my;
-		//先取得託播單資訊與對應素材資訊
-			$sql='
-				SELECT
-					版位類型.版位名稱 版位類型名稱,
-					託播單.託播單識別碼,
-					託播單.託播單CSMS群組識別碼,
-					託播單名稱,
-					素材.素材識別碼,
-					廣告期間開始時間,
-					廣告期間結束時間,
-					託播單素材.點擊後開啟類型,
-					託播單素材.點擊後開啟位址,
-					託播單狀態識別碼,
-					廣告可被播出小時時段,
-					影片畫質識別碼
-				FROM
-					託播單
-					INNER JOIN 版位 ON 版位.版位識別碼=託播單.版位識別碼
-					INNER JOIN 版位 版位類型 ON 版位類型.版位識別碼=版位.上層版位識別碼
-					INNER JOIN 託播單素材 ON 託播單素材.託播單識別碼=託播單.託播單識別碼
-					INNER JOIN 素材 ON 素材.素材識別碼=託播單素材.素材識別碼
-				WHERE
-					託播單.託播單識別碼=?
-			';
-			if(!$stmt=$my->prepare($sql)) {
-				exit(json_encode(array("success"=>false,'message'=>'資料庫錯誤','id'=>$id),JSON_UNESCAPED_UNICODE));
-			}
-			if(!$stmt->bind_param('i',$id)) {
-				exit(json_encode(array("success"=>false,'message'=>'資料庫錯誤','id'=>$id),JSON_UNESCAPED_UNICODE));
-			}
-			if(!$stmt->execute()) {
-				exit(json_encode(array("success"=>false,'message'=>'資料庫錯誤','id'=>$id),JSON_UNESCAPED_UNICODE));
-			}
-			if(!$res=$stmt->get_result()){
-				return(array("dbError"=>'無法取得結果集，請聯絡系統管理員！'));
-			}
-			$result1=$res->fetch_assoc();			
-			$result1_1=$res->fetch_assoc();	//有可能有兩筆素材，一筆為SD、另一筆為HD。
-			//再取得版位類型、版位、託播單其他參數，並依序被取代。
-			$sql='
-				SELECT
-					版位類型其他參數.版位其他參數名稱 版位類型其他參數名稱,
-					版位類型其他參數.版位其他參數預設值 版位類型其他參數預設值,
-					版位其他參數.版位其他參數預設值,
-					託播單其他參數.託播單其他參數值
-				FROM
-					託播單
-					INNER JOIN 版位 ON 版位.版位識別碼=託播單.版位識別碼
-					INNER JOIN 版位 版位類型 ON 版位類型.版位識別碼=版位.上層版位識別碼
-					INNER JOIN 版位其他參數 版位類型其他參數 ON 版位類型其他參數.版位識別碼=版位類型.版位識別碼
-					LEFT JOIN 版位其他參數 ON 版位其他參數.版位識別碼=版位.版位識別碼 AND 版位其他參數.版位其他參數順序=版位類型其他參數.版位其他參數順序
-					LEFT JOIN 託播單其他參數 ON 託播單其他參數.託播單識別碼=託播單.託播單識別碼 AND 託播單其他參數.託播單其他參數順序=版位類型其他參數.版位其他參數順序
-				WHERE
-					託播單.託播單識別碼=?
-				ORDER BY
-					版位類型其他參數.版位其他參數順序
-			';
-			$result2=$my->getResultArray($sql,'i',$id);
-			$result3=array();
-			foreach($result2 as $row){
-				$result3[$row['版位類型其他參數名稱']]=$row['版位類型其他參數預設值'];
-				if($row['版位其他參數預設值']!=null) $result3[$row['版位類型其他參數名稱']]=$row['版位其他參數預設值'];
-				if($row['託播單其他參數值']!=null) $result3[$row['版位類型其他參數名稱']]=$row['託播單其他參數值'];
-			}
-			
-			/*若24個時段同時出現，代表全天；
-			否則，若0,23同時出現，代表跨日；
-			否則，即不跨日。*/
-			$hours=explode(',',$result1['廣告可被播出小時時段']);
-			$hours2=array();
-			foreach($hours as $hour){
-				$hours2[intval($hour)]=intval($hour);
-			}
-			if(count($hours)===24){
-				$startTime='00:00';
-				$endTime='24:00';
-			}
-			else if(array_search('0',$hours)!==false&&array_search('23',$hours)!==false){
-				for($i=1;$i<23;$i++){
-					if(!isset($hours2[$i])){
-						$endTime=sprintf('%02d',$i).':00';
-						break;
-					}
-				}
-				for($i=22;$i>0;$i--){
-					if(!isset($hours2[$i])){
-						$startTime=sprintf('%02d',($i+1)).':00';
-						break;
-					}
-				}
-			}
-			else{
-				for($i=0;$i<23;$i++){
-					if(isset($hours2[$i])){
-						$startTime=sprintf('%02d',$i).':00';
-						break;
-					}
-				}
-				for($i=23;$i>0;$i--){
-					if(isset($hours2[$i])){
-						$endTime=sprintf('%02d',($i+1)).':00';
-						break;
-					}
-				}
-			}
-			//處理日期	
-			//開始日期
-			$tpdate = new DateTime($result1['廣告期間開始時間']);
-			$result1['廣告期間開始時間'] = $tpdate->format('Y/m/d H:i');
-			//結束日期
-			$tpdate = new DateTime($result1['廣告期間結束時間']);
-			//結束時間不為00秒，增加一分鐘
-			$endTimeA =explode(':',$result1['廣告期間結束時間']);
-			if(end($endTimeA)!='00')
-				$tpdate->add(new DateInterval('PT1M'));
-			$result1['廣告期間結束時間'] = $tpdate->format('Y/m/d H:i');
-			
-			if($result1['點擊後開啟類型']=='')
-			$result1['點擊後開啟類型']='NONE';
-			
-			switch($result1['版位類型名稱']){
-				case '首頁banner':
-				case '專區banner':
-					//獲得素材adCode
-					$sql = 'SELECT 素材識別碼,素材原始檔名,產業類型名稱
-							FROM 素材,產業類型
-							WHERE 素材.產業類型識別碼 = 產業類型.產業類型識別碼 AND 素材.素材識別碼 = ?
-						';
-					if(!$stmt=$my->prepare($sql)) {
-						exit(json_encode(array("success"=>false,'message'=>'資料庫錯誤','id'=>$_POST["託播單識別碼"]),JSON_UNESCAPED_UNICODE));
-					}
-					if(!$stmt->bind_param('i',$result1['素材識別碼'])) {
-						exit(json_encode(array("success"=>false,'message'=>'資料庫錯誤','id'=>$_POST["託播單識別碼"]),JSON_UNESCAPED_UNICODE));
-					}
-					if(!$stmt->execute()) {
-						exit(json_encode(array("success"=>false,'message'=>'資料庫錯誤','id'=>$_POST["託播單識別碼"]),JSON_UNESCAPED_UNICODE));
-					}
-					if(!$res=$stmt->get_result()){
-						exit(json_encode(array("success"=>false,'message'=>'資料庫錯誤','id'=>$_POST["託播單識別碼"]),JSON_UNESCAPED_UNICODE));
-					}
-					$materialInfo=$res->fetch_assoc();
-					$adCode = $materialInfo['產業類型名稱'].str_pad($materialInfo['素材識別碼'], 8, '0', STR_PAD_LEFT);
-					$mNameA =explode('.',$materialInfo['素材原始檔名']);
-					$type = end($mNameA);
-					$data=[$result1['託播單CSMS群組識別碼'],$adCode,$result3['adType'],$result1['託播單名稱'],$result1['點擊後開啟類型'],$result1['點擊後開啟位址'],'_____AMS_'.$result1['素材識別碼'].'.'.$type
-						,$result3['adSizetype'],$result3['serCode'],$result3['bnrSequence'],$result1['廣告期間開始時間'],$result1['廣告期間結束時間'],$startTime,$endTime];
-					break;
-					
-				case '頻道short EPG banner':
-					//獲得素材adCode
-					$sql = 'SELECT 素材識別碼,素材原始檔名,產業類型名稱
-							FROM 素材,產業類型
-							WHERE 素材.產業類型識別碼 = 產業類型.產業類型識別碼 AND 素材.素材識別碼 = ?
-						';
-					if(!$stmt=$my->prepare($sql)) {
-						exit(json_encode(array("success"=>false,'message'=>'資料庫錯誤','id'=>$_POST["託播單識別碼"]),JSON_UNESCAPED_UNICODE));
-					}
-					if(!$stmt->bind_param('i',$result1['素材識別碼'])) {
-						exit(json_encode(array("success"=>false,'message'=>'資料庫錯誤','id'=>$_POST["託播單識別碼"]),JSON_UNESCAPED_UNICODE));
-					}
-					if(!$stmt->execute()) {
-						exit(json_encode(array("success"=>false,'message'=>'資料庫錯誤','id'=>$_POST["託播單識別碼"]),JSON_UNESCAPED_UNICODE));
-					}
-					if(!$res=$stmt->get_result()){
-						exit(json_encode(array("success"=>false,'message'=>'資料庫錯誤','id'=>$_POST["託播單識別碼"]),JSON_UNESCAPED_UNICODE));
-					}
-					$materialInfo=$res->fetch_assoc();
-					$adCode = $materialInfo['產業類型名稱'].str_pad($materialInfo['素材識別碼'], 8, '0', STR_PAD_LEFT);
-					$fileNameA = explode('.',$materialInfo['素材原始檔名']);
-					$type = end($fileNameA);
-					$data=[$result1['託播單CSMS群組識別碼'],$result3['sepgOvaChannel'],$adCode,$result3['adType'],$result1['託播單名稱'],$result1['點擊後開啟類型'],$result1['點擊後開啟位址']
-					,'_____AMS_'.$result1['素材識別碼'].'.'.$type,$result3['sepgDefaultFlag'],$result1['廣告期間開始時間'],$result1['廣告期間結束時間'],$startTime,$endTime];
-					break;
-					
-				case '專區vod':
-					$sql = 'SELECT 素材原始檔名
-							FROM 素材
-							WHERE 素材.素材識別碼 = ?
-						';
-					if(!$stmt=$my->prepare($sql)) {
-						exit(json_encode(array("success"=>false,'message'=>'資料庫錯誤','id'=>$_POST["託播單識別碼"]),JSON_UNESCAPED_UNICODE));
-					}
-					if(!$stmt->bind_param('i',$result1_1['素材識別碼'])) {
-						exit(json_encode(array("success"=>false,'message'=>'資料庫錯誤','id'=>$_POST["託播單識別碼"]),JSON_UNESCAPED_UNICODE));
-					}
-					if(!$stmt->execute()) {
-						exit(json_encode(array("success"=>false,'message'=>'資料庫錯誤','id'=>$_POST["託播單識別碼"]),JSON_UNESCAPED_UNICODE));
-					}
-					if(!$res=$stmt->get_result()){
-						exit(json_encode(array("success"=>false,'message'=>'資料庫錯誤','id'=>$_POST["託播單識別碼"]),JSON_UNESCAPED_UNICODE));
-					}
-					$mInfo2 = $res->fetch_assoc();
-					
-					$SD影片=($result1['影片畫質識別碼']===1?$result1['素材識別碼']:(isset($result1_1['影片畫質識別碼'])?($result1_1['影片畫質識別碼']===1?$result1_1['素材識別碼']:null):null));
-					$HD影片=($result1['影片畫質識別碼']===2?$result1['素材識別碼']:(isset($result1_1['影片畫質識別碼'])?($result1_1['影片畫質識別碼']===2?$result1_1['素材識別碼']:null):null));
-					if($SD影片!=null){
-						$sql = 'SELECT 素材原始檔名
-								FROM 素材
-								WHERE 素材.素材識別碼 = ?
-							';
-						if(!$stmt=$my->prepare($sql)) {
-							exit(json_encode(array("success"=>false,'message'=>'資料庫錯誤','id'=>$_POST["託播單識別碼"]),JSON_UNESCAPED_UNICODE));
-						}
-						if(!$stmt->bind_param('i',$SD影片)) {
-							exit(json_encode(array("success"=>false,'message'=>'資料庫錯誤','id'=>$_POST["託播單識別碼"]),JSON_UNESCAPED_UNICODE));
-						}
-						if(!$stmt->execute()) {
-							exit(json_encode(array("success"=>false,'message'=>'資料庫錯誤','id'=>$_POST["託播單識別碼"]),JSON_UNESCAPED_UNICODE));
-						}
-						if(!$res=$stmt->get_result()){
-							exit(json_encode(array("success"=>false,'message'=>'資料庫錯誤','id'=>$_POST["託播單識別碼"]),JSON_UNESCAPED_UNICODE));
-						}
-						$mInfo = $res->fetch_assoc();
-						$fileNameA=explode('.',$mInfo['素材原始檔名']);
-						$type = end($fileNameA);
-						//*!*!*!staging 取代
-						$SD影片 = '_____AMS_'.$SD影片.'_'.md5_file('../material/uploadedFile/'.$SD影片.'.'.$type);
-						//$SD影片 = '_____AMS_24_dc433015e5a1f26282b5fcc08000a1dc';
-						//*!*!*!staging end
-					}
-					
-					if($HD影片!=null){
-						$sql = 'SELECT 素材原始檔名
-								FROM 素材
-								WHERE 素材.素材識別碼 = ?
-							';
-						if(!$stmt=$my->prepare($sql)) {
-							exit(json_encode(array("success"=>false,'message'=>'資料庫錯誤','id'=>$_POST["託播單識別碼"]),JSON_UNESCAPED_UNICODE));
-						}
-						if(!$stmt->bind_param('i',$HD影片)) {
-							exit(json_encode(array("success"=>false,'message'=>'資料庫錯誤','id'=>$_POST["託播單識別碼"]),JSON_UNESCAPED_UNICODE));
-						}
-						if(!$stmt->execute()) {
-							exit(json_encode(array("success"=>false,'message'=>'資料庫錯誤','id'=>$_POST["託播單識別碼"]),JSON_UNESCAPED_UNICODE));
-						}
-						if(!$res=$stmt->get_result()){
-							exit(json_encode(array("success"=>false,'message'=>'資料庫錯誤','id'=>$_POST["託播單識別碼"]),JSON_UNESCAPED_UNICODE));
-						}
-						$mInfo = $res->fetch_assoc();
-						$fileNameA = explode('.',$mInfo['素材原始檔名']);
-						$type = end($fileNameA);
-						//*!*!*!staging 取代
-						$HD影片 = '_____AMS_'.$HD影片.'_'.md5_file('../material/uploadedFile/'.$HD影片.'.'.$type);
-						//$HD影片 = '_____AMS_24_dc433015e5a1f26282b5fcc08000a1dc';
-						//*!*!*!staging end
-					}
-					$data=[$result1['託播單CSMS群組識別碼'],$SD影片,$HD影片,$result3['bakadDisplayMax'],$result1['點擊後開啟類型'],$result1['點擊後開啟位址'],$result3['serCode'],$result1['廣告期間開始時間'],$result1['廣告期間結束時間']
-					,$startTime,$endTime,$result3['bakadschdDisplaySequence'],$result3['bakadschdDisplayMax'],$result3['bannerTransactionId1'],$result3['bannerTransactionId2']
-					];
-					break;
-			}			
-			return $data;
-	}
-	
-	function getUploadingMeta($id){
-		global $my;
-		$sql='
-			SELECT
-				A.託播單CSMS群組識別碼,A.廣告可被播出小時時段,A1.版位名稱,A.託播單送出行為識別碼,A.託播單送出後是否成功
-			FROM
-				託播單 A LEFT JOIN 版位 A1 ON A1.版位識別碼 = A.版位識別碼
-			WHERE
-				A.託播單識別碼=?
-		';
-		$res=$my->getResultArray($sql,'i',$id);
-		$hours = explode(',',$res[0]['廣告可被播出小時時段']);
-		if(count($hours)==24){
-			$startTime = '00'; $endTime='23';
-		}
-		else{
-			$startTime = sprintf('%02s',$hours[0]); $endTime=sprintf('%02s',end($hours));
-			if($startTime=='00'&& $endTime=='23'){
-				for($i=1;$i<23;$i++){
-					if(intval($hours[$i])-1!=intval($hours[$i-1])){
-						$endTime=sprintf('%02s',$hours[$i-1]).':00';
-						break;
-					}
-				}
-				for($i=22;$i>0;$i--){
-					if(intval($hours[$i])+1!=intval($hours[$i+1])){
-						$startTime=sprintf('%02s',$hours[$i+1]).':00';
-						break;
-					}
-				}
-			}
-		}
-		
-		//判斷版位區域
-		$pName = $res[0]['版位名稱'];
-		if(PHPExtendFunction::stringEndsWith($pName,'_北'))
-		$area = 'N';
-		else if(PHPExtendFunction::stringEndsWith($pName,'_中'))
-		$area = 'C';
-		else if(PHPExtendFunction::stringEndsWith($pName,'_南'))
-		$area = 'S';
-		else if(PHPExtendFunction::stringEndsWith($pName,'_IAP'))
-		$area = 'IAP';
-		
-		$sendAction = 'insert';
-		
-		if($res[0]['託播單送出行為識別碼']!= null){
-			switch($res[0]['託播單送出行為識別碼']){
-				case 1:
-					break;
-				case 2:
-					if($res[0]['託播單送出後是否成功']==0)
-						$sendAction = 'update';
-					break;
-				case 3:
-					if($res[0]['託播單送出後是否成功']==1)
-						$sendAction = 'update';
-					break;
-			}
-		}
-		return array('area'=>$area,'sendAction'=>$sendAction,'gId'=>$res[0]['託播單CSMS群組識別碼'],'startTime'=>$startTime,'endTime'=>$endTime);
-	}
-	
 	//更改資料庫訂單狀態
 	function changeOrderSate($state,$idArray){
 		global $logger,$my;
 		foreach($idArray as $id){
 			switch($state){
 				case '送出':
-					$sql = "UPDATE 託播單 SET 託播單狀態識別碼=2,LAST_UPDATE_PEOPLE=?,LAST_UPDATE_TIME=CURRENT_TIMESTAMP WHERE 託播單識別碼=?";
+					$sql = "UPDATE 託播單 SET 託播單狀態識別碼=2,託播單.託播單需重新派送 = 0,LAST_UPDATE_PEOPLE=?,LAST_UPDATE_TIME=CURRENT_TIMESTAMP WHERE 託播單識別碼=?";
 					if(!$stmt=$my->prepare($sql)) {
 						exit(json_encode(array("success"=>false,'message'=>'資料庫錯誤','id'=>implode(',',$idArray)),JSON_UNESCAPED_UNICODE));
 					}

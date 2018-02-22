@@ -34,7 +34,7 @@
 			else
 				$endDate='9999-12-31';
 			if(isset($_POST['狀態']))
-				$state=($_POST['狀態']=='-1')?'%':$_POST['狀態'];
+				$state=($_POST['狀態']=='-1'||$_POST['狀態']==null)?'%':$_POST['狀態'];
 			else
 				$state='%';
 			if(isset($_POST['素材識別碼']))
@@ -57,14 +57,16 @@
 					INNER JOIN 版位 ON 版位.版位識別碼=託播單.版位識別碼
 					LEFT JOIN 委刊單 ON 委刊單.委刊單識別碼=託播單.委刊單識別碼
 					INNER JOIN 託播單狀態 ON 託播單狀態.託播單狀態識別碼=託播單.託播單狀態識別碼
+					LEFT JOIN 託播單投放版位 ON 託播單投放版位.託播單識別碼 = 託播單.託播單識別碼 AND 託播單投放版位.ENABLE=1		
+					LEFT JOIN 版位 額外版位 ON 託播單投放版位.版位識別碼 = 額外版位.版位識別碼
 				WHERE
 					(
 					'.($searchBy=='%'?'1':' 託播單.託播單識別碼=? OR 託播單CSMS群組識別碼=? OR 託播單名稱 LIKE ? OR 託播單說明 LIKE ?').'
 					)
 					'.($adowner=='%'?'':' AND 委刊單.廣告主識別碼 LIKE ? ').'
 					'.($orderList=='%'?'':' AND 託播單.委刊單識別碼 LIKE ? ').'
-					AND 上層版位識別碼 LIKE ?
-					AND 託播單.版位識別碼 LIKE ?
+					AND 版位.上層版位識別碼 LIKE ?
+					AND (託播單.版位識別碼 LIKE ? OR 託播單投放版位.版位識別碼 LIKE ?)
 					AND(
 						(廣告期間開始時間 BETWEEN ? AND ?) OR (廣告期間結束時間 BETWEEN ? AND ?) OR (? BETWEEN 廣告期間開始時間 AND 廣告期間結束時間)
 					)
@@ -72,7 +74,12 @@
 					'.(isset($_POST['全狀態搜尋'])?'':' AND 託播單.託播單狀態識別碼 IN (0,1,2,3,4)').'
 			';
 			
-			$param_type = ($searchBy=='%'?'':'iiss').($adowner=='%'?'':'s').($orderList=='%'?'':'s').'ssssssss';
+			if(isset($_POST['OtherCondition'])){
+				$sqlCon .= ' AND '.$_POST['OtherCondition'];
+			}
+			
+			
+			$param_type = ($searchBy=='%'?'':'iiss').($adowner=='%'?'':'s').($orderList=='%'?'':'s').'sssssssss';
 			$a_params = array();
 			$a_params[] = &$param_type;
 			if($searchBy!='%'){
@@ -86,6 +93,7 @@
 			if($orderList!='%')
 			$a_params[] = &$orderList;
 			$a_params[] = &$positionType;
+			$a_params[] = &$position;
 			$a_params[] = &$position;
 			$a_params[] = &$startDate;
 			$a_params[] = &$endDate;
@@ -134,7 +142,10 @@
 					託播單名稱,
 					託播單說明,
 					託播單狀態名稱 AS 託播單狀態,
-					版位名稱 AS 投放版位,
+					CASE  
+					   WHEN 額外版位.版位名稱 IS NULL THEN 版位.版位名稱
+					   ELSE 額外版位.版位名稱
+					END AS 投放版位,  
 					素材.素材識別碼 AS 素材識別碼,
 					圖片素材寬度 AS 圖片寬,
 					圖片素材高度 AS 圖片高,
@@ -255,6 +266,7 @@
 					INNER JOIN 版位 ON 版位.版位識別碼=託播單.版位識別碼
 					LEFT JOIN 委刊單 ON 委刊單.委刊單識別碼=託播單.委刊單識別碼
 					INNER JOIN 託播單狀態 ON 託播單狀態.託播單狀態識別碼=託播單.託播單狀態識別碼
+					LEFT JOIN 託播單投放版位 ON 託播單投放版位.託播單識別碼 = 託播單.託播單識別碼 AND 託播單投放版位.ENABLE=1		
 				WHERE
 					(
 					'.($searchBy=='%'?'1':' 託播單.託播單識別碼=? OR 託播單CSMS群組識別碼=? OR 託播單名稱 LIKE ? OR 託播單說明 LIKE ?').'
@@ -262,7 +274,7 @@
 					'.($adowner=='%'?'':' AND 委刊單.廣告主識別碼 LIKE ? ').'
 					'.($orderList=='%'?'':' AND 託播單.委刊單識別碼 LIKE ? ').'
 					AND 上層版位識別碼 LIKE ?
-					AND 託播單.版位識別碼 LIKE ?
+					AND (託播單.版位識別碼 LIKE ? OR 託播單投放版位.版位識別碼 LIKE ?)
 					AND(
 						(廣告期間開始時間 BETWEEN ? AND ?) OR (廣告期間結束時間 BETWEEN ? AND ?) OR (? BETWEEN 廣告期間開始時間 AND 廣告期間結束時間)
 					)
@@ -270,7 +282,7 @@
 					'.(isset($_POST['全狀態搜尋'])?'':' AND 託播單.託播單狀態識別碼 IN ('.implode(',',$_POST['全託播單識別碼狀態']).')').'
 			';
 			
-			$param_type = ($searchBy=='%'?'':'iiss').($adowner=='%'?'':'s').($orderList=='%'?'':'s').'ssssssss';
+			$param_type = ($searchBy=='%'?'':'iiss').($adowner=='%'?'':'s').($orderList=='%'?'':'s').'sssssssss';
 			$a_params = array();
 			$a_params[] = &$param_type;
 			if($searchBy!='%'){
@@ -284,6 +296,7 @@
 			if($orderList!='%')
 			$a_params[] = &$orderList;
 			$a_params[] = &$positionType;
+			$a_params[] = &$position;
 			$a_params[] = &$position;
 			$a_params[] = &$startDate;
 			$a_params[] = &$endDate;

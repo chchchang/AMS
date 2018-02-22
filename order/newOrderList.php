@@ -122,6 +122,7 @@ button{
 		$("#orderListIdRow").remove();
 		$("#ownerId").text("<?php if(isset($_GET['ownerid'])) echo htmlspecialchars($_GET['ownerid'], ENT_QUOTES, 'UTF-8');?>");
 		$('#ownerName').text(getAdOwnerName($("#ownerId").text()));
+		委刊單名稱 = $('#ownerName').text();
 	}
 	else if(action=="info"){
 		$("button").hide();

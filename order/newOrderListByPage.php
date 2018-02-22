@@ -280,7 +280,7 @@
 	
 	//顯示屬於特定廣告主的委刊單
 	function showOrderList(ownerId){
-		var bypost={method:'OrderListInfoByAdOwner',searchBy:$('#shearchText').val(),pageNo:1,order:'委刊單識別碼',asc:'ASC',廣告主識別碼:ownerId};
+		var bypost={method:'OrderListInfoByAdOwner',searchBy:$('#shearchText').val(),pageNo:1,order:'委刊單識別碼',asc:'DESC',廣告主識別碼:ownerId};
 		$.post('?',bypost,function(json){
 			DG2=new DataGrid('datagrid2',json.header,json.data);
 			DG2.set_page_info(json.pageNo,json.maxPageNo);

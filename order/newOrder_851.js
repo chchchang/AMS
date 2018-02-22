@@ -52,7 +52,7 @@
 		var byPost = {'連動廣告':true,'Dates':dateObj,'Hours':hours,'Area':areas};
 		$.post(url,byPost
 			,function(json){
-				var bnrSq = ['1','2'];
+				var bnrSq = ['1','2','3','4'];
 				for(var bi in bnrSq){
 					$select = $('#連動廣告'+bnrSq[bi]);
 					$select.data('tokenize').clear();
@@ -66,46 +66,39 @@
 							.val(CSMS[i]['託播單CSMS群組識別碼'])
 							.appendTo($select);
 							//設置預設廣告
-							if($.inArray( CSMS[i]['託播單CSMS群組識別碼'].toString(), ids)!=-1)
+							if($.inArray( CSMS[i]['託播單CSMS群組識別碼'].toString(), ids)!=-1){
 								$select.data('tokenize').tokenAdd(CSMS[i]['託播單CSMS群組識別碼'],CSMS[i]['託播單CSMS群組識別碼']+':'+CSMS[i]['託播單名稱']+'('+area+')');
+							}
 					}
 					//強制設定預設廣告
 					if(forceSet){
-						if(valArr['1'].length>0)
-						$.post('../order/ajaxFunction_OrderInfo.php',{method:'CSMSID取得連動託播單名稱',ids:valArr['1']}
-						,function(data){
-							$select = $('#連動廣告1');
-							for(var i in data){
-								if($('#連動廣告1 option[value="'+data[i]['託播單CSMS群組識別碼']+'"]').length == 0){
-									var area = data[i]['區域'].join(',');
-									var opt = $(document.createElement("option"));
-									opt.text(data[i]['託播單CSMS群組識別碼']+':'+data[i]['託播單名稱']+'('+area+')')
-									.val(data[i]['託播單CSMS群組識別碼'])
-									.appendTo($select);
-									$select.data('tokenize').tokenAdd(data[i]['託播單CSMS群組識別碼'],data[i]['託播單CSMS群組識別碼']+':'+data[i]['託播單名稱']+'('+area+')');
-								}
-							}
+						//console.log(valArr);
+						for(var key in valArr){
+							console.log(valArr[key].length);
+							if(valArr[key].length>0)
+							$.ajax({
+							type: 'post',
+							async: false,
+							url:'../order/ajaxFunction_OrderInfo.php',
+							data:{method:'CSMSID取得連動託播單名稱',ids:valArr[key]},
+							success:
+								function(data){
+									//console.log(data);
+									$select = $('#連動廣告'+key);
+									for(var i in data){
+										if($('#連動廣告'+key+' option[value="'+data[i]['託播單CSMS群組識別碼']+'"]').length == 0){
+											var area = data[i]['區域'].join(',');
+											var opt = $(document.createElement("option"));
+											opt.text(data[i]['託播單CSMS群組識別碼']+':'+data[i]['託播單名稱']+'('+area+')')
+											.val(data[i]['託播單CSMS群組識別碼'])
+											.appendTo($select);
+											$select.data('tokenize').tokenAdd(data[i]['託播單CSMS群組識別碼'],data[i]['託播單CSMS群組識別碼']+':'+data[i]['託播單名稱']+'('+area+')');
+										}
+									}
+								},
+							dataType : 'json'
+							});
 						}
-						,'json'
-						)
-						
-						if(valArr['2'].length>0)
-						$.post('../order/ajaxFunction_OrderInfo.php',{method:'CSMSID取得連動託播單名稱',ids:valArr['2']}
-						,function(data){
-							$select = $('#連動廣告2');
-							for(var i in data){
-								if($('#連動廣告2 option[value="'+data[i]['託播單CSMS群組識別碼']+'"]').length == 0){
-									var area = data[i]['區域'].join(',');
-									var opt = $(document.createElement("option"));
-									opt.text(data[i]['託播單CSMS群組識別碼']+':'+data[i]['託播單名稱']+'('+area+')')
-									.val(data[i]['託播單CSMS群組識別碼'])
-									.appendTo($select);
-									$select.data('tokenize').tokenAdd(data[i]['託播單CSMS群組識別碼'],data[i]['託播單CSMS群組識別碼']+':'+data[i]['託播單名稱']+'('+area+')');
-								}
-							}
-						}
-						,'json'
-						)
 					}
 					
 				}

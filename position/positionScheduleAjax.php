@@ -52,17 +52,60 @@ if(isset($_POST['action'])){
 		}
 		$ptn= $res->fetch_assoc()['版位名稱'];
 		//取得版位資料
-		$sql='SELECT 版位.版位名稱
-		FROM 版位,版位 版位類型
-		WHERE 版位.上層版位識別碼 = 版位類型.版位識別碼
-		AND 版位類型.版位識別碼 LIKE ?
-		AND 版位.版位識別碼 LIKE ?
-		'.($area==''?'':' AND ( '.$area.' )').
-		($ptn=='頻道short EPG banner'||$ptn=='專區vod'||$ptn=='專區banner'||$ptn=='首頁banner'?
-		'ORDER BY CHAR_LENGTH(SUBSTRING_INDEX(版位.版位名稱,SUBSTRING_INDEX(版位.版位名稱,"_",-1),1)),SUBSTRING_INDEX(版位.版位名稱,SUBSTRING_INDEX(版位.版位名稱,"_",-1),1)'
-		:'ORDER BY 版位.版位名稱'
-		)
-		;
+		if($ptn=='專區banner'||$ptn=='首頁banner'){
+			$sql='SELECT 版位.版位名稱,serCode.版位其他參數預設值 as serCode,bnrSequence.版位其他參數預設值 as bnrSequence
+			FROM 版位
+			JOIN 版位 版位類型 ON 版位.上層版位識別碼 = 版位類型.版位識別碼
+			LEFT JOIN 版位其他參數 serCode ON (serCode.版位識別碼 = 版位.版位識別碼 AND serCode.版位其他參數名稱 = "serCode")
+			LEFT JOIN 版位其他參數 bnrSequence ON (bnrSequence.版位識別碼 = 版位.版位識別碼 AND bnrSequence.版位其他參數名稱 = "bnrSequence")
+			WHERE 
+			版位類型.版位識別碼 LIKE ?
+			AND 版位.版位識別碼 LIKE ?
+			ORDER BY CHAR_LENGTH(serCode),serCode,CHAR_LENGTH(bnrSequence),bnrSequence,版位.版位名稱'
+			;
+		}
+		else if($ptn=='頻道short EPG banner'){
+			$sql='SELECT 版位.版位名稱,sepgOvaChannel.版位其他參數預設值 as sepgOvaChannel
+			FROM 版位
+			JOIN 版位 版位類型 ON 版位.上層版位識別碼 = 版位類型.版位識別碼
+			LEFT JOIN 版位其他參數 sepgOvaChannel ON (sepgOvaChannel.版位識別碼 = 版位.版位識別碼 AND sepgOvaChannel.版位其他參數名稱 = "sepgOvaChannel")
+			WHERE 
+			版位類型.版位識別碼 LIKE ?
+			AND 版位.版位識別碼 LIKE ?
+			ORDER BY CHAR_LENGTH(sepgOvaChannel),sepgOvaChannel,版位.版位名稱'
+			;
+		}
+		else if($ptn=='專區vod'){
+			$sql='SELECT 版位.版位名稱,serCode.版位其他參數預設值 as serCode
+			FROM 版位
+			JOIN 版位 版位類型 ON 版位.上層版位識別碼 = 版位類型.版位識別碼
+			LEFT JOIN 版位其他參數 serCode ON (serCode.版位識別碼 = 版位.版位識別碼 AND serCode.版位其他參數名稱 = "serCode")
+			WHERE 
+			版位類型.版位識別碼 LIKE ?
+			AND 版位.版位識別碼 LIKE ?
+			ORDER BY CHAR_LENGTH(serCode),serCode,版位.版位名稱'
+			;
+		}
+		else if($ptn=='前置廣告投放系統'){
+			$sql='SELECT 版位.版位名稱,ext.版位其他參數預設值 as ext,pre.版位其他參數預設值 as pre
+			FROM 版位
+			JOIN 版位 版位類型 ON 版位.上層版位識別碼 = 版位類型.版位識別碼
+			LEFT JOIN 版位其他參數 ext ON (ext.版位識別碼 = 版位.版位識別碼 AND ext.版位其他參數名稱 = "ext")
+			LEFT JOIN 版位其他參數 pre ON (pre.版位識別碼 = 版位.版位識別碼 AND pre.版位其他參數名稱 = "pre")
+			WHERE 
+			版位類型.版位識別碼 LIKE ?
+			AND 版位.版位識別碼 LIKE ?
+			ORDER BY ext,pre,版位.版位名稱'
+			;
+		}
+		else{
+			$sql='SELECT 版位.版位名稱
+			FROM 版位,版位 版位類型
+			WHERE 版位.上層版位識別碼 = 版位類型.版位識別碼
+			AND 版位類型.版位識別碼 LIKE ?
+			AND 版位.版位識別碼 LIKE ?
+			ORDER BY 版位.版位名稱';
+		}
 		if(!$stmt=$my->prepare($sql)) {
 			exit('無法準備statement，請聯絡系統管理員！');
 		}
@@ -79,30 +122,37 @@ if(isset($_POST['action'])){
 		while($row=$res->fetch_assoc())
 			$postionOrders[$row['版位名稱']] = [];
 		//取得託播單資料
-		$sql='SELECT 版位.版位名稱,託播單名稱,廣告期間開始時間,廣告期間結束時間,託播單.託播單識別碼,委刊單識別碼,素材識別碼,版位.版位識別碼
+		$sql='SELECT CASE  
+			   WHEN 額外版位.版位名稱 IS NULL THEN 版位.版位名稱
+			   ELSE 額外版位.版位名稱
+			   END AS 版位名稱,
+			託播單名稱,廣告期間開始時間,廣告期間結束時間,託播單.託播單識別碼,委刊單識別碼,素材識別碼,版位.版位識別碼,託播單其他參數值 AS 預設廣告
 		FROM 版位
         JOIN 託播單 ON 託播單.版位識別碼 = 版位.版位識別碼
         JOIN 版位 版位類型 ON 版位.上層版位識別碼 = 版位類型.版位識別碼
+		LEFT JOIN 託播單投放版位 ON 託播單.託播單識別碼 = 託播單投放版位.託播單識別碼 AND 託播單投放版位.ENABLE=1		
+		LEFT JOIN 版位 額外版位 ON 額外版位.版位識別碼 = 託播單投放版位.版位識別碼
         LEFT JOIN 版位其他參數 ON (版位其他參數.版位識別碼 = 版位類型.版位識別碼 AND 版位其他參數名稱 = "sepgDefaultFlag")
         LEFT JOIN 託播單素材 ON 託播單.託播單識別碼 = 託播單素材.託播單識別碼
         LEFT JOIN 託播單其他參數 ON (託播單.託播單識別碼 = 託播單其他參數.託播單識別碼 AND 版位其他參數.版位其他參數順序 = 託播單其他參數.託播單其他參數順序)
 		WHERE 
 		版位類型.版位識別碼 LIKE ?
 		'.($showDefault==''?'':' AND ( 託播單其他參數值='.$showDefault.' )').'
-		AND 版位.版位識別碼 LIKE ?
+		AND (版位.版位識別碼 LIKE ? OR 託播單投放版位.版位識別碼 LIKE ?)
 		AND (
 			(廣告期間開始時間 BETWEEN ? AND ?) OR (廣告期間結束時間 BETWEEN ? AND ?) OR (? BETWEEN 廣告期間開始時間 AND 廣告期間結束時間)
 			)
-		AND 託播單.託播單狀態識別碼 IN ('.(isset($_POST['待確認排程'])?'6':'0,1,2,3,4').')
+		AND 託播單.託播單狀態識別碼 IN ('.(isset($_POST['待確認排程'])?'6':'0,1,2,4').')
 		'.($area==''?'':' AND ( '.$area.' )').
 		($ptn=='頻道short EPG banner'||$ptn=='專區vod'||$ptn=='專區banner'||$ptn=='首頁banner'?
-		'ORDER BY CHAR_LENGTH(SUBSTRING_INDEX(版位.版位名稱,SUBSTRING_INDEX(版位.版位名稱,"_",-1),1)),SUBSTRING_INDEX(版位.版位名稱,SUBSTRING_INDEX(版位.版位名稱,"_",-1),1),託播單名稱'
-		:'ORDER BY 版位.版位名稱,託播單名稱'
+		'ORDER BY CHAR_LENGTH(SUBSTRING_INDEX(版位.版位名稱,SUBSTRING_INDEX(版位.版位名稱,"_",-1),1)),SUBSTRING_INDEX(版位.版位名稱,SUBSTRING_INDEX(版位.版位名稱,"_",-1),1),託播單其他參數值,託播單名稱'.
+		', CHAR_LENGTH(SUBSTRING_INDEX(額外版位.版位名稱,SUBSTRING_INDEX(額外版位.版位名稱,"_",-1),1)),SUBSTRING_INDEX(額外版位.版位名稱,SUBSTRING_INDEX(額外版位.版位名稱,"_",-1),1),託播單其他參數值,託播單名稱'
+		:'ORDER BY 託播單其他參數值,版位.版位名稱,額外版位.版位名稱,託播單名稱'
 		);
 		if(!$stmt=$my->prepare($sql)) {
 			exit('無法準備statement，請聯絡系統管理員！');
 		}
-		if(!$stmt->bind_param('sssssss',$positionType,$position,$startDate,$endDate,$startDate,$endDate,$startDate)){
+		if(!$stmt->bind_param('ssssssss',$positionType,$position,$position,$startDate,$endDate,$startDate,$endDate,$startDate)){
 			exit('無法繫結資料，請聯絡系統管理員！');
 		}
 		if(!$stmt->execute()) {
@@ -171,7 +221,7 @@ if(isset($_POST['action'])){
 					if(!$first)
 						$scheduleHtml.='<tr>';
 					$scheduleHtml.='<td bgcolor="'.$bgcolor[$positionCount%count($bgcolor)].'">'.(++$orderNum).'</td>';
-					$scheduleHtml.='<td bgcolor="'.$bgcolor[$positionCount%count($bgcolor)].'">'.$order['託播單名稱'].'</td>';
+					$scheduleHtml.='<td bgcolor="'.$bgcolor[$positionCount%count($bgcolor)].'">'.($order['預設廣告']==1?'[預設廣告]':'').$order['託播單名稱'].'</td>';
 					$std = explode(' ',$order['廣告期間開始時間'])[0];
 					$edd = explode(' ',$order['廣告期間結束時間'])[0];
 					if($order['素材識別碼'] == null)

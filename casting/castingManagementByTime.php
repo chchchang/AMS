@@ -42,20 +42,36 @@
 			$totalRowCount=0;
 			//總筆數
 			$sql='
-				SELECT COUNT(1) COUNT
-				FROM 版位,託播單
-				WHERE 版位.版位識別碼 = 託播單.版位識別碼 AND 上層版位識別碼 = ? AND 託播單狀態識別碼 IN (0,1,2,4) 
+				SELECT DISTINCT(
+				CASE 
+					WHEN 額外版位.版位識別碼 IS NULL THEN 版位.版位識別碼
+					ELSE 額外版位.版位識別碼
+				END
+				) AS COUNT
+				FROM 託播單 JOIN 版位 ON 版位.版位識別碼 = 託播單.版位識別碼
+				LEFT JOIN 託播單投放版位 ON 託播單.託播單識別碼 = 託播單投放版位.託播單識別碼 AND 託播單投放版位.ENABLE=1		
+				LEFT JOIN 版位 額外版位 ON 額外版位.版位識別碼 = 託播單投放版位.版位識別碼
+				WHERE 版位.上層版位識別碼 = ? AND 託播單狀態識別碼 IN (0,1,2,4) 
 				AND 版位.DISABLE_TIME IS NULL AND 版位.DELETED_TIME IS NULL
 				AND((? BETWEEN 廣告期間開始時間 AND 廣告期間結束時間 ) OR (? BETWEEN 廣告期間開始時間 AND 廣告期間結束時間 ) OR (廣告期間結束時間 BETWEEN ? AND ? ))
-				GROUP BY 版位名稱
 			';
 			if(!$result=$my->getResultArray($sql,'issss',$_POST['版位類型識別碼'],$_POST["start"],$_POST["end"],$_POST["start"],$_POST["end"])) $totalRowCount=0;
 			$totalRowCount=$result[0]['COUNT'];
 			//取得版位資料	
 			$sql ='
-				SELECT 版位.版位識別碼 AS 版位識別碼,版位名稱
-				FROM 版位,託播單
-				WHERE 版位.版位識別碼 = 託播單.版位識別碼 AND 上層版位識別碼 = ? AND 託播單狀態識別碼 IN (0,1,2,4)
+				SELECT 
+				CASE 
+					WHEN 額外版位.版位識別碼 IS NULL THEN 版位.版位識別碼
+					ELSE 額外版位.版位識別碼
+				END AS 版位識別碼,
+				CASE 
+					WHEN 額外版位.版位名稱 IS NULL THEN 版位.版位名稱
+					ELSE 額外版位.版位名稱
+				END AS 版位名稱
+				FROM 託播單 JOIN 版位 ON 版位.版位識別碼 = 託播單.版位識別碼
+				LEFT JOIN 託播單投放版位 ON 託播單.託播單識別碼 = 託播單投放版位.託播單識別碼 AND 託播單投放版位.ENABLE=1		
+				LEFT JOIN 版位 額外版位 ON 額外版位.版位識別碼 = 託播單投放版位.版位識別碼
+				WHERE 版位.上層版位識別碼 = ? AND 託播單狀態識別碼 IN (0,1,2,4) 
 				AND 版位.DISABLE_TIME IS NULL AND 版位.DELETED_TIME IS NULL
 				AND ((? BETWEEN 廣告期間開始時間 AND 廣告期間結束時間 ) OR (? BETWEEN 廣告期間開始時間 AND 廣告期間結束時間 ) OR (廣告期間結束時間 BETWEEN ? AND ? ))
 				GROUP BY 版位識別碼
@@ -69,10 +85,12 @@
 				$sql ='
 					SELECT 廣告可被播出小時時段
 					FROM 託播單
-					WHERE 版位識別碼 = ? AND 託播單狀態識別碼 IN (0,1,2,4) AND
+					LEFT JOIN 託播單投放版位 ON 託播單.託播單識別碼 = 託播單投放版位.託播單識別碼 AND 託播單投放版位.ENABLE=1		
+					LEFT JOIN 版位 額外版位 ON 額外版位.版位識別碼 = 託播單投放版位.版位識別碼
+					WHERE ((託播單.版位識別碼 = ? AND 託播單投放版位.版位識別碼 IS NULL) OR 託播單投放版位.版位識別碼 = ?) AND 託播單狀態識別碼 IN (0,1,2,4) AND
 					((? BETWEEN 廣告期間開始時間 AND 廣告期間結束時間 ) OR (? BETWEEN 廣告期間開始時間 AND 廣告期間結束時間 ) OR (廣告期間結束時間 BETWEEN ? AND ? ))
 				';
-				if(!$result2=$my->getResultArray($sql,'issss',$row['版位識別碼'],$_POST["start"],$_POST["end"],$_POST["start"],$_POST["end"])) $result2=array();
+				if(!$result2=$my->getResultArray($sql,'iissss',$row['版位識別碼'],$row['版位識別碼'],$_POST["start"],$_POST["end"],$_POST["start"],$_POST["end"])) $result2=array();
 				$timeCount = array(0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0);
 				foreach($result2 as $row2){
 					$temp = explode(",", $row2['廣告可被播出小時時段']);

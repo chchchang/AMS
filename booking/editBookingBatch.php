@@ -567,11 +567,9 @@
 						
 						var $inputtd = $('<td/>').appendTo($tr);
 						//連動廣告客制化
-						if(config['版位其他參數名稱']=='bannerTransactionId1'||config['版位其他參數名稱']=='bannerTransactionId2'){
-							var connectIndex = 1;
-							if (config['版位其他參數名稱']=='bannerTransactionId2')
-							connectIndex = 2;
-							
+						var paraName = config['版位其他參數名稱'];
+						if(paraName.startsWith('bannerTransactionId')){
+							var connectIndex = paraName.replace('bannerTransactionId','');							
 							var $連動 = $('<select  id="連動廣告'+connectIndex+'"  multiple="multiple"  class ="tokenize configValue" order='+i+' />').val(config['版位其他參數預設值']);
 							$inputtd.append($連動);
 							$('#連動廣告'+connectIndex).tokenize({
@@ -580,29 +578,23 @@
 									,newElements:false,
 									onAddToken: 
 										function(value, text, e){
-											var order1 =$('#連動廣告1').attr('order');
-											var order2 =$('#連動廣告2').attr('order');
-											otherConfigObj[order1] = ($('#連動廣告1').val()!=null)?$('#連動廣告1').val().join(','):'';
-											otherConfigObj[order2] = ($('#連動廣告2').val()!=null)?$('#連動廣告2').val().join(','):'';
-											if(otherConfigObj[order1]!=''){
-												$('#是否新增'+order1).prop('checked',true);
-											}
-											if(otherConfigObj[order2]!=''){
-												$('#是否新增'+order2).prop('checked',true);
-											}
+											$.each($('select.連動廣告'),function(){
+												var order =$(this).attr('order');
+												otherConfigObj[order] = ($(this).val()!=null)?$(this).val().join(','):'';
+												if(otherConfigObj[order]!=''){
+													$('#是否新增'+order).prop('checked',true);
+												}
+											});
 										},
 									onRemoveToken: 
 										function(value, text, e){
-											var order1 =$('#連動廣告1').attr('order');
-											var order2 =$('#連動廣告2').attr('order');
-											otherConfigObj[order1] = ($('#連動廣告1').val()!=null)?$('#連動廣告1').val().join(','):'';
-											otherConfigObj[order2] = ($('#連動廣告2').val()!=null)?$('#連動廣告2').val().join(','):'';
-											if(otherConfigObj[order1]!=''){
-												$('#是否新增'+order1).prop('checked',true);
-											}
-											if(otherConfigObj[order2]!=''){
-												$('#是否新增'+order2).prop('checked',true);
-											}
+											$.each($('select.連動廣告'),function(){
+												var order =$(this).attr('order');
+												otherConfigObj[order] = ($(this).val()!=null)?$(this).val().join(','):'';
+												if(otherConfigObj[order]!=''){
+													$('#是否新增'+order).prop('checked',true);
+												}
+											});
 										}
 								});				
 						}
@@ -692,31 +684,19 @@
 							}
 						}
 					}
-					if($('#連動廣告1').length!=0||$('#連動廣告2').length!=0){
-						m_setConnectionOrder({									
-							'1':$.isArray($('#連動廣告1').val())?$('#連動廣告1').val():[],
-							'2':$.isArray($('#連動廣告2').val())?$('#連動廣告2').val():[]
-						});
+					if($('#連動廣告1').length!=0 ||$('#連動廣告2').length!=0||$('#連動廣告3').length!=0 ||$('#連動廣告4').length!=0){
+						m_setConnectionOrder(getObjectForSetConnectOrder());
 						//時段全選按鈕
 						$('#allTimeBtn,#noTimeBtn').click(function(){
-							m_setConnectionOrder({									
-								'1':$.isArray($('#連動廣告1').val())?$('#連動廣告1').val():[],
-								'2':$.isArray($('#連動廣告2').val())?$('#連動廣告2').val():[]
-							});
+							m_setConnectionOrder(getObjectForSetConnectOrder());
 						});
 						$( "input[name='hours'],#StartDateCB,#EndDateCB,#hoursCB" ).change(function() {
-							m_setConnectionOrder({									
-								'1':$.isArray($('#連動廣告1').val())?$('#連動廣告1').val():[],
-								'2':$.isArray($('#連動廣告2').val())?$('#連動廣告2').val():[]
-							});
+							m_setConnectionOrder(getObjectForSetConnectOrder());
 						});
 						$( "#StartDate,#EndDate").focusout(function() {
-							m_setConnectionOrder({									
-								'1':$.isArray($('#連動廣告1').val())?$('#連動廣告1').val():[],
-								'2':$.isArray($('#連動廣告2').val())?$('#連動廣告2').val():[]
-							});
+							m_setConnectionOrder(getObjectForSetConnectOrder());
 						});	
-						
+					
 					}
 					//設定素材
 					for(var i in json['版位素材設定']){
@@ -786,6 +766,16 @@
 			}
 		});
 	}
+	
+	function getObjectForSetConnectOrder(){
+		var re  ={
+			'1':$.isArray($('#連動廣告1').val())?$('#連動廣告1').val():[],
+			'2':$.isArray($('#連動廣告2').val())?$('#連動廣告2').val():[],
+			'3':$.isArray($('#連動廣告3').val())?$('#連動廣告3').val():[],
+			'4':$.isArray($('#連動廣告4').val())?$('#連動廣告4').val():[]
+			};
+		return re;
+	}
 	//依照多組日期設定連動管告
 	function m_setConnectionOrder(ids){
 		if($('#連動廣告1').length==0)
@@ -841,7 +831,7 @@
 			changeYear: true,
 			monthNames: ["1","2","3","4","5","6","7","8","9","10","11","12"],
 			monthNamesShort: ["1","2","3","4","5","6","7","8","9","10","11","12"],
-			minDate: d.yyyymmdd()+' 00:00:00',
+			//minDate: d.yyyymmdd()+' 00:00:00',
 			onClose: function( selectedDate ) {
 				$( "#EndDate" ).datepicker( "option", "minDate", selectedDate );
 			}
@@ -866,7 +856,7 @@
 			changeYear: true,
 			monthNames: ["1","2","3","4","5","6","7","8","9","10","11","12"],
 			monthNamesShort: ["1","2","3","4","5","6","7","8","9","10","11","12"],
-			minDate: 0
+			//minDate: 0
 		});		
 	}
 	
@@ -945,16 +935,22 @@
 			if(typeof(jdata['其他參數'])!='undefined'){
 				var connectAd1=[];
 				var connectAd2=[];
+				var connectAd3=[];
+				var connectAd4=[];
 				for( var i in otherConfigObj){
 					if($('#參數名稱'+i).text()=='連動廣告1')
 						connectAd1 = otherConfigObj[i].split(',');
 					else if($('#參數名稱'+i).text()=='連動廣告2')
 						connectAd2 = otherConfigObj[i].split(',');
+					else if($('#參數名稱'+i).text()=='連動廣告2')
+						connectAd3 = otherConfigObj[i].split(',');
+					else if($('#參數名稱'+i).text()=='連動廣告2')
+						connectAd4 = otherConfigObj[i].split(',');
 					else if($('#參數名稱'+i).text()=='前置廣告連動')
 						m_setSEPGConnection(otherConfigObj[i]);
 				}
-				if($('#連動廣告1').length!=0 ||$('#連動廣告2').length!=0)
-					m_setConnectionOrder({'1':connectAd1,'2':connectAd2});
+				if($('#連動廣告1').length!=0 ||$('#連動廣告2').length!=0||$('#連動廣告3').length!=0 ||$('#連動廣告4').length!=0)
+					m_setConnectionOrder({'1':connectAd1,'2':connectAd2,'3':connectAd3,'4':connectAd4});
 			}
 			
 			configOption();

@@ -127,7 +127,7 @@
 		}
 	}
 	
-	$sql = "SELECT 廣告主識別碼,託播單.委刊單識別碼, 託播單.版位識別碼,版位類型.版位名稱 AS 版位類型名稱 
+	$sql = "SELECT 廣告主識別碼,託播單.委刊單識別碼, 託播單.版位識別碼,版位類型.版位名稱 AS 版位類型名稱,託播單.託播單識別碼
 	FROM 託播單,委刊單,版位,版位 版位類型
 	WHERE 託播單.委刊單識別碼=委刊單.委刊單識別碼 AND 託播單.版位識別碼 = 版位.版位識別碼 AND 版位.上層版位識別碼 = 版位類型.版位識別碼 AND 託播單識別碼=?";
 	if(!$stmt=$my->prepare($sql)) {
@@ -139,7 +139,7 @@
 	if(!$stmt->execute()) {
 		exit(json_encode(array("dbError"=>'無法執行statement，請聯絡系統管理員！'),JSON_UNESCAPED_UNICODE));
 	}
-	$stmt->bind_result($廣告主識別碼,$委刊單識別碼,$版位識別碼,$版位類型名稱);
+	$stmt->bind_result($廣告主識別碼,$委刊單識別碼,$版位識別碼,$版位類型名稱,$託播單識別碼);
 	$stmt->fetch();
 	
 	$parent = "";
@@ -188,7 +188,7 @@
 <h3 id = "alertMessage"></h3>
 <table class='styledTable2'>
 <tr><th id ='idText'>託播單識別碼</th><th>廣告主</th><th>委刊單</th><th>託播單狀態</th></tr>
-<tr><td><?=htmlspecialchars($_GET['name'], ENT_QUOTES, 'UTF-8')?></td><td><a id='owner'></a></td><td><a id = 'orderlist'></a></td>
+<tr><td><?=htmlspecialchars($託播單識別碼, ENT_QUOTES, 'UTF-8')?></td><td><a id='owner'></a></td><td><a id = 'orderlist'></a></td>
 <td> <a id = "playStatus"></a> <button class="darkButton" type="button" id="checkBtn">確定</button><button class="darkButton" type="button" id="sendBtn">送出</button></td></tr>
 <tr></tr>
 </table>
@@ -198,7 +198,7 @@
 <script>
 	var ajaxToApi="ajaxToAPI.php";
 	var 版位類型名稱='<?=$版位類型名稱?>';
-	var id= <?php echo htmlspecialchars($_GET['name'], ENT_QUOTES, 'UTF-8');?>;
+	var id= <?php echo htmlspecialchars($託播單識別碼, ENT_QUOTES, 'UTF-8');?>;
 	var change= <?=$change?>, apiInfo= <?=$apiInfo?>;
 	if(apiInfo==1)
 		orderInfoFromApi();

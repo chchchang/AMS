@@ -16,7 +16,6 @@
 		left:5px;
 		-moz-box-sizing: border-box;
 		box-sizing: border-box;
-		behavior: url(tool/PIE.htc);
 	}
 	#main{
 		position: absolute;
@@ -28,7 +27,6 @@
 		width: 100%;
 		-moz-box-sizing: border-box;
 		box-sizing: border-box; 
-		behavior: url(tool/PIE.htc); 
 	}
 	#status{
 		position: absolute;
@@ -38,7 +36,6 @@
 		width: 100%;
 		-moz-box-sizing: border-box;
 		box-sizing: border-box;
-		behavior: url(tool/PIE.htc);
 	}
 	</style>
 <style id="antiClickjack">body{display:none !important;}</style>
@@ -47,7 +44,6 @@
 <link rel="stylesheet" type="text/css" href="<?=$SERVER_SITE.Config::PROJECT_ROOT?>tool/jquery.loadmask.css" />
 <script src="tool/jquery.loadmask.js"></script>
 <body height = '120;'>
-
 <iframe id = 'main' name='main'  frameBorder=0/></iframe>
 <iframe width='280'  height = '100%' id = 'toolbar' frameBorder=0/></iframe>
 <iframe height='120' id = 'status' frameBorder=0></iframe>

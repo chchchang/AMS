@@ -149,14 +149,15 @@ html{
 
 .user{
   position:absolute;
+  font-size:20px;
   top:20px; 
   right:70px; 
 }
 
-.exit-btn{
+.exit-btn,.exit-btn:hover{
 	position:absolute;
-	top:15px; 
-	right:20px; 
+	top:10px;
+	right:10px;
 	background:url(tool/pic/logout.png);
 	background-repeat: no-repeat;
 	width:25px;
@@ -166,9 +167,7 @@ html{
 	padding:0px;
 	cursor:pointer;
 }
-.exit-btn:hover {
-	background-color:#dfdfdf;
-}
+
 
 #alertMessage{
 	position:absolute;
@@ -178,9 +177,16 @@ html{
 
 .changePasswd{
 	position:absolute;
-	top:35px;
+	top:50px;
 	right:70px;
 }
+
+.timer{
+	position:absolute;
+	bottom:5px;
+	right:5px;
+}
+
 
 table{
 	position:absolute;
@@ -198,23 +204,23 @@ table, th, td {
 <style id="antiClickjack">body{display:none !important;}</style>
 </head>
 <body>
+<a class="logo">AMS</a>
+<a class="wellcome">歡迎使用本系統</a>
+	<?php if(Config::TEST_MOD) echo '<font size=6 color="red">測試區</font>';else echo '<font size=6 color="red">正式區</font>';?>
+<a class="user"><?=htmlentities($_SESSION['AMS']['使用者姓名']);?></a>
+<a class="changePasswd" target="main" href="changePasswd.php">修改密碼</a>
+<p id="alertMessage">
+	<a id ="alertMessage1"></a><br>
+	<a id ="alertMessage2"></a><br>
+	<a id ="alertMessage3"></a>
+</p>
 <form action="logout.php" target="_top" method="get">
-	<a class="logo">AMS</a>
-	<a class="wellcome">歡迎使用本系統</a>
-		<?php if(Config::TEST_MOD) echo '<font size=6 color="red">測試區</font>';else echo '<font size=6 color="red">正式區</font>';?>
-	<a class="user"><?=htmlentities($_SESSION['AMS']['使用者姓名']);?></a>
-	<a class="changePasswd" target="main" href="changePasswd.php">修改密碼</a>
-	<p id="alertMessage">
-		<a id ="alertMessage1"></a><br>
-		<a id ="alertMessage2"></a><br>
-		<a id ="alertMessage3"></a>
-	</p>
 	<a  class="rightArea" align="right" >
 	<!--<p><button class="exit-btn" type="submit" align="middle" ></button></p>-->
-	<p><button class="exit-btn" align="middle" onclick="location.href='logout.php'"></button></p>
+	<p><button class="exit-btn" onclick="location.href='logout.php'"></button></p>
 	</a>
 </form>
-
+<a class="timer">您將再 <span id="time">00:00</span> 後登出!<button class = 'darkButton' id = 'refershTimer' onclick='rehreshTimer();'>刷新時間</button></a>
 <script>
 function updateTimeout(){
 	var 使用者=$('.user').text();
@@ -278,6 +284,35 @@ $(document).ready(function(){
 		updateTimeout();
 	},3000);
 });
+
+var duration = 60*300,minutes, display = $('#time'), seconds;
+var timer = setTimer(duration,display);
+function setTimer(duration,display){
+	$('#time').css('color','black');
+	var timer =  setInterval(function () {
+        minutes = parseInt(duration / 60, 10)
+        seconds = parseInt(duration % 60, 10);
+
+        minutes = minutes < 10 ? "0" + minutes : minutes;
+        seconds = seconds < 10 ? "0" + seconds : seconds;
+
+        display.text(minutes + ":" + seconds);
+
+        if (--duration < 0) {
+            parent.window.location.replace('logout.php');
+        }
+		if(duration < 300){
+			$('#time').css('color','#AA0000');
+		}
+    }, 1000);
+	return timer;
+}
+
+function rehreshTimer(){
+	clearInterval(timer);
+	timer = setTimer(duration,display);
+}
+
 </script>
 <a href="main.php" target="main">
 <table border="1">

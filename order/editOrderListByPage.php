@@ -501,9 +501,9 @@
 		$('#datagrid').html('');
 		var bypost={};
 		if(typeof(option.search)!='undefined'&&option.search==true)
-			bypost={method:'OrderListInfo',searchBy:$('#searchOrderList').val(),pageNo:1,order:'委刊單識別碼',asc:'ASC'};
+			bypost={method:'OrderListInfo',searchBy:$('#searchOrderList').val(),pageNo:1,order:'委刊單識別碼',asc:'DESC'};
 		else if(typeof(option.ownerId)!='undefined')
-			bypost={method:'OrderListInfoByAdOwner',pageNo:1,order:'委刊單識別碼',asc:'ASC',廣告主識別碼:option.ownerId};
+			bypost={method:'OrderListInfoByAdOwner',pageNo:1,order:'委刊單識別碼',asc:'DESC',廣告主識別碼:option.ownerId};
 		$.post('?',bypost,function(json){
 				json.header.push('修改委刊單');
 				for(var row in json.data){

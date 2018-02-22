@@ -65,6 +65,9 @@
 					AND 託播單.託播單狀態識別碼 LIKE ?
 					AND 託播單.託播單狀態識別碼 IN (1,2)'.'
 			';
+			if(isset($_POST['OtherCondition'])){
+				$sql .= ' AND '.$_POST['OtherCondition'];
+			}
 			$param_type = ($searchBy=='%'?'':'iiss').($adowner=='%'?'':'s').($orderList=='%'?'':'s').'ssssssss';
 			$a_params = array();
 			$a_params[] = &$param_type;
@@ -150,6 +153,7 @@
 	var DG = null;
 	$(function() {
 		$('#selectall,#unsendall,#sendall,#unselectall,#selectCurrent,#unselectCurrent').hide();
+		$('#_searchOUI_tabs-4').append('<input id="_searchOUI_unsendMaterialOnly" type="checkbox">只需重新送出的託播單');
 		$( "#dialog_form" ).dialog( {autoOpen: false, modal: true} );
 	});
 
@@ -176,6 +180,9 @@
 				,order:'託播單識別碼'
 				,asc:'DESC'
 			};
+		//是否只顯示素材位送出的託播單
+		if($('#_searchOUI_unsendMaterialOnly').prop("checked"))
+			bypost['OtherCondition'] = '(託播單.託播單需重新派送=1)';
 		//取的全部的託播單識別碼並建立是否選擇的map
 		bypost['method']='全託播單識別碼';
 		$.post('',bypost,function(json){
@@ -296,7 +303,7 @@
 			OrderSelectedOrNot[$(this).val()] = false;
 		});
 	});
-	//確定與取消確定
+	//送出與取消送出
 	$('#sendall,#unsendall').click(function(){
 		var sendFlag = true;
 		if($(this).attr('id')=='unsendall')
@@ -319,7 +326,7 @@
 				}
 			}
 		}
-		//先將託播單分群(產生SEPG託播單群組，其版位類型的託播單都以一個托播單一個檔案處理)
+		//先將託播單分群(產生SEPG託播單群組，其版位類型的託播單都以一個託播單一個檔案處理)
 		$.post('../order/ajaxToAPI.php',{'action':'群組託播單','selectedOrder':selectedOrder},
 			function(json){
 				//失敗的託播單

@@ -79,7 +79,7 @@
 	else if(isset($_POST['連動廣告'])){
 		$sql = 'SELECT 託播單識別碼,託播單名稱,廣告可被播出小時時段,託播單CSMS群組識別碼,版位.版位名稱,版位其他參數預設值
 			FROM 託播單,版位,版位 版位類型,版位其他參數
-			WHERE (版位類型.版位名稱="首頁banner" OR 版位類型.版位名稱="專區banner") AND 版位類型.版位識別碼 = 版位.上層版位識別碼 AND 版位.版位識別碼 = 託播單.版位識別碼 
+			WHERE (版位類型.版位名稱="首頁banner" OR 版位類型.版位名稱="專區banner" OR 版位類型.版位名稱="單一平台banner") AND 版位類型.版位識別碼 = 版位.上層版位識別碼 AND 版位.版位識別碼 = 託播單.版位識別碼 
 			AND 版位.版位識別碼 = 版位其他參數.版位識別碼 AND 版位其他參數名稱 = "bnrSequence"
 			';
 		
@@ -141,7 +141,7 @@
 			}
 		}
 		
-		$result = ['1'=>[],'2'=>[]];//分別存放兩個bnrSquence可連動的banner託播單
+		$result = ['1'=>[],'2'=>[],'3'=>[],'4'=>[]];//分別存放各bnrSquence可連動的banner託播單
 		if(isset($_POST['Area'])){
 			//有限定區域，檢查是否包含全部的指定區域
 			foreach($CSMSAreaIndex as $CSMSID=>$area){
@@ -212,7 +212,7 @@
 			FROM 託播單,版位,版位 版位類型,託播單其他參數,版位其他參數
 			WHERE 託播單.版位識別碼=版位.版位識別碼 AND 版位.上層版位識別碼=版位類型.版位識別碼 AND 版位類型.版位名稱 = "專區vod"  
 			AND 託播單.託播單識別碼 = 託播單其他參數.託播單識別碼 AND 託播單其他參數順序 = 版位其他參數順序 AND (版位.版位識別碼 = 版位其他參數.版位識別碼 OR 版位類型.版位識別碼 = 版位其他參數.版位識別碼)
-			AND (版位其他參數.版位其他參數名稱 = "bannerTransactionId1" || 版位其他參數.版位其他參數名稱 = "bannerTransactionId2")
+			AND (版位其他參數.版位其他參數名稱 LIKE "bannerTransactionId_")
 			AND (託播單其他參數值 LIKE ? OR 託播單其他參數值 LIKE ? OR 託播單其他參數值 = ?)
 			';
 
@@ -483,6 +483,7 @@
 <script type="text/javascript" src="../tool/jquery-plugin/jquery.tokenize.js"></script>
 <script type="text/javascript" src="newOrder_852.js?<?=time()?>"></script>
 <script type="text/javascript" src="newOrder_851.js?<?=time()?>"></script>
+
 <script src="../tool/jquery.loadmask.js"></script>
 <link rel="stylesheet" type="text/css" href="<?=$SERVER_SITE.Config::PROJECT_ROOT?>tool/jquery.loadmask.css" />
 <link rel="stylesheet" type="text/css" href="<?=$SERVER_SITE.Config::PROJECT_ROOT?>tool/jquery-plugin/jquery.tokenize.css" />
@@ -672,6 +673,7 @@
 					jdata=jdata[<?php if(isset($_GET["edit"])) echo htmlspecialchars($_GET["edit"], ENT_QUOTES, 'UTF-8'); else echo 0;?>];
 				else 
 					jdata=jdata[<?php if(isset($_GET["info"])) echo htmlspecialchars($_GET["info"], ENT_QUOTES, 'UTF-8'); else echo 0;?>];
+				jdata['版位識別碼'] = String(jdata['版位識別碼']).split(',');
 				showVal(jdata);
 			}
 			//顯示資料庫中的資料
@@ -802,6 +804,7 @@
 			case "專區banner":
 			case "頻道short EPG banner":
 			case "專區vod":
+			case "Vod+廣告":
 			if($("#Name").val().indexOf("'") != -1)
 			{
 				alert("CSMS類型託播單名稱不可包含「'」符號");
@@ -920,25 +923,60 @@
 			});
 		}
 		
-		var orders=[];	
-		$('#durationTb tr').each(function(){
-				var stt = $(this).find(' input:eq(0)').val();
-				var edt = $(this).find(' input:eq(1)').val();
-			$("#position option:selected").each(function() {
-				var pid = $(this).val();
-				var pname = $(this).text().split(':');
-				pname.splice(0,1)
-				pname=pname.join(':');				
-				var order = getOrderObj(pname,pid);
-				order["廣告期間開始時間"] = stt;
-				order["廣告期間結束時間"] = edt;
-				order["群組廣告期間開始時間"] = stt;
-				order["群組廣告期間結束時間"] = edt;
-				orders.push(order);
-			});					
-		});		
+		//依走期/版位增加託播單
+		var orders=[];
+		var selectedPositions=[];
+		switch($("#positiontype").text()){
+				case '前置廣告投放系統':
+				case "首頁banner":
+				case "專區banner":
+				case "頻道short EPG banner":
+				case "專區vod":
+				case "Vod+廣告":
+					//每一個走期、每一個版位都新增一張託播單
+					$('#durationTb tr').each(function(){
+							var stt = $(this).find(' input:eq(0)').val();
+							var edt = $(this).find(' input:eq(1)').val();
+						$("#position option:selected").each(function() {
+							var pid = $(this).val();
+							var pname = $(this).text().split(':');
+							pname.splice(0,1)
+							pname=pname.join(':');				
+							var order = getOrderObj(pname,pid);
+							order["廣告期間開始時間"] = stt;
+							order["廣告期間結束時間"] = edt;
+							order["群組廣告期間開始時間"] = stt;
+							order["群組廣告期間結束時間"] = edt;
+							orders.push(order);
+						});					
+					});
+					break;
+				case "barker頻道":
+				default:
+					//每個走期新增一張託播單，託播單可包含多個頻道
+					$('#durationTb tr').each(function(){
+						var stt = $(this).find(' input:eq(0)').val();
+						var edt = $(this).find(' input:eq(1)').val();
+						var selectedP=[];
+						var selectedPN=[];
+						$("#position option:selected").each(function() {
+							selectedP.push($(this).val());
+							var pname = $(this).text().split(':')
+							pname.splice(0,1)
+							pname=pname.join(':');
+							selectedPN.push(pname);
+						});				
+						var order = getOrderObj(selectedPN.join(','),selectedP.join(','));
+						order["廣告期間開始時間"] = stt;
+						order["廣告期間結束時間"] = edt;
+						order["群組廣告期間開始時間"] = stt;
+						order["群組廣告期間結束時間"] = edt;
+						orders.push(order);						
+					});	
+					break;
+			}	
 
-		function getOrderObj(pname,pid){	
+		function getOrderObj(pname,pid){
 			var jobject = {
 				"版位類型名稱":$("#positiontype").text(),
 				"版位名稱":pname,
@@ -1004,8 +1042,19 @@
 					case "專區banner":
 					case "頻道short EPG banner":
 					case "專區vod":
+					case "Vod+廣告":
 						saveOrder_851(orders,action);
 						break;
+					case "barker頻道":
+						var size = 0;
+						for (key in orders[0]['素材']) {
+							if (orders[0]['素材'].hasOwnProperty(key)) size++;
+						}
+						if(size>1){
+							alert('只可選擇一種影片畫質');
+							break;
+						};
+						
 					default:
 						if(action == "new"){
 							parent.newOrderSaved(orders);

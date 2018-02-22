@@ -1,7 +1,7 @@
 <?php
 	require '../tool/auth/auth.php';
 	define('PAGE_SIZE',10);
-	
+	define('MATERIALPATH',Config::GET_MATERIAL_FOLDER());
 	if(isset($_POST['action'])){
 		if($_POST['action']==='getMateral'){
 			$fromRowNo=isset($_POST['pageNo'])&&intval($_POST['pageNo'])>0?(intval($_POST['pageNo'])-1)*PAGE_SIZE:0;
@@ -121,12 +121,18 @@
 				ORDER BY 託播單.託播單識別碼
 			';
 			$result=$my->getResultArray($sql,'i',$_POST['素材識別碼']);
+			$sql='
+				UPDATE 託播單 JOIN 託播單素材 ON 託播單.託播單識別碼=託播單素材.託播單識別碼
+				SET 託播單.託播單需重新派送 = 1
+				WHERE 託播單狀態識別碼 IN(2,4) AND 素材識別碼=?
+			';
+			$my->execute($sql,'i',$_POST['素材識別碼']);
 			header('Content-Type: application/json; charset=utf-8');
 			exit(json_encode($result));
 		}
 		else if(($_POST['action']==='getAndPutStatus')&&isset($_POST['素材識別碼'])&&isset($_POST['副檔名'])){
 			//先透過API取得狀態
-			$local='/opt/lampp/htdocs/AMS/material/uploadedFile/'.$_POST['素材識別碼'].'.'.$_POST['副檔名'];
+			$local=MATERIALPATH.$_POST['素材識別碼'].'.'.$_POST['副檔名'];
 			if(is_file($local)===false){
 				header('Content-Type: application/json');
 				exit(json_encode(array('success'=>false,'error'=>'找不到指定素材，可能是素材未到位或檔案遺失，請上傳後再操作。')));
@@ -137,17 +143,25 @@
 				exit(json_encode($json));
 			}
 			$片名='_____AMS_'.$_POST['素材識別碼'].'_'.$md5_result;
-			$url='http://172.17.251.83:82/PTS/pts_media_status.php?v_id=2305&source='.$片名;
+			//$url='http://172.17.251.134/PMS4/pts_media_status.php?v_id=2305&source='.$片名;
+			$url=Config::PMS_SEARCH_URL.$片名;
 			$ch=curl_init($url);
 			curl_setopt($ch,CURLOPT_RETURNTRANSFER,true);
-			$xml=simplexml_load_string(curl_exec($ch));
+			$xmlString= curl_exec($ch);
+			if(curl_errno($ch))
+			{
+				$logger->error('錯誤代號:'.curl_errno($ch).'無法連接API:'.$url);
+				curl_close($ch);
+			}
+			//移除多餘空白字元
+			$xmlString = preg_replace('~\s*(<([^-->]*)>[^<]*<!--\2-->|<[^>]*>)\s*~','$1',$xmlString);
+			$xml=simplexml_load_string($xmlString);
 			$mediaId=(string)$xml->mediaId;
 			$chtnStatus=(string)$xml->chtnStatus;
 			$chtcStatus=(string)$xml->chtcStatus;
 			$chtsStatus=(string)$xml->chtsStatus;
 			$chtnIapId=(string)$xml->chtnIapId;
 			$chtsIapId=(string)$xml->chtsIapId;
-
 			//再更新到資料庫
 			$my=new MyDB(true);
 			$sql='UPDATE 素材 SET 影片媒體編號=?,影片媒體編號北=?,影片媒體編號南=? WHERE 素材識別碼=?';
@@ -177,20 +191,20 @@
 				exit(json_encode($json));
 			}
 			
-			$local='/opt/lampp/htdocs/AMS/material/uploadedFile/'.$_POST['素材識別碼'].'.'.$_POST['副檔名'];
+			$local=MATERIALPATH.$_POST['素材識別碼'].'.'.$_POST['副檔名'];
 			if(($md5_result=md5_file($local))===false){
 				$json=array('success'=>false,'error'=>'計算檔案md5值失敗！');
 				header('Content-Type: application/json');
 				exit(json_encode($json));
 			}
 			$remote='_____AMS_'.$_POST['素材識別碼'].'_'.$md5_result.'.'.$_POST['副檔名'];
-			
+			$poscessing ='_____AMS_'.$_POST['素材識別碼'].'_'.$md5_result.'.ams';
 			require '../tool/FTP.php';
 			$result=FTP::isAllFile($ftp_servers,$remote);
 			if($result[0])
 				$json=array('success'=>false,'error'=>'檔案已存在，請等待PMS自動派片！');
 			else{
-				$result=FTP::putAll($ftp_servers,$local,$remote);
+				$result=FTP::putAll($ftp_servers,$local,$remote,$remote.'.temp');
 				if(!$result[0])
 					$json=array('success'=>false,'error'=>'上傳檔案失敗！');
 				else{
@@ -230,6 +244,7 @@
 <script type="text/javascript" src="../tool/autoCompleteComboBox.js"></script>
 <script type="text/javascript" src="../tool/jquery-plugin/jquery.placeholder.min.js"></script>
 <body>
+<button id='pmscheckbtn'>Pms派送狀況查詢</button>
 <?php include('_searchMaterialUI.php'); ?>
 <input type="checkbox" id="僅顯示尚未派送項目">僅顯示未派送項目 <input type="checkbox" id="僅顯示未取得媒體編號項目">僅顯示未取得媒體編號項目 &nbsp;
 <input type="radio" name="素材是否已到" value="顯示素材已到與未到項目" checked>僅顯示素材已到與未到項目
@@ -458,6 +473,10 @@ $(document).ready(function(){
 	}
 	
 	getmDataGrid();
+	
+	$('#pmscheckbtn').click(function(){
+		location.assign('../checkPms.php');
+	});
 </script>
 </head>
 

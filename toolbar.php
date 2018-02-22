@@ -79,6 +79,27 @@
 		<li id="booking/bookingSchedule.php">銷售前預約託播單排程表</li>
 	</ul>
 </li>
+
+<li>各投放系統客制化功能
+	<ul>
+	<!--<li>前置廣告投放系統
+		<ul>
+		
+		</ul>
+	</li>
+	<li>CAMPS投放系統
+	<ul>
+		<li id="http://172.17.251.83/camps">CAMPS管理業面</li>
+		<li id="material/deliverMaterialCF_CAMPS.php">CAMPS派送素材</li>
+		<li id="position/positionCAMPS.php">同步CAMPS版位</li>
+	</ul>
+	</li>-->
+	<li id="http://172.17.251.133/camps">CAMPS管理業面</li>
+	<li id="setBarkerPosition.php">CAMPS版位資訊更新</li>
+	<li id="other/vsmBGManagement.php">單一平台背景圖</li>
+	</ul>
+</li>
+
 <li>廣告主管理
 	<ul>
 		<li id="adowner/newOwner.php">新增廣告主</li>
@@ -94,9 +115,9 @@
 		<li id="position/newPosition.php">新增版位資料</li>
 		<li id="position/editPosition.php">修改版位資料</li>
 		<li id="position/searchPosition.php">查詢版位資料</li>
+		<li id="position/setViewsPerHour.php">設定版位每小時曝光數</li>
 		<li id="position/positionTitle.php">前置廣告投放系統片單資訊</li>
 		<li id="position/positionAdNum.php">前置廣告投放系統廣告片數</li>
-		<li id="position/setViewsPerHour.php">設定版位每小時曝光數</li>
 		<li id="position/positionSchedule.php">版位類型排程查詢</li>
 	</ul>
 </li>
@@ -125,7 +146,9 @@
 		<li id="material/editMaterialBatch.php">批次修改素材</li>
 		<li id="material/searchMaterial.php">查詢素材</li>
 		<li id="material/deliverMaterial.php">派送素材(圖片)</li>
+		<li id="material/deliverMaterial_VSM.php">單一平台派送素材(圖片)</li>
 		<li id="material/deliverMaterialCF.php">派送素材(影片)</li>
+		<li id="material/deliverMaterialCF_CAMPS.php">CAMPS派送素材</li>
 	</ul>
 </li>
 <li>投放管理

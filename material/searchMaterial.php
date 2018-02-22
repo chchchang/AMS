@@ -61,6 +61,12 @@
 <?php include('_searchMaterialUI.php'); ?>
 </div>
 <div id = "datagrid"></div>
+<form id="downloadForm" method="post" action="ajaxToDB_Material.php" hidden>
+<input type="test" name="action"></input>
+<input type="test" name="file"></input>
+<input type="test" name="name"></input>
+<button type="submit"></button>
+</form>
 <script type="text/javascript">	
 	var showAminationTime = 500;
 	var returnToParent = <?=$returnToParent;?>;
@@ -148,11 +154,17 @@
 							if(!checkData['success'])
 								alert(checkData['message']);
 							else{
-								var $downForm = $('<form method="post" action="ajaxToDB_Material.php"></form>');
+								/*var $downForm = $('<form method="post" action="ajaxToDB_Material.php"></form>');
+								$downForm.
 								$('<input type="test" name="action"></input>').val('下載素材檔案').appendTo($downForm);
 								$('<input type="test" name="file"></input>').val(checkData['file']).appendTo($downForm);
 								$('<input type="test" name="name"></input>').val(checkData['name']).appendTo($downForm);
-								var $downBtn = $('<button type="submit"></button>').appendTo($downForm).click();
+								var $downBtn = $('<button type="submit"></button>').appendTo($downForm).click();*/
+								var $downForm =$('#downloadForm');
+								$downForm.find("[name='action']").val('下載素材檔案');
+								$downForm.find("[name='file']").val(checkData['file']);
+								$downForm.find("[name='name']").val(checkData['name']);
+								$downForm.find("[type='submit']").click();
 							}
 						}
 						,'json'
