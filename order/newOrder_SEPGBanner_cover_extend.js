@@ -61,44 +61,32 @@ $('.linkValue').click(function(){
 	}
 	else if (linkType=='OVA_VOD_CONTENT'){
 		var newDiv = $(document.createElement('div')); 
-		newDiv.html('<table>'
+		newDiv.html('<table width="100%">'
 		+'<tr><td>影片目錄</td><td><input id = "OVA_VOD_CONTENT_category" type = text></input></td></tr>'
 		+'<tr><td>影片片名</td><td><input id = "OVA_VOD_CONTENT_flim" type = text></input></td></tr>'
 		+'</table>');
 		newDiv.dialog({
 			close: function( event, ui ) {$(this).dialog('destroy').remove()},
+			width: 400,
+			height: 400,
+			modal: true,
+			title: "設定VOD資訊",
 			buttons: {
 				"確認": function() {
-					$.post("../material/ajax_findAdCodeAndName.php",{'素材名稱':$('#COVER_material').val()},
-						function(json){
-							if(!json['success']){
-								alert('查無素材名稱')
-							}
-							else{
-								var adCode=json['adCode'];
-								var picName=json['name'];
-								var service=$("#COVER_linkType").val();
-
-								var value = adCode+'#'+picName+'#'+service;
-								if(service!='NONE')
-									value+="#"+$("#COVER_linkValue").val();
-								$('#點擊後開啟位址'+order).val(value).trigger("change");
-								newDiv.dialog( "close" );	
-							}
-						}
-						,'json'
-					);			
+					var value = $("#OVA_VOD_CONTENT_category").val()+'#'+$("#OVA_VOD_CONTENT_flim").val();
+					$('#點擊後開啟位址'+order).val(value).trigger("change");
+					newDiv.dialog( "close" );						
 			  }
 			}
 		});
 		
 		$('#OVA_VOD_CONTENT_flim').autocomplete({
 			source :function( request, response) {
-						$.post( "../material/autoComplete_forMaterialSearchBox.php",{term: request.term, method:'素材查詢'},
+						$.post( "autoComplete_for_OVA_CONTENT.php",{term: request.term, method:'get_ova_content_title'},
 							function( data ) {
 							response(JSON.parse(data));
 							$(".ui-autocomplete").css({
-								"max-height": "100px",
+								"max-height": "200px",
 								"overflow-y": "auto",
 								"overflow-x": "hidden"
 							});
