@@ -47,12 +47,14 @@
 		}
 		
 		//輸出
-		OutputExcel::outputAll('851/'.implode(',',$_POST['ids']),$forExcel);
+		$ids = $_POST['ids'][0];
+		//OutputExcel::outputAll('851/'.implode(',',$_POST['ids']),$forExcel);
+		OutputExcel::outputAll('851/'.$ids,$forExcel);
 		//FTP上傳
-		$ids = implode(',',$_POST['ids']);
+		//$ids = implode(',',$_POST['ids']);
 		$localfile='../order/851/'.$ids.'.xls';			
 		if(is_file($localfile)===false){
-			exit(json_encode(array("success"=>false,'message'=>'找不到介接檔案，請重新派送。'.$本地路徑,'id'=>$ids)));
+			exit(json_encode(array("success"=>false,'message'=>'找不到介接檔案，請重新派送。'.$本地路徑,'id'=>implode(',',$_POST['ids']))));
 		}
 		$uploadingMeta = getUploadingMeta($_POST['ids'][0]);
 		if($uploadingMeta['area']=='IAP'){

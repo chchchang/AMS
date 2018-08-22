@@ -1677,7 +1677,7 @@
 		global $logger, $my;
 		$a_params = array();
 		$n = count($_POST['orderIds']);
-		$sql ='SELECT 版位類型.版位識別碼,版位.版位名稱
+		$sql ='SELECT 版位類型.版位識別碼,版位.版位名稱,版位類型.版位名稱 AS 版位類型名稱
 			FROM 託播單,版位, 版位 版位類型
 			WHERE 託播單.版位識別碼 = 版位.版位識別碼 AND 版位.上層版位識別碼 = 版位類型.版位識別碼 ';
 			
@@ -1711,7 +1711,9 @@
 		$positionConfig = array();//記錄版類型參數
 		$positionNames = array();//記錄版位名稱
 		$res = $stmt->get_result();
+		$ptName = "";
 		while($row = $res->fetch_assoc()){
+			$ptName = $row['版位類型名稱'];
 			if(!in_array($row['版位識別碼'],$positionTIds))
 				array_push($positionTIds, $row['版位識別碼']);
 			array_push($positionNames, $row['版位名稱']);
@@ -1882,7 +1884,7 @@
 				$timeArray=array_intersect($timeArray,explode(',',$row['廣告可被播出小時時段']));
 		}
 		exit(json_encode(array('success'=>true , '其他參數設定'=>$pConfig,'版位素材設定'=>$pMaterials,'日期'=>$dateArray
-		,'時段'=>implode(',',$timeArray),'pNames'=>$positionNames),JSON_UNESCAPED_UNICODE));
+		,'時段'=>implode(',',$timeArray),'pNames'=>$positionNames,'版位類型名稱'=>$ptName),JSON_UNESCAPED_UNICODE));
 	}
 	
 	function playing_times_percentage(){

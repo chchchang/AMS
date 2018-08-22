@@ -705,6 +705,7 @@
 							})
 						).appendTo($tr)
 						//點擊後開啟類型
+						console.log(json);
 						$('<th/>').append($('<input type ="checkbox" name="updateCheckBox" id="materialCTypeCB'+i+'" class="materialCB">')).appendTo($tr);
 						if(json.版位類型名稱  == '頻道short EPG banner'){
 							$('<td/>').append(
@@ -733,6 +734,20 @@
 								materialObj[$(this).attr('order')]['點擊後開啟類型'] = $(this).val();
 							}).val('NONE')
 						}
+						else if(json.版位類型名稱.startsWith('單一平台')){
+							$('<select order='+i+' id="點擊後開啟類型'+i+'" class="linkType VSM"/>')
+							.append($('<option value="">NONE</option>'))
+							.append($('<option value="internal">internal</option>'))
+							.append($('<option value="external">external</option>'))
+							.append($('<option value="app">app</option>'))
+							.append($('<option value="Vod">Vod</option>'))
+							.append($('<option value="Channel">Channel</option>'))
+							.append($('<option value="coverImageIdV">SEPG直向覆蓋圖片</option>'))
+							.append($('<option value="coverImageIdH">SEPG橫向覆蓋圖片</option>'))
+							.appendTo($tr).change(function(){
+								materialObj[$(this).attr('order')]['點擊後開啟類型'] = $(this).val();
+							}).val('NONE')
+						}
 						else{
 							$('<select order='+i+' id="點擊後開啟類型'+i+'" class="linkType"/>')
 							.append($('<option value="NONE">NONE</option>'))
@@ -742,11 +757,6 @@
 							.append($('<option value="OVA_CHANNEL">OVA_CHANNEL</option>'))
 							.append($('<option value="COVER_A">COVER_A</option>'))
 							.append($('<option value="COVER_B">COVER_B</option>'))
-							.append($('<option value="internal">internal</option>'))
-							.append($('<option value="external">external</option>'))
-							.append($('<option value="app">app</option>'))
-							.append($('<option value="Vod">Vod</option>'))
-							.append($('<option value="Channel">Channel</option>'))
 							.appendTo($tr).change(function(){
 								materialObj[$(this).attr('order')]['點擊後開啟類型'] = $(this).val();
 							}).val('NONE')							
@@ -757,16 +767,6 @@
 						$('<td/>').append(
 							$('<input type ="text" order='+i+' id="點擊後開啟位址'+i+'" class="linkValue">').appendTo($tr).change(function(){
 								materialObj[$(this).attr('order')]['點擊後開啟位址'] = $(this).val();
-							})
-							.autocomplete({
-								source :function( request, response ) {
-											$.post( "../order/autoCompleteSearch.php",{term: request.term, column:'點擊後開啟位址', table:'託播單素材'},
-												function( data ) {
-												response(JSON.parse(data));
-											})
-										}
-							}).on('autocompletechange change', function () {
-								materialObj[$(this).attr('order')]['點擊後開啟位址'] =  $(this).val();
 							})
 						).appendTo($tr)
 						
@@ -782,6 +782,27 @@
 						).appendTo($tr)
 						$('#materialTbody').append($tr)
 					}
+					//點擊後開啟位址autocomplete設定
+					$('.linkValue').each(function(i, el) {
+						var el = $(this);
+						el.autocomplete({
+							source :function( request, response,data) {
+										var order = el.attr('order');
+										if($("#點擊後開啟類型"+order).hasClass('VSM'))
+										$.post( "autoComplete_forVSMLink.php",{term: request.term, linkType: $("#點擊後開啟類型"+order).val()},
+											function( data ) {
+											response(JSON.parse(data));
+										});
+										else
+										$.post( "../order/autoCompleteSearch.php",{term: request.term, column:'點擊後開啟位址', table:'託播單素材'},
+											function( data ) {
+											response(JSON.parse(data));
+										});
+									}
+						}).on('autocompletechange change', function () {
+							materialObj[$(this).attr('order')]['點擊後開啟位址'] =  $(this).val();
+						})
+					})
 				}
 			}
 		});
@@ -863,7 +884,7 @@
 			},
 			onSelect: function(dateText) {
 				//選擇廣告開始日期後，預約日期推算
-				var s =$("#StartDate").val().split(" ")[0].split('-')
+				/*var s =$("#StartDate").val().split(" ")[0].split('-')
 				var deadline = new Date(parseInt(s[0],10),parseInt(s[1],10)-1,parseInt(s[2],10),00,00,00);
 				for(var i =deadlinePreDay; i >0;i--){
 					deadline.addDays(-1);
@@ -871,7 +892,8 @@
 						deadline.addDays(-1);
 					}
 				}
-				$('#Deadline').val(deadline.getFullYear()+'-'+addLeadingZero(2,deadline.getMonth()+1)+'-'+addLeadingZero(2,deadline.getDate()));
+				$('#Deadline').val(deadline.getFullYear()+'-'+addLeadingZero(2,deadline.getMonth()+1)+'-'+addLeadingZero(2,deadline.getDate()));*/
+				$('#Deadline').val($("#StartDate").val());
 			}
 		});
 		$( "#EndDate" ).datetimepicker({

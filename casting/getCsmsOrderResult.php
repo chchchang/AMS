@@ -137,7 +137,7 @@
 					if(filesize($local)===0){	//檔案大小等於0表示處理結果為成功
 						$送出是否成功=1;
 						//送出後的雙重檢查，若不通過，記錄內部錯誤訊息:投放系統託播單資訊與AMS不一致
-						$doubleCheck=doubleCheckData($result3['版位類型名稱'],$下一個動作,$區域,$託播單識別碼群組列表,$託播單CSMS群組識別碼);
+						$doubleCheck=doubleCheckData($result3['版位類型名稱'],$下一個動作,$區域,$託播單識別碼群組列表,$託播單CSMS群組識別碼,$託播單識別碼群組);
 						if(!$doubleCheck['success']){
 							$送出是否成功 = 0;
 							$新的託播單狀態識別碼=($下一個動作==='delete')?2:1;
@@ -147,7 +147,7 @@
 							$新的託播單狀態識別碼=($下一個動作==='delete')?1:2;
 						}
 						//刪除本地檔案
-						unlink('../order/851/'.$託播單識別碼群組列表.'.xls');
+						unlink('../order/851/'.$託播單識別碼群組[0].'.xls');
 						$內部錯誤訊息 = $doubleCheck['inner_error'];
 					}
 					else{	//檔案大小不等於0表示處理結果為失敗
@@ -184,12 +184,12 @@
 		}
 	}
 	
-	function doubleCheckData($版位類型名稱,$下一個動作,$區域,$託播單識別碼群組列表,$託播單CSMS群組識別碼){
+	function doubleCheckData($版位類型名稱,$下一個動作,$區域,$託播單識別碼群組列表,$託播單CSMS群組識別碼,$託播單識別碼群組){
 		require_once '../tool/PHPExcel/Classes/PHPExcel.php';
 		require_once '../tool/OracleDB.php';
 		//return true;
 		//讀取本地送出檔案用reader
-		$filename = '../order/851/'.$託播單識別碼群組列表.'.xls';
+		$filename = '../order/851/'.$託播單識別碼群組[0].'.xls';
 		$reader = PHPExcel_IOFactory::load($filename);
 		$sheet=$reader->getActiveSheet();
 		//取得OMP資料庫檔案並比較

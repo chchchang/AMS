@@ -248,12 +248,13 @@ u{
 							showSchedule();
 						},
 						onChangeMonthYear: function(year, month, inst){
-							$.post( ajaxtodbPath, { action: "查詢版位當月排程",版位識別碼:id,year: year,month: month }, 
+							//******為了效能問題，不顯示排程
+							/*$.post( ajaxtodbPath, { action: "查詢版位當月排程",版位識別碼:id,year: year,month: month }, 
 							function(data){
 								orderDetail=data;
 								$( "#datePicker" ).datepicker( "refresh" );
 							},'json'
-							);
+							);*/
 						}
 					})
 					.click(function() {
@@ -301,6 +302,9 @@ u{
 	
 	//設置timetable
 	function showSchedule() {
+		//******為了效能問題，不顯示排程
+		return 0;
+		//*****
 		var startTime=$.datepicker.formatDate('yy-mm-dd',$('#datePicker').datepicker('getDate'))+" 00:00:00";
 		var endTime = $.datepicker.formatDate('yy-mm-dd',$('#datePicker').datepicker('getDate'))+" 23:59:59";
 		$('#timetables').html('');

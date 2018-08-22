@@ -18,6 +18,8 @@
 <br>
 <a id ='showDefault'>顯示預設廣告設定:<input type = 'radio' name='showDefaultCheckBox' value=0></input>非預設廣告
 <input type = 'radio' name='showDefaultCheckBox' value=1></input>預設廣告<input type = 'radio' name='showDefaultCheckBox' value='all'></input>全部</a>
+<a id ='showOutterOrder'>顯示外廣告設定:<input type = 'radio' name='showOutterOrderCheckBox' value=0></input>非預設廣告
+<input type = 'radio' name='showOutterOrderCheckBox' value=1></input>預設廣告<input type = 'radio' name='showOutterOrderCheckBox' value='all'></input>全部</a>
 <div id = 'schDiv'>
 </div>
 <div id="dialog_form"><iframe id="dialog_iframe" width="100%" height="100%" frameborder="0" scrolling="yes"></iframe></div>

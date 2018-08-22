@@ -3,8 +3,8 @@
 	header("Content-Type:text/html; charset=utf-8");
 	require_once dirname(__FILE__).'/tool/MyDB.php';
 	require_once dirname(__FILE__).'/tool/MyLogger.php';
-	define('HOME','/home/ams/IabFiles/');
-	//define('HOME','order/851/');
+	//define('HOME','/home/ams/IabFiles/');
+	define('HOME','order/851/');
 	define('GLUE','$');
 	$my=new MyDB(true);
 	$logger=new MyLogger();
@@ -110,8 +110,8 @@
 				,$row1['廣告期間結束時間'],$row2['產業大類'],$row2['產業小類'],$row['委刊單名稱'],$row['CREATED_TIME'],$row['填單者'],$row['LAST_UPDATE_TIME'],$row['修改者']);
 				fwrite($file,implode(GLUE,$forExcel)."\n");
 			}*/
-			$forExcel = array($row['委刊單識別碼'],$row['廣告主名稱'],$row['廣告主統一編號'],$row['頻道商名稱'],$row['頻道商統一編號'],$row['承銷商名稱'],$row['承銷商統一編號'],$row1['廣告期間開始時間']
-				,$row1['廣告期間結束時間'],$row['委刊單名稱'],$row['CREATED_TIME'],$row['填單者'],$row['LAST_UPDATE_TIME'],$row['修改者']);
+			$forExcel = array($row['委刊單識別碼'],nf_to_wf($row['廣告主名稱'], $types = 'nf_to_wf'),$row['廣告主統一編號'],$row['頻道商名稱'],$row['頻道商統一編號'],$row['承銷商名稱'],$row['承銷商統一編號'],$row1['廣告期間開始時間']
+				,$row1['廣告期間結束時間'],nf_to_wf($row['委刊單名稱'], $types = 'nf_to_wf'),$row['CREATED_TIME'],$row['填單者'],$row['LAST_UPDATE_TIME'],$row['修改者']);
 				fwrite($file,implode(GLUE,$forExcel)."\n");
 		}
 		fclose($file);
@@ -153,6 +153,7 @@
 				,"bnrTransId2"
 				,"bnrTransId3"
 				,"bnrTransId4"
+				,"coverMaterialId"
 				)
 				;
 		fwrite($file,implode(GLUE,$header)."\n");
@@ -303,14 +304,12 @@
 				$oid=$row['託播單識別碼'];
 			
 			//若是可展開的banner廣告，從點擊開啟位址中頗析展開的圖片素材識別碼
+			$cover_pic = 'NULL';
 			if(($row['點擊後開啟類型']=="COVER_A" || $row['點擊後開啟類型']=="COVER_B") && ($location == 'N'||$location == 'C'||$location == 'S')){
 				$parapart =  explode('#',$row['點擊後開啟位址']);
 				$cover_pic_fileName = $parapart[1];//0100005187#_____AMS_5187.png#NONE => _____AMS_5187.png
 				$cover_pic_fileName = explode('.',$cover_pic_fileName)[0];//_____AMS_5187.png =>_____AMS_5187
-				$cover_pic = str_replace('_____AMS_5187','',$cover_pic_fileName);//_____AMS_5187=>5187
-			}
-			else{
-				$cover_pic = 'NULL';
+				$cover_pic = str_replace('_____AMS_','',$cover_pic_fileName);//_____AMS_5187=>5187
 			}
 			$temp = array(
 				$row['委刊單識別碼'],
@@ -324,8 +323,8 @@
 				$hours[0],
 				end($hours),
 				','.$row['廣告可被播出小時時段'].',',
-				$row['委刊單名稱'],
-				$row['託播單名稱'],
+				nf_to_wf($row['委刊單名稱'], $types = 'nf_to_wf'),
+				nf_to_wf($row['託播單名稱'], $types = 'nf_to_wf'),
 				$row['影片素材秒數'],
 				$location,
 				($location=='N'?($row['點擊後開啟類型'].'&'.$row['點擊後開啟位址']):'NULL'),
@@ -334,7 +333,6 @@
 				($location=='N'?$orderParam['bakadschdDisplayMax']:'NULL'),
 				($location=='C'?$orderParam['bakadschdDisplayMax']:'NULL'),
 				($location=='S'?$orderParam['bakadschdDisplayMax']:'NULL'),
-				$cover_pic,
 				$orderParam['bakadschdDisplaySequence'],
 				$row['CREATED_TIME'],
 				$row['填單者'],
@@ -344,7 +342,8 @@
 				$orderParam['bannerTransactionId1'],
 				$orderParam['bannerTransactionId2'],
 				$orderParam['bannerTransactionId3'],
-				$orderParam['bannerTransactionId4']
+				$orderParam['bannerTransactionId4'],
+				$cover_pic
 			);
 			fwrite($file,implode(GLUE,$temp)."\n");
 	
@@ -398,7 +397,7 @@
 					$row['素材類型名稱'] = 'video';
 					break;
 			}
-			$temp=array($row['素材識別碼'],$row['素材類型名稱'],$row['素材名稱'],$row['文字素材內容'],$row['產業大類'],$row['產業小類'],$row['CREATED_TIME'],$row['使用者姓名']);
+			$temp=array($row['素材識別碼'],$row['素材類型名稱'],nf_to_wf($row['素材名稱'], $types = 'nf_to_wf'),nf_to_wf($row['文字素材內容'], $types = 'nf_to_wf'),$row['產業大類'],$row['產業小類'],$row['CREATED_TIME'],$row['使用者姓名']);
 			fwrite($file,implode(GLUE,$temp)."\n");
 		}
 		fclose($file);
@@ -409,7 +408,32 @@
 		if($str == null)
 			return 'NULL';
 		else
-			return $str;
+			//return  nf_to_wf($str, $types = 'nf_to_wf');
+			return  $str;
+	}
+	
+	//特殊符號處理:轉全形
+	function nf_to_wf($strs, $types = 'nf_to_wf'){ //全形半形轉換
+		$nft = array(
+			"(", ")", "[", "]", "{", "}", ".", ",", ";", ":",
+			"-", "?", "!", "@", "#", "$", "%", "&", "|", "\\",
+			"/", "+", "=", "*", "~", "`", "'", "\"", "<", ">",
+			"^", "_", "[", "]"
+		);
+		$wft = array(
+			"（", "）", "〔", "〕", "｛", "｝", "﹒", "，", "；", "：",
+			"－", "？", "！", "＠", "＃", "＄", "％", "＆", "｜", "＼",
+			"／", "＋", "＝", "＊", "～", "、", "、", "＂", "＜", "＞",
+			"︿", "＿", "【", "】"
+		);
+
+		if ( $types == 'nf_to_wf' ){// 轉全形
+			return str_replace($nft, $wft, $strs);
+		}else if( $types == 'wf_to_nf' ){// 轉半形
+			return str_replace($wft, $nft, $strs);
+		}else{
+			return $strtmp;
+		}
 	}
 	
 ?>

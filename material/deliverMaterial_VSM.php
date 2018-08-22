@@ -2,7 +2,8 @@
 	require '../tool/auth/auth.php';
 	define('PAGE_SIZE',10);
 	define("MATERIAL_FOLDER", Config::GET_MATERIAL_FOLDER());
-	define("MATERIAL_FOLDER_URL", Config::GET_MATERIAL_FOLDER_URL(dirname(__FILE__).'\\'));
+	//define("MATERIAL_FOLDER_URL", Config::GET_MATERIAL_FOLDER_URL(dirname(__FILE__).'\\'));
+	define("MATERIAL_FOLDER_URL", "uploadedFile/");
 	
 	if(isset($_POST['action'])){
 		if($_POST['action']==='getMateral'){
@@ -115,7 +116,7 @@
 			require '../tool/SFTP.php';
 			foreach(Config::$FTP_SERVERS['VSM'] as $server){
 				$遠端路徑=$server['圖片素材路徑'];
-				$result[]=SFTP::putAndRename($server['host'],$server['username'],$server['password'],$本地路徑.$_POST['local'],$遠端路徑.$_POST['remote'],$_POST['remote'].'.temp')?true:false;
+				$result[]=SFTP::putAndRename($server['host'],$server['username'],$server['password'],$本地路徑.$_POST['local'],$遠端路徑.$_POST['remote'],MATERIAL_FOLDER_URL.$_POST['remote'].'.temp')?true:false;
 				//$result[]=true;
 				$hostRes[$server['host']]=$result[count($result)-1];
 			}

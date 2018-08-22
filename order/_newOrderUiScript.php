@@ -64,7 +64,7 @@
 		},
 		onSelect: function(dateText) {
 			//選擇廣告開始日期後，預約日期推算
-			var s =$("#StartDate").val().split(" ")[0].split('-')
+			/*var s =$("#StartDate").val().split(" ")[0].split('-')
 			var deadline = new Date(parseInt(s[0],10),parseInt(s[1],10)-1,parseInt(s[2],10),00,00,00);
 			for(var i =deadlinePreDay; i >0;i--){
 				deadline.addDays(-1);
@@ -72,7 +72,9 @@
 					deadline.addDays(-1);
 				}
 			}
-			$('#Deadline').val(deadline.getFullYear()+'-'+addLeadingZero(2,deadline.getMonth()+1)+'-'+addLeadingZero(2,deadline.getDate()));
+			$('#Deadline').val(deadline.getFullYear()+'-'+addLeadingZero(2,deadline.getMonth()+1)+'-'+addLeadingZero(2,deadline.getDate()));*/
+			var s =$("#StartDate").val().split(" ");
+			$('#Deadline').val(s[0]);
 		}
 	});
 	$( "#EndDate" ).datetimepicker({
@@ -372,7 +374,7 @@
 						var ptn = $("#positiontype").text();
 						if(ptn.startsWith('單一平台')){
 							$('<td/>').append(
-							$('<select order='+i+' id="點擊後開啟類型'+i+'" class="linkType"/>')
+							$('<select order='+i+' id="點擊後開啟類型'+i+'" class="linkType VSM"/>')
 								.append($('<option value="">NONE</option>'))
 								.append($('<option value="internal">internal</option>'))
 								.append($('<option value="external">external</option>'))
@@ -420,17 +422,9 @@
 										$('#點擊後開啟位址'+i).val(materialObj[i].點擊後開啟位址);
 									}
 								}
-							}).autocomplete({
-								source :function( request, response ) {
-											$.post( "../order/autoCompleteSearch.php",{term: request.term, column:'點擊後開啟位址', table:'託播單素材'},
-												function( data ) {
-												response(JSON.parse(data));
-											})
-										}
-							}).on('autocompletechange change', function () {
-								materialObj[$(this).attr('order')]['點擊後開啟位址'] =  $(this).val();
 							})
 						).appendTo($tr)
+						
 						
 						//選擇素材
 						$('<td/>').append(
@@ -443,6 +437,27 @@
 						).appendTo($tr)
 						$('#materialTbody').append($tr)
 					}
+					//點擊後開啟位址autocomplete設定
+					$('.linkValue').each(function(i, el) {
+						var el = $(this);
+						el.autocomplete({
+							source :function( request, response,data) {
+										var order = el.attr('order');
+										if($("#點擊後開啟類型"+order).hasClass('VSM'))
+										$.post( "autoComplete_forVSMLink.php",{term: request.term, linkType: $("#點擊後開啟類型"+order).val()},
+											function( data ) {
+											response(JSON.parse(data));
+										});
+										else
+										$.post( "../order/autoCompleteSearch.php",{term: request.term, column:'點擊後開啟位址', table:'託播單素材'},
+											function( data ) {
+											response(JSON.parse(data));
+										});
+									}
+						}).on('autocompletechange change', function () {
+							materialObj[$(this).attr('order')]['點擊後開啟位址'] =  $(this).val();
+						})
+					})
 					
 					if(action=="info"||action=="orderInDb"||action=="orderFromApi"){
 						$("button").hide();

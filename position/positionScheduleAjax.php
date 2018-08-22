@@ -126,28 +126,25 @@ if(isset($_POST['action'])){
 			   WHEN 額外版位.版位名稱 IS NULL THEN 版位.版位名稱
 			   ELSE 額外版位.版位名稱
 			   END AS 版位名稱,
-			託播單名稱,廣告期間開始時間,廣告期間結束時間,託播單.託播單識別碼,委刊單識別碼,素材識別碼,版位.版位識別碼,託播單其他參數值 AS 預設廣告
+			託播單名稱,廣告期間開始時間,廣告期間結束時間,託播單.託播單識別碼,委刊單識別碼,素材識別碼,版位.版位識別碼
 		FROM 版位
         JOIN 託播單 ON 託播單.版位識別碼 = 版位.版位識別碼
         JOIN 版位 版位類型 ON 版位.上層版位識別碼 = 版位類型.版位識別碼
 		LEFT JOIN 託播單投放版位 ON 託播單.託播單識別碼 = 託播單投放版位.託播單識別碼 AND 託播單投放版位.ENABLE=1		
 		LEFT JOIN 版位 額外版位 ON 額外版位.版位識別碼 = 託播單投放版位.版位識別碼
-        LEFT JOIN 版位其他參數 ON (版位其他參數.版位識別碼 = 版位類型.版位識別碼 AND 版位其他參數名稱 = "sepgDefaultFlag")
         LEFT JOIN 託播單素材 ON 託播單.託播單識別碼 = 託播單素材.託播單識別碼
-        LEFT JOIN 託播單其他參數 ON (託播單.託播單識別碼 = 託播單其他參數.託播單識別碼 AND 版位其他參數.版位其他參數順序 = 託播單其他參數.託播單其他參數順序)
-		WHERE 
-		版位類型.版位識別碼 LIKE ?
-		'.($showDefault==''?'':' AND ( 託播單其他參數值='.$showDefault.' )').'
-		AND (版位.版位識別碼 LIKE ? OR 託播單投放版位.版位識別碼 LIKE ?)
+        WHERE 
+		版位類型.版位識別碼 LIKE ?'
+		.' AND (版位.版位識別碼 LIKE ? OR 託播單投放版位.版位識別碼 LIKE ?)
 		AND (
 			(廣告期間開始時間 BETWEEN ? AND ?) OR (廣告期間結束時間 BETWEEN ? AND ?) OR (? BETWEEN 廣告期間開始時間 AND 廣告期間結束時間)
 			)
 		AND 託播單.託播單狀態識別碼 IN ('.(isset($_POST['待確認排程'])?'6':'0,1,2,4').')
 		'.($area==''?'':' AND ( '.$area.' )').
 		($ptn=='頻道short EPG banner'||$ptn=='專區vod'||$ptn=='專區banner'||$ptn=='首頁banner'?
-		'ORDER BY CHAR_LENGTH(SUBSTRING_INDEX(版位.版位名稱,SUBSTRING_INDEX(版位.版位名稱,"_",-1),1)),SUBSTRING_INDEX(版位.版位名稱,SUBSTRING_INDEX(版位.版位名稱,"_",-1),1),託播單其他參數值,託播單名稱'.
-		', CHAR_LENGTH(SUBSTRING_INDEX(額外版位.版位名稱,SUBSTRING_INDEX(額外版位.版位名稱,"_",-1),1)),SUBSTRING_INDEX(額外版位.版位名稱,SUBSTRING_INDEX(額外版位.版位名稱,"_",-1),1),託播單其他參數值,託播單名稱'
-		:'ORDER BY 託播單其他參數值,版位.版位名稱,額外版位.版位名稱,託播單名稱'
+		'ORDER BY CHAR_LENGTH(SUBSTRING_INDEX(版位.版位名稱,SUBSTRING_INDEX(版位.版位名稱,"_",-1),1)),SUBSTRING_INDEX(版位.版位名稱,SUBSTRING_INDEX(版位.版位名稱,"_",-1),1),託播單名稱'.
+		', CHAR_LENGTH(SUBSTRING_INDEX(額外版位.版位名稱,SUBSTRING_INDEX(額外版位.版位名稱,"_",-1),1)),SUBSTRING_INDEX(額外版位.版位名稱,SUBSTRING_INDEX(額外版位.版位名稱,"_",-1),1),託播單名稱'
+		:'ORDER BY 版位.版位名稱,額外版位.版位名稱,託播單名稱'
 		);
 		if(!$stmt=$my->prepare($sql)) {
 			exit('無法準備statement，請聯絡系統管理員！');
@@ -268,6 +265,15 @@ if(isset($_POST['action'])){
 		$scheduleHtml.='</tbody>';
 		$scheduleHtml='<table id="pschedule" class = "styledTable2" cellpadding="0" cellspacing="0">'.$scheduleHtml.'</table>';
 		exit(json_encode(array('table'=>$scheduleHtml,'postionOrders'=>$postionOrders),JSON_UNESCAPED_UNICODE));
+	}
+	
+	function getOrderDetail($orderId,$ptid){
+		global $my;
+		$sql ='
+			SELECT 
+			LEFT JOIN 版位其他參數 ON (版位其他參數.版位識別碼 = 版位類型.版位識別碼 AND 版位其他參數名稱 = "sepgDefaultFlag")
+			LEFT JOIN 託播單其他參數 ON (託播單.託播單識別碼 = 託播單其他參數.託播單識別碼 AND 版位其他參數.版位其他參數順序 = 託播單其他參數.託播單其他參數順序)
+		';
 	}
 }
 ?>

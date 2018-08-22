@@ -106,10 +106,12 @@
 				(new MyLogger())->error('無法上傳檔案('.$processingName.')到FTP server('.$host.')');
 				return false;
 			}
+			//先嘗試刪除要更更改的檔名
+			$sftp->delete($remote);
 			if (!$sftp->rename($processingName,$remote)) {
 				(new MyLogger())->error("更改檔名($new_file)失敗！");
-				if(!$sftp->delete($remote)){
-					(new MyLogger())->error('無法刪除FTP server('.$remote.')檔案。');
+				if(!$sftp->delete($processingName)){
+					(new MyLogger())->error('無法刪除FTP server('.$processingName.')檔案。');
 					return false;
 				}
 				return false;

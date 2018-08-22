@@ -6,11 +6,13 @@
 		const PROJECT_ROOT='/AMS/';
 		
 		const DB_HOST='localhost';
-		const DB_USER='AMS_Test';
-		//const DB_USER='root';
-		const DB_PASSWORD='AMS_stage';
-		//const DB_PASSWORD='root';
-		const DB_NAME='AMS_TEST';
+		//const DB_USER='AMS_Test';
+		const DB_USER='root';
+		//const DB_PASSWORD='AMS_stage';
+		const DB_PASSWORD='root';
+		//const DB_NAME='AMS_TEST';
+		//const DB_NAME='ams_csms_append';
+		const DB_NAME='ams_test';
 		
 		const OMP_N_ORACLE_DB_USER='OMPCHT15';
 		const OMP_N_ORACLE_DB_TABLE_OWNER='OMPCHT15';
