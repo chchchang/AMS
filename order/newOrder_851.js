@@ -72,9 +72,7 @@
 					}
 					//強制設定預設廣告
 					if(forceSet){
-						//console.log(valArr);
 						for(var key in valArr){
-							console.log(valArr[key].length);
 							if(valArr[key].length>0)
 							$.ajax({
 							type: 'post',

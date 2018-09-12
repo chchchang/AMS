@@ -102,15 +102,15 @@
 			($material["每則圖片素材最大高度"]=='')?($value["每則圖片素材最大高度"]=null):($value["每則圖片素材最大高度"]=$material["每則圖片素材最大高度"]);
 			($material["每則影片素材最大秒數"]=='')?($value["每則影片素材最大秒數"]=null):($value["每則影片素材最大秒數"]=$material["每則影片素材最大秒數"]);
 
-			$sql="INSERT INTO 版位素材類型 (版位識別碼,素材順序,素材類型識別碼,託播單素材是否必填,影片畫質識別碼,每小時最大素材筆數,每小時最大影片素材合計秒數,每則文字素材最大字數
+			$sql="INSERT INTO 版位素材類型 (版位識別碼,素材順序,顯示名稱,素材類型識別碼,託播單素材是否必填,影片畫質識別碼,每小時最大素材筆數,每小時最大影片素材合計秒數,每則文字素材最大字數
 			,每則圖片素材最大寬度,每則圖片素材最大高度,每則影片素材最大秒數,CREATED_PEOPLE)
-			VALUES(?,?,?,?,?,?,?,?,?,?,?,?)";
+			VALUES(?,?,?,?,?,?,?,?,?,?,?,?,?)";
 			if(!$stmt2=$my->prepare($sql)){
 				$Error=json_encode(array("dbError"=>'無法準備statement，請聯絡系統管理員！'),JSON_UNESCAPED_UNICODE);
 				goto exitWithError;
 			}
 			
-			if(!$stmt2->bind_param('iiiiiiiiiiii',$insertId,$material['素材順序'],$material['素材類型識別碼'],$material['託播單素材是否必填'],$material['影片畫質識別碼']
+			if(!$stmt2->bind_param('iisiiiiiiiiii',$insertId,$material['素材順序'],$material['顯示名稱'],$material['素材類型識別碼'],$material['託播單素材是否必填'],$material['影片畫質識別碼']
 			,$value['每小時最大素材筆數'],$value['每小時最大影片素材合計秒數'],$value['每則文字素材最大字數'],$value['每則圖片素材最大寬度'],$value['每則圖片素材最大高度']
 			,$value['每則影片素材最大秒數'],$_SESSION['AMS']['使用者識別碼'])){
 				$Error=json_encode(array("dbError"=>'無法繫結資料，請聯絡系統管理員！'),JSON_UNESCAPED_UNICODE);
@@ -230,36 +230,20 @@
 			($material["每則圖片素材最大高度"]=='')?($value["每則圖片素材最大高度"]=null):($value["每則圖片素材最大高度"]=$material["每則圖片素材最大高度"]);
 			($material["每則影片素材最大秒數"]=='')?($value["每則影片素材最大秒數"]=null):($value["每則影片素材最大秒數"]=$material["每則影片素材最大秒數"]);
 
-			$sql="INSERT INTO 版位素材類型 (版位識別碼,素材順序,素材類型識別碼,託播單素材是否必填,影片畫質識別碼,每小時最大素材筆數,每小時最大影片素材合計秒數,每則文字素材最大字數
+			$sql="INSERT INTO 版位素材類型 (版位識別碼,素材順序,顯示名稱,素材類型識別碼,託播單素材是否必填,影片畫質識別碼,每小時最大素材筆數,每小時最大影片素材合計秒數,每則文字素材最大字數
 			,每則圖片素材最大寬度,每則圖片素材最大高度,每則影片素材最大秒數,CREATED_PEOPLE)
-			VALUES(?,?,?,?,?,?,?,?,?,?,?,?)";
+			VALUES(?,?,?,?,?,?,?,?,?,?,?,?,?)";
 			if(!$stmt2=$my->prepare($sql)){
 				$Error=json_encode(array("dbError"=>'無法準備statement，請聯絡系統管理員！'),JSON_UNESCAPED_UNICODE);
 				goto exitWithError;
 			}
 			
-			if(!$stmt2->bind_param('iiiiiiiiiiii',$_POST['版位識別碼'],$material['素材順序'],$material['素材類型識別碼'],$material['託播單素材是否必填'],$material['影片畫質識別碼']
+			if(!$stmt2->bind_param('iisiiiiiiiiii',$_POST['版位識別碼'],$material['素材順序'],$material['顯示名稱'],$material['素材類型識別碼'],$material['託播單素材是否必填'],$material['影片畫質識別碼']
 			,$value['每小時最大素材筆數'],$value['每小時最大影片素材合計秒數'],$value['每則文字素材最大字數'],$value['每則圖片素材最大寬度'],$value['每則圖片素材最大高度']
 			,$value['每則影片素材最大秒數'],$_SESSION['AMS']['使用者識別碼'])){
 				$Error=json_encode(array("dbError"=>'無法繫結資料，請聯絡系統管理員！'),JSON_UNESCAPED_UNICODE);
 				goto exitWithError;
 			}
-			
-			/*$sql="UPDATE 版位素材類型 SET 素材類型識別碼=?,託播單素材是否必填=?,影片畫質識別碼=?,每小時最大素材筆數=?,每小時最大影片素材合計秒數=?,每則文字素材最大字數=?
-			,每則圖片素材最大寬度=?,每則圖片素材最大高度=?,每則影片素材最大秒數=?,LAST_UPDATE_PEOPLE=?,LAST_UPDATE_TIME = CURRENT_TIMESTAMP
-			WHERE 版位識別碼 =? AND 素材順序=?
-			";
-			if(!$stmt2=$my->prepare($sql)){
-				$Error=json_encode(array("dbError"=>'無法準備statement，請聯絡系統管理員！'),JSON_UNESCAPED_UNICODE);
-				goto exitWithError;
-			}
-			
-			if(!$stmt2->bind_param('iiiiiiiiiiii',$material['素材類型識別碼'],$material['託播單素材是否必填'],$material['影片畫質識別碼']
-			,$value['每小時最大素材筆數'],$value['每小時最大影片素材合計秒數'],$value['每則文字素材最大字數'],$value['每則圖片素材最大寬度'],$value['每則圖片素材最大高度']
-			,$value['每則影片素材最大秒數'],$_SESSION['AMS']['使用者識別碼'],$_POST['版位識別碼'],$material['素材順序'])){
-				$Error=json_encode(array("dbError"=>'無法繫結資料，請聯絡系統管理員！'),JSON_UNESCAPED_UNICODE);
-				goto exitWithError;
-			}*/
 			
 			
 			if(!$stmt2->execute()){

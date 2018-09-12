@@ -83,6 +83,10 @@
 				require_once 'ajaxToAPI_VSM.php';
 				sendOrder_VSM($_POST["託播單識別碼"]);
 				break;
+			case "鑽石版位":
+				require_once 'ajaxToAPI_diamond.php';
+				sendOrder_diamond($_POST["託播單識別碼"]);
+				break;
 			default:{
 				recordResult('insert',1,null,null);
 				changeOrderSate('送出',array($_POST["託播單識別碼"]));
@@ -357,6 +361,10 @@
 						return array("success"=>false,"message"=>'素材尚未派送到VSM');
 					}
 					return array("success"=>true,"message"=>'success');
+				}else if($row['版位類型名稱']=='鑽石版位')
+				{
+					//鑽石版位廣告送出時會同時派送素材，不需檢查
+					return array("success"=>true,"message"=>'success');
 				}
 				
 				if($area=='IAP')
@@ -441,6 +449,10 @@
 				require_once 'ajaxToAPI_VSM.php';
 				cancelEPGOrder_VSM($_POST["託播單識別碼"]);
 					break;
+			case "鑽石版位":
+				require_once 'ajaxToAPI_diamond.php';
+				cancelOrder_diamond($_POST["託播單識別碼"]);
+				break;
 			default:{
 				recordResult('delete',1,null,null);
 				changeOrderSate('取消送出',array($_POST["託播單識別碼"]));

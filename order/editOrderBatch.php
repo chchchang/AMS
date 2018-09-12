@@ -692,10 +692,11 @@
 						$('#版位類型識別碼').text(material['版位識別碼']);
 						$('<td/>').text(material['素材順序']).appendTo($tr);
 						
-						if(material['素材類型名稱']=='影片')
+						/*if(material['素材類型名稱']=='影片')
 							$('<td class = "mtype" order='+i+'/>').text(material['影片畫質名稱']+material['素材類型名稱']).appendTo($tr);
 						else
-							$('<td class = "mtype" order='+i+'/>').text(material['素材類型名稱']).appendTo($tr);
+							$('<td class = "mtype" order='+i+'/>').text(material['素材類型名稱']).appendTo($tr);*/
+						$('<td class = "mtype" order='+i+'/>').text(material['顯示名稱']).appendTo($tr);
 							
 						//可否點擊
 						$('<th/>').append($('<input type ="checkbox" name="updateCheckBox" id="materialClickableCB'+i+'" class="materialCB">')).appendTo($tr);

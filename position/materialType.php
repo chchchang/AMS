@@ -37,6 +37,7 @@
 <input type="number" value = 0 id='順序' hidden>
 <table class = 'styledTable2'>
 <tbody>
+<tr><th>顯示名稱</th><td><input id='顯示名稱' value = "" type="text"></td></tr>
 <tr><th>託播單素材是否必填</th><td><input type="radio" value = 1 name='必填' checked>是 <input type="radio" value = 0 name='必填'>否</td></tr>
 <tr><th>每小時最大素材筆數</th><td><input id = "每小時最大素材筆數" type="number" value = "" style="width:60px"></td></tr>
 <tr id = "textM"><th><input  type="radio" name="myRadio" value="文字">文字:</th> 
@@ -120,6 +121,7 @@ function setFilmType(selectedId){
 
 function showVal(jobject){
 	$('#順序').val(jobject.素材順序);
+	$("#顯示名稱").val(jobject.顯示名稱);
 	$("input[name='必填'][value='"+jobject.託播單素材是否必填+"']").prop('checked',true);
 	$("input[name='myRadio'][value='"+jobject.素材類型+"']").prop('checked',true);
 	$('#每小時最大素材筆數').val(jobject.每小時最大素材筆數);
@@ -165,7 +167,8 @@ $('#submitBtn').click(function(){
 		每則圖片素材最大高度:$('#每則圖片素材最大高度').val(),
 		每小時最大影片素材合計秒數:$('#每小時最大影片素材合計秒數').val(),
 		每則影片素材最大秒數:$('#每則影片素材最大秒數').val(),
-		影片畫質識別碼:$('#影片畫質識別碼').val()
+		影片畫質識別碼:$('#影片畫質識別碼').val(),
+		顯示名稱:$('#顯示名稱').val(),
 	}
 	if(action == 'new')
 		parent.materialTypeAdd(jobject);

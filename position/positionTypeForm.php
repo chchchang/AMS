@@ -15,7 +15,7 @@
 			//取的素材資料
 			$sql = '
 			SELECT 版位識別碼,素材順序,版位素材類型.素材類型識別碼,素材類型名稱 AS 素材類型,託播單素材是否必填,影片畫質識別碼,每小時最大素材筆數,每小時最大影片素材合計秒數,每則文字素材最大字數
-			,每則圖片素材最大寬度,每則圖片素材最大高度,每則影片素材最大秒數
+			,每則圖片素材最大寬度,每則圖片素材最大高度,每則影片素材最大秒數,顯示名稱
 			FROM 版位素材類型,素材類型
 			WHERE 版位識別碼 = ? AND 素材類型.素材類型識別碼 = 版位素材類型.素材類型識別碼
 			ORDER BY 素材順序
@@ -432,6 +432,7 @@ function materialTypeAdd(jobject,disable){
 	};
 
 	$c=$('<a/>')
+	$c.append(jobject.顯示名稱+' ');
 	if(jobject.是否必填==1){
 		$c.append('必填 ');
 	}
@@ -497,6 +498,7 @@ function materialTypeEdit(jobject){
 	$li = $('.materialType').eq(jobject.素材順序-1);
 	$li = $li.find('a');
 	$li.text('');
+	$li.append(jobject.顯示名稱+' ');
 	if(jobject.是否必填==1){
 		$li.append('必填 ');
 	}

@@ -351,10 +351,11 @@
 						
 						$('<td/>').text(material['素材順序']).appendTo($tr);
 						
-						if(material['素材類型名稱']=='影片')
+						/*if(material['素材類型名稱']=='影片')
 							$('<td class = "mtype" order='+i+'/>').text(material['影片畫質名稱']+material['素材類型名稱']).appendTo($tr);
 						else
-							$('<td class = "mtype" order='+i+'/>').text(material['素材類型名稱']).appendTo($tr);
+							$('<td class = "mtype" order='+i+'/>').text(material['素材類型名稱']).appendTo($tr);*/
+						$('<td class = "mtype" order='+i+'/>').text(material['顯示名稱']).appendTo($tr);
 							
 						$('<td/>').text((material['託播單素材是否必填']==0)?'否':'是').appendTo($tr);
 						//可否點擊
@@ -511,7 +512,7 @@
 			});
 			setConnectOrder('../order/newOrder.php',ids,dateObj,[getHours()],areas,forceSet);
 		}
-		else{
+		else if($('#positiontype').text()=='單一平台barker_vod'){
 			setConnectOrderVSM('../order/ajaxForVSM.php',ids,dateObj,[getHours()],forceSet);
 		}
 	}

@@ -28,8 +28,8 @@
 		const OMP_S_ORACLE_DB_CONN_STR='';
 		const SECRET_FOLDER='0b7d6e5a265d20715443e19a1f7609c6';
 		//const MATERIAL_FOLDER='/opt/lampp/htdocs/AMS/material/uploadedFile/';
-		//const MATERIAL_FOLDER= '\\material\\uploadedFile\\';
-		const MATERIAL_FOLDER= '/material/uploadedFile/';
+		const MATERIAL_FOLDER= '\\material\\uploadedFile\\';
+		//const MATERIAL_FOLDER= '/material/uploadedFile/';
 		
 		const MIN_PASSWD_LENGTH=8;
 		
