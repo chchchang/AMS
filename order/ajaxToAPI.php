@@ -80,6 +80,8 @@
 			case "單一平台barker_vod":
 			case "單一平台EPG":
 			case "單一平台marquee":
+			case "單一平台background_banner":
+			case "單一平台advertising_page":
 				require_once 'ajaxToAPI_VSM.php';
 				sendOrder_VSM($_POST["託播單識別碼"]);
 				break;
@@ -355,7 +357,8 @@
 					require_once '../tool/SFTP.php';
 					foreach(Config::$FTP_SERVERS['VSM'] as $server){
 						$遠端路徑=$server['圖片素材路徑'];
-						$fileName ='_____AMS_'.$row2['素材識別碼'].'.'.end(explode(".",$row2['素材原始檔名']));
+						$fileNamePatterns = explode(".",$row2['素材原始檔名']);
+						$fileName ='_____AMS_'.$row2['素材識別碼'].'.'.end($fileNamePatterns);
 						$isfile =SFTP::isFile($server['host'],$server['username'],$server['password'],$遠端路徑.$fileName);
 						if(!$isfile)
 						return array("success"=>false,"message"=>'素材尚未派送到VSM');
@@ -442,6 +445,8 @@
 			case "單一平台banner":
 			case "單一平台barker_vod":
 			case "單一平台marquee":
+			case "單一平台background_banner":
+			case "單一平台advertising_page":
 				require_once 'ajaxToAPI_VSM.php';
 				cancelOrder_VSM($_POST["託播單識別碼"]);
 				break;

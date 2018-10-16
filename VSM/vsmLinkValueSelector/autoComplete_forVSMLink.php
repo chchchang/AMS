@@ -1,6 +1,6 @@
 <?php
-	require_once('../tool/auth/authAJAX.php');
-	require_once('../Config_VSM_Meta.php');
+	require_once('../../tool/auth/authAJAX.php');
+	require_once('../../Config_VSM_Meta.php');
 	
 
 

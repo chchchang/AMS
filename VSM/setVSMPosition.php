@@ -4,8 +4,7 @@
 	require_once '../tool/MyDB.php';
 	require_once '../Config_VSM_Meta.php';
 	$logger=new MyLogger();
-	//$mat_type_name = ['banner','barker_vod','barker','marquee'];
-	$mat_type_name = ['banner','barker_vod','marquee'];
+	$mat_type_name = ['banner','barker_vod','barker','marquee','background_banner','advertising_page'];
 	//$apiUrl = 'localhost/VSMAPI/getVSMPosition.php';	
 	$apiUrl = Config_VSM_Meta::GET_POSITION_API();	
 	//連線DB
@@ -94,60 +93,52 @@
 			echo '已建立過版位類型素材<br>';
 		}
 		else{
+			$sql='INSERT INTO 版位素材類型 (版位識別碼,素材順序,顯示名稱,素材類型識別碼,託播單素材是否必填,影片畫質識別碼,CREATED_PEOPLE)';
 			//banner
 			if($ptindex==0){
-				$sql='INSERT INTO 版位素材類型 (版位識別碼,素材順序,素材類型識別碼,託播單素材是否必填,影片畫質識別碼,CREATED_PEOPLE)'
-				.' VALUES ('.$ptid.',1,2,0,1,1)'
+				$sql.=' VALUES ('.$ptid.',1,圖片,2,1,1,1)'
 				;
-				if(!$stmt=$my->prepare($sql)) {
-					exit('錯誤代碼('.$my->errno.')、錯誤訊息('.$my->error.')。');
-				}
-				
-				if(!$stmt->execute()) {
-					exit('錯誤代碼('.$my->errno.')、錯誤訊息('.$my->error.')。');
-				}
-				echo '版位類型素材建立完成<br>';
 			}
 			//barker_vod
 			else if($ptindex==1){
-				$sql='INSERT INTO 版位素材類型 (版位識別碼,素材順序,素材類型識別碼,託播單素材是否必填,影片畫質識別碼,CREATED_PEOPLE)'
-				.' VALUES ('.$ptid.',1,3,0,1,1)'
-				.',  ('.$ptid.',2,3,0,2,1)'
+				$sql.=' VALUES ('.$ptid.',1,影片,3,0,1,1)'
+				.',  ('.$ptid.',2,影片,3,0,2,1)'
 				;
-				if(!$stmt=$my->prepare($sql)) {
-					exit('錯誤代碼('.$my->errno.')、錯誤訊息('.$my->error.')。');
-				}
-				if(!$stmt->execute()) {
-					exit('錯誤代碼('.$my->errno.')、錯誤訊息('.$my->error.')。');
-				}
-				echo '版位類型素材建立完成<br>';
 			}
 			//barker
 			else if($ptindex==2){
-				$sql='INSERT INTO 版位素材類型 (版位識別碼,素材順序,素材類型識別碼,託播單素材是否必填,影片畫質識別碼,CREATED_PEOPLE)'
-				.' VALUES ('.$ptid.',1,3,0,1,1)'
+				$sql.=' VALUES ('.$ptid.',1,影片,3,0,1,1)'
 				;
-				if(!$stmt=$my->prepare($sql)) {
-					exit('錯誤代碼('.$my->errno.')、錯誤訊息('.$my->error.')。');
-				}
-				if(!$stmt->execute()) {
-					exit('錯誤代碼('.$my->errno.')、錯誤訊息('.$my->error.')。');
-				}
-				echo '版位類型素材建立完成<br>';
 			}
 			//marquee
 			else if($ptindex==3){
-				$sql='INSERT INTO 版位素材類型 (版位識別碼,素材順序,素材類型識別碼,託播單素材是否必填,CREATED_PEOPLE)'
-				.' VALUES ('.$ptid.',1,1,1,1)'
+				$sql.=' VALUES ('.$ptid.',1,文字,1,1,1)'
 				;
-				if(!$stmt=$my->prepare($sql)) {
-					exit('錯誤代碼('.$my->errno.')、錯誤訊息('.$my->error.')。');
-				}
-				if(!$stmt->execute()) {
-					exit('錯誤代碼('.$my->errno.')、錯誤訊息('.$my->error.')。');
-				}
-				echo '版位類型素材建立完成<br>';
 			}
+			//background_banner
+			else if($ptindex==4){
+				$sql.=' VALUES ('.$ptid.',1,圖片,2,1,1,1)'
+				;
+			}
+			//advertising_page
+			else if($ptindex==5){
+				$sql.=' VALUES ('.$ptid.',1,內文,1,1,1,1)'
+				.',  ('.$ptid.',2,圖片,2,1,1,1)'
+				.',  ('.$ptid.',3,影片,3,0,2,1)'
+				;
+				
+			}
+			else{
+				return 0;
+			}
+			if(!$stmt=$my->prepare($sql)) {
+				exit('錯誤代碼('.$my->errno.')、錯誤訊息('.$my->error.')。');
+			}
+			if(!$stmt->execute()) {
+				exit('錯誤代碼('.$my->errno.')、錯誤訊息('.$my->error.')。');
+			}
+			echo '版位類型素材建立完成<br>';
+			
 		}
 		//建立版位類型其他參數
 		$sql='DELETE FROM 版位其他參數 WHERE 版位識別碼=?';
@@ -174,17 +165,7 @@
 			.',  ('.$ptid.',6,"link","link",1,1,0,"",1)'
 			.',  ('.$ptid.',7,"linkParameter","linkParameter",1,1,0,"",1)'
 			;
-			if(!$stmt=$my->prepare($sql)) {
-				exit('錯誤代碼('.$my->errno.')、錯誤訊息('.$my->error.')。');
-			}
-			
-			if(!$stmt->bind_param('ss',$PTData['mat_type_id'],$PTData['mat_type_name'])){
-				exit('錯誤代碼('.$my->errno.')、錯誤訊息('.$my->error.')。');
-			}
-			
-			if(!$stmt->execute()) {
-				exit('錯誤代碼('.$my->errno.')、錯誤訊息('.$my->error.')。');
-			}
+
 		}
 		//barker_vod
 		else if($ptindex==1){
@@ -199,17 +180,6 @@
 			.',  ('.$ptid.',8,"url","url",1,1,1,"rtsp://172.17.188.35:5004/vscontsrv%3a",1)'
 			.',  ('.$ptid.',9,"bannerTransactionId","bannerTransactionId",1,1,0,"",1)'
 			;
-			if(!$stmt=$my->prepare($sql)) {
-				exit('錯誤代碼('.$my->errno.')、錯誤訊息('.$my->error.')。');
-			}
-			
-			if(!$stmt->bind_param('ss',$PTData['mat_type_id'],$PTData['mat_type_name'])){
-				exit('錯誤代碼('.$my->errno.')、錯誤訊息('.$my->error.')。');
-			}
-			
-			if(!$stmt->execute()) {
-				exit('錯誤代碼('.$my->errno.')、錯誤訊息('.$my->error.')。');
-			}
 		}
 		//barker
 		else if($ptindex==2){
@@ -219,17 +189,6 @@
 			.',  ('.$ptid.',3,"group_name","group_name",1,1,1,?,1)'
 			.',  ('.$ptid.',4,"url","url",1,1,1,"igmp://230.1.2.102:2102",1)'
 			;
-			if(!$stmt=$my->prepare($sql)) {
-				exit('錯誤代碼('.$my->errno.')、錯誤訊息('.$my->error.')。');
-			}
-			
-			if(!$stmt->bind_param('ss',$PTData['mat_type_id'],$PTData['mat_type_name'])){
-				exit('錯誤代碼('.$my->errno.')、錯誤訊息('.$my->error.')。');
-			}
-			
-			if(!$stmt->execute()) {
-				exit('錯誤代碼('.$my->errno.')、錯誤訊息('.$my->error.')。');
-			}
 		}
 		//marquee
 		else if($ptindex==3){
@@ -243,17 +202,45 @@
 			.',  ('.$ptid.',7,"linkParameter","linkParameter",1,1,0,"",1)'
 			.',  ('.$ptid.',8,"url","url",1,1,1,"rtsp://172.17.188.35:5004/vscontsrv%3a",1)'
 			;
-			if(!$stmt=$my->prepare($sql)) {
-				exit('錯誤代碼('.$my->errno.')、錯誤訊息('.$my->error.')。');
-			}
-			
-			if(!$stmt->bind_param('ss',$PTData['mat_type_id'],$PTData['mat_type_name'])){
-				exit('錯誤代碼('.$my->errno.')、錯誤訊息('.$my->error.')。');
-			}
-			
-			if(!$stmt->execute()) {
-				exit('錯誤代碼('.$my->errno.')、錯誤訊息('.$my->error.')。');
-			}
+		}
+		//background_banner
+		else if($ptindex==4){
+			$sql='INSERT INTO 版位其他參數 (版位識別碼,版位其他參數順序,版位其他參數顯示名稱,版位其他參數名稱,版位其他參數型態識別碼,版位其他參數是否必填,是否版位專用,版位其他參數預設值,CREATED_PEOPLE)'
+			.' VALUES ('.$ptid.',1,"mat_type_id","mat_type_id",1,1,1,?,1)'
+			.',  ('.$ptid.',2,"srv_category_id","srv_category_id",1,1,1,-1,1)'
+			.',  ('.$ptid.',3,"group_name","group_name",1,1,1,?,1)'
+			.',  ('.$ptid.',4,"weight","weight",2,1,0,1,1)'
+			;
+		}
+		//advertising_page
+		else if($ptindex==5){
+			$sql='INSERT INTO 版位其他參數 (版位識別碼,版位其他參數順序,版位其他參數顯示名稱,版位其他參數名稱,版位其他參數型態識別碼,版位其他參數是否必填,是否版位專用,版位其他參數預設值,CREATED_PEOPLE)'
+			.' VALUES ('.$ptid.',1,"mat_type_id","mat_type_id",1,1,1,?,1)'
+			.',  ('.$ptid.',2,"srv_category_id","srv_category_id",1,1,1,-1,1)'
+			.',  ('.$ptid.',3,"group_name","group_name",1,1,1,?,1)'
+			.',  ('.$ptid.',4,"標題顏色","titleColor",1,0,0,"#FFFFFFFF",1)'
+			.',  ('.$ptid.',5,"子標題","subheader",1,1,0,"",1)'
+			.',  ('.$ptid.',6,"子標題顏色","subheaderColor",1,0,0,"#FF55555",1)'
+			.',  ('.$ptid.',7,"內文顏色","contentColor",1,0,0,"#FF55555",1)'
+			.',  ('.$ptid.',8,"成人內容","isAdult",3,0,0,0,1)'
+			.',  ('.$ptid.',9,"影片url","url",1,1,1,"rtsp://172.17.188.35:5004/vscontsrv%3a",1)'
+			;
+		}
+		else{
+			echo '不需建立板位<br>';
+			return 0;
+		}
+		
+		if(!$stmt=$my->prepare($sql)) {
+			exit('錯誤代碼('.$my->errno.')、錯誤訊息('.$my->error.')。');
+		}
+		
+		if(!$stmt->bind_param('ss',$PTData['mat_type_id'],$PTData['mat_type_name'])){
+			exit('錯誤代碼('.$my->errno.')、錯誤訊息('.$my->error.')。');
+		}
+		
+		if(!$stmt->execute()) {
+			exit('錯誤代碼('.$my->errno.')、錯誤訊息('.$my->error.')。');
 		}
 		echo '版位其他參數建立完成<br>';
 		return $ptid;

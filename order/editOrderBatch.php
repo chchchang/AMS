@@ -192,6 +192,8 @@
 <link rel="stylesheet" href="<?=$SERVER_SITE.Config::PROJECT_ROOT?>tool/jquery-ui/jquery-ui.css"></link>
 <script type="text/javascript" src="newOrder_852.js?<?=time()?>"></script>
 <script type="text/javascript" src="newOrder_851.js?<?=time()?>"></script>
+<script type="text/javascript" src="../VSM/vsmLinkValueSelector/VodBundleSelector.js"></script>
+<script type="text/javascript" src="../VSM/vsmLinkValueSelector/VodPosterSelector.js"></script>
 <link rel='stylesheet' type='text/css' href='<?=$SERVER_SITE.Config::PROJECT_ROOT?>external-stylesheet.css'/>
 <style type="text/css">
   	.Center{
@@ -742,6 +744,7 @@
 							.append($('<option value="external">external</option>'))
 							.append($('<option value="app">app</option>'))
 							.append($('<option value="Vod">Vod</option>'))
+							.append($('<option value="VODPoster">VODPoster</option>'))
 							.append($('<option value="Channel">Channel</option>'))
 							.append($('<option value="coverImageIdV">SEPG直向覆蓋圖片</option>'))
 							.append($('<option value="coverImageIdH">SEPG橫向覆蓋圖片</option>'))
@@ -790,7 +793,7 @@
 							source :function( request, response,data) {
 										var order = el.attr('order');
 										if($("#點擊後開啟類型"+order).hasClass('VSM'))
-										$.post( "autoComplete_forVSMLink.php",{term: request.term, linkType: $("#點擊後開啟類型"+order).val()},
+										$.post( "../VSM/vsmLinkValueSelector/autoComplete_forVSMLink.php",{term: request.term, linkType: $("#點擊後開啟類型"+order).val()},
 											function( data ) {
 											response(JSON.parse(data));
 										});
@@ -803,6 +806,23 @@
 						}).on('autocompletechange change', function () {
 							materialObj[$(this).attr('order')]['點擊後開啟位址'] =  $(this).val();
 						})
+						el.click(function(){
+							var order = el.attr('order');
+							if( $("#點擊後開啟類型"+order).val()=="Vod"){
+								var callback= function(selectedVod){
+									el.val(selectedVod["product_id"]+":/"+selectedVod["product_name"]);
+									el.trigger("change");
+								};
+								var VodSelector = new VodBundleSelector(callback);	
+							}
+							else if($("#點擊後開啟類型"+order).val()=="VODPoster"){
+								var callback= function(selectedVod){
+									el.val(selectedVod["internal_name"]+":/"+selectedVod["poster_name"]);
+									el.trigger("change");
+								};
+								var VodSelector = new VodPosterSelector(callback);	
+							}
+						});
 					})
 				}
 			}
