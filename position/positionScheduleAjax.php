@@ -98,6 +98,17 @@ if(isset($_POST['action'])){
 			ORDER BY ext,pre,版位.版位名稱'
 			;
 		}
+		else if($ptn=='單一平台EPG'){
+			$sql='SELECT 版位.版位名稱,channel_number.版位其他參數預設值 as channel_number
+			FROM 版位
+			JOIN 版位 版位類型 ON 版位.上層版位識別碼 = 版位類型.版位識別碼
+			LEFT JOIN 版位其他參數 channel_number ON (channel_number.版位識別碼 = 版位.版位識別碼 AND channel_number.版位其他參數名稱 = "channel_number")
+			WHERE 
+			版位類型.版位識別碼 LIKE ?
+			AND 版位.版位識別碼 LIKE ?
+			ORDER BY CHAR_LENGTH(channel_number),channel_number,版位.版位名稱'
+			;
+		}
 		else{
 			$sql='SELECT 版位.版位名稱
 			FROM 版位,版位 版位類型

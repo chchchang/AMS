@@ -96,35 +96,34 @@
 			$sql='INSERT INTO 版位素材類型 (版位識別碼,素材順序,顯示名稱,素材類型識別碼,託播單素材是否必填,影片畫質識別碼,CREATED_PEOPLE)';
 			//banner
 			if($ptindex==0){
-				$sql.=' VALUES ('.$ptid.',1,圖片,2,1,1,1)'
+				$sql.=' VALUES ('.$ptid.',1,"圖片",2,1,1,1)'
 				;
 			}
 			//barker_vod
 			else if($ptindex==1){
-				$sql.=' VALUES ('.$ptid.',1,影片,3,0,1,1)'
-				.',  ('.$ptid.',2,影片,3,0,2,1)'
+				$sql.=' VALUES ('.$ptid.',1,"影片",3,0,1,1)'
+				.',  ('.$ptid.',2,"影片",3,0,2,1)'
 				;
 			}
 			//barker
 			else if($ptindex==2){
-				$sql.=' VALUES ('.$ptid.',1,影片,3,0,1,1)'
+				$sql.=' VALUES ('.$ptid.',1,"影片",3,0,1,1)'
 				;
 			}
 			//marquee
 			else if($ptindex==3){
-				$sql.=' VALUES ('.$ptid.',1,文字,1,1,1)'
+				$sql.=' VALUES ('.$ptid.',1,"文字",1,1,1,1)'
 				;
 			}
 			//background_banner
 			else if($ptindex==4){
-				$sql.=' VALUES ('.$ptid.',1,圖片,2,1,1,1)'
+				$sql.=' VALUES ('.$ptid.',1,"圖片",2,1,1,1)'
 				;
 			}
 			//advertising_page
 			else if($ptindex==5){
-				$sql.=' VALUES ('.$ptid.',1,內文,1,1,1,1)'
-				.',  ('.$ptid.',2,圖片,2,1,1,1)'
-				.',  ('.$ptid.',3,影片,3,0,2,1)'
+				$sql.=' VALUES ('.$ptid.',1,"圖片",2,1,1,1)'
+				.',  ('.$ptid.',2,"影片",3,0,2,1)'
 				;
 				
 			}
@@ -177,7 +176,7 @@
 			.',  ('.$ptid.',5,"linkType","linkType",1,1,0,"",1)'
 			.',  ('.$ptid.',6,"link","link",1,1,0,"",1)'
 			.',  ('.$ptid.',7,"linkParameter","linkParameter",1,1,0,"",1)'
-			.',  ('.$ptid.',8,"url","url",1,1,1,"rtsp://172.17.188.35:5004/vscontsrv%3a",1)'
+			.',  ('.$ptid.',8,"url","url",1,1,1,"rtsp://172.17.188.35:5004/asset/vscontsrv%3a",1)'
 			.',  ('.$ptid.',9,"bannerTransactionId","bannerTransactionId",1,1,0,"",1)'
 			;
 		}
@@ -200,7 +199,6 @@
 			.',  ('.$ptid.',5,"linkType","linkType",1,1,0,"",1)'
 			.',  ('.$ptid.',6,"link","link",1,1,0,"",1)'
 			.',  ('.$ptid.',7,"linkParameter","linkParameter",1,1,0,"",1)'
-			.',  ('.$ptid.',8,"url","url",1,1,1,"rtsp://172.17.188.35:5004/vscontsrv%3a",1)'
 			;
 		}
 		//background_banner
@@ -221,9 +219,10 @@
 			.',  ('.$ptid.',4,"標題顏色","titleColor",1,0,0,"#FFFFFFFF",1)'
 			.',  ('.$ptid.',5,"子標題","subheader",1,1,0,"",1)'
 			.',  ('.$ptid.',6,"子標題顏色","subheaderColor",1,0,0,"#FF55555",1)'
-			.',  ('.$ptid.',7,"內文顏色","contentColor",1,0,0,"#FF55555",1)'
-			.',  ('.$ptid.',8,"成人內容","isAdult",3,0,0,0,1)'
-			.',  ('.$ptid.',9,"影片url","url",1,1,1,"rtsp://172.17.188.35:5004/vscontsrv%3a",1)'
+			.',  ('.$ptid.',7,"內文","content",1,1,0,"",1)'
+			.',  ('.$ptid.',8,"內文顏色","contentColor",1,0,0,"#FF55555",1)'
+			.',  ('.$ptid.',9,"成人內容","isAdult",3,0,0,0,1)'
+			.',  ('.$ptid.',10,"影片url","url",1,1,1,"rtsp://172.17.188.35:5004/asset/vscontsrv%3a",1)'
 			;
 		}
 		else{

@@ -341,7 +341,7 @@
 						else
 							$status = 1;
 							
-						if(intval($status)!=1)
+						if(intval($status)==0)
 							return array("success"=>false,"message"=>'對應區域的伺服器尚未派送素材');
 						
 					}

@@ -101,7 +101,7 @@ td.ui-datepicker-current-day a {border: 2px #E63F00 solid !important;}
 	var 版位=[];
 	var 版位識別碼=0;
 	$(function() {
-		$('#time').prop('disabled',true);
+		/*$('#time').prop('disabled',true);
 		$.post('?',{method:'getPositions'},function(json) {	
 			for(i=0;i<json.length;i++) {
 				版位[json[i].版位類型識別碼]=json[i];
@@ -129,7 +129,52 @@ td.ui-datepicker-current-day a {border: 2px #E63F00 solid !important;}
 					setDatePicker(new Date());
 				}
 			});
-		},'json');
+		},'json');*/
+		//設定版位選項
+		$.post('../order/orderManaging.php',{method:'getPositionTypeSelection'}
+			,function(positionTypeOption){
+				for(var i in positionTypeOption){
+					var opt = $(document.createElement("option"));
+					opt.text(positionTypeOption[i][1])//紀錄版位類型名稱
+					.val(positionTypeOption[i][0])//紀錄版位類型識別碼
+					.appendTo($("#positiontype"));
+				}
+				setPosition($( "#positiontype option:selected" ).val());
+				
+				$( "#positiontype" ).combobox({
+					 select: function( event, ui ) {
+						$("#position").combobox('setText','');
+						setPosition(this.value);
+					 }
+				});
+			}
+			,'json'
+		);
+		
+		//設定版位資料
+		function setPosition(pId){
+			$("#position").empty();
+			$("#position" ).val("");
+			$.post( "../order/ajaxToDB_Order.php", { action: "getPositionByPositionType",版位類型識別碼:pId }, 
+				function( data ) {
+					for(var i in data){
+						var opt = $(document.createElement("option"));
+						opt.text(data[i][1])//紀錄版位名稱
+						.val(data[i][0])//紀錄版位識別碼
+						.appendTo($("#position"));
+					}
+				}
+				,"json"
+			);
+		}
+	
+
+		$( "#position" ).combobox({
+			select: function( event, ui ) {
+				版位識別碼=this.value;
+				setDatePicker(new Date());
+			}
+		});
 		
 		$('#previousDate').click(function() {
 			if($('#time').datepicker('getDate')) {

@@ -102,6 +102,53 @@
 					]
 				];
 			}
+			//2018/11/15 若為banner_full，於banner1 與 banner2位置放入兩張空白託播單，讓前端不顯示
+			if($orderConfigData['group_name'] == "banner_full"){
+				$bypostOrder[] = [
+					"transaction_id"=>$orderData["託播單識別碼"]."_emptybanner1",
+					"mat_type_id"=>4,
+					"srv_category_id"=>$orderConfigData['srv_category_id'],
+					"group_name"=>"banner1",
+					"title"=>$orderData['託播單名稱'],
+					"start_datetime"=>$orderData['廣告期間開始時間'],
+					"end_datetime"=>$orderData['廣告期間結束時間'],
+					"hours"=>$orderData['廣告可被播出小時時段'],
+					"otherConfig"=>
+					[
+						"focusImageId"=>"",
+						"unfocusImageId"=>"",
+						"linkType"=>"NONE",
+						"link"=>"",
+						"linkParameter"=>"",
+						"weight"=>$orderConfigData['weight'],
+						'material_link'=>"",
+						'material_link_value'=>""
+					]
+				];
+				
+				$bypostOrder[] = [
+					"transaction_id"=>$orderData["託播單識別碼"]."_emptybanner2",
+					"mat_type_id"=>4,
+					"srv_category_id"=>$orderConfigData['srv_category_id'],
+					"group_name"=>"banner2",
+					"title"=>$orderData['託播單名稱'],
+					"start_datetime"=>$orderData['廣告期間開始時間'],
+					"end_datetime"=>$orderData['廣告期間結束時間'],
+					"hours"=>$orderData['廣告可被播出小時時段'],
+					"otherConfig"=>
+					[
+						"focusImageId"=>"",
+						"unfocusImageId"=>"",
+						"linkType"=>"NONE",
+						"link"=>"",
+						"linkParameter"=>"",
+						"weight"=>$orderConfigData['weight'],
+						'material_link'=>"",
+						'material_link_value'=>""
+					]
+				];
+			}
+			
 			$action = 'sendOrder';
 		}
 		
@@ -260,7 +307,7 @@
 			//取得素材資訊
 			$sql='
 				SELECT
-					素材順序,素材名稱,素材原始檔名,文字素材內容,影片媒體編號,託播單素材.素材識別碼,可否點擊,點擊後開啟類型,點擊後開啟位址
+					素材順序,素材名稱,素材類型識別碼,素材原始檔名,文字素材內容,影片媒體編號,託播單素材.素材識別碼,可否點擊,點擊後開啟類型,點擊後開啟位址
 				FROM
 					託播單素材
 					LEFT JOIN 素材 ON 素材.素材識別碼=託播單素材.素材識別碼
@@ -279,21 +326,23 @@
 				$material_link = "";
 				$material_link_value = "";
 				foreach($orderMaterial as $om){
-					if($om["素材順序"]==1){
+					if($om["素材類型識別碼"]==1){
 						$Materials["content"] = $om["文字素材內容"];
-						$material_link = $om["點擊後開啟類型"];
-						$material_link_value = $om["點擊後開啟位址"];
+						
 					}
-					if($om["素材順序"]==2){
+					if($om["素材類型識別碼"]==2){
 						$materialType = end(explode('.',$om['素材原始檔名']));
 						$materialName = 'ad/_____AMS_'.$om['素材識別碼'].'.'.$materialType;
 						$Materials["imageId"] = $materialName;
+						$material_link = $om["點擊後開啟類型"];
+						$material_link_value = $om["點擊後開啟位址"];
 					}
-					if($om["素材順序"]==3){
+					if($om["素材類型識別碼"]==3){
 						$material_url = $orderConfigData['url'].$om['影片媒體編號'].'_f';
-						$Materials["vodURL"] = $om["文字素材內容"];
+						$Materials["vodURL"] = $material_url;
 					}
 				}
+			
 				$bypostOrder[] = [
 					"transaction_id"=>$orderData["託播單識別碼"],
 					"mat_type_id"=>$orderConfigData['mat_type_id'],
@@ -304,7 +353,7 @@
 					"end_datetime"=>$orderData['廣告期間結束時間'],
 					"hours"=>$orderData['廣告可被播出小時時段'],
 					"otherConfig"=>[
-						"content"=>$Materials['content'],
+						"content"=>$orderConfigData['content'],
 						"imageId"=>$Materials['imageId'],
 						"vodURL"=>$Materials['vodURL'],
 						"titleColor"=>$orderConfigData['titleColor'],
