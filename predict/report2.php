@@ -2,6 +2,7 @@
 	header("X-Frame-Options: SAMEORIGIN");
 	include('../tool/auth/auth.php');
 	require '../tool/OutputExcel.php';
+	require_once '../tool/phpExtendFunction.php';
 	
 	$my=new mysqli(Config::DB_HOST,Config::DB_USER,Config::DB_PASSWORD,Config::DB_NAME);
 	if($my->connect_errno) {
@@ -16,6 +17,8 @@
 		$ch_where="";//紀錄選擇頻道query的where部分(頻道選擇query+廣告分類query)
 		$date_where=" AND 預測_頻道表.生效日期=? AND 平台識別碼 LIKE ? ";//紀錄選擇日期query的where部分
 		$param_type='ss';//生效日期與平台識別碼
+		$actualDates=array();
+		
 		if($_POST['選擇平台']=='OMP')
 			$選擇平台='2';
 		else if($_POST['選擇平台']=='IAP')
@@ -26,12 +29,14 @@
 		if(isset($_POST["實際日期期間"])){
 			$param_type.='ss';
 			$date_where.=" AND 日期 BETWEEN ? AND ? ";
+			$actualDates = phpExtendFunction::getDatesByPeriod($_POST["實際日期期間"][0],$_POST["實際日期期間"][1],"Ymd");
 		}
 		else if(isset($_POST["實際日期"])){
 			$n = count($_POST["實際日期"]);
 			$param_type.=str_repeat("s", $n);
 			if($n>0)
 				$date_where.="AND 日期 IN (?".str_repeat(",?", $n-1).") ";
+			$actualDates = $_POST["實際日期"];
 		}
 		
 		if(isset($_POST["頻道列表"])){
@@ -120,6 +125,8 @@
 		$ch_where="";//紀錄選擇頻道query的where部分(頻道選擇query+廣告分類query)
 		$date_where=" AND 預測_頻道表.生效日期=? AND 平台識別碼 LIKE ? ";//紀錄選擇日期query的where部分
 		$param_type='ss';//生效日期與平台識別碼
+		$predictDates=array();
+		
 		if($_POST['選擇平台']=='OMP')
 			$選擇平台='2';
 		else if($_POST['選擇平台']=='IAP')
@@ -130,12 +137,15 @@
 		if(isset($_POST["預測日期期間"])){
 			$param_type.='ss';
 			$date_where.=" AND 日期 BETWEEN ? AND ? ";
+			$predictDates = phpExtendFunction::getDatesByPeriod($_POST["預測日期期間"][0],$_POST["預測日期期間"][1],"Ymd");
 		}
 		else if(isset($_POST["預測日期"])){
 			$n = count($_POST["預測日期"]);
 			$param_type.=str_repeat("s", $n);
 			if($n>0)
 				$date_where.=" AND 日期 IN (?".str_repeat(",?", $n-1).") ";
+			
+			$predictDates = $_POST["預測日期"];
 		}
 		
 		if(isset($_POST["頻道列表"])){
@@ -221,12 +231,8 @@
 		
 		if(isset($_POST['匯出報表'])){
 			$fileName =uniqid();
-			/*$outputExcel=new OutputExcel('export/'.$fileName);
-			$outputExcel->outputSheet('實際',getExcelArray($_POST['sheetName1'],$result,false));
-			$outputExcel->outputSheet('預測',getExcelArray($_POST['sheetName2'],$result_predict,true));
-			$outputExcel->close();*/
-			OutputExcel::outputAll_sheet('export/'.$fileName,array('實際'=>getExcelArray($_POST['sheetName1'],$result,false),
-																	'預測'=>getExcelArray($_POST['sheetName2'],$result_predict,true)));
+			OutputExcel::outputAll_sheet('export/'.$fileName,array('實際'=>getExcelArray($_POST['sheetName1'],$result,false,$actualDates),
+																	'預測'=>getExcelArray($_POST['sheetName2'],$result_predict,true,$predictDates)));
 			$protocol = (!empty($_SERVER['HTTPS']) && $_SERVER['HTTPS'] !== 'off' || $_SERVER['SERVER_PORT'] == 443) ? "https://" : "http://";
 			exit(json_encode(array('success'=>true,'url'=>$protocol.$_SERVER ['HTTP_HOST'].str_replace("report2.php",'export/'.$fileName.".xls",$_SERVER['PHP_SELF'])),JSON_UNESCAPED_UNICODE));
 		}
@@ -300,13 +306,13 @@
 	}
 	
 	//產生excel檔案
-	function getExcelArray ($firstRow,$result,$predict){
+	function getExcelArray ($sheetName,$result,$predict,$dates){
 		$forExcel = array();
 		//累加全部頻道曝光數用
 		$allSum	= ['全頻道','','',$_POST['選擇平台'],'全時段'];
 		//header
 		$forExcel[]=['頻道號碼','頻道名稱','廣告分類','平台','時段'];
-		foreach($result as $頻道號碼=>$v1){
+		/*foreach($result as $頻道號碼=>$v1){
 		foreach($v1 as $頻道名稱=>$v2){
 		foreach($v2 as $廣告分類=>$v3){
 		foreach($v3 as $平台識別碼=>$v4){
@@ -315,13 +321,17 @@
 			$forExcel[0][]= $日期;
 			$allSum[]=0;
 		}
-		break;}break;}break;}break;}break;}
+		break;}break;}break;}break;}break;}*/
+		
+		foreach($dates as $date){
+			$forExcel[0][]= $date;
+		}
 		
 		$forExcel[0][]='區間加總';
 		if($predict)
 			$forExcel[0][]='預估值';
 			
-		array_unshift($forExcel,array($firstRow));
+		array_unshift($forExcel,array($sheetName));
 		foreach($result as $頻道號碼=>$v1){
 			$c1 = $頻道號碼;
 			$temp = array();
@@ -333,10 +343,22 @@
 				foreach($v4 as $時段=>$v5){
 					$subRow = ['','','','',$時段];
 					$localSum=0;
+					//依照日期建立預設array
+					$dateCount = array();
+					foreach($dates as $date){
+						$dateCount[$date]= 0;
+					}
+					//塞入資料到預設array
 					foreach($v5 as $日期=>$v6){
-						$subRow[]=$v6;
+						//$subRow[]=$v6;
+						$dateCount[$日期] = $v6;
 						$localSum+=$v6;
 					}
+					//從預設array塞入資料到row中
+					foreach($dateCount as $count){
+						$subRow[]=$count;
+					}
+					
 					$subRow[]=$localSum;
 					$temp[]=$subRow;
 				}

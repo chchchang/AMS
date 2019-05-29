@@ -169,15 +169,16 @@
 		}
 	}
 	@include('../tool/auth/auth.php');
+	$oids = "";
+	if(isset($_GET["oids"]))
+		$oids = htmlspecialchars($_GET["oids"], ENT_QUOTES, 'UTF-8');
 	
 ?>
 <!DOCTYPE html>
 <html>
 <head>
 <meta charset="utf-8">
-<?php
-	include('../tool/sameOriginXfsBlock.php');
-?>
+
 <script type="text/javascript" src="../tool/jquery-1.11.1.js"></script>
 <script src="../tool/jquery-ui/jquery-ui.js"></script>
 <script src="../tool/jquery-ui/jquery-ui-timepicker-addon.js" type="text/javascript"></script>
@@ -189,11 +190,12 @@
 <script type="text/javascript" src="../tool/jquery-plugin/jquery.tokenize.js"></script>
 <link rel="stylesheet" type="text/css" href="<?=$SERVER_SITE.Config::PROJECT_ROOT?>tool/jquery-plugin/jquery.tokenize.css" />
 <link href="<?=$SERVER_SITE.Config::PROJECT_ROOT?>tool/jquery-ui/jquery-ui-timepicker-addon.css" rel="stylesheet"></link>
-<link rel="stylesheet" href="<?=$SERVER_SITE.Config::PROJECT_ROOT?>tool/jquery-ui/jquery-ui.css"></link>
+<link rel="stylesheet" href="<?=$SERVER_SITE.Config::PROJECT_ROOT?>tool/jquery-ui/jquery-ui.css" ></link>
 <script type="text/javascript" src="newOrder_852.js?<?=time()?>"></script>
 <script type="text/javascript" src="newOrder_851.js?<?=time()?>"></script>
 <script type="text/javascript" src="../VSM/vsmLinkValueSelector/VodBundleSelector.js"></script>
 <script type="text/javascript" src="../VSM/vsmLinkValueSelector/VodPosterSelector.js"></script>
+<script type="text/javascript" src="../VSM/vsmLinkValueSelector/appSelector.js"></script>
 <link rel='stylesheet' type='text/css' href='<?=$SERVER_SITE.Config::PROJECT_ROOT?>external-stylesheet.css'/>
 <style type="text/css">
   	.Center{
@@ -332,6 +334,7 @@
 		return yyyy +'-'+ (mm[1]?mm:"0"+mm[0]) +'-'+ (dd[1]?dd:"0"+dd[0]); // padding
 	};
 	var deadlinePreDay = 5;//預約到期日期到數天數
+
 //********設定
 	$("#tabs").tabs({
 		activate: function(event, ui) {
@@ -821,6 +824,13 @@
 									el.trigger("change");
 								};
 								var VodSelector = new VodPosterSelector(callback);	
+							}
+							else if($("#點擊後開啟類型"+order).val()=="app"){
+								var callback= function(selectedVod){
+									el.val(selectedVod["appname"]+":/"+selectedVod["apppara"]);
+									el.trigger("change");
+								};
+								var VodSelector = new appSelector(callback);	
 							}
 						});
 					})
@@ -1561,7 +1571,17 @@
 		//$('#editOrders').attr( 'src', 'selectOrder.php?returnParentFuncName=addOrdersToEdit&ignoreOrders='+JSON.stringify(selectedOrder));
 	}
 	
-	
+	//利用get參數設定以選擇的託播單
+	var oids ="<?=$oids?>";
+	if(oids!=""){
+		selectedOrder = oids.split(",");
+		$("#tabs").tabs({ active: 1 });
+		$('#selectedNum').text(selectedOrder.length);
+		for(var i in selectedOrder){
+			addSelectedOrder(selectedOrder[i]);
+		}
+	}
+	console.log(selectedOrder);
  </script>
  
  

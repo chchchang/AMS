@@ -248,7 +248,7 @@ u{
 							showSchedule();
 						},
 						onChangeMonthYear: function(year, month, inst){
-							//******為了效能問題，不顯示排程
+							//****因效能問題戰時不顯示排程表
 							/*$.post( ajaxtodbPath, { action: "查詢版位當月排程",版位識別碼:id,year: year,month: month }, 
 							function(data){
 								orderDetail=data;
@@ -302,7 +302,7 @@ u{
 	
 	//設置timetable
 	function showSchedule() {
-		//******為了效能問題，不顯示排程
+		//***因效能問題戰時不顯示排程表
 		return 0;
 		//*****
 		var startTime=$.datepicker.formatDate('yy-mm-dd',$('#datePicker').datepicker('getDate'))+" 00:00:00";

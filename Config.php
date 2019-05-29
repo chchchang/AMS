@@ -101,5 +101,13 @@
 			$mfu = str_replace($path,"", $mf);
 			return $mf;
 		}
+		
+		//VOD插廣告API
+		public static function GET_API_SERVER_852_VOD_AD(){
+			$API_SERVER_852 = 'http://172.17.156.9:80';
+			$API_SERVER_852_TESTING = 'http://172.18.4.141:80';
+			return (self::TEST_MOD)? $API_SERVER_852_TESTING : $API_SERVER_852;
+		}
+		
 	}
 ?>

@@ -1,4 +1,5 @@
-<?php 	
+<?php 
+	header('Access-Control-Allow-Origin: http://');
 	include('../tool/auth/authAJAX.php');
 	require_once dirname(__FILE__).'/../tool/MyDB.php';
 	$my=new MyDB(true);

@@ -117,7 +117,7 @@
 			}
 			//background_banner
 			else if($ptindex==4){
-				$sql.=' VALUES ('.$ptid.',1,"圖片",2,1,1,1)'
+				$sql.=' VALUES ('.$ptid.',1,"圖片",2,1,1,1) ,('.$ptid.',2,"縮圖",2,0,1,1)'
 				;
 			}
 			//advertising_page
@@ -208,6 +208,7 @@
 			.',  ('.$ptid.',2,"srv_category_id","srv_category_id",1,1,1,-1,1)'
 			.',  ('.$ptid.',3,"group_name","group_name",1,1,1,?,1)'
 			.',  ('.$ptid.',4,"weight","weight",2,1,0,1,1)'
+			.',  ('.$ptid.',5,"縮圖文字","context",1,0,0,"",1)'
 			;
 		}
 		//advertising_page
@@ -223,6 +224,7 @@
 			.',  ('.$ptid.',8,"內文顏色","contentColor",1,0,0,"#FF55555",1)'
 			.',  ('.$ptid.',9,"成人內容","isAdult",3,0,0,0,1)'
 			.',  ('.$ptid.',10,"影片url","url",1,1,1,"rtsp://172.17.188.35:5004/asset/vscontsrv%3a",1)'
+			.',  ('.$ptid.',11,"weight","weight",1,1,0,"1",1)'
 			;
 		}
 		else{
@@ -394,7 +396,7 @@
 		/*$sql='SELECT 版位.版位識別碼 FROM 版位 LEFT JOIN 版位其他參數 ON 版位.版位識別碼 = 版位其他參數.版位識別碼 
 			WHERE 版位其他參數.版位其他參數名稱 = "content_id" AND 版位其他參數預設值 LIKE ?';
 		$result =$my->getResultArray($sql,'s',$PTData['content_id']);*/
-		$sql='SELECT 版位.版位識別碼 FROM 版位 WHERE 版位名稱 LIKE ? AND 上層版位識別碼 = ?';
+		$sql='SELECT 版位.版位識別碼 FROM 版位 WHERE 版位名稱 LIKE ? AND 上層版位識別碼 = ? and DISABLE_TIME IS NULL AND DELETED_TIME IS NULL';
 		$result =$my->getResultArray($sql,'si',$PTData['channel_number'].'\_%',$ptid);
 		echo '建立版位'.$ptn.'<br>';
 		if(count($result)>0){

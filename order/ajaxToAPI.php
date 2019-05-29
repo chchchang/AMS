@@ -89,6 +89,10 @@
 				require_once 'ajaxToAPI_diamond.php';
 				sendOrder_diamond($_POST["託播單識別碼"]);
 				break;
+			case "Vod插廣告":
+				require_once 'ajaxToAPI_VodAds.php';
+				sendOrder_VodAds($_POST["託播單識別碼"]);
+				break;
 			default:{
 				recordResult('insert',1,null,null);
 				changeOrderSate('送出',array($_POST["託播單識別碼"]));
@@ -313,10 +317,10 @@
 					}
 					$explodeFileName=explode(".",$row2['素材原始檔名']);
 					$fileName= Config::GET_MATERIAL_FOLDER().$row2['素材識別碼'].".".$explodeFileName[count($explodeFileName)-1];
-					$exists= file_exists($fileName);
+					/*$exists= file_exists($fileName);
 					if(!$exists){
 						return array("success"=>false,"message"=>'素材尚未派送');
-					}else{
+					}else{*/
 						$片名='_____AMS_'.$row2['素材識別碼'].'_'.md5_file($fileName);
 						//$url='http://172.17.251.83:82/PTS/pts_media_status.php?v_id=2305&source='.$片名;
 						$url=Config::PMS_SEARCH_URL.$片名;
@@ -344,7 +348,7 @@
 						if(intval($status)==0)
 							return array("success"=>false,"message"=>'對應區域的伺服器尚未派送素材');
 						
-					}
+					//}
 				}
 				//barker不檢查素材
 			}else if($row2['素材類型名稱']=='圖片'){
@@ -353,7 +357,7 @@
 					$type = 'EPG';
 				else if($row['版位類型名稱']=='專區banner' || $row['版位類型名稱']=='首頁banner')
 					$type = '專區';
-				else if($row['版位類型名稱']=='單一平台banner'||$row['版位類型名稱']=='單一平台EPG'){
+				else if(substr($row['版位類型名稱'],0,12)=='單一平台'){
 					require_once '../tool/SFTP.php';
 					foreach(Config::$FTP_SERVERS['VSM'] as $server){
 						$遠端路徑=$server['圖片素材路徑'];
@@ -457,6 +461,10 @@
 			case "鑽石版位":
 				require_once 'ajaxToAPI_diamond.php';
 				cancelOrder_diamond($_POST["託播單識別碼"]);
+				break;
+			case "Vod插廣告":
+				require_once 'ajaxToAPI_VodAds.php';
+				cancelOrder_VodAds($_POST["託播單識別碼"]);
 				break;
 			default:{
 				recordResult('delete',1,null,null);

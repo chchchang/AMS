@@ -93,9 +93,9 @@
 				$result=array();
 				while($row=$res->fetch_assoc())
 					$result[]=$row;
-				if(count($result)===0)
+				/*if(count($result)===0)
 					return null;
-				else
+				else*/
 					return $result;
 			}
 			else

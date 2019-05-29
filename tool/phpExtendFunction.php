@@ -85,5 +85,20 @@ class PHPExtendFunction{
 		else
 			return $str;
 	}
+	
+	public static function getDatesByPeriod($start,$end,$returnFormat){
+		$period = new DatePeriod(
+			 new DateTime($start),
+			 new DateInterval('P1D'),
+			 new DateTime($end)
+		);
+		$return = array();
+		foreach ($period as $key => $value) {
+			$return[]=$value->format($returnFormat);
+		}
+		$tail = new DateTime($start);
+		$return[]=$tail->format($returnFormat);
+		return $return;
+	}
 }
 ?>

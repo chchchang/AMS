@@ -1120,6 +1120,9 @@
 		$feedback = array(
 			"success" => true,
 			"message" => "訂單資訊更新成功",
+			"insertIds"=>$insertIds,
+			"editIds"=>$editIds,
+			"deleteIds"=>$deleteIds
 		);
 		
 		$mutex->unlock();

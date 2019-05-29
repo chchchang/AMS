@@ -96,7 +96,9 @@
 	</li>-->
 	<li id="http://172.17.251.133/camps">CAMPS管理業面</li>
 	<li id="setBarkerPosition.php">CAMPS版位資訊更新</li>
-	<li id="other/vsmBGManagement.php">單一平台背景圖</li>
+	<li id="other/vsmBGManagement.php">單一平台黃金版位管理</li>
+	<li id="VSM/setVSMPosition.php">更新VSM版位</li>
+	<li id="other/updateOrderPara.php">VOD插廣告/單一平台廣告參數更新</li>
 	</ul>
 </li>
 
@@ -105,6 +107,7 @@
 		<li id="adowner/newOwner.php">新增廣告主</li>
 		<li id="adowner/editAdOwner.php">修改廣告主</li>
 		<li id="adowner/searchAdOwner.php">查詢廣告主</li>
+		<li id="adowner/agent/agnetManagement.php">代理商管理</li>
 	</ul>
 </li>
 <li>版位管理
@@ -123,6 +126,7 @@
 </li>
 <li>訂單管理
 	<ul>
+		<li id="order/orderList_v2/orderListManagement.php">新版委刊單管理</li>
 		<li id="order/orderManaging.php">訂單管理</li>
 		<li id="order/newOrderListByPage.php">新增委刊單</li>
 		<li id="order/editOrderListByPage.php">修改委刊單</li>

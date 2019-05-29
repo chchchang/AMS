@@ -1,4 +1,6 @@
 <?php
+ini_set('display_errors','1');
+error_reporting(E_ALL);
 	header("Content-Type:text/html; charset=utf-8");
 	require_once 'tool/MyDB.php';
 	require 'tool/OutputExcel.php';
@@ -104,8 +106,8 @@
 		$sql='SELECT 版位識別碼 FROM 版位 WHERE 版位名稱 = "'.$row['name'].'"';
 		$result =$my->getResultArray($sql);
 		if(count($result)>0){
-			echo $row['name'].':已建立過版位<br>';
 			$pid = $result[0]['版位識別碼'];
+			echo $row['name'].':已建立過版位，ID:'.$pid.'<br>';
 		}
 		else{
 			$sql='INSERT INTO 版位 (版位名稱,上層版位識別碼,CREATED_PEOPLE) VALUES ("'.$row['name'].'",'.$ptid.',1)';
@@ -123,11 +125,10 @@
 			$pid = $stmt->insert_id;
 			echo '版位 '.$row['name'].' 建立完成，ID'.$pid.'<br>';
 		}
-		
 		$sql='SELECT 版位識別碼 FROM 版位其他參數 WHERE 版位識別碼 = ?';
 		$result =$my->getResultArray($sql,'i',$pid);
 		if(count($result)>0){
-			//echo $row['name'].' 已建立過版位其他參數'.'<br>';
+			echo $row['name'].' 已建立過版位其他參數'.'<br>';
 			$sql='DELETE FROM 版位其他參數 WHERE 版位識別碼=?';
 			
 			if(!$stmt=$my->prepare($sql)) {
@@ -145,7 +146,7 @@
 			}
 			//return 0;
 		}
-		
+		echo $row['name'].' 開始建立版位其他參數'.'<br>';
 		$sql='INSERT INTO 版位其他參數 (版位識別碼,版位其他參數順序,版位其他參數顯示名稱,版位其他參數名稱,版位其他參數型態識別碼,版位其他參數是否必填,是否版位專用,版位其他參數預設值,CREATED_PEOPLE)'
 		.' VALUES ('.$pid.',1,"channel_id","channel_id",2,1,1,?,1)'
 		.',  ('.$pid.',2,"playout_id","playout_id",2,1,1,?,1)'
@@ -153,16 +154,18 @@
 		.',  ('.$pid.',4,"online","online",3,1,1,?,1)'
 		.',  ('.$pid.',5,"sale","sale",3,1,1,?,1)'
 		;
-		
+		echo $row['name'].' 準備sql<br>';
 		if(!$stmt=$my->prepare($sql)) {
 			$logger->error('無法準備statement，錯誤代碼('.$my->errno.')、錯誤訊息('.$my->error.')。');
 			exit(json_encode(array("dbError"=>'無法準備statement，請聯絡系統管理員！'),JSON_UNESCAPED_UNICODE));
 		}
-		
-		if(!$stmt->bind_param('sssss',$row['channel_id'],$row['playout_id'],$row['english_name'],(!$row['online']?0:$row['online']),(!$row['sale']?0:$row['sale']))) {
+		echo $row['name'].' bind para<br>';
+		$online = !$row['online']?0:$row['online'];
+		$sale =(!$row['sale']?0:$row['sale']);
+		if(!$stmt->bind_param('sssss',$row['channel_id'],$row['playout_id'],$row['english_name'],$online,$sale)) {
 			exit(json_encode(array("dbError"=>'無法繫結資料，請聯絡系統管理員！'),JSON_UNESCAPED_UNICODE));
 		}
-		
+		echo $row['name'].' execute<br>';
 		if(!$stmt->execute()) {
 			$logger->error('無法執行statement，錯誤代碼('.$stmt->errno.')、錯誤訊息('.$stmt->error.')。');
 			exit(json_encode(array("dbError"=>'無法執行statement，請聯絡系統管理員！'),JSON_UNESCAPED_UNICODE));
@@ -191,6 +194,7 @@
 		}
 		curl_close($ch);
 		$data = json_decode($apiResult,true);
+		print_r($data);
 		foreach($data as $row){
 			creatBarkerT($row,$ptid);
 		}

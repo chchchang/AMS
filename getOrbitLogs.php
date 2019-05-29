@@ -20,6 +20,8 @@
 		
 	if(isset($_GET["DATE"]))
 		$searchDate = $_GET["DATE"];
+	else if(isset($argv[1]))
+		$searchDate = $argv[1];
 	else
 		$searchDate = date("Y-m-d",strtotime("-1 days"));
 	//$searchDate = date("Y-m-d");
@@ -123,6 +125,7 @@
 					//取得時間strign
 					$tstString = $tst->format('Y-m-d H:i:s');
 					$tetString = $tet->format('Y-m-d H:i:s');	
+					if($tetString>=$tstString)
 					if(($tetString>$st && $tetString<=$et) || ($tstString>=$st && $tstString<$et) || ($tstString<=$st && $tetString>=$et) || ($tstString>$st && $tetString<$et)){
 						if(!isset($feedBack[$ad['playout_id']])){
 							$feedBack[$ad['playout_id']] = [];
@@ -162,6 +165,7 @@
 		$tstString = $tst->format('Y-m-d H:i:s');
 		$tetString = $tet->format('Y-m-d H:i:s');	
 		//echo $row['name'].' '.$row['start_time'].'<br>';
+		if($tetString>=$tstString)
 		if(($tetString>$st && $tetString<=$et) || ($tstString>=$st && $tstString<$et) || ($tstString<=$st && $tetString>=$et) || ($tstString>$st && $tetString<$et)){
 			$adBuffer_hours[]=$row;
 			if(!isset($feedBack[$row['playout_id']])){
@@ -181,11 +185,12 @@
 			exit('產生檔案失敗');
 		echo '取得版位資訊</br>';
 		//取得版位資料
-		$sql='	SELECT  版位.版位名稱,channelId參數.版位其他參數預設值 AS channel_id, playoutId參數.版位其他參數預設值 AS playout_id,版位.版位識別碼
+		$sql='	SELECT  版位.版位名稱,channelId參數.版位其他參數預設值 AS channel_id, playoutId參數.版位其他參數預設值 AS playout_id, serCode參數.版位其他參數預設值 AS serCode,版位.版位識別碼
 				FROM 版位 
 					JOIN 版位 版位類型 ON 版位.上層版位識別碼 = 版位類型.版位識別碼
 					JOIN 版位其他參數 channelId參數 ON channelId參數.版位識別碼 = 版位.版位識別碼 AND channelId參數.版位其他參數名稱="channel_id"
 					JOIN 版位其他參數 playoutId參數 ON playoutId參數.版位識別碼 = 版位.版位識別碼 AND playoutId參數.版位其他參數名稱="playout_id"
+                    LEFT JOIN 版位其他參數 serCode參數 ON serCode參數.版位識別碼 = 版位.版位識別碼 AND serCode參數.版位其他參數名稱="serCode"
 				WHERE 
 					版位類型.版位名稱 = "barker頻道" 
 			';
@@ -240,7 +245,8 @@
 				//整理書出資訊:互動專區代碼 IP&PORT 託播單號 媒體代碼 媒體名稱 媒體種類 媒體長度 託播型式 開始日期 開始時間 結束日期 結束時間
 				$stt = explode(' ',$schData['start_time']);
 				$ett = explode(' ',$schData['stop_time']);
-				$互動專區代碼  = ($positionMeta==[])?'null':($positionMeta['channel_id'].' '.$positionMeta['版位名稱']);
+				//$互動專區代碼  = ($positionMeta==[])?'null':($positionMeta['channel_id'].' '.$positionMeta['版位名稱']);
+				$互動專區代碼  = ($positionMeta==[])?'null':($positionMeta['serCode'].' '.$positionMeta['版位名稱']);
 				$IPPORT = $schData['ip'].':'.$schData['port'];
 				$託播單號 = ($orderMeta_db==[])?'null':($orderMeta_db['託播單識別碼']);//AMS資料庫版本
 				//$託播單號 = ($orderMeta==[])?'null':($orderMeta['transaction_id']);//CAMPS API版本

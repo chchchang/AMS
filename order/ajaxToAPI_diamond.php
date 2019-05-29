@@ -64,7 +64,7 @@
 		}
 		
 		//新增
-		$postvars = http_build_query($bypostOrder,JSON_UNESCAPED_UNICODE);
+		$postvars = json_encode($bypostOrder,JSON_UNESCAPED_UNICODE);
 		if(!$apiResult=connec_to_Api_json(dianomdOrderAPIUrl,'POST',$postvars)){
 			recordResult($rcordaction,0,"無法連鑽石版位廣告API",null);
 			$logger->error('無法連鑽石版位廣告API:'.dianomdOrderAPIUrl);
@@ -87,7 +87,7 @@
 		$bypostOrder = get_order_post_data($orderId,$action);		
 		
 		//取消託播單
-		$postvars = http_build_query($bypostOrder,JSON_UNESCAPED_UNICODE);
+		$postvars = json_encode($bypostOrder,JSON_UNESCAPED_UNICODE);
 		if(!$apiResult=connec_to_Api_json(dianomdOrderAPIUrl,'POST',$postvars)){
 			recordResult($action,0,"無法連鑽石版位廣告API",null);
 			$logger->error('無法連鑽石版位廣告API:'.dianomdOrderAPIUrl);
@@ -116,6 +116,7 @@
 		curl_setopt($ch,CURLOPT_POSTFIELDS,$postvars);
 		curl_setopt($ch,CURLOPT_RETURNTRANSFER,1);
 		curl_setopt($ch, CURLOPT_TIMEOUT, 500);
+		curl_setopt($ch, CURLOPT_HTTPHEADER, ['Content-Type: application/json','Content-Length: ' . strlen($postvars)]);
 		//curl_setopt($ch, CURLOPT_HEADER, true);
 		$apiResult = curl_exec($ch);
 		//$logger->error('錯誤代號:'.$apiResult .'/無法連接API:'.$url);
@@ -199,6 +200,7 @@
 				"type"=>$orderConfigData['type'],
 				"action"=>$action,
 				"data"=>array(
+					array(
 					"ams_id"=> $orderData["託播單識別碼"],
 					"name"=> $orderData['託播單名稱'],
 					"starttime"=> $orderData['廣告期間開始時間'],
@@ -213,6 +215,7 @@
 					"uiID"=>  $orderConfigData['uiID'],
 					"iapID"=>  $orderConfigData['iapID'],
 					"ompID"=>  $orderConfigData['ompID']
+					)
 				)
 			];
 		}

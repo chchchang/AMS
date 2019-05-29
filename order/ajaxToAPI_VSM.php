@@ -108,7 +108,7 @@
 					"transaction_id"=>$orderData["託播單識別碼"]."_emptybanner1",
 					"mat_type_id"=>4,
 					"srv_category_id"=>$orderConfigData['srv_category_id'],
-					"group_name"=>"banner1",
+					"group_name"=>"banner_1",
 					"title"=>$orderData['託播單名稱'],
 					"start_datetime"=>$orderData['廣告期間開始時間'],
 					"end_datetime"=>$orderData['廣告期間結束時間'],
@@ -121,7 +121,7 @@
 						"link"=>"",
 						"linkParameter"=>"",
 						"weight"=>$orderConfigData['weight'],
-						'material_link'=>"",
+						'material_link'=>"NONE",
 						'material_link_value'=>""
 					]
 				];
@@ -130,7 +130,7 @@
 					"transaction_id"=>$orderData["託播單識別碼"]."_emptybanner2",
 					"mat_type_id"=>4,
 					"srv_category_id"=>$orderConfigData['srv_category_id'],
-					"group_name"=>"banner2",
+					"group_name"=>"banner_2",
 					"title"=>$orderData['託播單名稱'],
 					"start_datetime"=>$orderData['廣告期間開始時間'],
 					"end_datetime"=>$orderData['廣告期間結束時間'],
@@ -143,7 +143,7 @@
 						"link"=>"",
 						"linkParameter"=>"",
 						"weight"=>$orderConfigData['weight'],
-						'material_link'=>"",
+						'material_link'=>"NONE",
 						'material_link_value'=>""
 					]
 				];
@@ -281,9 +281,18 @@
 				ORDER BY
 					託播單素材.素材順序
 			';
-			$orderMaterial=$my->getResultArray($sql,'i',$orderId)[0];
-			$materialType = end(explode('.',$orderMaterial['素材原始檔名']));
-			$materialName = 'ad/_____AMS_'.$orderMaterial['素材識別碼'].'.'.$materialType;
+			$orderMaterials=$my->getResultArray($sql,'i',$orderId);
+			$materialName = "";
+			$thumbNailName = "";
+			foreach($orderMaterials as $orderMaterial){
+				$materialType = end(explode('.',$orderMaterial['素材原始檔名']));
+				if($orderMaterial["素材順序"] == 1){
+					$materialName = 'ad/_____AMS_'.$orderMaterial['素材識別碼'].'.'.$materialType;
+				}
+				else{
+					$thumbNailName = 'ad/_____AMS_'.$orderMaterial['素材識別碼'].'.'.$materialType;
+				}
+			}
 			foreach($orderConfig as $pid=>$orderConfigData){
 				$bypostOrder[] = [
 					"transaction_id"=>$orderData["託播單識別碼"],
@@ -296,7 +305,9 @@
 					"hours"=>$orderData['廣告可被播出小時時段'],
 					"otherConfig"=>[
 						"imageId"=>$materialName,
-						"weight"=>$orderConfigData['weight']
+						"weight"=>$orderConfigData['weight'],
+						"context"=>$orderConfigData['context'],
+						"thumbnailImageId"=>$thumbNailName
 					]
 				];
 			}
@@ -316,7 +327,7 @@
 				ORDER BY
 					託播單素材.素材順序
 			';
-			$orderMaterial=$my->getResultArray($sql,'i',$orderId)[0];
+			$orderMaterial=$my->getResultArray($sql,'i',$orderId);
 			foreach($orderConfig as $pid=>$orderConfigData){
 				$Materials = [
 					"content"=>"",
@@ -343,7 +354,7 @@
 					}
 				}
 			
-				$bypostOrder[] = [
+				$temp = [
 					"transaction_id"=>$orderData["託播單識別碼"],
 					"mat_type_id"=>$orderConfigData['mat_type_id'],
 					"srv_category_id"=>$orderConfigData['srv_category_id'],
@@ -360,21 +371,28 @@
 						"subheader"=>$orderConfigData['subheader'],
 						"subheaderColor"=>$orderConfigData['subheaderColor'],
 						"isAdult"=>$orderConfigData['isAdult'],
-						"weight"=>"1",
+						"weight"=>$orderConfigData['weight'],
 						"material_link"=>$material_link,
 						//"material_link"=>$orderMaterial['點擊後開啟類型'],
 						"material_link_value"=>$material_link_value
 						//"material_link_value"=>$orderMaterial['點擊後開啟位址']
 					]
 				];
+				
+				if($orderConfigData['weight']==0){
+					$temp["title"]="";
+					$temp['otherConfig']["subheader"]="";
+				}
+				
+				$bypostOrder[] = $temp;
 			}
 			
 			$action ='sendOrder';
 		}
-		
+		$bypostOrder = replace_new_line_charater($bypostOrder);
 		//新增
 		$bypost=['action'=>$action,'orderData'=>$bypostOrder];
-		$postvars = http_build_query($bypost,JSON_UNESCAPED_UNICODE);
+		$postvars = http_build_query($bypost);
 		if(!$apiResult=connec_to_Api_json(Config_VSM_Meta::GET_AD_API(),'POST',$postvars)){
 			$logger->error('無法連VSM API');
 			exit(json_encode(array("success"=>false,"message"=>'無法連接VSM託播單API','id'=>$orderId),JSON_UNESCAPED_UNICODE));	
@@ -389,7 +407,7 @@
 	function cancelOrder_VSM($orderId){
 		global $logger, $my;
 		$bypost=['action'=>'cancelOrder','transaction_id'=>$orderId];
-		$postvars = http_build_query($bypost,JSON_UNESCAPED_UNICODE);
+		$postvars = http_build_query($bypost);
 		if(!$apiResult=connec_to_Api_json(Config_VSM_Meta::GET_AD_API(),'POST',$postvars)){
 			$logger->error('無法連VSM API');
 			exit(json_encode(array("success"=>false,"message"=>'無法連接VSM託播單API','id'=>$orderId),JSON_UNESCAPED_UNICODE));	
@@ -404,7 +422,7 @@
 	function cancelEPGOrder_VSM($orderId){
 		global $logger, $my;
 		$bypost=['action'=>'cancelEPGOrder','transaction_id'=>$orderId];
-		$postvars = http_build_query($bypost,JSON_UNESCAPED_UNICODE);
+		$postvars = http_build_query($bypost);
 		if(!$apiResult=connec_to_Api_json(Config_VSM_Meta::GET_AD_API(),'POST',$postvars)){
 			$logger->error('無法連VSM API');
 			exit(json_encode(array("success"=>false,"message"=>'無法連接VSM託播單API','id'=>$orderId),JSON_UNESCAPED_UNICODE));	
@@ -437,5 +455,21 @@
 		}
 		curl_close($ch);
 		return $apiResult;
+	}
+	
+	function replace_new_line_charater($array){
+		$result = array();
+        foreach( $array as $key => $val ) {
+            if( is_array( $val ) ) {
+                $result[$key] = replace_new_line_charater( $val );
+			}
+			else if(is_string ($val)){
+				$result[$key] = str_replace("\\n", "\n", $val);
+			}
+            else {
+                $result[$key] = $val;
+            }
+        }
+        return $result;
 	}
 ?>

@@ -56,7 +56,7 @@
 					JOIN 版位 ON 託播單.版位識別碼 = 版位.版位識別碼
 					JOIN 版位 版位類型 ON 版位類型.版位識別碼 = 版位.上層版位識別碼
 				WHERE 
-					版位類型.版位名稱 IN ("首頁banner","專區banner","專區vod","頻道short EPG banner","barker頻道")
+					版位類型.版位名稱 IN ("首頁banner","專區banner","專區vod","頻道short EPG banner","barker頻道","Vod插廣告") OR 版位類型.版位名稱 LIKE "單一平台%"
 			';
 		if(!$stmt=$my->prepare($sql)) {
 			eixtWhitCode(500);
@@ -198,7 +198,7 @@
 					JOIN 使用者 C ON 託播單.CREATED_PEOPLE = C.使用者識別碼
 					LEFT JOIN 使用者 U ON 託播單.LAST_UPDATE_PEOPLE =U.使用者識別碼
 				WHERE
-					版位類型.版位名稱 IN ("首頁banner","專區banner","專區vod","頻道short EPG banner","barker頻道")
+					版位類型.版位名稱 IN ("首頁banner","專區banner","專區vod","頻道short EPG banner","barker頻道","Vod插廣告","鑽石版位")
 			';
 		if(!$stmt=$my->prepare($sql)) {
 			eixtWhitCode(500);
@@ -304,8 +304,10 @@
 			$paras = array_map('n2s',$paras);
 			//$orderParam = array_map('n2s',$orderParam);
 			//$positionParam = array_map('n2s',$positionParam);
-			$oid=$row['託播單CSMS群組識別碼'];
-			if($row['版位類型名稱']=='barker頻道')
+			$csmspositions = ["首頁banner","專區banner","專區vod","頻道short EPG banner"];
+			if(in_array($row['版位類型名稱'],$csmspositions))
+				$oid=$row['託播單CSMS群組識別碼'];
+			else
 				$oid=$row['託播單識別碼'];
 			
 			//若是可展開的banner廣告，從點擊開啟位址中頗析展開的圖片素材識別碼
@@ -316,6 +318,7 @@
 				$cover_pic_fileName = explode('.',$cover_pic_fileName)[0];//_____AMS_5187.png =>_____AMS_5187
 				$cover_pic = str_replace('_____AMS_','',$cover_pic_fileName);//_____AMS_5187=>5187
 			}
+			
 			$temp = array(
 				$row['委刊單識別碼'],
 				$oid,
@@ -409,7 +412,7 @@
 					JOIN 使用者 C ON 託播單.CREATED_PEOPLE = C.使用者識別碼
 					LEFT JOIN 使用者 U ON 託播單.LAST_UPDATE_PEOPLE =U.使用者識別碼
 				WHERE
-					版位類型.版位名稱 IN ("單一平台banner","單一平台EPG","單一平台barker_vod")
+					版位類型.版位名稱 LIKE "單一平台%"
 			';
 		if(!$stmt=$my->prepare($sql)) {
 			eixtWhitCode(500);
@@ -514,6 +517,11 @@
 			else{
 				$cover_pic = 'NULL';
 			}
+			//若是單一平台EPG，版位名稱只記錄頻道號碼即可
+			if($row['版位類型名稱']=="單一平台EPG"){
+				$namepart =  explode('_',$row['版位名稱']);
+				$row['版位名稱'] = $namepart[0];
+			}
 			$temp = array(
 				$row['委刊單識別碼'],//adTransactionId
 				$oid,//adTransactionId_D
@@ -581,7 +589,7 @@
 					JOIN 產業類型 ON 產業類型.產業類型識別碼 = 素材.產業類型識別碼
 					JOIN 產業類型 上層產業類型 ON 上層產業類型.產業類型識別碼 = 產業類型.上層產業類型識別碼
 				WHERE 
-					版位類型.版位名稱 IN ("首頁banner","專區banner","專區vod","頻道short EPG banner","barker頻道")
+					版位類型.版位名稱 IN ("首頁banner","專區banner","專區vod","頻道short EPG banner","barker頻道","Vod插廣告")
 			';
 		if(!$stmt=$my->prepare($sql)) {
 			eixtWhitCode(500);

@@ -1,6 +1,7 @@
 <script type="text/javascript" src="newOrder_VSM.js?<?=time()?>"></script>
 <script type="text/javascript" src="../VSM/vsmLinkValueSelector/VodBundleSelector.js"></script>
 <script type="text/javascript" src="../VSM/vsmLinkValueSelector/VodPosterSelector.js"></script>
+<script type="text/javascript" src="../VSM/vsmLinkValueSelector/appSelector.js"></script>
 <script>
 //********設定
 	if(typeof(positionTypeId)=='undefined')
@@ -476,6 +477,13 @@
 									el.trigger("change");
 								};
 								var VodSelector = new VodPosterSelector(callback);	
+							}
+							else if($("#點擊後開啟類型"+order).val()=="app"){
+								var callback= function(selectedVod){
+									el.val(selectedVod["appname"]+":/"+selectedVod["apppara"]);
+									el.trigger("change");
+								};
+								var VodSelector = new appSelector(callback);	
 							}
 						});
 					})
