@@ -101,7 +101,7 @@ td.ui-datepicker-current-day a {border: 2px #E63F00 solid !important;}
 	var 版位=[];
 	var 版位識別碼=0;
 	$(function() {
-		/*$('#time').prop('disabled',true);
+		$('#time').prop('disabled',true);
 		$.post('?',{method:'getPositions'},function(json) {	
 			for(i=0;i<json.length;i++) {
 				版位[json[i].版位類型識別碼]=json[i];
@@ -129,7 +129,7 @@ td.ui-datepicker-current-day a {border: 2px #E63F00 solid !important;}
 					setDatePicker(new Date());
 				}
 			});
-		},'json');*/
+		},'json');
 		//設定版位選項
 		$.post('../order/orderManaging.php',{method:'getPositionTypeSelection'}
 			,function(positionTypeOption){
@@ -478,6 +478,45 @@ td.ui-datepicker-current-day a {border: 2px #E63F00 solid !important;}
 					}
 					,'json'
 				);
+			}
+			else if(pName=="單一平台barker_vod"){
+				//取得VSM VOD廣告播放資料
+				var byPost={
+					'action':"單一平台barker_vod"
+					,'版位識別碼':版位識別碼
+					,'date':startTime.split(" ")[0]
+				};
+				var T1data = json[0];
+				$.ajax({
+					url:'ajaxToAPI.php'
+					,data:byPost
+					,type:'POST'
+					,dataType:'json'
+					,timeout:5000
+					,success:
+					function(data){
+						if(typeof(data['Error'])!='undefined'){
+							alert(data['Error']);
+						}else{
+							$('#tables2').append('<div id = "TT2"></div>');
+							//比照取回的資訊
+							for(var T1id in T1data){
+								for(var transaction_id in data){
+									if(T1data[T1id]["託播單代碼"] == transaction_id){
+										T1data[T1id]["upTitle"]+="投放次數:"+data[transaction_id]["play_time"];
+										break;
+									}
+								}
+							}								
+							var TT2=new CreateTimetable_sequence('TT2',{託播單:T1data});
+						}
+						unMaskAll();
+					}
+					,error:function(){
+						alert('取得實際排程表失敗!');
+						unMaskAll();
+					}
+				});
 			}
 		}//,'json'
 		);

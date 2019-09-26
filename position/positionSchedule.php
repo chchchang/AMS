@@ -1,5 +1,14 @@
 <?php
 include('../tool/auth/auth.php');	
+if(isset($_POST["method"])){
+	if($_POST["method"]=="取得託播單用參數"){
+		$ptypeId = $_POST["版位類型識別碼"];
+		$sql = "Select * from 版位其他參數 WHERE 版位識別碼 = ? AND 是否版位專用 = 0";
+		$res = $my->getResultArray($sql,'i',$ptypeId);
+		exit(json_encode($res,JSON_UNESCAPED_UNICODE));
+	}
+	exit();
+}
 ?>
 <!DOCTYPE html>
 <html>
@@ -22,7 +31,12 @@ th {overflow:hidden;white-space:nowrap;}
 #pschedule { border-width: 0px; }
 </style>
 <body>
+
+<iframe id="txtArea1" style="display:none"></iframe>
 <?php include('_positionScheduleUI.php');?>
 <?php include('_positionScheduleScript.php');?>
+<script type="text/javascript">
+
+</script>
 </body>
 </html>

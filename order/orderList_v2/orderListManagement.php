@@ -91,8 +91,8 @@
 	$( "#dialog_form" ).dialog(
 		{
 		autoOpen: false,
-		width: '80%',
-		height: '80%',
+		width: '90%',
+		height: '90%',
 		modal: true
 		});
 
@@ -101,6 +101,7 @@
 	
 	function showDataGrid(){
 		$('#datagrid').html('');
+		$("#scheduleOperSet").hide();
 		var bypost={method:'取得委刊單資料表',pageNo:1,order:'委刊單識別碼',asc:'DESC',searchBy:$('#shearchText').val()};
 		$.post(ajaxtodbPath,bypost,function(json){
 				json.header.push('修改','刪除','託播排程管理');
@@ -171,21 +172,12 @@
 				DG.update=function(){
 					$.post(ajaxtodbPath,bypost,function(json) {
 							for(var row in json.data){
-								json.data[row].push(['修改','button'],['刪除','button']);
+								json.data[row].push(['修改','button'],['刪除','button'],['託播排程管理','button']);
 							}
 							DG.set_data(json.data);
 						},'json');
 				}
 				
-				//隱藏視窗
-				function hideInfoWindow(){
-					if($(".InfoWindow").length>0){
-						$(".InfoWindow").remove();
-					}
-					if(DG.is_collapsed()){
-						DG.uncollapse();
-					}
-				}	
 				$("#datagrid").hide().slideDown(showAminationTime);
 			}
 			,'json'

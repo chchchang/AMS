@@ -14,10 +14,21 @@
 				break;
 			}
 		}
-		if(!$checkRefer){
-			header('Content-Type: text/html; charset=utf-8');
+		if(!$checkRefer)
 			exit('非法操作!');
+	}else{
+		$checkRefer = false;
+		foreach(Config::$SERVER_SITES as $server){
+			$protocol = (!empty($_SERVER['HTTPS']) && $_SERVER['HTTPS'] !== 'off' || $_SERVER['SERVER_PORT'] == 443) ? "https://" : "http://";
+			$url =$protocol.$_SERVER['HTTP_HOST'].$_SERVER['REQUEST_URI'];
+			if(strrpos($url,$server.Config::PROJECT_ROOT , -strlen($url)) !== FALSE){
+				$checkRefer = true;
+				$SERVER_SITE=$server;
+				break;
+			}
 		}
+		if(!$checkRefer)
+			exit('非法操作!');
 	}
 	
 	$logger=new MyLogger();

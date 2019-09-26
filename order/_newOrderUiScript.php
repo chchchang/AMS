@@ -762,6 +762,7 @@
 						}
 						$(".mBtn").prop('disabled', false);
 					}
+				
 				});
 	}
 	
@@ -852,7 +853,10 @@
 					
 					if($('#參數名稱'+i).text().startsWith('連動廣告') && $('#positiontype').text() == '專區vod'){
 						var 連動廣告編號 = $('#參數名稱'+i).text().replace('連動廣告','');
-						connectIds[連動廣告編號] = otherConfigObj[i].split(',');
+						if(otherConfigObj[i] == null)
+							connectIds[連動廣告編號] =[];
+						else
+							connectIds[連動廣告編號] = otherConfigObj[i].split(',');
 					}
 					/*else if($('#參數名稱'+i).text()=='連動廣告2' && $('#positiontype').text() == '專區vod')
 						connectIds['2'] = otherConfigObj[i].split(',');*/
@@ -860,7 +864,10 @@
 						m_sepgConnect(otherConfigObj[i]);
 					else if($('#參數名稱'+i).text().startsWith('bannerTransactionId')){
 						var 連動廣告編號 = $('#參數名稱'+i).text().replace('連動廣告','');
-						connectIds[連動廣告編號] = otherConfigObj[i].split(',');
+						if(otherConfigObj[i] == null)
+							connectIds[連動廣告編號] =[];
+						else
+							connectIds[連動廣告編號] = otherConfigObj[i].split(',');
 					}
 				}
 				//if($('#連動廣告1').length != 0)
@@ -897,6 +904,10 @@
 		if(action!="new" && action!="edit"){
 			$("#position").data('tokenize').disable();
 			$('#clearPosition').hide();
+		}
+		//***單一平台託播單開啟修改版偽功能
+		if(action == 'update' && $("#positiontype").text().startsWith("單一平台")){
+			$("#position").data('tokenize').enable();
 		}
 		
 		if(action=="info"||action=="orderInDb"||action=="orderFromApi"){

@@ -1,5 +1,6 @@
 <?php
 	include('../tool/auth/authAJAX.php');
+	require_once('../Config_VSM_Meta.php');
 	//前置設定
 
 	
@@ -12,6 +13,9 @@
 				break;
 			case "851取得排程表":
 				getSchedule_851();
+				break;
+			case "單一平台barker_vod":
+				getSchedule_VSM_barker();
 				break;
 		}
 	}
@@ -265,5 +269,17 @@
 		}
 		
 		exit (json_encode(array('getUrl'=>$getUrl),JSON_UNESCAPED_UNICODE));
+	}
+	
+	function getSchedule_VSM_barker(){
+		global $logger, $my;
+		$url = Config_VSM_Meta::GET_BARKER_VOD_PLAY_TIME_API();
+		// 建立CURL連線
+		$postvars = http_build_query(array());
+		if(!$apiResult=connec_to_Api($url,$postvars)){
+			$logger->error('無法連接單一平台API');
+			exit(json_encode(array("Error"=>'無法連接單一平台API'),JSON_UNESCAPED_UNICODE));	
+		}
+		exit ($apiResult);
 	}
 ?>

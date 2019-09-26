@@ -216,7 +216,7 @@
 						//開啟新增託播單畫面
 						//pids = order["版位識別碼"].split(',');
 						pids = order["版位識別碼"];
-						$("#dialog_iframe").attr("src","../newOrder.php?orderListName="+order["委刊單名稱"]+"&positionTypeId="+order["版位類型識別碼"]+"&positionId="+pids[0])
+						$("#dialog_iframe").attr("src","../newOrder.php?saveBtnText=儲存&orderListName="+order["委刊單名稱"]+"&positionTypeId="+order["版位類型識別碼"]+"&positionId="+pids[0])
 						.css({"width":"100%","height":"100%"}); 
 						$( "#dialog_form" ).dialog({height:$(window).height()*0.8, width:$(window).width()*0.8, title:"新增託播單"});
 						$( "#dialog_form" ).dialog( 'open' );

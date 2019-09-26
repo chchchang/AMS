@@ -33,14 +33,6 @@ if(isset($_POST['action'])){
 			$showDefault = '';
 		$startDate=($_POST['開始日期']=='')?'0000-00-00':$_POST['開始日期'].' 00:00:00';
 		$endDate=($_POST['結束日期']=='')?'9999-12-31':$_POST['結束日期'].' 23:59:59';
-		
-		//過濾預設廣告用參數
-		if(isset($_POST['排序條件'])&&$_POST['排序條件']!=""&&$_POST['排序條件']!=null){
-			$orderProperty = $_POST['排序條件'];
-		}
-		else
-			$orderProperty = -1;
-		
 		//取得版位類型名稱
 		$sql='SELECT 版位名稱
 		FROM 版位
@@ -106,6 +98,17 @@ if(isset($_POST['action'])){
 			ORDER BY ext,pre,版位.版位名稱'
 			;
 		}
+		else if($ptn=='單一平台EPG'){
+			$sql='SELECT 版位.版位名稱,channel_number.版位其他參數預設值 as channel_number
+			FROM 版位
+			JOIN 版位 版位類型 ON 版位.上層版位識別碼 = 版位類型.版位識別碼
+			LEFT JOIN 版位其他參數 channel_number ON (channel_number.版位識別碼 = 版位.版位識別碼 AND channel_number.版位其他參數名稱 = "channel_number")
+			WHERE 
+			版位類型.版位識別碼 LIKE ?
+			AND 版位.版位識別碼 LIKE ?
+			ORDER BY CHAR_LENGTH(channel_number),channel_number,版位.版位名稱'
+			;
+		}
 		else{
 			$sql='SELECT 版位.版位名稱
 			FROM 版位,版位 版位類型
@@ -134,26 +137,25 @@ if(isset($_POST['action'])){
 			   WHEN 額外版位.版位名稱 IS NULL THEN 版位.版位名稱
 			   ELSE 額外版位.版位名稱
 			   END AS 版位名稱,
-			託播單名稱,廣告期間開始時間,廣告期間結束時間,託播單.託播單識別碼,委刊單識別碼,素材識別碼,版位.版位識別碼,託播單其他參數值
+			託播單名稱,廣告期間開始時間,廣告期間結束時間,託播單.託播單識別碼,委刊單識別碼,素材識別碼,版位.版位識別碼
 		FROM 版位
         JOIN 託播單 ON 託播單.版位識別碼 = 版位.版位識別碼
         JOIN 版位 版位類型 ON 版位.上層版位識別碼 = 版位類型.版位識別碼
 		LEFT JOIN 託播單投放版位 ON 託播單.託播單識別碼 = 託播單投放版位.託播單識別碼 AND 託播單投放版位.ENABLE=1		
 		LEFT JOIN 版位 額外版位 ON 額外版位.版位識別碼 = 託播單投放版位.版位識別碼
         LEFT JOIN 託播單素材 ON 託播單.託播單識別碼 = 託播單素材.託播單識別碼
-		LEFT JOIN 託播單其他參數 ON 託播單.託播單識別碼 = 託播單其他參數.託播單識別碼 AND 託播單其他參數.託播單其他參數順序='.$orderProperty.'
-		WHERE 
-		版位類型.版位識別碼 LIKE ?
-		AND (版位.版位識別碼 LIKE ? OR 託播單投放版位.版位識別碼 LIKE ?)
+        WHERE 
+		版位類型.版位識別碼 LIKE ?'
+		.' AND (版位.版位識別碼 LIKE ? OR 託播單投放版位.版位識別碼 LIKE ?)
 		AND (
 			(廣告期間開始時間 BETWEEN ? AND ?) OR (廣告期間結束時間 BETWEEN ? AND ?) OR (? BETWEEN 廣告期間開始時間 AND 廣告期間結束時間)
 			)
 		AND 託播單.託播單狀態識別碼 IN ('.(isset($_POST['待確認排程'])?'6':'0,1,2,4').')
 		'.($area==''?'':' AND ( '.$area.' )').
 		($ptn=='頻道short EPG banner'||$ptn=='專區vod'||$ptn=='專區banner'||$ptn=='首頁banner'?
-		'ORDER BY CHAR_LENGTH(SUBSTRING_INDEX(版位.版位名稱,SUBSTRING_INDEX(版位.版位名稱,"_",-1),1)),SUBSTRING_INDEX(版位.版位名稱,SUBSTRING_INDEX(版位.版位名稱,"_",-1),1),託播單其他參數值,託播單名稱'.
-		', CHAR_LENGTH(SUBSTRING_INDEX(額外版位.版位名稱,SUBSTRING_INDEX(額外版位.版位名稱,"_",-1),1)),SUBSTRING_INDEX(額外版位.版位名稱,SUBSTRING_INDEX(額外版位.版位名稱,"_",-1),1),託播單其他參數值,託播單名稱'
-		:'ORDER BY 託播單其他參數值,版位.版位名稱,額外版位.版位名稱,託播單名稱'
+		'ORDER BY CHAR_LENGTH(SUBSTRING_INDEX(版位.版位名稱,SUBSTRING_INDEX(版位.版位名稱,"_",-1),1)),SUBSTRING_INDEX(版位.版位名稱,SUBSTRING_INDEX(版位.版位名稱,"_",-1),1),託播單名稱'.
+		', CHAR_LENGTH(SUBSTRING_INDEX(額外版位.版位名稱,SUBSTRING_INDEX(額外版位.版位名稱,"_",-1),1)),SUBSTRING_INDEX(額外版位.版位名稱,SUBSTRING_INDEX(額外版位.版位名稱,"_",-1),1),託播單名稱'
+		:'ORDER BY 版位.版位名稱,額外版位.版位名稱,託播單名稱'
 		);
 		if(!$stmt=$my->prepare($sql)) {
 			exit('無法準備statement，請聯絡系統管理員！');
@@ -227,14 +229,13 @@ if(isset($_POST['action'])){
 					if(!$first)
 						$scheduleHtml.='<tr>';
 					$scheduleHtml.='<td bgcolor="'.$bgcolor[$positionCount%count($bgcolor)].'">'.(++$orderNum).'</td>';
-					$scheduleHtml.='<td bgcolor="'.$bgcolor[$positionCount%count($bgcolor)].'">'.$order['託播單名稱'].'</td>';
+					$scheduleHtml.='<td bgcolor="'.$bgcolor[$positionCount%count($bgcolor)].'">'.(isset($order['預設廣告'])&&$order['預設廣告']==1?'[預設廣告]':'').$order['託播單名稱'].'</td>';
 					$std = explode(' ',$order['廣告期間開始時間'])[0];
 					$edd = explode(' ',$order['廣告期間結束時間'])[0];
 					if($order['素材識別碼'] == null)
 						$order['素材識別碼']=0;
 					$colspanFlag = false;
 					$colspanNum = 0;
-					$order['託播單其他參數值'] = $order['託播單其他參數值']==null?"&nbsp;":$order['託播單其他參數值'];
 					for($i =0;$i<=$diff;$i++){
 						$date = date('Y-m-d',strtotime($_POST["開始日期"]. ' + '.$i.' days'));
 						if($std<=$date && $edd>=$date){
@@ -243,17 +244,17 @@ if(isset($_POST['action'])){
 						}
 						else if($colspanFlag){
 							$scheduleHtml.='<td class="orderSch" orderId ='.$order['託播單識別碼'].' 委刊單識別碼 ='.$order['委刊單識別碼'].' 素材識別碼 ='.$order['素材識別碼'].' 版位識別碼 ='.$order['版位識別碼']
-							.' colspan ="'.$colspanNum.'" title ="'.$order['託播單識別碼'].":".$order['託播單名稱'].'">'.$order['託播單其他參數值'].'</td>';
+							.' colspan ="'.$colspanNum.'" title ="'.$order['託播單識別碼'].":".$order['託播單名稱'].'">&nbsp;</td>';
 							$colspanFlag = false;
 							$colspanNum = 0;
-							$scheduleHtml.='<td bgcolor="'.$bgcolor[$positionCount%count($bgcolor)].'">'.$order['託播單其他參數值'].'</td>';
+							$scheduleHtml.='<td bgcolor="'.$bgcolor[$positionCount%count($bgcolor)].'">&nbsp;</td>';
 						}
 						else
-							$scheduleHtml.='<td bgcolor="'.$bgcolor[$positionCount%count($bgcolor)].'">'.$order['託播單其他參數值'].'</td>';
+							$scheduleHtml.='<td bgcolor="'.$bgcolor[$positionCount%count($bgcolor)].'">&nbsp;</td>';
 					}
 					if($colspanFlag){
 						$scheduleHtml.='<td class="orderSch" orderId ='.$order['託播單識別碼'].' 委刊單識別碼 ='.$order['委刊單識別碼'].' 素材識別碼 ='.$order['素材識別碼'].' 版位識別碼 ='.$order['版位識別碼']
-						.' colspan ="'.$colspanNum.'" title ="'.$order['託播單識別碼'].":".$order['託播單名稱'].'">'.$order['託播單其他參數值'].'</td>';
+						.' colspan ="'.$colspanNum.'" title ="'.$order['託播單識別碼'].":".$order['託播單名稱'].'">&nbsp;</td>';
 					}
 					$scheduleHtml.='</tr>';
 					$first = false;

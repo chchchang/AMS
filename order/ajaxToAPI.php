@@ -197,6 +197,7 @@
 	
 	//檢查素材用
 	function m_chckMaterial($id){
+		global $logger;
 		$CSMSPTN = ['首頁banner','專區banner','專區vod','頻道short EPG banner','Vod+廣告'];
 		$my=new MyDB(true);
 		$sql = "SELECT COUNT(*) AS count FROM 託播單素材 WHERE 託播單識別碼 = ? AND 素材識別碼 = 0";

@@ -1,13 +1,5 @@
 
 <script type="text/javascript">
-	//匯出excel表格
-	function exportExcel(){
-	  var html = '&lt;meta http-equiv="content-type" content="application/vnd.ms-excel; charset=UTF-8" />&lt;title>Excel&lt;/title>';
-	  html += '';
-	  html += document.getElementById('pschedule').outerHTML + '';
-	  window.open('data:application/vnd.ms-excel,' + encodeURIComponent(html));
-	}
-
 	var showAminationTime=500;
 	$( "#dialog_form" ).dialog(
 	{autoOpen: false,
@@ -41,7 +33,6 @@
 	
 	//版位自動完成選項
 	function setPosition(pId){
-		//版位自動完成選項
 		$("#psch_position").empty();
 		$.post( "../order/ajaxToDB_Order.php", { action: "getPositionByPositionType",版位類型識別碼:pId }, 
 			function( data ) {
@@ -55,17 +46,6 @@
 				$( "#psch_position" ).combobox('setText','');
 				$( "#psch_position" ).val('');
 				
-			}
-			,"json"
-		);
-		//更新版位類型參數選擇
-		$("#psch_sortByProperty").empty();
-		$("#psch_sortByProperty").append('<option value="">無</option>');
-		$.post( "../position/positionSchedule.php", { method: "取得託播單用參數",版位類型識別碼:pId }, 
-			function( data ) {
-				for(i in  data){
-					$("#psch_sortByProperty").append('<option value="'+data[i]["版位其他參數順序"]+'">'+data[i]["版位其他參數顯示名稱"]+'</option>');
-				}
 			}
 			,"json"
 		);
@@ -123,10 +103,6 @@
 				);
 			}
 		}
-		//若是單一平台EPG版位，顯示預設廣告過濾選項
-		else if(ptn == '單一平台EPG'){
-			$('#showDefault').show();
-		}
 		//不是CSMS版位類型，清空顯示區域選項
 		else{
 			$('#showArea,#showDefault').hide();
@@ -148,8 +124,8 @@
 			return 0;
 		}
 		
+		$('schDiv').mask('託播單確定中...');
 		//取的資料
-		$('#schDiv').mask('資料產生中...');
 		//post用參數
 		var bypost = {
 		action:'版位排程'
@@ -158,7 +134,6 @@
 		,'開始日期':$('#startDatePicker').val()
 		,'結束日期':$('#endDatePicker').val()
 		,'顯示模式':$('input[name=displayType]:checked').val()
-		,'排序條件':$("#psch_sortByProperty").val()
 		};
 		if(typeof(getBookingSch)!='undefined' && getBookingSch)
 			bypost['待確認排程'] = true;
@@ -188,7 +163,7 @@
 				);
 				$('#pschedule').tableHeadFixer({"left" : 1});
 				colorOrderSch();
-				$('#schDiv').unmask();
+				$('schDiv').unmask();
 			}
 		,'json'
 		);

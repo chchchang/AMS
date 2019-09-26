@@ -233,7 +233,7 @@
 	function position_timeTable(){
 		global $logger, $my;
 		
-		$std=$_POST['year'].'-'.sprintf('%02d',strval($_POST['month']));
+		/*$std=$_POST['year'].'-'.sprintf('%02d',strval($_POST['month']));
 		$stdwlidcard = $std.'-%';
 		$std .='-01';
 		$sql= "SELECT 託播單.託播單識別碼,廣告可被播出小時時段,廣告期間開始時間,廣告期間結束時間 
@@ -260,8 +260,8 @@
 		while($row = $res->fetch_array()){
 			array_push($a,$row);
 		}
-		echo json_encode($a,JSON_UNESCAPED_UNICODE);
-		
+		echo json_encode($a,JSON_UNESCAPED_UNICODE);*/
+		echo json_encode(array(),JSON_UNESCAPED_UNICODE);
 	}
 	
 	/**新增委刊單**/
@@ -883,7 +883,7 @@
 				//用第一個版位當作代表版位
 				$edit['版位識別碼'] = $orderPositions[0];
 				$sql="UPDATE 託播單 SET 託播單名稱=?,託播單說明=?,廣告期間開始時間=?,廣告期間結束時間=?,廣告可被播出小時時段=?,
-				預約到期時間=?,售價=?,託播單狀態識別碼=?,LAST_UPDATE_PEOPLE=?,LAST_UPDATE_TIME=CURRENT_TIMESTAMP WHERE 託播單識別碼=? ";
+				預約到期時間=?,售價=?,託播單狀態識別碼=?,版位識別碼=?,LAST_UPDATE_PEOPLE=?,LAST_UPDATE_TIME=CURRENT_TIMESTAMP WHERE 託播單識別碼=? ";
 				$start=$edit["廣告期間開始時間"];
 				$end=$edit["廣告期間結束時間"];
 				if(!$stmt=$my->prepare($sql)) {
@@ -891,9 +891,9 @@
 					goto exitWithError;
 				}
 				$price = ($edit["售價"]=="")?null:$edit["售價"];
-				if(!$stmt->bind_param('ssssssiiii',$edit["託播單名稱"],$edit["託播單說明"],$start,$end
+				if(!$stmt->bind_param('ssssssiiiii',$edit["託播單名稱"],$edit["託播單說明"],$start,$end
 									,$edit["廣告可被播出小時時段"],$edit["預約到期時間"],$price
-									,$state,$_SESSION['AMS']['使用者識別碼'],$edit["託播單識別碼"])) {
+									,$state,$edit['版位識別碼'],$_SESSION['AMS']['使用者識別碼'],$edit["託播單識別碼"])) {
 					$Error=(json_encode(array("dbError"=>'無法繫結資料，請聯絡系統管理員！'),JSON_UNESCAPED_UNICODE));
 					goto exitWithError;
 				}
@@ -974,7 +974,6 @@
 				}
 				
 				//檢查多版位投放
-				/*if(count($orderPositions)>1){
 					$sql = 'SELECT * FROM 託播單投放版位 WHERE 託播單識別碼 = ?';
 					if(!$stmt=$my->prepare($sql)) {
 						$Error=(json_encode(array("dbError"=>'無法準備statement，請聯絡系統管理員！'),JSON_UNESCAPED_UNICODE));
@@ -1007,27 +1006,11 @@
 					//已存在的版位不可變動投放次數
 					foreach($orderPositions as $pid){
 						if(isset($positionsRecort[$pid])){
-							//版位存在
+							//版位存在,標記為啟動
 							$positionsRecort[$pid]['ENABLE']=1;
-							$sql="UPDATE 託播單投放版位 SET 版位投放上限=?,ENABLE=?,LAST_UPDATE_PEOPLE=?,LAST_UPDATE_TIME=CURRENT_TIMESTAMP WHERE 託播單識別碼=? AND 版位識別碼=?";
-							if(!$stmt=$my->prepare($sql)) {
-								$logger->error('無法準備statement，錯誤代碼('.$my->errno.')、錯誤訊息('.$my->error.')。');
-								exit(json_encode(array("dbError"=>'無法準備statement，請聯絡系統管理員！'),JSON_UNESCAPED_UNICODE));
-							}
-							
-							if(!$stmt->bind_param('iiiii',$$positionsRecort[$pid]['版位投放上限'],$$positionsRecort[$pid]["ENABLE"]
-													,$_SESSION['AMS']['使用者識別碼'],$positionsRecort[$pid]["託播單識別碼"],$pid)) {
-								$logger->error('無法繫結資料，錯誤代碼('.$stmt->errno.')、錯誤訊息('.$stmt->error.')。');
-								exit(json_encode(array("dbError"=>'無法繫結資料，請聯絡系統管理員！'),JSON_UNESCAPED_UNICODE));
-							}
-							
-							if(!$stmt->execute()) {
-								$logger->error('無法執行statement，錯誤代碼('.$stmt->errno.')、錯誤訊息('.$stmt->error.')。');
-								exit(json_encode(array("dbError"=>'無法執行statement，請聯絡系統管理員！'),JSON_UNESCAPED_UNICODE));
-							}
 						}
 						else{
-							//版位不存在
+							//版位不存在，直接新增
 							$positionsRecort[$pid]=$positionTemplate;
 							$positionsRecort[$pid]['ENABLE']=1;
 							$positionsRecort[$pid]['版位識別碼']=$pid;
@@ -1038,7 +1021,7 @@
 								$Error=json_encode(array("dbError"=>'無法準備statement，請聯絡系統管理員！'),JSON_UNESCAPED_UNICODE);
 								goto exitWithError;
 							}
-							if(!$stmt->bind_param('iiiii',$edit["託播單識別碼"],$pid,$positionTemplate['版位投放上限'],0,$_SESSION['AMS']['使用者識別碼'])) {
+							if(!$stmt->bind_param('iiiii',$edit["託播單識別碼"],$pid,$positionTemplate['版位投放上限'],$positionsRecort[$pid]['版位投放次數'],$_SESSION['AMS']['使用者識別碼'])) {
 								$Error=json_encode(array("dbError"=>'無法繫結資料，請聯絡系統管理員！'),JSON_UNESCAPED_UNICODE);
 								goto exitWithError;
 							}
@@ -1048,7 +1031,27 @@
 							}
 						}
 					}
-				}//end of 檢查多版位投放*/
+				
+					//依照比較結果更新版位啟動狀態
+					foreach($positionsRecort as $pid=> $positionsRecortData){
+						$sql="UPDATE 託播單投放版位 SET 版位投放上限=?,ENABLE=?,LAST_UPDATE_PEOPLE=?,LAST_UPDATE_TIME=CURRENT_TIMESTAMP WHERE 託播單識別碼=? AND 版位識別碼=?";
+						if(!$stmt=$my->prepare($sql)) {
+							$logger->error('無法準備statement，錯誤代碼('.$my->errno.')、錯誤訊息('.$my->error.')。');
+							exit(json_encode(array("dbError"=>'無法準備statement，請聯絡系統管理員！'),JSON_UNESCAPED_UNICODE));
+						}
+						
+						if(!$stmt->bind_param('iiiii',$positionsRecort[$pid]['版位投放上限'],$positionsRecort[$pid]["ENABLE"]
+												,$_SESSION['AMS']['使用者識別碼'],$positionsRecort[$pid]["託播單識別碼"],$pid)) {
+							$logger->error('無法繫結資料，錯誤代碼('.$stmt->errno.')、錯誤訊息('.$stmt->error.')。');
+							exit(json_encode(array("dbError"=>'無法繫結資料，請聯絡系統管理員！'),JSON_UNESCAPED_UNICODE));
+						}
+						
+						if(!$stmt->execute()) {
+							$logger->error('無法執行statement，錯誤代碼('.$stmt->errno.')、錯誤訊息('.$stmt->error.')。');
+							exit(json_encode(array("dbError"=>'無法執行statement，請聯絡系統管理員！'),JSON_UNESCAPED_UNICODE));
+						}
+					}
+				//end of 檢查多版位投放
 				
 				array_push($editIds,$edit["託播單識別碼"]);
 			}
@@ -1253,8 +1256,9 @@
 							$sql = 'SELECT 每則文字素材最大字數,每則圖片素材最大寬度,每則圖片素材最大高度,每則影片素材最大秒數,素材類型識別碼
 								FROM 版位素材類型 
 								WHERE 版位識別碼 =? AND 版位素材類型.素材順序 = ?';
-							
-							$positionLimit[$positionID][$mOrder]= $my->getResultArray($sql,'ii',$positionID,$mOrder)[0];
+							$pdata = $my->getResultArray($sql,'ii',$positionID,$mOrder);
+							if(isset($pdata[0]))
+								$positionLimit[$positionID][$mOrder]= $pdata[0];
 						}
 						//取得素材資料
 						$sql ='SELECT 影片素材秒數,文字素材內容,圖片素材寬度,圖片素材高度 FROM 素材 WHERE 素材識別碼=? LIMIT 0,1';

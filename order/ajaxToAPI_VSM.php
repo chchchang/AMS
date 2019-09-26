@@ -389,6 +389,14 @@
 			
 			$action ='sendOrder';
 		}
+		//送出前先取消現有託播單
+		if($action=='sendOrder')
+			$checkResult=cancelOrder_VSM_action($orderId);
+		else if($action=='sendEPGOrder')
+			$checkResult=cancelEPGOrder_VSM_action($orderId);
+		if(!$checkResult['success'])
+			exit(json_encode(array("success"=>false,"message"=>'託播單取消送出失敗 '.$checkResult['message'],'id'=>$orderId),JSON_UNESCAPED_UNICODE));
+		
 		$bypostOrder = replace_new_line_charater($bypostOrder);
 		//新增
 		$bypost=['action'=>$action,'orderData'=>$bypostOrder];
@@ -405,7 +413,16 @@
 	}
 	
 	function cancelOrder_VSM($orderId){
-		global $logger, $my;
+		global $logger;
+		$checkResult = cancelOrder_VSM_action($orderId);
+		if($checkResult['success'])
+			changeOrderSate('取消送出',array($orderId));
+		else
+			exit(json_encode(array("success"=>false,"message"=>'託播單取消送出失敗 '.$checkResult['message'],'id'=>$orderId),JSON_UNESCAPED_UNICODE));
+	}
+	
+	function cancelOrder_VSM_action($orderId){
+		global $logger;
 		$bypost=['action'=>'cancelOrder','transaction_id'=>$orderId];
 		$postvars = http_build_query($bypost);
 		if(!$apiResult=connec_to_Api_json(Config_VSM_Meta::GET_AD_API(),'POST',$postvars)){
@@ -413,14 +430,20 @@
 			exit(json_encode(array("success"=>false,"message"=>'無法連接VSM託播單API','id'=>$orderId),JSON_UNESCAPED_UNICODE));	
 		}
 		$checkResult = json_decode($apiResult,true);
+		return $checkResult;
+	}
+	
+	function cancelEPGOrder_VSM($orderId){
+		global $logger;
+		$checkResult = cancelEPGOrder_VSM_action($orderId);
 		if($checkResult['success'])
 			changeOrderSate('取消送出',array($orderId));
 		else
 			exit(json_encode(array("success"=>false,"message"=>'託播單取消送出失敗 '.$checkResult['message'],'id'=>$orderId),JSON_UNESCAPED_UNICODE));
 	}
 	
-	function cancelEPGOrder_VSM($orderId){
-		global $logger, $my;
+	function cancelEPGOrder_VSM_action($orderId){
+		global $logger;
 		$bypost=['action'=>'cancelEPGOrder','transaction_id'=>$orderId];
 		$postvars = http_build_query($bypost);
 		if(!$apiResult=connec_to_Api_json(Config_VSM_Meta::GET_AD_API(),'POST',$postvars)){
@@ -428,10 +451,7 @@
 			exit(json_encode(array("success"=>false,"message"=>'無法連接VSM託播單API','id'=>$orderId),JSON_UNESCAPED_UNICODE));	
 		}
 		$checkResult = json_decode($apiResult,true);
-		if($checkResult['success'])
-			changeOrderSate('取消送出',array($orderId));
-		else
-			exit(json_encode(array("success"=>false,"message"=>'託播單取消送出失敗 '.$checkResult['message'],'id'=>$orderId),JSON_UNESCAPED_UNICODE));
+		return $checkResult;
 	}
 	
 	function connec_to_Api_json($url,$method,$postvars){
