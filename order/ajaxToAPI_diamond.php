@@ -50,7 +50,8 @@
 		$bypostOrder = get_order_post_data($orderId,$action);		
 		$materialFilesInfo = get_material_info_by_oid($orderId);		
 		//送出素材
-		$uploadMaterialResult = upload_material_by_from(dianomdMaterialAPIUrl,$materialFilesInfo,[]);
+		$materialURL = dianomdMaterialAPIUrl."?type=".$bypostOrder['type'];
+		$uploadMaterialResult = upload_material_by_from($materialURL,$materialFilesInfo,[]);
 		
 		//送出素材失敗
 		if($action == "add")

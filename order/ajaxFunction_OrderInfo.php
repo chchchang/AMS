@@ -115,7 +115,7 @@
 			
 			$sql.=$sqlCon;
 				
-			if(!$stmt = $my->prepare($sql)) {
+			/*if(!$stmt = $my->prepare($sql)) {
 				exit(json_encode(array('success'=>false , 'message'=>'資料庫錯誤'),JSON_UNESCAPED_UNICODE));
 			}
 			call_user_func_array(array($stmt, 'bind_param'), $a_params);
@@ -131,12 +131,13 @@
 			if($row=$res->fetch_assoc())
 				$totalRowCount=$row['COUNT'];
 			else
-				exit;
+				exit;*/
 
 			//再取得資料
 			$sql=
 				'
 				SELECT
+					COUNT(1) COUNT,
 					託播單.託播單識別碼,
 					託播單CSMS群組識別碼,
 					託播單名稱,
@@ -176,6 +177,9 @@
 				exit('無法取得結果集，請聯絡系統管理員！');
 			}		
 			while($row=$res->fetch_assoc()){
+					if($totalRowCount == 0)
+						$totalRowCount=$row['COUNT'];
+					
 					$temp = explode(',',$row['時段']);
 					$timeString=$temp[0];
 					for($i =1; $i<count($temp); $i++){

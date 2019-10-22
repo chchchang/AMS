@@ -156,7 +156,7 @@
 			//取得素材資訊
 			$sql='
 				SELECT
-					素材順序,影片媒體編號,託播單素材.素材識別碼,可否點擊,點擊後開啟類型,點擊後開啟位址
+					素材順序,影片媒體編號,託播單素材.素材識別碼,可否點擊,點擊後開啟類型,點擊後開啟位址,影片畫質識別碼
 				FROM
 					託播單素材
 					LEFT JOIN 素材 ON 素材.素材識別碼=託播單素材.素材識別碼
@@ -165,9 +165,25 @@
 				ORDER BY
 					託播單素材.素材順序
 			';
-			$orderMaterial=$my->getResultArray($sql,'i',$orderId)[0];
+			$orderMaterials=$my->getResultArray($sql,'i',$orderId);
 			foreach($orderConfig as $pid=>$orderConfigData){
-				$material_url = $orderConfigData['url'].$orderMaterial['影片媒體編號'].'_f';
+				$Materials = [
+					"url"=>"",
+					"sdUrl"=>""
+				];
+				$material_link = "";
+				$material_link_value = "";
+				foreach($orderMaterials as $orderMaterial){
+					if($orderMaterial["影片畫質識別碼"] == 2){
+						$Materials["url"]= $orderConfigData['url'].$orderMaterial['影片媒體編號'].'_f';
+						$material_link = $orderMaterial['點擊後開啟類型'];
+						$material_link_value = $orderMaterial['點擊後開啟位址'];
+					}
+					else if($orderMaterial["影片畫質識別碼"] == 1){
+						$Materials["sdUrl"]= $orderConfigData['url'].$orderMaterial['影片媒體編號'].'_f';
+					}
+				}
+				
 				$bypostOrder[] = [
 					"transaction_id"=>$orderData["託播單識別碼"],
 					"mat_type_id"=>$orderConfigData['mat_type_id'],
@@ -178,14 +194,16 @@
 					"end_datetime"=>$orderData['廣告期間結束時間'],
 					"hours"=>$orderData['廣告可被播出小時時段'],
 					"otherConfig"=>[
-						"url"=>$material_url,
+						"url"=>$Materials["url"],
+						"sdUrl"=>$Materials["sdUrl"],
 						"linkType"=>$orderConfigData['linkType'],
 						"link"=>$orderConfigData['link'],
 						"linkParameter"=>$orderConfigData['linkParameter'],
 						"weight"=>$orderConfigData['weight'],
 						"bannerTransactionId"=>$orderConfigData['bannerTransactionId'],
-						'material_link'=>$orderMaterial['點擊後開啟類型'],
-						'material_link_value'=>$orderMaterial['點擊後開啟位址']
+						'material_link'=>$material_link,
+						'material_link_value'=>$material_link_value,
+						'playTimeLimit'=>$orderConfigData['playTimeLimit']
 					]
 				];
 			}
@@ -206,7 +224,8 @@
 					託播單素材.素材順序
 			';
 			$orderMaterial=$my->getResultArray($sql,'i',$orderId)[0];
-			$materialType = end(explode('.',$orderMaterial['素材原始檔名']));
+			$explodedName = explode('.',$orderMaterial['素材原始檔名']);
+			$materialType = end($explodedName);
 			$materialName = 'ad/_____AMS_'.$orderMaterial['素材識別碼'].'.'.$materialType;
 			foreach($orderConfig as $pid=>$orderConfigData){
 				$bypostOrder[] = [
@@ -285,12 +304,16 @@
 			$materialName = "";
 			$thumbNailName = "";
 			foreach($orderMaterials as $orderMaterial){
-				$materialType = end(explode('.',$orderMaterial['素材原始檔名']));
+				$explodedName = explode('.',$orderMaterial['素材原始檔名']);
+				$materialType = end($explodedName);
 				if($orderMaterial["素材順序"] == 1){
 					$materialName = 'ad/_____AMS_'.$orderMaterial['素材識別碼'].'.'.$materialType;
 				}
-				else{
+				else if($orderMaterial["素材順序"] == 2){
 					$thumbNailName = 'ad/_____AMS_'.$orderMaterial['素材識別碼'].'.'.$materialType;
+				}
+				else{
+					$thumbNailContexName = 'ad/_____AMS_'.$orderMaterial['素材識別碼'].'.'.$materialType;
 				}
 			}
 			foreach($orderConfig as $pid=>$orderConfigData){
@@ -307,7 +330,8 @@
 						"imageId"=>$materialName,
 						"weight"=>$orderConfigData['weight'],
 						"context"=>$orderConfigData['context'],
-						"thumbnailImageId"=>$thumbNailName
+						"thumbnailImageId"=>$thumbNailName,
+						"thumbnailWithContextImageId"=>$thumbNailContexName
 					]
 				];
 			}
@@ -318,7 +342,7 @@
 			//取得素材資訊
 			$sql='
 				SELECT
-					素材順序,素材名稱,素材類型識別碼,素材原始檔名,文字素材內容,影片媒體編號,託播單素材.素材識別碼,可否點擊,點擊後開啟類型,點擊後開啟位址
+					素材順序,素材名稱,素材類型識別碼,素材原始檔名,文字素材內容,影片媒體編號,託播單素材.素材識別碼,可否點擊,點擊後開啟類型,點擊後開啟位址,影片畫質識別碼
 				FROM
 					託播單素材
 					LEFT JOIN 素材 ON 素材.素材識別碼=託播單素材.素材識別碼
@@ -332,7 +356,8 @@
 				$Materials = [
 					"content"=>"",
 					"imageId"=>"",
-					"vodURL"=>""
+					"vodURL"=>"",
+					"sdVodURL"=>""
 				];
 				$material_link = "";
 				$material_link_value = "";
@@ -342,7 +367,8 @@
 						
 					}
 					if($om["素材類型識別碼"]==2){
-						$materialType = end(explode('.',$om['素材原始檔名']));
+						$explodedName = explode('.',$om['素材原始檔名']);
+						$materialType = end($explodedName);
 						$materialName = 'ad/_____AMS_'.$om['素材識別碼'].'.'.$materialType;
 						$Materials["imageId"] = $materialName;
 						$material_link = $om["點擊後開啟類型"];
@@ -350,7 +376,10 @@
 					}
 					if($om["素材類型識別碼"]==3){
 						$material_url = $orderConfigData['url'].$om['影片媒體編號'].'_f';
-						$Materials["vodURL"] = $material_url;
+						if($om["影片畫質識別碼"]==2)
+							$Materials["vodURL"] = $material_url;
+						else if ($om["影片畫質識別碼"]==1)
+							$Materials["sdVodURL"] = $material_url;
 					}
 				}
 			
@@ -367,6 +396,7 @@
 						"content"=>$orderConfigData['content'],
 						"imageId"=>$Materials['imageId'],
 						"vodURL"=>$Materials['vodURL'],
+						"sdVodURL"=>$Materials['sdVodURL'],
 						"titleColor"=>$orderConfigData['titleColor'],
 						"subheader"=>$orderConfigData['subheader'],
 						"subheaderColor"=>$orderConfigData['subheaderColor'],
