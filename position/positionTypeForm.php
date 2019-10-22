@@ -556,7 +556,7 @@ function otherConfigAdd(jobject,disable){
 	}else{
 		$c.append('託播單用 ');
 	}
-	$c.append(jobject.版位其他參數名稱+' 預設:'+jobject.版位其他參數預設值);
+	$c.append(jobject.版位其他參數名稱+'('+jobject.版位其他參數顯示名稱+') 預設:'+jobject.版位其他參數預設值);
 	$("#sortableOther").append($li.append($c));
 	configArray.push(jobject);
 	configArray_parent.push(jobject);
@@ -600,7 +600,7 @@ function otherConfigEdit(jobject){
 	else{
 		$li.append('託播單用 ');
 	}
-	$li.append(jobject.版位其他參數名稱+' 預設:'+jobject.版位其他參數預設值);
+	$li.append(jobject.版位其他參數名稱+'('+jobject.版位其他參數顯示名稱+') 預設:'+jobject.版位其他參數預設值);
 	configArray.splice(jobject.版位其他參數順序-1,1,jobject);
 	$('#dialogDiv').dialog('close');
 }

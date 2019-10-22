@@ -60,12 +60,19 @@
 		);
 		//更新版位類型參數選擇
 		$("#psch_sortByProperty").empty();
-		$("#psch_sortByProperty").append('<option value="">無</option>');
+		$("#psch_sortByProperty").append('<option value=-1>無</option>');
 		$.post( "../position/positionSchedule.php", { method: "取得託播單用參數",版位類型識別碼:pId }, 
 			function( data ) {
 				for(i in  data){
 					$("#psch_sortByProperty").append('<option value="'+data[i]["版位其他參數順序"]+'">'+data[i]["版位其他參數顯示名稱"]+'</option>');
 				}
+				//取得cookie紀錄的最常選用參數
+				$.post( "../position/positionScheduleAjax.php", { action: "取得常用參數",版位類型識別碼:pId }, 
+					function( paraid ) {
+						$("#psch_sortByProperty").val(paraid);
+					}
+					,"json"
+				);
 			}
 			,"json"
 		);
@@ -112,7 +119,7 @@
 		//若是CSMS版位類型，開啟顯示區域選項
 		if($.inArray(ptn,CSMSPTN)!=-1){
 			$('#showArea').show();
-			if(ptn == '頻道short EPG banner')
+			/*if(ptn == '頻道short EPG banner')
 				$('#showDefault').show();
 			else{
 				$('#showDefault').hide();
@@ -121,12 +128,12 @@
 						$(this).prop('checked',false);
 					}
 				);
-			}
+			}*/
 		}
 		//若是單一平台EPG版位，顯示預設廣告過濾選項
-		else if(ptn == '單一平台EPG'){
+		/*else if(ptn == '單一平台EPG'){
 			$('#showDefault').show();
-		}
+		}*/
 		//不是CSMS版位類型，清空顯示區域選項
 		else{
 			$('#showArea,#showDefault').hide();
@@ -159,6 +166,8 @@
 		,'結束日期':$('#endDatePicker').val()
 		,'顯示模式':$('input[name=displayType]:checked').val()
 		,'排序條件':$("#psch_sortByProperty").val()
+		,'排序條件名稱':$('#psch_sortByProperty option:selected').text()
+		,'排程顯示方式':$("#psch_sortFormat").val()
 		};
 		if(typeof(getBookingSch)!='undefined' && getBookingSch)
 			bypost['待確認排程'] = true;
@@ -169,9 +178,9 @@
 			bypost['顯示區域'].push($(this).val());
 		});
 		//過濾預設廣告用參數
-		$('input[name="showDefaultCheckBox"]:checked').each(function(){
+		/*$('input[name="showDefaultCheckBox"]:checked').each(function(){
 			bypost['預設廣告過濾']=$(this).val();
-		});
+		});*/
 		$.post(getdataUrl,bypost,
 			function(data){
 				//清空資料表

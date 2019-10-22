@@ -93,7 +93,7 @@ if(action == 'limitedEdit'){
 	showVal(jobject);
 	$('input').prop('disabled', true);
 	$( "#版位其他參數型態識別碼" ).combobox('disable');
-	$('input[name="defaultValue"],#版位其他參數預設值').prop('disabled', false);
+	$('input[name="defaultValue"],#版位其他參數預設值,#版位其他參數顯示名稱').prop('disabled', false);
 }
 
 //設定參數預設值動作
