@@ -375,6 +375,9 @@
 						$material_link_value = $om["點擊後開啟位址"];
 					}
 					if($om["素材類型識別碼"]==3){
+						if($om['影片媒體編號']==""||$om['影片媒體編號']==null){
+							continue;
+						}
 						$material_url = $orderConfigData['url'].$om['影片媒體編號'].'_f';
 						if($om["影片畫質識別碼"]==2)
 							$Materials["vodURL"] = $material_url;

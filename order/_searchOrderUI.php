@@ -54,7 +54,7 @@
 		//Enter搜尋
 		$("#_searchOUI_searchOrder").keypress(function(event){
 			if (event.keyCode == 13){
-					showOrderDG();
+				showOrderDG();
 			}
 		}).autocomplete({
 			source :function( request, response) {
@@ -66,7 +66,7 @@
 		});
 		
 		$('#_searchOUI_searchOrderButton').click(function(){
-				showOrderDG();
+			showOrderDG();
 		});
 		
 		$( "#_searchOUI_tabs" ).tabs();

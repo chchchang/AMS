@@ -163,11 +163,13 @@
 				return;
 			}
 			m_pageInfo.empty();
-			if(total<2)
+			if(total<2 && total != -1)
 				return;
 			
 			m_currentPage = current;
 			m_totalPage = total;
+			if(total == -1)
+				total=1;
 			//建立頁數資訊
 			var nextBtn = $(document.createElement('button'));
 			nextBtn.text("下一頁")
@@ -200,10 +202,21 @@
 											});
 			//點擊下一頁
 			$("#"+appendElementId+">.pageInfo>.nextBtn").click(function(){
-														if(m_currentPage < m_totalPage){
-															$("#"+appendElementId+">.pageInfo>select").val(++m_currentPage);
+														m_currentPage+=1;
+														//總頁數為-1，動態增加頁數
+														if(m_totalPage == -1){
+															if( $("#"+appendElementId+">.pageInfo>select option[value="+m_currentPage+"]").length == 0){
+																$("#"+appendElementId+">.pageInfo>select").append($("<option></option>").attr("value",m_currentPage).text(m_currentPage));
+															}
+															$("#"+appendElementId+">.pageInfo>select").val(m_currentPage);
 															return m_this.pageChange(m_currentPage);
-													}});
+														}
+														//總頁數不為-1，一般行為
+														else if(m_currentPage < m_totalPage){
+															$("#"+appendElementId+">.pageInfo>select").val(m_currentPage);
+															return m_this.pageChange(m_currentPage);
+														}
+													});
 			//點擊上一頁
 			$("#"+appendElementId+">.pageInfo>.preBtn").click(function() {
 														if(m_currentPage > 1){

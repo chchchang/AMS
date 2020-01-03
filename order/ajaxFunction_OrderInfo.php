@@ -8,44 +8,8 @@
 			$orders=array();
 			$fromRowNo=isset($_POST['pageNo'])&&intval($_POST['pageNo'])>0?(intval($_POST['pageNo'])-1)*PAGE_SIZE:0;
 			$totalRowCount=0;	//T.B.D.
-			$searchBy='%'.((isset($_POST['searchBy']))?$_POST['searchBy']:'').'%';
-			if(isset($_POST['廣告主識別碼']))
-				$adowner=($_POST['廣告主識別碼']=='')?'%':$_POST['廣告主識別碼'];
-			else
-				$adowner='%';
-			if(isset($_POST['委刊單識別碼']))
-				$orderList=($_POST['委刊單識別碼']=='')?'%':$_POST['委刊單識別碼'];
-			else
-				$orderList='%';
-			if(isset($_POST['版位類型識別碼']))
-				$positionType=($_POST['版位類型識別碼']=='')?'%':$_POST['版位類型識別碼'];
-			else
-				$positionType='%';
-			if(isset($_POST['版位識別碼']))
-				$position=($_POST['版位識別碼']=='')?'%':$_POST['版位識別碼'];
-			else
-				$position='%';
-			if(isset($_POST['開始時間']))
-				$startDate=($_POST['開始時間']=='')?'0000-00-00':$_POST['開始時間'].' 00:00:00';
-			else
-				$startDate='0000-00-00';
-			if(isset($_POST['結束時間']))
-				$endDate=($_POST['結束時間']=='')?'9999-12-31':$_POST['結束時間'].' 23:59:59';
-			else
-				$endDate='9999-12-31';
-			if(isset($_POST['狀態']))
-				$state=($_POST['狀態']=='-1'||$_POST['狀態']==null)?'%':$_POST['狀態'];
-			else
-				$state='%';
-			if(isset($_POST['素材識別碼']))
-				$material=($_POST['素材識別碼']=='-1'||$_POST['素材識別碼']==null)?'%':$_POST['素材識別碼'];
-			else
-				$material='%';
-			if(isset($_POST['素材群組識別碼']))
-				$materialGroup=($_POST['素材群組識別碼']=='0'||$_POST['素材群組識別碼']==null)?'%':$_POST['素材群組識別碼'];
-			else
-				$materialGroup='%';
-				
+			//取得sql用參數
+			$parameters=getparameters();
 			//先取得總筆數
 			$sql='
 				SELECT COUNT(1) COUNT
@@ -61,10 +25,10 @@
 					LEFT JOIN 版位 額外版位 ON 託播單投放版位.版位識別碼 = 額外版位.版位識別碼
 				WHERE
 					(
-					'.($searchBy=='%'?'1':' 託播單.託播單識別碼=? OR 託播單CSMS群組識別碼=? OR 託播單名稱 LIKE ? OR 託播單說明 LIKE ?').'
+					'.($parameters["searchBy"]=='%'?'1':' 託播單.託播單識別碼=? OR 託播單CSMS群組識別碼=? OR 託播單名稱 LIKE ? OR 託播單說明 LIKE ?').'
 					)
-					'.($adowner=='%'?'':' AND 委刊單.廣告主識別碼 LIKE ? ').'
-					'.($orderList=='%'?'':' AND 託播單.委刊單識別碼 LIKE ? ').'
+					'.($parameters["廣告主識別碼"]=='%'?'':' AND 委刊單.廣告主識別碼 LIKE ? ').'
+					'.($parameters["委刊單識別碼"]=='%'?'':' AND 託播單.委刊單識別碼 LIKE ? ').'
 					AND 版位.上層版位識別碼 LIKE ?
 					AND (託播單.版位識別碼 LIKE ? OR 託播單投放版位.版位識別碼 LIKE ?)
 					AND(
@@ -79,43 +43,43 @@
 			}
 			
 			
-			$param_type = ($searchBy=='%'?'':'iiss').($adowner=='%'?'':'s').($orderList=='%'?'':'s').'sssssssss';
+			$param_type = ($parameters["searchBy"]=='%'?'':'iiss').($parameters["廣告主識別碼"]=='%'?'':'s').($parameters["委刊單識別碼"]=='%'?'':'s').'sssssssss';
 			$a_params = array();
 			$a_params[] = &$param_type;
-			if($searchBy!='%'){
+			if($parameters["searchBy"]!='%'){
 			$a_params[] = &$_POST['searchBy'];
 			$a_params[] = &$_POST['searchBy'];
-			$a_params[] = &$searchBy;
-			$a_params[] = &$searchBy;
+			$a_params[] = &$parameters["searchBy"];
+			$a_params[] = &$parameters["searchBy"];
 			}
-			if($adowner!='%')
-			$a_params[] = &$adowner;
-			if($orderList!='%')
-			$a_params[] = &$orderList;
-			$a_params[] = &$positionType;
-			$a_params[] = &$position;
-			$a_params[] = &$position;
-			$a_params[] = &$startDate;
-			$a_params[] = &$endDate;
-			$a_params[] = &$startDate;
-			$a_params[] = &$endDate;
-			$a_params[] = &$startDate;
-			$a_params[] = &$state;
+			if($parameters["廣告主識別碼"]!='%')
+			$a_params[] = &$parameters["廣告主識別碼"];
+			if($parameters["委刊單識別碼"]!='%')
+			$a_params[] = &$parameters["委刊單識別碼"];
+			$a_params[] = &$parameters["版位類型識別碼"];
+			$a_params[] = &$parameters["版位識別碼"];
+			$a_params[] = &$parameters["版位識別碼"];
+			$a_params[] = &$parameters["開始時間"];
+			$a_params[] = &$parameters["結束時間"];
+			$a_params[] = &$parameters["開始時間"];
+			$a_params[] = &$parameters["結束時間"];
+			$a_params[] = &$parameters["開始時間"];
+			$a_params[] = &$parameters["狀態"];
 			
-			if($material!='%'){
+			if($parameters["素材識別碼"]!='%'){
 				$param_type .='s';
 				$sqlCon.=' AND 託播單素材.素材識別碼 LIKE ? ';
-				$a_params[] = &$material;
+				$a_params[] = &$parameters["素材識別碼"];
 			}
-			if($materialGroup!='%'){
+			if($parameters["素材群組識別碼"]!='%'){
 				$param_type .='s';
 				$sqlCon.=' AND 素材.素材群組識別碼 LIKE ? ';
-				$a_params[] = &$materialGroup;
+				$a_params[] = &$parameters["素材群組識別碼"];
 			}
 			
 			$sql.=$sqlCon;
-				
-			/*if(!$stmt = $my->prepare($sql)) {
+			
+			if(!$stmt = $my->prepare($sql)) {
 				exit(json_encode(array('success'=>false , 'message'=>'資料庫錯誤'),JSON_UNESCAPED_UNICODE));
 			}
 			call_user_func_array(array($stmt, 'bind_param'), $a_params);
@@ -131,13 +95,12 @@
 			if($row=$res->fetch_assoc())
 				$totalRowCount=$row['COUNT'];
 			else
-				exit;*/
-
-			//再取得資料
+				exit;
+			
+			//取得資料
 			$sql=
 				'
 				SELECT
-					COUNT(1) COUNT,
 					託播單.託播單識別碼,
 					託播單CSMS群組識別碼,
 					託播單名稱,
@@ -177,9 +140,6 @@
 				exit('無法取得結果集，請聯絡系統管理員！');
 			}		
 			while($row=$res->fetch_assoc()){
-					if($totalRowCount == 0)
-						$totalRowCount=$row['COUNT'];
-					
 					$temp = explode(',',$row['時段']);
 					$timeString=$temp[0];
 					for($i =1; $i<count($temp); $i++){
@@ -222,48 +182,11 @@
 			exit;
 		}
 		else if($_POST['method'] == '全託播單識別碼'){
-			$_POST['searchBy'] = isset($_POST['searchBy'])?$_POST['searchBy']:'';
-			$searchBy='%'.$_POST['searchBy'].'%';
-			if(isset($_POST['廣告主識別碼']))
-				$adowner=($_POST['廣告主識別碼']=='')?'%':$_POST['廣告主識別碼'];
-			else
-				$adowner='%';
-			if(isset($_POST['委刊單識別碼']))
-				$orderList=($_POST['委刊單識別碼']=='')?'%':$_POST['委刊單識別碼'];
-			else
-				$orderList='%';
-			if(isset($_POST['版位類型識別碼']))
-				$positionType=($_POST['版位類型識別碼']=='')?'%':$_POST['版位類型識別碼'];
-			else
-				$positionType='%';
-			if(isset($_POST['版位識別碼']))
-				$position=($_POST['版位識別碼']=='')?'%':$_POST['版位識別碼'];
-			else
-				$position='%';
-			if(isset($_POST['開始時間']))
-				$startDate=($_POST['開始時間']=='')?'0000-00-00':$_POST['開始時間'].' 00:00:00';
-			else
-				$startDate='0000-00-00';
-			if(isset($_POST['結束時間']))
-				$endDate=($_POST['結束時間']=='')?'9999-12-31':$_POST['結束時間'].' 23:59:59';
-			else
-				$endDate='9999-12-31';
-			if(isset($_POST['狀態']))
-				$state=($_POST['狀態']=='-1')?'%':$_POST['狀態'];
-			else
-				$state='%';
-			if(isset($_POST['素材識別碼']))
-				$material=($_POST['素材識別碼']=='-1'||$_POST['素材識別碼']==null)?'%':$_POST['素材識別碼'];
-			else
-				$material='%';
-			if(isset($_POST['素材群組識別碼']))
-				$materialGroup=($_POST['素材群組識別碼']=='0'||$_POST['素材群組識別碼']==null)?'%':$_POST['素材群組識別碼'];
-			else
-				$materialGroup='%';
-			
-			$sql=
-				'SELECT 託播單.託播單識別碼
-				FROM
+			$parameters=getparameters();
+			$sql='
+				SELECT 託播單.託播單識別碼
+				';
+			$sqlCon =	' FROM
 					託播單
 					LEFT JOIN 託播單素材 ON 託播單素材.託播單識別碼=託播單.託播單識別碼
 					LEFT JOIN 素材 ON 素材.素材識別碼=託播單素材.素材識別碼
@@ -271,13 +194,14 @@
 					LEFT JOIN 委刊單 ON 委刊單.委刊單識別碼=託播單.委刊單識別碼
 					INNER JOIN 託播單狀態 ON 託播單狀態.託播單狀態識別碼=託播單.託播單狀態識別碼
 					LEFT JOIN 託播單投放版位 ON 託播單投放版位.託播單識別碼 = 託播單.託播單識別碼 AND 託播單投放版位.ENABLE=1		
+					LEFT JOIN 版位 額外版位 ON 託播單投放版位.版位識別碼 = 額外版位.版位識別碼
 				WHERE
 					(
-					'.($searchBy=='%'?'1':' 託播單.託播單識別碼=? OR 託播單CSMS群組識別碼=? OR 託播單名稱 LIKE ? OR 託播單說明 LIKE ?').'
+					'.($parameters["searchBy"]=='%'?'1':' 託播單.託播單識別碼=? OR 託播單CSMS群組識別碼=? OR 託播單名稱 LIKE ? OR 託播單說明 LIKE ?').'
 					)
-					'.($adowner=='%'?'':' AND 委刊單.廣告主識別碼 LIKE ? ').'
-					'.($orderList=='%'?'':' AND 託播單.委刊單識別碼 LIKE ? ').'
-					AND 上層版位識別碼 LIKE ?
+					'.($parameters["廣告主識別碼"]=='%'?'':' AND 委刊單.廣告主識別碼 LIKE ? ').'
+					'.($parameters["委刊單識別碼"]=='%'?'':' AND 託播單.委刊單識別碼 LIKE ? ').'
+					AND 版位.上層版位識別碼 LIKE ?
 					AND (託播單.版位識別碼 LIKE ? OR 託播單投放版位.版位識別碼 LIKE ?)
 					AND(
 						(廣告期間開始時間 BETWEEN ? AND ?) OR (廣告期間結束時間 BETWEEN ? AND ?) OR (? BETWEEN 廣告期間開始時間 AND 廣告期間結束時間)
@@ -286,40 +210,43 @@
 					'.(isset($_POST['全狀態搜尋'])?'':' AND 託播單.託播單狀態識別碼 IN ('.implode(',',$_POST['全託播單識別碼狀態']).')').'
 			';
 			
-			$param_type = ($searchBy=='%'?'':'iiss').($adowner=='%'?'':'s').($orderList=='%'?'':'s').'sssssssss';
+						
+			$param_type = ($parameters["searchBy"]=='%'?'':'iiss').($parameters["廣告主識別碼"]=='%'?'':'s').($parameters["委刊單識別碼"]=='%'?'':'s').'sssssssss';
 			$a_params = array();
 			$a_params[] = &$param_type;
-			if($searchBy!='%'){
+			if($parameters["searchBy"]!='%'){
 			$a_params[] = &$_POST['searchBy'];
 			$a_params[] = &$_POST['searchBy'];
-			$a_params[] = &$searchBy;
-			$a_params[] = &$searchBy;
+			$a_params[] = &$parameters["searchBy"];
+			$a_params[] = &$parameters["searchBy"];
 			}
-			if($adowner!='%')
-			$a_params[] = &$adowner;
-			if($orderList!='%')
-			$a_params[] = &$orderList;
-			$a_params[] = &$positionType;
-			$a_params[] = &$position;
-			$a_params[] = &$position;
-			$a_params[] = &$startDate;
-			$a_params[] = &$endDate;
-			$a_params[] = &$startDate;
-			$a_params[] = &$endDate;
-			$a_params[] = &$startDate;
-			$a_params[] = &$state;
+			if($parameters["廣告主識別碼"]!='%')
+			$a_params[] = &$parameters["廣告主識別碼"];
+			if($parameters["委刊單識別碼"]!='%')
+			$a_params[] = &$parameters["委刊單識別碼"];
+			$a_params[] = &$parameters["版位類型識別碼"];
+			$a_params[] = &$parameters["版位識別碼"];
+			$a_params[] = &$parameters["版位識別碼"];
+			$a_params[] = &$parameters["開始時間"];
+			$a_params[] = &$parameters["結束時間"];
+			$a_params[] = &$parameters["開始時間"];
+			$a_params[] = &$parameters["結束時間"];
+			$a_params[] = &$parameters["開始時間"];
+			$a_params[] = &$parameters["狀態"];
 			
-			if($material!='%'){
+			if($parameters["素材識別碼"]!='%'){
 				$param_type .='s';
-				$sql.=' AND 託播單素材.素材識別碼 LIKE ? ';
-				$a_params[] = &$material;
+				$sqlCon.=' AND 託播單素材.素材識別碼 LIKE ? ';
+				$a_params[] = &$parameters["素材識別碼"];
 			}
-			if($materialGroup!='%'){
+			if($parameters["素材群組識別碼"]!='%'){
 				$param_type .='s';
-				$sql.=' AND 素材.素材群組識別碼 LIKE ? ';
-				$a_params[] = &$materialGroup;
+				$sqlCon.=' AND 素材.素材群組識別碼 LIKE ? ';
+				$a_params[] = &$parameters["素材群組識別碼"];
 			}
-			$sql .= ' GROUP BY 託播單識別碼';
+			
+			$sql.=$sqlCon;
+			
 			if(!$stmt = $my->prepare($sql)) {
 				exit(json_encode(array('success'=>false , 'message'=>'資料庫錯誤'),JSON_UNESCAPED_UNICODE));
 			}
@@ -331,9 +258,9 @@
 				exit('無法取得結果集，請聯絡系統管理員！');
 			}		
 			$result =array();
-			while($row=$res->fetch_assoc())
+			while($row=$res->fetch_assoc()){
 				$result[]=$row['託播單識別碼'];
-
+			}
 			exit(json_encode($result,JSON_UNESCAPED_UNICODE));
 		}
 		else if($_POST['method'] == '託播單狀態名稱'){
@@ -428,6 +355,77 @@
 			$result = [];
 			exit(json_encode($result,JSON_UNESCAPED_UNICODE));			
 		}
+	}
+	function getparameters(){
+		$checkinput = false;
+		if(isset($_POST['searchBy'])&&$_POST['searchBy']!='')
+			$checkinput = true;
+		$parameters = array();
+		$parameters["searchBy"]='%'.((isset($_POST['searchBy']))?$_POST['searchBy']:'').'%';
+		if(isset($_POST['廣告主識別碼'])&&$_POST['廣告主識別碼']!=''){
+			$parameters["廣告主識別碼"]=$_POST['廣告主識別碼'];
+			$checkinput = true;
+		}
+		else
+			$parameters["廣告主識別碼"]='%';
+		if(isset($_POST['委刊單識別碼'])&&$_POST['委刊單識別碼']!=''){
+			$parameters["委刊單識別碼"]=($_POST['委刊單識別碼']=='')?'%':$_POST['委刊單識別碼'];
+			$checkinput = true;
+		}
+		else
+			$parameters["委刊單識別碼"]='%';
+		if(isset($_POST['版位類型識別碼'])&&$_POST['版位類型識別碼']!=''){
+			$parameters["版位類型識別碼"]=($_POST['版位類型識別碼']=='')?'%':$_POST['版位類型識別碼'];
+			$checkinput = true;
+		}
+		else
+			$parameters["版位類型識別碼"]='%';
+		if(isset($_POST['版位識別碼'])&&$_POST['版位識別碼']!=''){
+			$parameters["版位識別碼"]=($_POST['版位識別碼']=='')?'%':$_POST['版位識別碼'];
+			$checkinput = true;
+		}
+		else
+			$parameters["版位識別碼"]='%';
+		
+		$parameters["開始時間"] = date('Y-m-d', strtotime('-7 days'));
+		if(isset($_POST['開始時間'])&&$_POST['開始時間']!=''){
+			$parameters["開始時間"]=$_POST['開始時間'];
+		}
+		else if(isset($_POST['結束時間'])&&$_POST['結束時間']!=''){
+			$parameters["開始時間"] = date('d-m-Y', strtotime("-14 day", strtotime($_POST['結束時間'])));
+		}
+		$parameters["開始時間"].=' 00:00:00';
+		
+		$parameters["結束時間"] = date('Y-m-d', strtotime("+14 day", strtotime($parameters["開始時間"])));
+		if(isset($_POST['結束時間'])&&$_POST['結束時間']!=''){
+			$parameters["結束時間"]=$_POST['結束時間'];
+		}
+		$parameters["結束時間"].=' 23:59:59';
+	
+		if(isset($_POST['狀態']))
+			$parameters["狀態"]=($_POST['狀態']=='-1'||$_POST['狀態']==null)?'%':$_POST['狀態'];
+		else
+			$parameters["狀態"]='%';
+		if(isset($_POST['素材識別碼'])&&$_POST['素材識別碼']!=''){
+			$parameters["素材識別碼"]=($_POST['素材識別碼']=='-1'||$_POST['素材識別碼']==null)?'%':$_POST['素材識別碼'];
+			$checkinput = true;
+		}
+		else
+			$parameters["素材識別碼"]='%';
+		if(isset($_POST['素材群組識別碼'])&&$_POST['素材群組識別碼']!=''){
+			$parameters["素材群組識別碼"]=($_POST['素材群組識別碼']=='0'||$_POST['素材群組識別碼']==null)?'%':$_POST['素材群組識別碼'];
+			$checkinput = true;
+		}
+		else
+			$parameters["素材群組識別碼"]='%';
+		//若沒有輸入搜尋條件，回傳空的資料表並顯示"請設定條件"
+		if(!$checkinput){
+			echo json_encode(array('pageNo'=>1,'maxPageNo'=>1,'header'=>array("")
+						,'data'=>array(array(array("請設定收尋條件",'text'))),'sortable'=>array()),JSON_UNESCAPED_UNICODE);
+			exit;
+		}
+		
+		return $parameters;
 	}
 	exit ;
 	

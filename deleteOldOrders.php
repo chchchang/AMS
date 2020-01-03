@@ -1,14 +1,20 @@
 <?php
-require_once dirname(__FILE__).'/tool/MyDB.php';
-$my=new MyDB(true);
-$FILEPATH = "/opt/lampp/htdocs/AMS/material/uploadedFile/";
-//$DEADLINE = "2017-08-01";
-$DEADLINE = date('Y-m-d',strtotime('-1 year'));
+require_once dirname(__FILE__).'/Config.php';
+
+$my = new mysqli(Config::DB_HOST,Config::DB_USER,Config::DB_PASSWORD,Config::DB_NAME);
+$my->query("SET NAMES utf8"); 
+
+$FILEPATH = "/opt/rh/httpd24/root/var/www/html/AMS/material/uploadedFile/";
+//$DEADLINE = date('Y-m-d',strtotime('-1 year'));
+$DEADLINE = date('Y-m-d',strtotime('-180 days'));
 $LIMIT = "1000";
 
-//print_r($DEADLINE);
+print_r($DEADLINE);
 deleteOrderData();
 deleteMaterialFiles();
+deleteMaterialByOutDateList("/opt/rh/httpd24/root/var/www/html/AMS/outdatedMaterialList.dat");
+
+$my->close();
 
 function deleteOrderData(){
 	global $DEADLINE,$LIMIT;
@@ -17,9 +23,9 @@ function deleteOrderData(){
 	if(count($outDatedOrders["託播單識別碼"])>0)
 	deleteData($outDatedOrders);
 
-	$DEADLINE_6M = date('Y-m-d',strtotime('-6 months'));
-	$outDatedOrders_6M =selectOutDatedOrders($DEADLINE_6M,null);
-	deleteMaterial_onlyFile($outDatedOrders_6M);
+	//$DEADLINE_6M = date('Y-m-d',strtotime('-6 months'));
+	//$outDatedOrders_6M =selectOutDatedOrders($DEADLINE_6M,null);
+	//deleteMaterial_onlyFile($outDatedOrders_6M);
 }
 
 //selecte the oders that must be deleted
@@ -175,6 +181,50 @@ function deleteMaterial_onlyFile($outDatedOrders){
 			echo " fail\n";
 	}
 }
+
+function deleteMaterialByOutDateList($filename){
+	global $my,$FILEPATH,$DEADLINE;
+	echo "deleteMaterialByOutDateList\n";
+	$myfile = fopen($filename, "r") or die("Unable to open file!");
+	while($file = fgets($myfile)){
+		//解析素材識別碼
+		$id =getMaterilIdByFilePath($file);
+		//確認素材是否有被託播單使用
+		$sql='SELECT COUNT(託播單.廣告期間結束時間) AS C FROM 託播單素材 JOIN 託播單 ON 託播單素材.託播單識別碼 = 託播單.託播單識別碼 WHERE 託播單素材.素材識別碼='.$id.' AND 託播單.廣告期間結束時間<"'.$DEADLINE.'"';
+		if(!$stmt=$my->prepare($sql)) {
+			exit($my->error);
+		}
+		if(!$stmt->execute()) {
+			exit($my->error);
+		}
+		if(!$res=$stmt->get_result()){
+			exit($my->error);
+		}
+		$row = $res->fetch_assoc();
+			if($row["C"] != 0){
+			echo $file;
+			if(@unlink($file))
+				echo " success\n";
+			else 
+				echo " fail\n";
+		}
+		
+	}
+	
+	fclose($myfile);
+}
+
+function getMaterilIdByFilePath($path){
+	//取得素材名稱
+	$pattern = explode("/",$path);
+	$name = end($pattern);
+	//取得識別碼
+	$pattern = explode(".",$name);
+	$id = $pattern[0];
+	
+	return $id;
+}
+
 
 echo 'DONE';
 ?>

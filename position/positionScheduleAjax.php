@@ -123,6 +123,17 @@ function getPositionSchedule(){
 		ORDER BY ext,pre,版位.版位名稱'
 		;
 	}
+	else if($ptn=='單一平台EPG'){
+		$sql='SELECT 版位.版位名稱,channel_number.版位其他參數預設值 as channel_number
+		FROM 版位
+		JOIN 版位 版位類型 ON 版位.上層版位識別碼 = 版位類型.版位識別碼
+		LEFT JOIN 版位其他參數 channel_number ON (channel_number.版位識別碼 = 版位.版位識別碼 AND channel_number.版位其他參數名稱 = "channel_number")
+		WHERE 
+		版位類型.版位識別碼 LIKE ?
+		AND 版位.版位識別碼 LIKE ?
+		ORDER BY CAST(channel_number AS DECIMAL),版位.版位名稱'
+		;
+	}
 	else{
 		$sql='SELECT 版位.版位名稱
 		FROM 版位,版位 版位類型
@@ -168,7 +179,7 @@ function getPositionSchedule(){
 	AND 託播單.託播單狀態識別碼 IN ('.(isset($_POST['待確認排程'])?'6':'0,1,2,4').')
 	'.($area==''?'':' AND ( '.$area.' )').
 	($ptn=='頻道short EPG banner'||$ptn=='專區vod'||$ptn=='專區banner'||$ptn=='首頁banner'?
-	'ORDER BY CHAR_LENGTH(SUBSTRING_INDEX(版位.版位名稱,SUBSTRING_INDEX(版位.版位名稱,"_",-1),1)),SUBSTRING_INDEX(版位.版位名稱,SUBSTRING_INDEX(版位.版位名稱,"_",-1),1),託播單其他參數值,託播單名稱'.
+	'ORDER BY CHAR_LENGTH(SUBSTRING_INDEX(版位.版位名稱,SUBSTRING_INDEX(版位.版位名稱,"_",-1),1)),託播單其他參數值,託播單名稱'.
 	', CHAR_LENGTH(SUBSTRING_INDEX(額外版位.版位名稱,SUBSTRING_INDEX(額外版位.版位名稱,"_",-1),1)),SUBSTRING_INDEX(額外版位.版位名稱,SUBSTRING_INDEX(額外版位.版位名稱,"_",-1),1),託播單其他參數值,託播單名稱'
 	:'ORDER BY CAST(託播單其他參數值 AS DECIMAL),版位.版位名稱,額外版位.版位名稱,託播單狀態識別碼,託播單名稱'
 	);

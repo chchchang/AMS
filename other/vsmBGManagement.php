@@ -86,6 +86,7 @@
 			$tfilename = $tempDir.'/'.hash('ripemd160',iconv('UTF-8', 'UCS-4', $_FILES['fileToUpload']['name'])).'.'.$type;
 			if(move_uploaded_file($_FILES['fileToUpload']['tmp_name'],$tfilename))//複製檔案
 				//exit (json_encode(array("success" => true,"message" => "原始檔案上傳成功"),JSON_UNESCAPED_UNICODE));
+
 			
 			$date = $_POST["StartDate"];
 			$index = count($fileNameA)-2;
