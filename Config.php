@@ -83,7 +83,8 @@
 		public static $CAMPS_API=array(
 			'order'=>'http://172.17.251.130:8080/barker/transaction',
 			'position'=>'http://172.17.251.130:8080/barker/channel',
-			'material'=>'http://172.17.251.130:8080/barker/material'
+			'material'=>'http://172.17.251.130:8080/barker/material',
+			'delete_remote_material'=>'http://172.17.251.130:8080/barker/deleteFile?AMS_FILE_ID='
 		);
 		
 		static protected $_root= null;

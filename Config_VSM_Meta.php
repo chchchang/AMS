@@ -9,6 +9,7 @@
 		//const VSM_AUTOCOMPLETE_LINK_FILE = 'api/ams/autoCompleteForLink.php';	
 		const VSM_AUTOCOMPLETE_LINK_FILE = 'backend/linkValueSelector/autoCompleteSearch.php';	
 		const VOD_BUNDLE_SELECTOR_AJAX = 'backend/linkValueSelector/ajax_vod_bundle_selector.php';	
+		const VAST_SETTING_AJAX = 'api/ams/epgVastBanner/setVastUrlOption.php';	
 		
 		public static function GET_AD_API(){
 			$url = self::VSM_API_ROOT.self::VSM_AD_FILE;
@@ -32,6 +33,11 @@
 		
 		public static function GET_BARKER_VOD_PLAY_TIME_API(){
 			$url = self::VSM_API_ROOT.self::VSM_BARKER_VOD_PLAY_TIME_FILE;
+			return $url;
+		}
+		
+		public static function GET_SET_VAST_OPTION_API(){
+			$url = self::VSM_API_ROOT.self::VAST_SETTING_AJAX;
 			return $url;
 		}
 

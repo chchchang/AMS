@@ -101,12 +101,12 @@
 		json.header.push('詳細資料');
 		if(returnToParent)
 			json.header.push('選擇');
-		json.header.push('下載檔案');
+		json.header.push('執行派送');
 		for(var row in json.data){
 			json.data[row].push(["詳細資料","button"]);
 			if(returnToParent)
 				json.data[row].push(["選擇","button"]);	
-			json.data[row].push(["下載檔案","button"]);
+			json.data[row].push(["執行派送","button"]);
 		}
 		
 		mydg=new DataGrid('datagrid',json.header,json.data);
@@ -148,7 +148,7 @@
 				else if(row[x][0]=="選擇"&&returnToParent){
 					parent.materialChosen(row[0][0]);
 				}
-				else if(row[x][0]=="下載檔案"){
+				else if(row[x][0]=="執行派送"){
 					$.post('ajaxToDB_Material.php',{'action':'下載素材檔案檢查','素材識別碼':row[0][0]}
 						,function(checkData){
 							if(!checkData['success'])
@@ -183,7 +183,7 @@
 					json.data[row].push(["詳細資料","button"]);
 					if(returnToParent)
 						json.data[row].push(["選擇","button"]);
-					json.data[row].push(["下載檔案","button"]);
+					json.data[row].push(["執行派送","button"]);
 					}
 					mydg.set_data(json.data);
 					setHoverImag();

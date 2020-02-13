@@ -375,14 +375,20 @@
 						$material_link_value = $om["點擊後開啟位址"];
 					}
 					if($om["素材類型識別碼"]==3){
-						if($om['影片媒體編號']==""||$om['影片媒體編號']==null){
+						if($om["影片畫質識別碼"]==null){
+							//沒有設定影片素材
 							continue;
 						}
-						$material_url = $orderConfigData['url'].$om['影片媒體編號'].'_f';
-						if($om["影片畫質識別碼"]==2)
-							$Materials["vodURL"] = $material_url;
-						else if ($om["影片畫質識別碼"]==1)
-							$Materials["sdVodURL"] = $material_url;
+						else{
+							if($om['影片媒體編號']==""||$om['影片媒體編號']==null){
+								exit(json_encode(array("success"=>false,"message"=>'託播單送出失敗 '.$om["素材名稱"].'未取得媒體編號','id'=>$orderId),JSON_UNESCAPED_UNICODE));
+							}
+							$material_url = $orderConfigData['url'].$om['影片媒體編號'].'_f';
+							if($om["影片畫質識別碼"]==2)
+								$Materials["vodURL"] = $material_url;
+							else if ($om["影片畫質識別碼"]==1)
+								$Materials["sdVodURL"] = $material_url;
+						}
 					}
 				}
 			

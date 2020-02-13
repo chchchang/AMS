@@ -120,7 +120,7 @@ function deleteData($outDatedOrders){
 //刪除過期素材實體檔案與素材資料
 function deleteMaterialFiles(){
 	global $my,$FILEPATH,$DEADLINE,$LIMIT;
-	$sql='SELECT 素材.素材識別碼,素材原始檔名 FROM 素材 LEFT JOIN 託播單素材 ON 素材.素材識別碼 = 託播單素材.素材識別碼 WHERE 託播單素材.素材識別碼 IS NULL AND 素材.CREATED_TIME <"'.$DEADLINE.
+	$sql='SELECT 素材.素材識別碼,素材原始檔名,CAMPS影片派送時間 FROM 素材 LEFT JOIN 託播單素材 ON 素材.素材識別碼 = 託播單素材.素材識別碼 WHERE 託播單素材.素材識別碼 IS NULL AND 素材.CREATED_TIME <"'.$DEADLINE.
 	'" LIMIT '.$LIMIT
 			;
 	if(!$stmt=$my->prepare($sql)) {
@@ -139,6 +139,14 @@ function deleteMaterialFiles(){
 		$temp = explode('.',$row['素材原始檔名']);
 		$fileName = $FILEPATH.$row['素材識別碼'].'.'.end($temp);
 		echo $fileName;
+		if($row['CAMPS影片派送時間']!=null){
+			echo " delete remote file (orbit)...";
+			if(!deleteRemoteFileOrbit($row['素材識別碼'])){
+				echo " delete remote file (orbit) false\n";
+				continue;
+			}
+		}
+		
 		if(@unlink($fileName))
 			echo " success\n";
 		else 
@@ -158,7 +166,7 @@ function deleteMaterialFiles(){
 function deleteMaterial_onlyFile($outDatedOrders){
 	global $my,$FILEPATH;
 	$deteteOrderListStr = implode(',',$outDatedOrders["託播單識別碼"]);
-	$sql='SELECT distinct 素材.素材識別碼,素材原始檔名 FROM 素材 LEFT JOIN 託播單素材 ON 素材.素材識別碼 = 託播單素材.素材識別碼 WHERE 託播單素材.託播單識別碼 IN('.$deteteOrderListStr.')';
+	$sql='SELECT distinct 素材.素材識別碼,素材原始檔名,CAMPS影片派送時間 FROM 素材 LEFT JOIN 託播單素材 ON 素材.素材識別碼 = 託播單素材.素材識別碼 WHERE 託播單素材.託播單識別碼 IN('.$deteteOrderListStr.')';
 	if(!$stmt=$my->prepare($sql)) {
 		exit($my->error);
 	}
@@ -175,11 +183,65 @@ function deleteMaterial_onlyFile($outDatedOrders){
 		$temp = explode('.',$row['素材原始檔名']);
 		$fileName = $FILEPATH.$row['素材識別碼'].'.'.end($temp);
 		echo $fileName;
+		if($row['CAMPS影片派送時間']!=null){
+			echo " delete remote file (orbit)...";
+			if(!deleteRemoteFileOrbit($row['素材識別碼'])){
+				echo " delete remote file (orbit) false\n";
+				continue;
+			}
+		}
+		
 		if(@unlink($fileName))
 			echo " success\n";
 		else 
 			echo " fail\n";
 	}
+}
+
+function deleteRemoteFileOrbit($mid){
+	$statusCode = deleteRemote($mid);
+	$feedback = false;
+	if($statusCode == 200){
+		//再利用API查詢一次，第二次查詢orbit找不到資料才算刪除成功
+		$doublecheck = deleteRemote($mid);
+		if($doublecheck == 405 || $doublecheck == 404)
+			$feedback = true;
+		else
+			$feedback =false;
+	}
+	else if($doublecheck == 405 || $doublecheck == 404)
+		$feedback = true;
+	return $feedback;
+}
+function deleteRemote($mid){
+	$api=Config::$CAMPS_API['delete_remote_material'];
+	$url = $api.$mid;
+	$ch=curl_init($url);
+	curl_setopt($ch,CURLOPT_RETURNTRANSFER,true);
+	$getResult = json_decode(curl_exec($ch),true);
+	$statusCode = curl_getinfo($ch, CURLINFO_HTTP_CODE);
+	/*
+	switch($code){
+	case 500:
+		$feedback = 'API參數錯誤';
+		break;
+	case 404:
+		$feedback = 'CAMPS無對應的檔案紀錄';
+		break;
+	case 405:
+		$feedback = 'Orbit中已無此檔案';
+		break;
+	case 200:
+		$feedback = '檔案成功從Orbit刪除';
+		break;
+	case 406:
+		$feedback = 'API端流程中發生未知錯誤';
+		break;
+	default :
+		$feedback = "";
+	}
+	*/
+	return $statusCode;
 }
 
 function deleteMaterialByOutDateList($filename){

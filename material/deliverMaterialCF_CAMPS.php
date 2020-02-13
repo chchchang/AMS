@@ -85,10 +85,11 @@
 			if(!$showAll)
 				$a_params[] =&$fromRowNo;
 			$result=call_user_func_array(array($my, 'getResultArray'), $a_params);
-			$DG_header=array_merge($DG_header,array('取得結果','派送影片'));
+			$DG_header=array_merge($DG_header,array('取得結果','派送影片','刪除遠端影片','執行結果'));
 			$DG_body=array();
 			foreach($result as $row){
-				$DG_body[]=array(array($row['素材識別碼']),array($row['素材名稱']),array($row['素材說明']),array($row['素材原始檔名']),array($row['影片素材秒數']),array($row['CAMPS影片派送時間']),array($row['CAMPS影片媒體編號']),array('取得結果','button'),array('派送影片','button'));
+				$DG_body[]=array(array($row['素材識別碼']),array($row['素材名稱']),array($row['素材說明']),array($row['素材原始檔名']),array($row['影片素材秒數']),array($row['CAMPS影片派送時間'])
+				,array($row['CAMPS影片媒體編號']),array('取得結果','button'),array('派送影片','button'),array('刪除遠端影片','button'),array(""));
 			}
 			header('Content-Type: application/json');
 			exit(json_encode(array('pageNo'=>$showAll?1:(($fromRowNo/PAGE_SIZE)+1),'maxPageNo'=>$showAll?1:ceil($totalRowCount/PAGE_SIZE),'allCount'=>$totalRowCount,
@@ -193,6 +194,69 @@
 			$json['$remote']=$remote;
 			exit(json_encode($json));
 		}
+		//刪除遠端素材deleteRemote
+		else if(($_POST['action']==='deleteRemote')&&isset($_POST['素材識別碼'])){
+			$statusCode = deleteRemote($_POST['素材識別碼']);
+			$feedback = array('success'=>false,'message'=>'連接CAMPS刪除素材API失敗');
+			if($statusCode == 200){
+				//再利用API查詢一次，第二次查詢orbit找不到資料才算刪除成功
+				$doublecheck = deleteRemote($_POST['素材識別碼']);
+				if($doublecheck == 405){
+					//更新DB，在素材說明欄位加註"Orbit影片以刪除"
+					$my=new MyDB(true);
+					$sql='UPDATE 素材 SET 素材說明=CONCAT(素材說明,"Orbit影片以刪除"),LAST_UPDATE_TIME=?,LAST_UPDATE_PEOPLE=? WHERE 素材識別碼=?';
+					$time=date('Y-m-d H:i:s');
+					if(
+						($stmt=$my->prepare($sql))
+						&&($stmt->bind_param('sii',$time,$_SESSION['AMS']['使用者識別碼'],$_POST['素材識別碼']))
+						&&($stmt->execute())
+					){
+						$feedback = array('success'=>true,'message'=>getDeleteRemoteResultCodeMapping(200));
+					}
+					else{
+						$json=array('success'=>false,'message'=>'更新派送狀態失敗！');
+					}
+				}
+				else
+					$feedback = array('success'=>false,'message'=>getDeleteRemoteResultCodeMapping($doublecheck));
+			}
+			else
+				$feedback = array('success'=>false,'message'=>getDeleteRemoteResultCodeMapping($statusCode));
+			
+			exit(json_encode($feedback));
+		}
+	}
+	
+	function deleteRemote($mid){
+		$api=Config::$CAMPS_API['delete_remote_material'];
+		$url = $api.$mid;
+		$ch=curl_init($url);
+		curl_setopt($ch,CURLOPT_RETURNTRANSFER,true);
+		$getResult = json_decode(curl_exec($ch),true);
+		$statusCode = curl_getinfo($ch, CURLINFO_HTTP_CODE);
+		return $statusCode;
+	}
+	function getDeleteRemoteResultCodeMapping($code){
+		switch($code){
+			case 500:
+				$feedback = 'API參數錯誤';
+				break;
+			case 404:
+				$feedback = 'CAMPS無對應的檔案紀錄';
+				break;
+			case 405:
+				$feedback = 'Orbit中已無此檔案';
+				break;
+			case 200:
+				$feedback = '檔案成功從Orbit刪除';
+				break;
+			case 406:
+				$feedback = 'API端流程中發生未知錯誤';
+				break;
+			default :
+				$feedback = "";
+		}
+		return $feedback;
 	}
 ?>
 <!doctype html>
@@ -261,55 +325,66 @@ $(document).ready(function(){
 		var value影片媒體編號=getColValueByName('CAMPS影片媒體編號');
 		var node影片派送時間=getColByName('CAMPS影片派送時間');
 		var node影片媒體編號=getColByName('CAMPS影片媒體編號');
+		var node執行結果=getColByName('執行結果');
 		
 		$(event.target).mask('處理中...');
 		$(node影片派送時間).mask('處理中...');
 		$(node影片媒體編號).mask('處理中...');
-
-		//無論是取得結果或是派送影片皆須先取得是否有已送出的託播單使用該素材以便提醒
-		$.post('deliverMaterialCF.php',{action:'getReorders',素材識別碼:value素材識別碼},function(getReordersJson){
-			var showReordersAlert=function(json){
-				if(json){
-					msg="注意：下列託播單已送出但使用到的是舊的影片素材，請等待派片成功之後，再將這些託播單先取消送出並且再次送出後才會生效。\n\n託播單識別碼,託播單名稱\n";
-					for(var i in json)
-						msg+=json[i].託播單識別碼+','+json[i].託播單名稱+"\n";
-					alert(msg);
-				}
-			};
-			//無論是取得結果或是派送影片皆須先取得狀態(取得狀態蘊含更新狀態)
-			副檔名=value素材原始檔名.substr(value素材原始檔名.lastIndexOf('.')+1);
-			$.post(null,{action:'getAndPutStatus',素材識別碼:value素材識別碼,副檔名:副檔名,素材原始檔名:value素材原始檔名},function(json){
-				if(!json.success)
-					alert(json.error);
-				else{
-					if(json.mediaId===''){
-						node影片媒體編號.innerHTML=json.mediaId;
-						if(buttonName==='取得結果') alert('查無資料，請重新派送影片。');
-						if(buttonName==='派送影片'){
-							$.post(null,{action:'uploadCF',素材識別碼:value素材識別碼,副檔名:副檔名,素材原始檔名:value素材原始檔名},function(json){
-								if(!json.success)
-									alert(json.error);
-								else{
-									node影片派送時間.innerHTML=json.CAMPS影片派送時間;
-									alert('上傳影片成功，請等待CAMPS處理影片。');
-									//上傳成功後，若mediaId原先不為空表示重覆派送，則進行提醒重送已送出託播單。
-									if(value影片媒體編號!=='') showReordersAlert(getReordersJson);
-								}
-							},'json');
+		
+		if(buttonName==='刪除遠端影片'){
+			$.post(null,{action:'deleteRemote',素材識別碼:value素材識別碼},function(json){
+					node執行結果.innerHTML=json.message;
+					$(event.target).unmask();
+					$(node影片派送時間).unmask();
+					$(node影片媒體編號).unmask();
+				},'json');
+		}
+		else{
+			//無論是取得結果或是派送影片皆須先取得是否有已送出的託播單使用該素材以便提醒
+			$.post('deliverMaterialCF.php',{action:'getReorders',素材識別碼:value素材識別碼},function(getReordersJson){
+				var showReordersAlert=function(json){
+					if(json){
+						msg="注意：下列託播單已送出但使用到的是舊的影片素材，請等待派片成功之後，再將這些託播單先取消送出並且再次送出後才會生效。\n\n託播單識別碼,託播單名稱\n";
+						for(var i in json)
+							msg+=json[i].託播單識別碼+','+json[i].託播單名稱+"\n";
+						alert(msg);
+					}
+				};
+				//無論是取得結果或是派送影片皆須先取得狀態(取得狀態蘊含更新狀態)
+				副檔名=value素材原始檔名.substr(value素材原始檔名.lastIndexOf('.')+1);
+				$.post(null,{action:'getAndPutStatus',素材識別碼:value素材識別碼,副檔名:副檔名,素材原始檔名:value素材原始檔名},function(json){
+					if(!json.success)
+						node執行結果.innerHTML=json.error;
+					else{
+						if(json.mediaId===''){
+							node影片媒體編號.innerHTML=json.mediaId;
+							if(buttonName==='取得結果') node執行結果.innerHTML='查無資料，請重新派送影片。';
+							if(buttonName==='派送影片'){
+								$.post(null,{action:'uploadCF',素材識別碼:value素材識別碼,副檔名:副檔名,素材原始檔名:value素材原始檔名},function(json){
+									if(!json.success)
+										node執行結果.innerHTML=json.error;
+									else{
+										node影片派送時間.innerHTML=json.CAMPS影片派送時間;
+										node執行結果.innerHTML='上傳影片成功，請等待CAMPS處理影片。';
+										//上傳成功後，若mediaId原先不為空表示重覆派送，則進行提醒重送已送出託播單。
+										if(value影片媒體編號!=='') showReordersAlert(getReordersJson);
+									}
+								},'json');
+							}
+						}
+						else{
+							node影片媒體編號.innerHTML=json.mediaId;
+							if(buttonName==='派送影片') node執行結果.innerHTML='已派送，請檢視各欄位結果，不可重覆派送！';
+							//取得結果成功後，若mediaId原先不為空且新的mediaId不同於原先的值，則表示重覆派送需進行提醒重送已送出託播單。
+							if(buttonName==='取得結果'&&value影片媒體編號!==''&&value影片媒體編號.search(json.mediaId)==-1) showReordersAlert(getReordersJson);
 						}
 					}
-					else{
-						node影片媒體編號.innerHTML=json.mediaId;
-						if(buttonName==='派送影片') alert('已派送，請檢視各欄位結果，不可重覆派送！');
-						//取得結果成功後，若mediaId原先不為空且新的mediaId不同於原先的值，則表示重覆派送需進行提醒重送已送出託播單。
-						if(buttonName==='取得結果'&&value影片媒體編號!==''&&value影片媒體編號.search(json.mediaId)==-1) showReordersAlert(getReordersJson);
-					}
-				}
-				$(event.target).unmask();
-				$(node影片派送時間).unmask();
-				$(node影片媒體編號).unmask();
+					$(event.target).unmask();
+					$(node影片派送時間).unmask();
+					$(node影片媒體編號).unmask();
+				},'json');
 			},'json');
-		},'json');
+		}
 	}
 	
 	$('#showAll').click(function(){
@@ -352,7 +427,7 @@ $(document).ready(function(){
 				json.body[tr].splice(0,0,['<input type="checkbox">','html'])
 			}
 			var DG = new DataGrid('DG',json.header,json.body);
-			$('#DG').prepend('<button id="getAll">取得結果</button><button id="putAll">派送影片</button>')
+			$('#DG').prepend('<button id="getAll">取得結果</button><button id="putAll">派送影片</button><button id="remoteDeletAll">刪除遠端影片</button>')
 						$('#getAll').click(function(event){
 				$(this).mask('...');
 				var selected=$('#DG tr').has('input[type=checkbox]:checked').children('td').children('button:contains("取得")');
@@ -368,6 +443,18 @@ $(document).ready(function(){
 			$('#putAll').click(function(event){
 				$(this).mask('...');
 				var selected=$('#DG tr').has('input[type=checkbox]:checked').children('td').children('button:contains("派送")');
+				selected.click()
+				var interval=setInterval(function(){
+					if(!selected.isMasked()){
+						clearInterval(interval);
+						$(event.target).unmask();
+					}
+				},1000);
+			});
+			
+			$('#remoteDeletAll').click(function(event){
+				$(this).mask('...');
+				var selected=$('#DG tr').has('input[type=checkbox]:checked').children('td').children('button:contains("刪除遠端影片")');
 				selected.click()
 				var interval=setInterval(function(){
 					if(!selected.isMasked()){

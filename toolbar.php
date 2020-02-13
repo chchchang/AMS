@@ -99,6 +99,8 @@
 	<li id="other/vsmBGManagement.php">單一平台黃金版位管理</li>
 	<li id="VSM/setVSMPosition.php">更新VSM版位</li>
 	<li id="other/updateOrderPara.php">VOD插廣告/單一平台廣告參數更新</li>
+	<li id="other/vastUrlManagement.php">聯播網廣告來源管理</li>
+	<li id="other/shortEPGBannerLimitManagement.php">EPG Banner投放上限設定</li>
 	</ul>
 </li>
 
@@ -153,6 +155,7 @@
 		<li id="material/deliverMaterial_VSM.php">單一平台派送素材(圖片)</li>
 		<li id="material/deliverMaterialCF.php">派送素材(影片)</li>
 		<li id="material/deliverMaterialCF_CAMPS.php">CAMPS派送素材</li>
+		<li id="material/deliverMaterialV2.php">派送素材2.0</li>
 	</ul>
 </li>
 <li>投放管理
