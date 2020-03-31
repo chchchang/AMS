@@ -35,9 +35,9 @@
 		}
 		//更新URL
 		else if($_POST['postAction'] == "setUrl"){
-			if(!checkRepeat($_POST['data']['newname'])){
+			/*if(!checkRepeat($_POST['data']['newname'])){
 				exit(json_encode(array('success'=>false,"message"=>"更新失敗:名稱重複"),JSON_UNESCAPED_UNICODE));
-			}
+			}*/
 			if(updateUrl($_POST['data']['newurl'],$_POST['data']['newname'],$_POST['data']['urlid'])){
 				exit(json_encode(array('success'=>true,"message"=>"更新成功"),JSON_UNESCAPED_UNICODE));
 			}
@@ -54,6 +54,15 @@
 				exit(json_encode(array('success'=>false,"message"=>"預設來源設定失敗"),JSON_UNESCAPED_UNICODE));
 			}
 		}
+		//取消URL為預設
+		else if($_POST['postAction'] == "cancleDefaultUrl"){
+			if(cancleDefaultUrl($_POST['data']['urlid'])){
+				exit(json_encode(array('success'=>true,"message"=>"取消預設來源設定成功"),JSON_UNESCAPED_UNICODE));
+			}
+			else{
+				exit(json_encode(array('success'=>false,"message"=>"取消預設來源設定失敗"),JSON_UNESCAPED_UNICODE));
+			}
+		}
 		//刪除URL
 		else if($_POST['postAction'] == "deleteUrl"){
 			if(deleteUrl($_POST['data']['urlid'])){
@@ -66,12 +75,13 @@
 		//同步到VSM
 		else if($_POST['postAction'] == "syncToVsm"){
 			$url = Config_VSM_Meta::GET_SET_VAST_OPTION_API();
-			$sql = "select 聯播網廣告URL,聯播網廣告來源識別碼 from 聯播網廣告來源 WHERE 是否為預設來源 = 1";
-			$res=$my->getResultArray($sql);
-			if(count($res)<1)
-				exit(json_encode(array('success'=>false,"message"=>"沒有預設廣告來源"),JSON_UNESCAPED_UNICODE));
-			$data = array("defaultUrl"=>$res[0]["聯播網廣告URL"],"defaultUrlId"=>$res[0]["聯播網廣告來源識別碼"],"schedule"=>array());
-			$bypost = array("action"=>"setVastUrl","data"=>$data);
+			$sql = "select 聯播網廣告URL,聯播網廣告來源識別碼,是否為預設來源 from 聯播網廣告來源 WHERE 1";
+			$urls=$my->getResultArray($sql);
+			$source = array();
+			foreach($urls as $row){
+				$source[] = array("vast_url_id"=>$row["聯播網廣告來源識別碼"],"url"=>$row["聯播網廣告URL"],"default_flag"=>$row["是否為預設來源"]);
+			}
+			$bypost = array("action"=>"setVastUrl","data"=>$source);
 			$postvars = http_build_query($bypost);
 			$res = PHPExtendFunction::connec_to_Api($url,'POST',$postvars);
 			if($res["success"]){
@@ -123,13 +133,26 @@
 		global $my;
 		$my->begin_transaction();
 		//先將所有的廣告來源設為非預設
-		$sql = "update 聯播網廣告來源 set 是否為預設來源 = 0,LAST_UPDATE_PEOPLE=?,LAST_UPDATE_TIME=CURRENT_TIMESTAMP";
+		/*$sql = "update 聯播網廣告來源 set 是否為預設來源 = 0,LAST_UPDATE_PEOPLE=?,LAST_UPDATE_TIME=CURRENT_TIMESTAMP";
 		if(!$my->execute($sql,"i",$_SESSION['AMS']['使用者識別碼'])){
 			$my->rollback();
 			return false;
-		}
+		}*/
 		//將指定廣告來源設為預設
 		$sql = "update 聯播網廣告來源 set 是否為預設來源 = 1,LAST_UPDATE_PEOPLE=?,LAST_UPDATE_TIME=CURRENT_TIMESTAMP where 聯播網廣告來源識別碼 = ?";
+		if(!$my->execute($sql,"ii",$_SESSION['AMS']['使用者識別碼'],$urlid)){
+			$my->rollback();
+			return false;
+		}
+		$my->commit();
+		return true;
+	}
+	//取消URL為預設
+	function cancleDefaultUrl($urlid){
+		global $my;
+		$my->begin_transaction();
+		//將指定廣告來源設為預設
+		$sql = "update 聯播網廣告來源 set 是否為預設來源 = 0,LAST_UPDATE_PEOPLE=?,LAST_UPDATE_TIME=CURRENT_TIMESTAMP where 聯播網廣告來源識別碼 = ?";
 		if(!$my->execute($sql,"ii",$_SESSION['AMS']['使用者識別碼'],$urlid)){
 			$my->rollback();
 			return false;
@@ -216,7 +239,8 @@ function refreshtable(){
 					+"<td><input id='url_"+data[i]["聯播網廣告來源識別碼"]+"' value='"+data[i]["聯播網廣告URL"]+"' disabled></input></td>"
 					+"<td><input id='name_"+data[i]["聯播網廣告來源識別碼"]+"' value='"+data[i]["聯播網廣告來源名稱"]+"' disabled></input></td>"
 					+"<td>"+data[i]["是否為預設來源"]+"</input></td>"
-					+"<td><button id='setdefault_"+data[i]["聯播網廣告來源識別碼"]+"' class='urlDefaultBtn' urlid = '"+data[i]["聯播網廣告來源識別碼"]+"' >設為預設來源</button></td>"
+					+"<td><button id='setdefault_"+data[i]["聯播網廣告來源識別碼"]+"' class='urlDefaultBtn' urlid = '"+data[i]["聯播網廣告來源識別碼"]+"' >設為預設來源</button>"
+					+"<button id='cancledefault_"+data[i]["聯播網廣告來源識別碼"]+"' class='urlCancleDefaultBtn' urlid = '"+data[i]["聯播網廣告來源識別碼"]+"' >取消預設來源</button></td>"
 					+"<td><button id='edit_"+data[i]["聯播網廣告來源識別碼"]+"' class='urlEditBtn' urlid = '"+data[i]["聯播網廣告來源識別碼"]+"' >修改</button>"
 					+"<button id='submit_"+data[i]["聯播網廣告來源識別碼"]+"' class='urlSumbitBtn' urlid = '"+data[i]["聯播網廣告來源識別碼"]+"' >提交</button></td>"
 					+"<td><button id='delete_"+data[i]["聯播網廣告來源識別碼"]+"' class='urlDeletBtn' urlid = '"+data[i]["聯播網廣告來源識別碼"]+"' >刪除</button></td>"
@@ -225,10 +249,18 @@ function refreshtable(){
 						tr.css({"background-color": "#F0F8FF"});
 					}
 					$("#soursetablebody").append(tr);
+					if(data[i]["是否為預設來源"]=="是"){
+						$("#setdefault_"+data[i]["聯播網廣告來源識別碼"]).hide();
+						$("#cancledefault_"+data[i]["聯播網廣告來源識別碼"]).show();
+					}
+					else{
+						$("#setdefault_"+data[i]["聯播網廣告來源識別碼"]).show();
+						$("#cancledefault_"+data[i]["聯播網廣告來源識別碼"]).hide();
+					}
 				}
 				//設定設為預設按鈕動作
 				$(".urlDefaultBtn").click(function(){
-					if(confirm("只允許一個預設廣告來源，舊的預設廣告來源將會被取消。確定將此來源設為新的預設廣告來源?")){
+					//if(confirm("只允許一個預設廣告來源，舊的預設廣告來源將會被取消。確定將此來源設為新的預設廣告來源?")){
 						var urlid = $(this).attr("urlid");
 						//ajax設定預設廣告
 						$.post("?",{"postAction":"setDefaultUrl","data":{urlid:urlid}},
@@ -240,7 +272,23 @@ function refreshtable(){
 							}
 							,"json"
 						)
-					}
+					//}
+				});
+				//取消設為預設按鈕動作
+				$(".urlCancleDefaultBtn").click(function(){
+					//if(confirm("只允許一個預設廣告來源，舊的預設廣告來源將會被取消。確定將此來源設為新的預設廣告來源?")){
+						var urlid = $(this).attr("urlid");
+						//ajax設定預設廣告
+						$.post("?",{"postAction":"cancleDefaultUrl","data":{urlid:urlid}},
+							function(feedback){
+								if(feedback["success"]){
+									refreshtable();
+								}
+								alert(feedback["message"]);
+							}
+							,"json"
+						)
+					//}
 				});
 				
 				//設定修改按鈕動作
