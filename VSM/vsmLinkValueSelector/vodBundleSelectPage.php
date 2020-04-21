@@ -3,7 +3,7 @@ date_default_timezone_set("Asia/Taipei");
 ?>
 <!doctype html>
 <head>
-<script type="text/javascript" src="../../tool/jquery-1.11.1.js"></script>
+<script type="text/javascript" src="../../tool/jquery-3.4.1.min.js"></script>
 <meta http-equiv="Content-Type" content="text/html; charset=utf-8">
 <link rel="stylesheet" href="../../external-stylesheet.css">
 </head>

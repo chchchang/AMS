@@ -137,7 +137,7 @@
 <head>
 <meta http-equiv="x-frame-options" content="deny">
 <meta http-equiv="Content-Type" content="text/html; charset=utf-8">
-<script type="text/javascript" src="tool/jquery-1.11.1.js"></script>
+<script type="text/javascript" src="tool/jquery-3.4.1.min.js"></script>
 <script type="text/javascript" src="tool/jquery-plugin/jquery.placeholder.min.js"></script>
 <style type="text/css">
 body{

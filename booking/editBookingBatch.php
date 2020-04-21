@@ -178,17 +178,17 @@
 	include('../tool/sameOriginXfsBlock.php');
 ?>
 <script type="text/javascript" src="../tool/jquery-1.11.1.js"></script>
-<script src="../tool/jquery-ui/jquery-ui.js"></script>
-<script src="../tool/jquery-ui/jquery-ui-timepicker-addon.js" type="text/javascript"></script>
-<script src="../tool/jquery-ui/jquery-ui-sliderAccess.js" type="text/javascript"></script>
+<script src="../tool/jquery-ui1.2/jquery-ui.js"></script>
+<script src="../tool/jquery-ui1.2/jquery-ui-timepicker-addon.js" type="text/javascript"></script>
+<script src="../tool/jquery-ui1.2/jquery-ui-sliderAccess.js" type="text/javascript"></script>
 <script type="text/javascript" src="../tool/ajax/ajaxToDB.js"></script> 
 <script type="text/javascript" src="../tool/autoCompleteComboBox.js"></script>
 <script src="../tool/iframeAutoHeight.js" type="text/javascript"></script>
 <script type="text/javascript" src="../tool/jquery-plugin/jquery.placeholder.min.js"></script>
 <script type="text/javascript" src="../tool/jquery-plugin/jquery.tokenize.js"></script>
 <link rel="stylesheet" type="text/css" href="<?=$SERVER_SITE.Config::PROJECT_ROOT?>tool/jquery-plugin/jquery.tokenize.css" />
-<link href="<?=$SERVER_SITE.Config::PROJECT_ROOT?>tool/jquery-ui/jquery-ui-timepicker-addon.css" rel="stylesheet"></link>
-<link rel="stylesheet" href="<?=$SERVER_SITE.Config::PROJECT_ROOT?>tool/jquery-ui/jquery-ui.css"></link>
+<link href="<?=$SERVER_SITE.Config::PROJECT_ROOT?>tool/jquery-ui1.2/jquery-ui-timepicker-addon.css" rel="stylesheet"></link>
+<link rel="stylesheet" href="<?=$SERVER_SITE.Config::PROJECT_ROOT?>tool/jquery-ui1.2/jquery-ui.css"></link>
 <script type="text/javascript" src="../order/newOrder_852.js?<?=time()?>"></script>
 <script type="text/javascript" src="../order/newOrder_851.js?<?=time()?>"></script>
 <link rel='stylesheet' type='text/css' href='<?=$SERVER_SITE.Config::PROJECT_ROOT?>external-stylesheet.css'/>

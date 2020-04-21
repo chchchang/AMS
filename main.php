@@ -374,11 +374,11 @@
 	include('tool/sameOriginXfsBlock.php');
 ?>
 <link rel="stylesheet" type="text/css" href="<?=$SERVER_SITE.Config::PROJECT_ROOT?>tool/jquery.loadmask.css" />
-<script src="tool/jquery-1.11.1.js"></script>
+<script src="tool/jquery-3.4.1.min.js"></script>
 <script src="tool/jquery.loadmask.js"></script>
 <script src="tool/datagrid/CDataGrid.js"></script>
-<script src="tool/jquery-ui/jquery-ui.js"></script>
-<link rel="stylesheet" href="<?=$SERVER_SITE.Config::PROJECT_ROOT?>tool/jquery-ui/jquery-ui.css">
+<script src="tool/jquery-ui1.2/jquery-ui.js"></script>
+<link rel="stylesheet" href="<?=$SERVER_SITE.Config::PROJECT_ROOT?>tool/jquery-ui1.2/jquery-ui.css">
 <link rel="stylesheet" type="text/css" href="<?=$SERVER_SITE.Config::PROJECT_ROOT?>external-stylesheet.css">
 <script>
 $(document).ready(function(){

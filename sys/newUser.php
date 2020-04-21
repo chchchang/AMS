@@ -48,7 +48,7 @@
 <head>
 <meta http-equiv="x-frame-options" content="sameorigin">
 <link rel='stylesheet' type='text/css' href='<?=$SERVER_SITE.Config::PROJECT_ROOT?>external-stylesheet.css' />
-<script type="text/javascript" src="../tool/jquery-1.11.1.js"></script>
+<script type="text/javascript" src="../tool/jquery-3.4.1.min.js"></script>
 <style type="text/css">
 body{
 	text-align: center;

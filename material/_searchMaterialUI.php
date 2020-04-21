@@ -24,12 +24,16 @@
   <ul>
     <li><a href="#_searchMUI_tabs-1">設定有效日期條件</a></li>
     <li><a href="#_searchMUI_tabs-2">設定素材群組條件</a></li>
+    <li><a id ="_searchMUI_tabs_nav-CAMPS_date" href="#_searchMUI_tabs-CAMPS_date">設定CAMPS派送日期條件</a></li>
   </ul>
 	<div id ='_searchMUI_tabs-1'>
 		開始日期:<input type="text" id="_searchMUI_startDate"></input> 結束日期:<input type="text" id="_searchMUI_endDate"></input>
 	</div>
 	<div id="_searchMUI_tabs-2">
 		素材群組:<select id="_searchMUI_materialGroup"></select>
+	</div>
+	<div id ='_searchMUI_tabs-CAMPS_date'>
+		開始日期:<input type="text" id="_searchMUI_startDate_CAMPS"></input> 結束日期:<input type="text" id="_searchMUI_endDate_CAMPS"></input>
 	</div>
 </div>
 <div id="_searchMUI_searchForm" class = "basicBlock">
@@ -39,7 +43,9 @@
 </div>
 <script type="text/javascript">
 	$(function() {
+		$( "#_searchMUI_tabs_nav-CAMPS_date" ).hide();
 		$( "#_searchMUI_tabs" ).tabs();
+		//預設隱藏的TABS
 		//設訂素材群組資料
 		$("#_searchMUI_materialGroup").combobox();
 		$.post('../material/ajaxFunction_MaterialInfo.php',{method:'取得素材群組'},
@@ -59,7 +65,7 @@
 		);
 		
 		//datePicker
-		$( "#_searchMUI_startDate,#_searchMUI_endDate" )
+		$( "#_searchMUI_startDate,#_searchMUI_endDate,#_searchMUI_startDate_CAMPS,#_searchMUI_endDate_CAMPS" )
 		.datepicker({
 			dateFormat: "yy-mm-dd",
 			changeMonth: true,

@@ -10,11 +10,11 @@
 <head>
 <meta http-equiv="Content-Type" content="text/html; charset=utf-8;"/>
 <link rel='stylesheet' type='text/css' href='../../external-stylesheet.css' />
-<script type="text/javascript" src="../../tool/jquery-1.11.1.js"></script>
+<script type="text/javascript" src="../../tool/jquery-3.4.1.min.js"></script>
 <script type="text/javascript" src="../../tool/datagrid/CDataGrid.js"></script>
-<script src="../../tool/jquery-ui/jquery-ui.min.js"></script>
+<script src="../../tool/jquery-ui1.2/jquery-ui.min.js"></script>
 <script type="text/javascript" src="../../tool/jquery-plugin/jquery.placeholder.min.js"></script>
-<link rel="stylesheet" href="../../tool/jquery-ui/jquery-ui.css">
+<link rel="stylesheet" href="../../tool/jquery-ui1.2/jquery-ui.css">
 </head>
 <body>
 <div id = "scheuleDatagrid"></div>

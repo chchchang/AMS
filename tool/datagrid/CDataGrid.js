@@ -202,7 +202,7 @@
 											});
 			//點擊下一頁
 			$("#"+appendElementId+">.pageInfo>.nextBtn").click(function(){
-														m_currentPage+=1;
+														m_currentPage++;
 														//總頁數為-1，動態增加頁數
 														if(m_totalPage == -1){
 															if( $("#"+appendElementId+">.pageInfo>select option[value="+m_currentPage+"]").length == 0){
@@ -219,7 +219,7 @@
 													});
 			//點擊上一頁
 			$("#"+appendElementId+">.pageInfo>.preBtn").click(function() {
-														if(m_currentPage > 1){
+															if(m_currentPage > 1){
 															$("#"+appendElementId+">.pageInfo>select").val(--m_currentPage);
 															return m_this.pageChange(m_currentPage);
 													}});											

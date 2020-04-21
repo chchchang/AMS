@@ -208,6 +208,10 @@ fieldset legend {
 	color:#888888;
 }
 
+.fieldset-auto-width {
+	display: inline-block;
+}
+
 /*table設定*/
 table{
 word-break:break-all;

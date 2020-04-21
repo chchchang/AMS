@@ -125,9 +125,9 @@ td.normal {border: none !important;padding: 1px 0 1px 1px !important;background:
 td.normal a {background:#DDDDDD !important;border: 1px #888888 solid !important;}
 td.ui-datepicker-current-day a {border: 2px #E63F00 solid !important;}
 </style>
-<script src="../tool/jquery-1.11.1.js"></script>
-<script src="../tool/jquery-ui/jquery-ui.js"></script>
-<link rel="stylesheet" href="<?=$SERVER_SITE.Config::PROJECT_ROOT?>tool/jquery-ui/jquery-ui.css">
+<script src="../tool/jquery-3.4.1.min.js"></script>
+<script src="../tool/jquery-ui1.2/jquery-ui.js"></script>
+<link rel="stylesheet" href="<?=$SERVER_SITE.Config::PROJECT_ROOT?>tool/jquery-ui1.2/jquery-ui.css">
 <script src="../tool/timetable/TimeTable.js?<?=time()?>"></script>
 <script type="text/javascript" src="../tool/autoCompleteComboBox.js"></script>
 <script type="text/javascript" src="../tool/datagrid/CDataGrid.js"></script>

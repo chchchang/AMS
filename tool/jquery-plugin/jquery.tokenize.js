@@ -90,7 +90,6 @@
             }
 
             this.dropdown = $('<ul />')
-				.css({'max-height': '250px', 'overflow': 'auto'})//****
                 .addClass('Dropdown');
 
             this.tokensContainer = $('<ul />')
@@ -497,7 +496,7 @@
                 this.dropdownReset();
 
                 $('option', this.select).not(':selected, :disabled').each(function(){
-                    if($this.options.nbDropdownElements == null || count <= $this.options.nbDropdownElements){//****
+                    if(count <= $this.options.nbDropdownElements){
                         if(regexp.test($(this).html())){
                             $this.dropdownAddItem($(this).attr('value'), $(this).html());
                             found = true;
@@ -526,7 +525,7 @@
                             if(data){
                                 $this.dropdownReset();
                                 $.each(data, function(key, val){
-                                    if($this.options.nbDropdownElements == null || count <= $this.options.nbDropdownElements){//*****
+                                    if(count <= $this.options.nbDropdownElements){
                                         var html;
                                         if(val[$this.options.htmlField]){
                                             html = val[$this.options.htmlField];
@@ -822,7 +821,7 @@
         delimiter: ',',
         newElements: true,
         autosize: false,
-        nbDropdownElements: null,//*****
+        nbDropdownElements: 10,
         displayDropdownOnFocus: false,
         maxElements: 0,
         sortable: false,

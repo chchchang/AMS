@@ -33,11 +33,11 @@
 	include('../tool/sameOriginXfsBlock.php');
 ?>
 <script type="text/javascript" src="../tool/jquery-1.11.1.js"></script>
-<link rel="stylesheet" href="<?=$SERVER_SITE.Config::PROJECT_ROOT?>tool/jquery-ui/jquery-ui.css">
-<script src="../tool/jquery-ui/jquery-ui.js"></script>
-<link href="<?=$SERVER_SITE.Config::PROJECT_ROOT?>tool/jquery-ui/jquery-ui-timepicker-addon.css" rel="stylesheet"></link>
-<script src="../tool/jquery-ui/jquery-ui-timepicker-addon.js" type="text/javascript"></script>
-<script src="../tool/jquery-ui/jquery-ui-sliderAccess.js" type="text/javascript"></script>
+<link rel="stylesheet" href="<?=$SERVER_SITE.Config::PROJECT_ROOT?>tool/jquery-ui1.2/jquery-ui.css">
+<script src="../tool/jquery-ui1.2/jquery-ui.js"></script>
+<link href="<?=$SERVER_SITE.Config::PROJECT_ROOT?>tool/jquery-ui1.2/jquery-ui-timepicker-addon.css" rel="stylesheet"></link>
+<script src="../tool/jquery-ui1.2/jquery-ui-timepicker-addon.js" type="text/javascript"></script>
+<script src="../tool/jquery-ui1.2/jquery-ui-sliderAccess.js" type="text/javascript"></script>
 <script type="text/javascript" src="../tool/ajax/ajaxToDB.js"></script> 
 <script type="text/javascript" src="../tool/autoCompleteComboBox.js"></script>
 <script type="text/javascript" src="../tool/jquery-plugin/jquery.placeholder.min.js"></script>

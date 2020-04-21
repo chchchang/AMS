@@ -10,6 +10,15 @@
 			$totalRowCount=0;	//T.B.D.
 			//取得sql用參數
 			$parameters=getparameters();
+			//若沒有輸入搜尋條件，回傳空的資料表並顯示"請設定條件"
+			if(!$parameters){
+				echo json_encode(array('pageNo'=>1,'maxPageNo'=>1,'header'=>array("")
+							,'data'=>array(array(array("請設定收尋條件",'text'))),'sortable'=>array()),JSON_UNESCAPED_UNICODE);
+				exit;
+			}
+			if(!isset($_POST['全託播單識別碼狀態'])){
+				$_POST['全託播單識別碼狀態'] = array(0,1,2,3,4);
+			}
 			//先取得總筆數
 			$sql='
 				SELECT COUNT(1) COUNT
@@ -35,8 +44,8 @@
 						(廣告期間開始時間 BETWEEN ? AND ?) OR (廣告期間結束時間 BETWEEN ? AND ?) OR (? BETWEEN 廣告期間開始時間 AND 廣告期間結束時間)
 					)
 					AND 託播單.託播單狀態識別碼 LIKE ?
-					'.(isset($_POST['全狀態搜尋'])?'':' AND 託播單.託播單狀態識別碼 IN (0,1,2,3,4)').'
-			';
+					'.(isset($_POST['全狀態搜尋'])?'':' AND 託播單.託播單狀態識別碼 IN ('.implode(',',$_POST['全託播單識別碼狀態']).')')
+				;
 			
 			if(isset($_POST['OtherCondition'])){
 				$sqlCon .= ' AND '.$_POST['OtherCondition'];
@@ -183,8 +192,12 @@
 		}
 		else if($_POST['method'] == '全託播單識別碼'){
 			$parameters=getparameters();
+			//沒設定搜尋條件，回傳空資料
+			if(!$parameters)
+				exit(json_encode(array(),JSON_UNESCAPED_UNICODE));
+			
 			$sql='
-				SELECT 託播單.託播單識別碼
+				SELECT DISTINCT 託播單.託播單識別碼,託播單狀態.託播單狀態名稱
 				';
 			$sqlCon =	' FROM
 					託播單
@@ -258,8 +271,20 @@
 				exit('無法取得結果集，請聯絡系統管理員！');
 			}		
 			$result =array();
-			while($row=$res->fetch_assoc()){
-				$result[]=$row['託播單識別碼'];
+			if(isset($_POST["回傳狀態"])&&$_POST["回傳狀態"]){
+				
+				$temp =array();
+				$temp2 = array();
+				while($row=$res->fetch_assoc()){
+					$temp[]=$row['託播單識別碼'];
+					$temp2[]=$row['託播單狀態名稱'];
+				}
+				$result = array('id'=>$temp,'state'=>$temp2);
+			}
+			else{
+				while($row=$res->fetch_assoc()){
+					$result[]=$row['託播單識別碼'];
+				}
 			}
 			exit(json_encode($result,JSON_UNESCAPED_UNICODE));
 		}
@@ -356,6 +381,7 @@
 			exit(json_encode($result,JSON_UNESCAPED_UNICODE));			
 		}
 	}
+	
 	function getparameters(){
 		$checkinput = false;
 		if(isset($_POST['searchBy'])&&$_POST['searchBy']!='')
@@ -390,9 +416,11 @@
 		$parameters["開始時間"] = date('Y-m-d', strtotime('-7 days'));
 		if(isset($_POST['開始時間'])&&$_POST['開始時間']!=''){
 			$parameters["開始時間"]=$_POST['開始時間'];
+			$checkinput = true;
 		}
 		else if(isset($_POST['結束時間'])&&$_POST['結束時間']!=''){
 			$parameters["開始時間"] = date('d-m-Y', strtotime("-14 day", strtotime($_POST['結束時間'])));
+			$checkinput = true;
 		}
 		$parameters["開始時間"].=' 00:00:00';
 		
@@ -418,11 +446,12 @@
 		}
 		else
 			$parameters["素材群組識別碼"]='%';
-		//若沒有輸入搜尋條件，回傳空的資料表並顯示"請設定條件"
+		//若沒有輸入搜尋條件，回傳空的資料"
 		if(!$checkinput){
-			echo json_encode(array('pageNo'=>1,'maxPageNo'=>1,'header'=>array("")
+			/*echo json_encode(array('pageNo'=>1,'maxPageNo'=>1,'header'=>array("")
 						,'data'=>array(array(array("請設定收尋條件",'text'))),'sortable'=>array()),JSON_UNESCAPED_UNICODE);
-			exit;
+			exit;*/
+			return false;
 		}
 		
 		return $parameters;

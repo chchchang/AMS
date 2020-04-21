@@ -399,7 +399,7 @@
 <head>
 	<meta http-equiv="x-frame-options" content="sameorigin">
 	<meta http-equiv="Content-Type" content="text/html; charset=utf-8">
-	<script type="text/javascript" src="../tool/jquery-1.11.1.js"></script>
+	<script type="text/javascript" src="../tool/jquery-3.4.1.min.js"></script>
 	<script src="tool/jquery-ui-1.11.2.custom/jquery-ui.js"></script>
 	<script type="text/javascript" src="tool/jquery.autocomplete.multiselect.js"></script>
 	<script type="text/javascript" src="tool/jquery-ui.multidatespicker.js"></script>

@@ -48,9 +48,9 @@
 <?php
 	include('../tool/sameOriginXfsBlock.php');
 ?>
-<script type="text/javascript" src="../tool/jquery-1.11.1.js"></script>
-<link rel="stylesheet" href="<?=$SERVER_SITE.Config::PROJECT_ROOT?>tool/jquery-ui/jquery-ui.css">
-<script src="../tool/jquery-ui/jquery-ui.js"></script>
+<script type="text/javascript" src="../tool/jquery-3.4.1.min.js"></script>
+<link rel="stylesheet" href="<?=$SERVER_SITE.Config::PROJECT_ROOT?>tool/jquery-ui1.2/jquery-ui.css">
+<script src="../tool/jquery-ui1.2/jquery-ui.js"></script>
 <script type="text/javascript" src="../tool/datagrid/CDataGrid.js"></script>
 <script type="text/javascript" src="../tool/autoCompleteComboBox.js"></script>
 <script type="text/javascript" src="../tool/jquery-plugin/jquery.placeholder.min.js"></script>
@@ -95,13 +95,13 @@
 				,版位識別碼:$('#_searchOUI_position').val()
 				,素材識別碼:$('#_searchOUI_material').val()
 				,素材群組識別碼:$('#_searchOUI_materialGroup').val()
+				,全託播單識別碼狀態:[0,1]
 				,pageNo:1
 				,order:'託播單識別碼'
 				,asc:'DESC'
 			};
 		//取的全部的託播單識別碼並建立是否選擇的map
 		bypost['method']='全託播單識別碼';
-		bypost['全託播單識別碼狀態']=[0,1];
 		$.post('ajaxFunction_OrderInfo.php',bypost,function(json){
 			for(var row in json){
 				OrderSelectedOrNot[json[row]] = false;
@@ -111,6 +111,7 @@
 		);
 		//取得資料
 		bypost['method']='OrderInfoBySearch';
+		delete bypost['全託播單識別碼狀態'];
 		$.post('ajaxFunction_OrderInfo.php',bypost,function(json){
 				json.header.push('選擇');
 				var stateCol = $.inArray('託播單狀態',json.header);

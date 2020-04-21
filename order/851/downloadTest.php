@@ -4,7 +4,7 @@
 <!DOCTYPE html>
 <html>
 <head>
-<script type="text/javascript" src="../../tool/jquery-1.11.1.js"></script>
+<script type="text/javascript" src="../../tool/jquery-3.4.1.min.js"></script>
 </head>
 <body>
 <a href = 'zipDownload.php'> click me</a>

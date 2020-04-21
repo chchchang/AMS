@@ -26,10 +26,10 @@
 <?php
 	include('../tool/sameOriginXfsBlock.php');
 ?>
-<script type="text/javascript" src="../tool/jquery-1.11.1.js"></script>
+<script type="text/javascript" src="../tool/jquery-3.4.1.min.js"></script>
 <script type="text/javascript" src="../tool/ajax/ajaxToDB.js"></script> 
-<link rel="stylesheet" href="<?=$SERVER_SITE.Config::PROJECT_ROOT?>tool/jquery-ui/jquery-ui.css">
-<script src="../tool/jquery-ui/jquery-ui.js"></script>
+<link rel="stylesheet" href="<?=$SERVER_SITE.Config::PROJECT_ROOT?>tool/jquery-ui1.2/jquery-ui.css">
+<script src="../tool/jquery-ui1.2/jquery-ui.js"></script>
 <script type="text/javascript" src="../tool/autoCompleteComboBox.js"></script>
 <link rel='stylesheet' type='text/css' href='<?=$SERVER_SITE.Config::PROJECT_ROOT?>external-stylesheet.css' /> 
 </head>

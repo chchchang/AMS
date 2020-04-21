@@ -29,9 +29,9 @@ if(isset($_POST['postAction'])){
 <html>
 <head>
 	<meta http-equiv="Content-Type" content="text/html; charset=utf-8">
-	<script type="text/javascript" src="../tool/jquery-1.11.1.js"></script>
-	<script src="../tool/jquery-ui/jquery-ui.min.js"></script>
-	<link rel="stylesheet" href="<?=$SERVER_SITE.Config::PROJECT_ROOT?>tool/jquery-ui/jquery-ui.css">
+	<script type="text/javascript" src="../tool/jquery-3.4.1.min.js"></script>
+	<script src="../tool/jquery-ui1.2/jquery-ui.min.js"></script>
+	<link rel="stylesheet" href="<?=$SERVER_SITE.Config::PROJECT_ROOT?>tool/jquery-ui1.2/jquery-ui.css">
 	<link rel='stylesheet' type='text/css' href='<?=$SERVER_SITE.Config::PROJECT_ROOT?>external-stylesheet.css'/>
 	
 </head>

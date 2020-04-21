@@ -7,7 +7,7 @@
 <?php
 	include('../tool/sameOriginXfsBlock.php');
 ?>
-<script src="../tool/jquery-1.11.1.js"></script>
+<script src="../tool/jquery-3.4.1.min.js"></script>
 <style>
 html{
 	overflow:hidden;

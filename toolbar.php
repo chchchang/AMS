@@ -9,7 +9,7 @@
 	include('tool/sameOriginXfsBlock.php');
 	?>
 	<link rel='stylesheet' type='text/css' href='<?=$SERVER_SITE.Config::PROJECT_ROOT?>external-stylesheet.css'/>
-	<script language="javascript" src="tool/jquery-1.11.1.js"></script>
+	<script language="javascript" src="tool/jquery-3.4.1.min.js"></script>
 	<script src="tool/tree.js"></script>
 	<link rel="stylesheet" type="text/css" href="<?=$SERVER_SITE.Config::PROJECT_ROOT?>tool/jquery.loadmask.css" />
 	<script src="tool/jquery.loadmask.js"></script>
@@ -101,6 +101,7 @@
 	<li id="other/updateOrderPara.php">VOD插廣告/單一平台廣告參數更新</li>
 	<li id="other/vastUrlManagement.php">聯播網廣告來源管理</li>
 	<li id="other/shortEPGBannerLimitManagement.php">EPG Banner投放上限設定</li>
+	<li id="VSM/epgBannerAuth/managementPage.php">單一平台EPG Banner撥放權限管理</li>
 	</ul>
 </li>
 

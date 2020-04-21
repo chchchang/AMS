@@ -317,13 +317,13 @@
 	include('../tool/sameOriginXfsBlock.php');
 ?>
 <script type="text/javascript" src="../tool/jquery-1.11.1.js"></script>
-<script src="../tool/jquery-ui/jquery-ui.js"></script>
+<script src="../tool/jquery-ui1.2/jquery-ui.js"></script>
 <script type="text/javascript" src="../tool/jquery-plugin/jquery.tokenize.js"></script>
 <script type="text/javascript" src="../tool/datagrid/CDataGrid.js"></script>
 <script type="text/javascript" src="../tool/autoCompleteComboBox.js"></script>
 <script type="text/javascript" src="../tool/jquery-plugin/jquery.placeholder.min.js"></script>
 <script type="text/javascript" src="newOrder_851.js?<?=time()?>"></script>
-<link rel="stylesheet" href="<?=$SERVER_SITE.Config::PROJECT_ROOT?>tool/jquery-ui/jquery-ui.css">
+<link rel="stylesheet" href="<?=$SERVER_SITE.Config::PROJECT_ROOT?>tool/jquery-ui1.2/jquery-ui.css">
 <link rel="stylesheet" type="text/css" href="<?=$SERVER_SITE.Config::PROJECT_ROOT?>tool/jquery-plugin/jquery.tokenize.css" />
 <link rel='stylesheet' type='text/css' href='<?=$SERVER_SITE.Config::PROJECT_ROOT?>external-stylesheet.css'/>
 <style type="text/css">

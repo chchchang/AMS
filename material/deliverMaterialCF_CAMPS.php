@@ -29,7 +29,19 @@
 				$unNumberOnly=$_POST['僅顯示未取得編號'];
 			else
 				$unNumberOnly='false';
-				
+			//若有設定CAMPS派送時間，將以下falg設為true並在sql中加入相關參數
+			$CAMPSTimeFlag = false;
+			if(isset($_POST['CAMPS開始時間'])&&$_POST['CAMPS開始時間']!=''){
+				$startDateCAMPS=$_POST['CAMPS開始時間'].' 00:00:00';
+				$CAMPSTimeFlag = true;
+			}else
+				$startDateCAMPS='0000-00-00';
+			if(isset($_POST['CAMPS結束時間'])&&$_POST['CAMPS結束時間']!=''){
+				$endDateCAMPS=$_POST['CAMPS結束時間'].' 23:59:59';
+				$CAMPSTimeFlag = true;
+			}else
+				$endDateCAMPS='9999-12-31';
+			
 			switch($_POST['素材是否已到']){
 				case '僅顯示素材未到項目':
 					$fileUploadOrNot=' AND (素材原始檔名 IS NULL OR 素材原始檔名="") ';
@@ -53,13 +65,14 @@
 						OR (素材有效結束時間 IS NULL AND 素材有效開始時間<?)
 					)
 				AND ( 素材識別碼 LIKE ? OR 素材名稱 LIKE ? OR 素材說明 LIKE ? OR 素材原始檔名 LIKE ? OR CAMPS影片媒體編號 LIKE ?)
+				AND ((CAMPS影片派送時間 BETWEEN ? AND ?)'.($CAMPSTimeFlag?'':'OR CAMPS影片派送時間 IS NULL').')
 				'.($unCimmitOnly=='true'?'AND ( CAMPS影片派送時間 IS NULL )':'').'
 				'.($unNumberOnly=='true'?'AND ((CAMPS影片媒體編號 IS NULL || CAMPS影片媒體編號 = ""))':'')
 				.$fileUploadOrNot
-				,'sssssssssssss'
+				,'sssssssssssssss'
 				,$materialGroup
 				,$startDate,$endDate,$startDate,$endDate,$startDate,$endDate,$startDate
-				,$searchBy,$searchBy,$searchBy,$searchBy,$searchBy
+				,$searchBy,$searchBy,$searchBy,$searchBy,$searchBy,$startDateCAMPS,$endDateCAMPS
 				);			
 			$totalRowCount=$result[0]['COUNT'];
 			//取得資料
@@ -75,13 +88,14 @@
 						OR (素材有效結束時間 IS NULL AND 素材有效開始時間<?)
 					)
 				AND ( 素材識別碼 LIKE ? OR 素材名稱 LIKE ? OR 素材說明 LIKE ? OR 素材原始檔名 LIKE ? OR CAMPS影片媒體編號 LIKE ?)
+				AND ((CAMPS影片派送時間 BETWEEN ? AND ?)'.($CAMPSTimeFlag?'':'OR CAMPS影片派送時間 IS NULL').')
 				'.($unCimmitOnly=='true'?'AND ( CAMPS影片派送時間 IS NULL )':'').'
 				'.($unNumberOnly=='true'?'AND ((CAMPS影片媒體編號 IS NULL || CAMPS影片媒體編號 = ""))':'')
 				.$fileUploadOrNot.'
 				ORDER BY '.((isset($_POST['order']))?$_POST['order']:'素材識別碼').' '.$_POST['asc'].
 				($showAll?'':(' LIMIT ?, '.PAGE_SIZE));
-			$defString = 'sssssssssssss'.($showAll?'':'i');
-			$a_params =[&$sql,&$defString,&$materialGroup,&$startDate,&$endDate,&$startDate,&$endDate,&$startDate,&$endDate,&$startDate,&$searchBy,&$searchBy,&$searchBy,&$searchBy,&$searchBy];
+			$defString = 'sssssssssssssss'.($showAll?'':'i');
+			$a_params =[&$sql,&$defString,&$materialGroup,&$startDate,&$endDate,&$startDate,&$endDate,&$startDate,&$endDate,&$startDate,&$searchBy,&$searchBy,&$searchBy,&$searchBy,&$searchBy,&$startDateCAMPS,&$endDateCAMPS];
 			if(!$showAll)
 				$a_params[] =&$fromRowNo;
 			$result=call_user_func_array(array($my, 'getResultArray'), $a_params);
@@ -265,13 +279,13 @@
 <?php
 	include('../tool/sameOriginXfsBlock.php');
 ?>
-<link rel="stylesheet" href="<?=$SERVER_SITE.Config::PROJECT_ROOT?>tool/jquery-ui/jquery-ui.css">
+<link rel="stylesheet" href="<?=$SERVER_SITE.Config::PROJECT_ROOT?>tool/jquery-ui1.2/jquery-ui.css">
 <link rel="stylesheet" type="text/css" href="<?=$SERVER_SITE.Config::PROJECT_ROOT?>external-stylesheet.css" />
 <link rel="stylesheet" type="text/css" href="<?=$SERVER_SITE.Config::PROJECT_ROOT?>tool/jquery.loadmask.css" />
-<script src="../tool/jquery-1.11.1.js"></script>
+<script src="../tool/jquery-3.4.1.min.js"></script>
 <script src="../tool/jquery.loadmask.js"></script>
 <script src="../tool/datagrid/CDataGrid.js"></script>
-<script src="../tool/jquery-ui/jquery-ui.js"></script>
+<script src="../tool/jquery-ui1.2/jquery-ui.js"></script>
 <script type="text/javascript" src="../tool/autoCompleteComboBox.js"></script>
 <script type="text/javascript" src="../tool/jquery-plugin/jquery.placeholder.min.js"></script>
 <body>
@@ -290,6 +304,7 @@ $("#_searchMUI_materialTypeSelectoin,#_searchMUI_missingFileOnly,#_searchMUI_mis
 
 <script>
 $(document).ready(function(){
+	$( "#_searchMUI_tabs_nav-CAMPS_date" ).show();
 	//覆寫mask、unmask
 	var oriMask=$.fn.mask;
 	var oriUnmask=$.fn.unmask;
@@ -404,6 +419,8 @@ $(document).ready(function(){
 			,"素材群組識別碼":$("#_searchMUI_materialGroup").val()
 			,"開始時間":$("#_searchMUI_startDate").val()
 			,"結束時間":$("#_searchMUI_endDate").val()
+			,"CAMPS開始時間":$("#_searchMUI_startDate_CAMPS").val()
+			,"CAMPS結束時間":$("#_searchMUI_endDate_CAMPS").val()
 			,"僅顯示未派送":$('#僅顯示尚未派送項目').prop('checked')
 			,"僅顯示未取得編號":$('#僅顯示未取得媒體編號項目').prop('checked')
 			,"素材是否已到":$("input[name=素材是否已到]:checked").val()

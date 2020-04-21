@@ -107,7 +107,7 @@
 <head>
 <meta http-equiv="x-frame-options" content="sameorigin">
 <meta http-equiv="Content-Type" content="text/html; charset=utf-8">
-<script type="text/javascript" src="tool/jquery-1.11.1.js"></script>
+<script type="text/javascript" src="tool/jquery-3.4.1.min.js"></script>
 <link rel='stylesheet' type='text/css' href='<?=$SERVER_SITE.Config::PROJECT_ROOT?>external-stylesheet.css'/>
 	<link rel="stylesheet" type="text/css" href="<?=$SERVER_SITE.Config::PROJECT_ROOT?>tool/jquery.loadmask.css" />
 	<script src="tool/jquery.loadmask.js"></script>

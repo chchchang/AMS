@@ -46,7 +46,7 @@
 	include('../tool/sameOriginXfsBlock.php');
 ?>
 <link rel="stylesheet" type="text/css" href="<?=$SERVER_SITE.Config::PROJECT_ROOT?>external-stylesheet.css" />
-<script src="../tool/jquery-1.11.1.js"></script>
+<script src="../tool/jquery-3.4.1.min.js"></script>
 <script src="../tool/datagrid/CDataGrid.js"></script>
 </head>
 <script>

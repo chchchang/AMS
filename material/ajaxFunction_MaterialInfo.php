@@ -2,28 +2,29 @@
 	//前置設定
 	include('../tool/auth/authAJAX.php');
 	define('PAGE_SIZE',10);
-	$material_folder = Config::GET_MATERIAL_FOLDER();
-	$material_folder_url = Config::GET_MATERIAL_FOLDER_URL(dirname(__FILE__).'\\');
-	//$pppp=dirname(__FILE__);
-	//exit($material_folder_url.' '.$material_folder.' '.$pppp);
+	//$material_folder = Config::GET_MATERIAL_FOLDER();
+	//$material_folder_url = Config::GET_MATERIAL_FOLDER_URL(dirname(__FILE__).'\\');
+	$material_folder_url = "uploadedFile/";
+	
 	if(isset($_POST['method'])){
 		if($_POST['method']=='DATAGRID素材資訊'){
-			$orders=array();
-			$fromRowNo=isset($_POST['pageNo'])&&intval($_POST['pageNo'])>0?(intval($_POST['pageNo'])-1)*PAGE_SIZE:0;
-			$totalRowCount=0;
-			$searchBy='%'.$_POST['searchBy'].'%';
+
+			$paras = array();
+			$paras['fromRowNo']=isset($_POST['pageNo'])&&intval($_POST['pageNo'])>0?(intval($_POST['pageNo'])-1)*PAGE_SIZE:0;
+			$paras['totalRowCount']=0;
+			$paras['searchBy']='%'.$_POST['searchBy'].'%';
 			if(!isset($_POST['素材類型'])||$_POST['素材類型']=='')
 				$_POST['素材類型'] = '%';
 			if(!isset($_POST['素材群組識別碼'])||$_POST['素材群組識別碼']==''||$_POST['素材群組識別碼']==0)
 				$_POST['素材群組識別碼'] = '%';
 			if(isset($_POST['開始時間']))
-				$startDate=($_POST['開始時間']=='')?'0000-00-00':$_POST['開始時間'].' 00:00:00';
+				$paras['startDate']=($_POST['開始時間']=='')?'0000-00-00':$_POST['開始時間'].' 00:00:00';
 			else
-				$startDate='0000-00-00';
+				$paras['startDate']='0000-00-00';
 			if(isset($_POST['結束時間']))
-				$endDate=($_POST['結束時間']=='')?'9999-12-31':$_POST['結束時間'].' 23:59:59';
+				$paras['endDate']=($_POST['結束時間']=='')?'9999-12-31':$_POST['結束時間'].' 23:59:59';
 			else
-				$endDate='9999-12-31';
+				$paras['endDate']='9999-12-31';
 
 			//先取得總筆數
 			$sql='
@@ -37,16 +38,16 @@
 						OR (素材有效開始時間 IS NULL AND 素材有效結束時間>?)
 						OR (素材有效結束時間 IS NULL AND 素材有效開始時間<?)
 					)
-				AND ( 素材識別碼 LIKE ? OR 素材名稱 LIKE ? OR 素材說明 LIKE ? OR 素材原始檔名 LIKE ? )';
+				AND ( 素材識別碼 LIKE ? OR 素材名稱 LIKE ? OR 素材說明 LIKE ? OR 素材原始檔名 LIKE ? OR CAMPS影片媒體編號 LIKE ? OR 影片媒體編號 LIKE ? OR  影片媒體編號北 LIKE ? OR  影片媒體編號南 LIKE ?)';
 			
 			if(!$stmt=$my->prepare($sql)) {
 				$logger->error('無法準備statement，錯誤代碼('.$my->errno.')、錯誤訊息('.$my->error.')。');
 				exit('無法準備statement，請聯絡系統管理員！');
 			}
 			
-			if(!$stmt->bind_param('sssssssssssss',$_POST['素材類型'],$_POST['素材群組識別碼']
-				,$startDate,$endDate,$startDate,$endDate,$startDate,$endDate,$startDate
-				,$searchBy,$searchBy,$searchBy,$searchBy)) {
+			if(!$stmt->bind_param('sssssssssssssssss',$_POST['素材類型'],$_POST['素材群組識別碼']
+				,$paras['startDate'],$paras['endDate'],$paras['startDate'],$paras['endDate'],$paras['startDate'],$paras['endDate'],$paras['startDate']
+				,$paras['searchBy'],$paras['searchBy'],$paras['searchBy'],$paras['searchBy'],$paras['searchBy'],$paras['searchBy'],$paras['searchBy'],$paras['searchBy'])) {
 				$logger->error('無法繫結資料，錯誤代碼('.$stmt->errno.')、錯誤訊息('.$stmt->error.')。');
 				exit('無法繫結資料，請聯絡系統管理員！');
 			}
@@ -62,98 +63,16 @@
 			}
 			
 			if($row=$res->fetch_assoc())
-				$totalRowCount=$row['COUNT'];
+				$paras['totalRowCount']=$row['COUNT'];
 			else
 				exit;
 			
 			//再取得資料
-			$sql='
-				SELECT 素材識別碼, 素材.素材群組識別碼, 素材類型名稱,素材名稱,文字素材內容,圖片素材寬度,圖片素材高度,影片素材秒數,素材原始檔名,素材有效開始時間 AS 有效開始時間,素材有效結束時間 AS 有效結束時間
-					,素材群組.DISABLE_TIME
-				FROM 素材
-				LEFT JOIN 素材群組 ON 素材.素材群組識別碼 = 素材群組.素材群組識別碼
-				,素材類型
-				WHERE 素材.素材類型識別碼 LIKE ? 
-				AND 素材.素材類型識別碼 =  素材類型.素材類型識別碼
-				AND 素材.素材群組識別碼 LIKE ? 
-				AND(
-						((素材有效開始時間 BETWEEN ? AND ?) OR (素材有效結束時間 BETWEEN ? AND ?) OR (? BETWEEN 素材有效開始時間 AND 素材有效結束時間))
-						OR (素材有效開始時間 IS NULL AND 素材有效結束時間 IS NULL)
-						OR (素材有效開始時間 IS NULL AND 素材有效結束時間>?)
-						OR (素材有效結束時間 IS NULL AND 素材有效開始時間<?)
-					)
-				AND ( 素材識別碼 LIKE ? OR 素材名稱 LIKE ? OR 素材說明 LIKE ? OR 素材原始檔名 LIKE ? ) 
-				ORDER BY '.$_POST['order'].' '.$_POST['asc'].' '.
-				'LIMIT ?,'.PAGE_SIZE.'
-			';
+			getDatasAndReturn($paras);
 			
-			if(!$stmt=$my->prepare($sql)) {
-				exit('無法準備statement，請聯絡系統管理員！');
-			}
-			
-			if(!$stmt->bind_param('sssssssssssssi',$_POST['素材類型'],$_POST['素材群組識別碼']
-				,$startDate,$endDate,$startDate,$endDate,$startDate,$endDate,$startDate
-				,$searchBy,$searchBy,$searchBy,$searchBy,$fromRowNo)) {
-				$logger->error('無法繫結資料，錯誤代碼('.$stmt->errno.')、錯誤訊息('.$stmt->error.')。');
-				exit('無法繫結資料，請聯絡系統管理員！');
-			}
-			if(!$stmt->execute()) {
-				$logger->error('無法執行statement，錯誤代碼('.$stmt->errno.')、錯誤訊息('.$stmt->error.')。');
-				exit('無法執行statement，請聯絡系統管理員！');
-			}	
-			if(!$res=$stmt->get_result()) {
-				$logger->error('無法取得結果集，錯誤代碼('.$stmt->errno.')、錯誤訊息('.$stmt->error.')。');
-				exit('無法取得結果集，請聯絡系統管理員！');
-			}		
-			while($row=$res->fetch_assoc()){
-				if($row['素材群組識別碼']!=null)
-					if($row['DISABLE_TIME']!=null)
-						$row['素材群組識別碼'].='(已隱藏)';
-				if($row['素材類型名稱']=='圖片'||$row['素材類型名稱']=='影片'){
-					$exists = true;
-					if($row['素材原始檔名']==''||$row['素材原始檔名']==NULL)
-						$exists = false;
-					else if($row['素材類型名稱']=='圖片'){
-						$explodeFileName=explode(".",$row['素材原始檔名']);
-						$exists= file_exists($material_folder_url.$row['素材識別碼'].".".$explodeFileName[count($explodeFileName)-1]);
-					}
-					
-					if(!$exists){
-						$start ='<a style="color:red">';$end='</a>';
-						$orders[]=array(array($row['素材識別碼'],'html'),array($start.(($row['素材群組識別碼']==null)?'':$row['素材群組識別碼']).$end,'html')
-						,array($start.$row['素材類型名稱'].$end,'html'),array($start.$row['素材名稱'].$end,'html')
-						,array('','html')
-						,($row['素材類型名稱']=='圖片')?array('<img class ="dgImg" src="'.$material_folder_url.$row['素材識別碼'].'?'.time().
-						'" alt="'.$row['素材識別碼'].':'.$row['素材原始檔名'].'"style="max-width:100%;max-height:100%;border:0;">','html'):array('','text')
-						,array($start.(($row['圖片素材寬度']==null)?'':$row['圖片素材寬度']).$end,'html'),array($start.(($row['圖片素材高度']==null)?'':$row['圖片素材高度']).$end,'html')
-						,array($start.(($row['影片素材秒數']==null)?'':$row['影片素材秒數']).$end,'html'),array(($row['有效開始時間']==null)?'':$row['有效開始時間'],'text'),array(($row['有效結束時間']==null)?'':$row['有效結束時間'],'text')
-						);
-					}
-					else{
-						goto addOrders;
-					}
-				
-				}
-				else{
-					addOrders:
-						$explodeFileName=explode(".",$row['素材原始檔名']);
-						$orders[]=array(array($row['素材識別碼'],'text'),array(($row['素材群組識別碼']==null)?'':$row['素材群組識別碼'],'text'),array($row['素材類型名稱'],'text'),array($row['素材名稱'],'text')
-						,array(($row['文字素材內容']==null)?'':$row['文字素材內容'],'text')
-						,($row['素材類型名稱']=='圖片')?array('<img class ="dgImg" src="'.$material_folder_url.$row['素材識別碼'].'.'.end($explodeFileName).'?'.time().
-						'" alt="'.$row['素材識別碼'].':'.$row['素材原始檔名'].'" style="max-width:100%;max-height:100%;border:0;">','html'):array('','text')
-						,array(($row['圖片素材寬度']==null)?'':$row['圖片素材寬度'],'text'),array(($row['圖片素材高度']==null)?'':$row['圖片素材高度'],'text')
-						,array(($row['影片素材秒數']==null)?'':$row['影片素材秒數'],'text'),array(($row['有效開始時間']==null)?'':$row['有效開始時間'],'text'),array(($row['有效結束時間']==null)?'':$row['有效結束時間'],'text')
-						);
-				}
-			}
-			header('Content-Type: application/json; charset=UTF-8');
-			echo json_encode(array('pageNo'=>($fromRowNo/PAGE_SIZE)+1,'maxPageNo'=>ceil($totalRowCount/PAGE_SIZE),'header'=>array('素材識別碼','素材群組識別碼','素材類型名稱','素材名稱','文字素材內容'
-									,'圖片素材內容','圖片素材寬度','圖片素材高度','影片素材秒數','有效開始時間','有效結束時間')
-							,'data'=>$orders,'sortable'=>array('素材識別碼','素材群組識別碼','素材類型名稱','素材名稱','文字素材內容'
-									,'圖片素材寬度','圖片素材高度','影片素材秒數','有效開始時間','有效結束時間')),JSON_UNESCAPED_UNICODE);
 		}
 		if($_POST['method']=='DATAGRID素材資訊_MISSING'){
-			$orders=array();
+			$materials=array();
 			$fromRowNo=isset($_POST['pageNo'])&&intval($_POST['pageNo'])>0?(intval($_POST['pageNo'])-1)*PAGE_SIZE:0;
 			$totalRowCount=0;	//T.B.D.
 			$searchBy='%'.$_POST['searchBy'].'%';
@@ -203,7 +122,7 @@
 						$totalRowCount++;
 						if(ceil($totalRowCount/PAGE_SIZE)==intval($_POST['pageNo'])){
 							$start ='<a style="color:red">';$end='</a>';
-							$orders[]=array(array($row['素材識別碼'],'text'),array($start.(($row['素材群組識別碼']==null)?'':$row['素材群組識別碼']).$end,'html')
+							$materials[]=array(array($row['素材識別碼'],'text'),array($start.(($row['素材群組識別碼']==null)?'':$row['素材群組識別碼']).$end,'html')
 							,array($start.$row['素材類型名稱'].$end,'html'),array($start.$row['素材名稱'].$end,'html')
 							,array('','html')
 							,($row['素材類型名稱']=='圖片')?array('<img class ="dgImg" src="'.$material_folder_url.$row['素材識別碼'].'?'.time().'" alt="'.$row['素材識別碼'].':'.$row['素材原始檔名'].'" style="max-width:100%;max-height:100%;border:0;">','html'):array('','text')
@@ -217,7 +136,7 @@
 			header('Content-Type: application/json; charset=UTF-8');
 			echo json_encode(array('pageNo'=>($fromRowNo/PAGE_SIZE)+1,'maxPageNo'=>ceil($totalRowCount/PAGE_SIZE),'header'=>array('素材識別碼','素材群組識別碼','素材類型名稱','素材名稱','文字素材內容'
 									,'圖片素材內容','圖片素材寬度','圖片素材高度','影片素材秒數')
-							,'data'=>$orders,'sortable'=>array('素材識別碼','素材群組識別碼','素材類型名稱','素材名稱','文字素材內容'
+							,'data'=>$materials,'sortable'=>array('素材識別碼','素材群組識別碼','素材類型名稱','素材名稱','文字素材內容'
 									,'圖片素材寬度','圖片素材高度','影片素材秒數')),JSON_UNESCAPED_UNICODE);
 		}
 		else if($_POST['method']=='檢查版位素材設定'){
@@ -467,6 +386,97 @@
 			}
 			exit(json_encode($result,JSON_UNESCAPED_UNICODE));
 		}
+	}
+	
+	function getDatasAndReturn($paras){
+		global $logger,$my,$material_folder_url;
+		$materials=array();
+		
+		$sql='
+				SELECT 素材識別碼, 素材.素材群組識別碼, 素材類型名稱,素材名稱,文字素材內容,圖片素材寬度,圖片素材高度,影片素材秒數,素材原始檔名,素材有效開始時間 AS 有效開始時間,素材有效結束時間 AS 有效結束時間
+					,素材群組.DISABLE_TIME
+				FROM 素材
+				LEFT JOIN 素材群組 ON 素材.素材群組識別碼 = 素材群組.素材群組識別碼
+				,素材類型
+				WHERE 素材.素材類型識別碼 LIKE ? 
+				AND 素材.素材類型識別碼 =  素材類型.素材類型識別碼
+				AND 素材.素材群組識別碼 LIKE ? 
+				AND(
+						((素材有效開始時間 BETWEEN ? AND ?) OR (素材有效結束時間 BETWEEN ? AND ?) OR (? BETWEEN 素材有效開始時間 AND 素材有效結束時間))
+						OR (素材有效開始時間 IS NULL AND 素材有效結束時間 IS NULL)
+						OR (素材有效開始時間 IS NULL AND 素材有效結束時間>?)
+						OR (素材有效結束時間 IS NULL AND 素材有效開始時間<?)
+					)
+				AND ( 素材識別碼 LIKE ? OR 素材名稱 LIKE ? OR 素材說明 LIKE ? OR 素材原始檔名 LIKE ? OR CAMPS影片媒體編號 LIKE ? OR 影片媒體編號 LIKE ? OR  影片媒體編號北 LIKE ? OR  影片媒體編號南 LIKE ? ) 
+				ORDER BY '.$_POST['order'].' '.$_POST['asc'].' '.
+				'LIMIT ?,'.PAGE_SIZE.'
+			';
+			
+			if(!$stmt=$my->prepare($sql)) {
+				exit('無法準備statement，請聯絡系統管理員！');
+			}
+			
+			if(!$stmt->bind_param('sssssssssssssssssi',$_POST['素材類型'],$_POST['素材群組識別碼']
+				,$paras['startDate'],$paras['endDate'],$paras['startDate'],$paras['endDate'],$paras['startDate'],$paras['endDate'],$paras['startDate']
+				,$paras['searchBy'],$paras['searchBy'],$paras['searchBy'],$paras['searchBy'],$paras['searchBy'],$paras['searchBy'],$paras['searchBy'],$paras['searchBy'],$paras['fromRowNo'])) {
+				$logger->error('無法繫結資料，錯誤代碼('.$stmt->errno.')、錯誤訊息('.$stmt->error.')。');
+				exit('無法繫結資料，請聯絡系統管理員！');
+			}
+			if(!$stmt->execute()) {
+				$logger->error('無法執行statement，錯誤代碼('.$stmt->errno.')、錯誤訊息('.$stmt->error.')。');
+				exit('無法執行statement，請聯絡系統管理員！');
+			}	
+			if(!$res=$stmt->get_result()) {
+				$logger->error('無法取得結果集，錯誤代碼('.$stmt->errno.')、錯誤訊息('.$stmt->error.')。');
+				exit('無法取得結果集，請聯絡系統管理員！');
+			}		
+			while($row=$res->fetch_assoc()){
+				if($row['素材群組識別碼']!=null)
+					if($row['DISABLE_TIME']!=null)
+						$row['素材群組識別碼'].='(已隱藏)';
+				if($row['素材類型名稱']=='圖片'||$row['素材類型名稱']=='影片'){
+					$exists = true;
+					if($row['素材原始檔名']==''||$row['素材原始檔名']==NULL)
+						$exists = false;
+					else if($row['素材類型名稱']=='圖片'){
+						$explodeFileName=explode(".",$row['素材原始檔名']);
+						$exists= file_exists($material_folder_url.$row['素材識別碼'].".".$explodeFileName[count($explodeFileName)-1]);
+					}
+					
+					if(!$exists){
+						//不存在的素材用紅色強調
+						$start ='<a style="color:red">';$end='</a>';
+						$materials[]=array(array($row['素材識別碼'],'html'),array($start.(($row['素材群組識別碼']==null)?'':$row['素材群組識別碼']).$end,'html')
+						,array($start.$row['素材類型名稱'].$end,'html'),array($start.$row['素材名稱'].$end,'html')
+						,array('','html')
+						,($row['素材類型名稱']=='圖片')?array('<img class ="dgImg" src="'.$material_folder_url.$row['素材識別碼'].'?'.time().
+						'" alt="'.$row['素材識別碼'].':'.$row['素材原始檔名'].'"style="max-width:100%;max-height:100%;border:0;">','html'):array('','text')
+						,array($start.(($row['圖片素材寬度']==null)?'':$row['圖片素材寬度']).$end,'html'),array($start.(($row['圖片素材高度']==null)?'':$row['圖片素材高度']).$end,'html')
+						,array($start.(($row['影片素材秒數']==null)?'':$row['影片素材秒數']).$end,'html'),array(($row['有效開始時間']==null)?'':$row['有效開始時間'],'text'),array(($row['有效結束時間']==null)?'':$row['有效結束時間'],'text')
+						);
+					}
+					else{
+						goto addmaterials;
+					}
+				
+				}
+				else{
+					addmaterials:
+						$explodeFileName=explode(".",$row['素材原始檔名']);
+						$materials[]=array(array($row['素材識別碼'],'text'),array(($row['素材群組識別碼']==null)?'':$row['素材群組識別碼'],'text'),array($row['素材類型名稱'],'text'),array($row['素材名稱'],'text')
+						,array(($row['文字素材內容']==null)?'':$row['文字素材內容'],'text')
+						,($row['素材類型名稱']=='圖片')?array('<img class ="dgImg" src="'.$material_folder_url.$row['素材識別碼'].'.'.end($explodeFileName).'?'.time().
+						'" alt="'.$row['素材識別碼'].':'.$row['素材原始檔名'].'" style="max-width:100%;max-height:100%;border:0;">','html'):array('','text')
+						,array(($row['圖片素材寬度']==null)?'':$row['圖片素材寬度'],'text'),array(($row['圖片素材高度']==null)?'':$row['圖片素材高度'],'text')
+						,array(($row['影片素材秒數']==null)?'':$row['影片素材秒數'],'text'),array(($row['有效開始時間']==null)?'':$row['有效開始時間'],'text'),array(($row['有效結束時間']==null)?'':$row['有效結束時間'],'text')
+						);
+				}
+			}
+			header('Content-Type: application/json; charset=UTF-8');
+			echo json_encode(array('pageNo'=>($paras['fromRowNo']/PAGE_SIZE)+1,'maxPageNo'=>ceil($paras['totalRowCount']/PAGE_SIZE),'header'=>array('素材識別碼','素材群組識別碼','素材類型名稱','素材名稱','文字素材內容'
+									,'圖片素材內容','圖片素材寬度','圖片素材高度','影片素材秒數','有效開始時間','有效結束時間')
+							,'data'=>$materials,'sortable'=>array('素材識別碼','素材群組識別碼','素材類型名稱','素材名稱','文字素材內容'
+									,'圖片素材寬度','圖片素材高度','影片素材秒數','有效開始時間','有效結束時間')),JSON_UNESCAPED_UNICODE);
 	}
 	exit ;
 	

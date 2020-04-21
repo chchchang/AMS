@@ -129,9 +129,9 @@
 <?php
 	include('../tool/sameOriginXfsBlock.php');
 ?>
-<script type="text/javascript" src="../tool/jquery-1.11.1.js"></script>
-<link rel="stylesheet" href="<?=$SERVER_SITE.Config::PROJECT_ROOT?>tool/jquery-ui/jquery-ui.css">
-<script src="../tool/jquery-ui/jquery-ui.js"></script>
+<script type="text/javascript" src="../tool/jquery-3.4.1.min.js"></script>
+<link rel="stylesheet" href="<?=$SERVER_SITE.Config::PROJECT_ROOT?>tool/jquery-ui1.2/jquery-ui.css">
+<script src="../tool/jquery-ui1.2/jquery-ui.js"></script>
 <script type="text/javascript" src="../tool/datagrid/CDataGrid.js"></script>
 <script type="text/javascript" src="../tool/autoCompleteComboBox.js"></script>
 <script type="text/javascript" src="../tool/jquery-plugin/jquery.placeholder.min.js"></script>
@@ -176,16 +176,18 @@
 				,版位識別碼:$('#_searchOUI_position').val()
 				,素材識別碼:$('#_searchOUI_material').val()
 				,素材群組識別碼:$('#_searchOUI_materialGroup').val()
+				,全託播單識別碼狀態:[1,2]
 				,pageNo:1
 				,order:'託播單識別碼'
 				,asc:'DESC'
+				,回傳狀態:true
 			};
 		//是否只顯示素材位送出的託播單
 		if($('#_searchOUI_unsendMaterialOnly').prop("checked"))
 			bypost['OtherCondition'] = '(託播單.託播單需重新派送=1)';
 		//取的全部的託播單識別碼並建立是否選擇的map
 		bypost['method']='全託播單識別碼';
-		$.post('',bypost,function(json){
+		$.post('../order/ajaxFunction_OrderInfo.php',bypost,function(json){
 			for(var row=0 ;row<json['id'].length;row++){
 				OrderSelectedOrNot[json['id'][row]] = false;
 				OrderState[json['id'][row]]=json['state'][row];
@@ -195,6 +197,7 @@
 		);
 		//取得資料
 		bypost['method']='OrderInfoBySearch';
+		delete bypost['全託播單識別碼狀態'];
 		$.post('../order/ajaxFunction_OrderInfo.php',bypost,function(json){
 				json.header.push('選擇');
 				var stateCol = $.inArray('託播單狀態',json.header);

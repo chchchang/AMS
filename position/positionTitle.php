@@ -283,14 +283,14 @@
 	<?php
 	include('../tool/sameOriginXfsBlock.php');
 	?>
-	<script type="text/javascript" src="../tool/jquery-1.11.1.js"></script>
-	<link rel="stylesheet" href="<?=$SERVER_SITE.Config::PROJECT_ROOT?>tool/jquery-ui/jquery-ui.css">
-	<script src="../tool/jquery-ui/jquery-ui.min.js"></script>
+	<script type="text/javascript" src="../tool/jquery-3.4.1.min.js"></script>
+	<link rel="stylesheet" href="<?=$SERVER_SITE.Config::PROJECT_ROOT?>tool/jquery-ui1.2/jquery-ui.css">
+	<script src="../tool/jquery-ui1.2/jquery-ui.min.js"></script>
 	<script type="text/javascript" src="../tool/datagrid/CDataGrid.js"></script>
 	<script type="text/javascript" src="../tool/jquery-plugin/jquery.placeholder.min.js"></script>
-	<link href="<?=$SERVER_SITE.Config::PROJECT_ROOT?>tool/jquery-ui/jquery-ui-timepicker-addon.css" rel="stylesheet"></link>
-	<script src="../tool/jquery-ui/jquery-ui-timepicker-addon.js" type="text/javascript"></script>
-	<script src="../tool/jquery-ui/jquery-ui-sliderAccess.js" type="text/javascript"></script>
+	<link href="<?=$SERVER_SITE.Config::PROJECT_ROOT?>tool/jquery-ui1.2/jquery-ui-timepicker-addon.css" rel="stylesheet"></link>
+	<script src="../tool/jquery-ui1.2/jquery-ui-timepicker-addon.js" type="text/javascript"></script>
+	<script src="../tool/jquery-ui1.2/jquery-ui-sliderAccess.js" type="text/javascript"></script>
 	<link rel='stylesheet' type='text/css' href='<?=$SERVER_SITE.Config::PROJECT_ROOT?>external-stylesheet.css'/>
 	<style type="text/css">
 	td.highlight {border: none !important;padding: 1px 0 1px 1px !important;background: none !important;overflow:hidden;}

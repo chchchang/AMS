@@ -225,7 +225,7 @@
 	<?php
 	include('../tool/sameOriginXfsBlock.php');
 	?>
-	<script type="text/javascript" src="../tool/jquery-1.11.1.js"></script>
+	<script type="text/javascript" src="../tool/jquery-3.4.1.min.js"></script>
 	<script src="tool/jquery-ui-1.11.2.custom/jquery-ui.js"></script>
 	<script type="text/javascript" src="tool/jquery.autocomplete.multiselect.js"></script>
 	<script type="text/javascript" src="tool/jquery-ui.multidatespicker.js"></script>

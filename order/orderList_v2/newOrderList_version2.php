@@ -106,19 +106,19 @@
 	include('../../tool/sameOriginXfsBlock.php');
 ?>
 <script type="text/javascript" src="../../tool/ajax/ajaxToDB.js"></script>
-<script type="text/javascript" src="../../tool/jquery-1.11.1.js"></script>
-<script src="../../tool/jquery-ui/jquery-ui.js"></script>
-<link rel="stylesheet" href="../../tool/jquery-ui/jquery-ui.css"></link>
+<script type="text/javascript" src="../tool/jquery-1.11.1.js"></script>
+<script src="../../tool/jquery-ui1.2/jquery-ui.js"></script>
+<link rel="stylesheet" href="../../tool/jquery-ui1.2/jquery-ui.css"></link>
 <script src="../../tool/iframeAutoHeight.js" type="text/javascript"></script>
 <script type="text/javascript" src="../../tool/autoCompleteComboBox.js"></script>
 <script type="text/javascript" src="../../tool/jquery-plugin/jquery.placeholder.min.js"></script>
 <script type="text/javascript" src="../../tool/jquery-plugin/jquery.tokenize.js"></script>
-<link rel="stylesheet" href="../../tool/jquery-ui/jquery-ui.css"></link>
+<link rel="stylesheet" href="../../tool/jquery-ui1.2/jquery-ui.css"></link>
 <link rel='stylesheet' type='text/css' href='../../external-stylesheet.css' />
 <link rel="stylesheet" type="text/css" href="../../tool/jquery-plugin/jquery.tokenize.css" />
-<link href="../../tool/jquery-ui/jquery-ui-timepicker-addon.css" rel="stylesheet"></link>
-<script src="../../tool/jquery-ui/jquery-ui-timepicker-addon.js" type="text/javascript"></script>
-<script src="../../tool/jquery-ui/jquery-ui-sliderAccess.js" type="text/javascript"></script>
+<link href="../../tool/jquery-ui1.2/jquery-ui-timepicker-addon.css" rel="stylesheet"></link>
+<script src="../../tool/jquery-ui1.2/jquery-ui-timepicker-addon.js" type="text/javascript"></script>
+<script src="../../tool/jquery-ui1.2/jquery-ui-sliderAccess.js" type="text/javascript"></script>
 <script type="text/javascript" src="../../order/newOrder_851.js?<?=time()?>"></script>
 <style type="text/css">
 

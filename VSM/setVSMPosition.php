@@ -179,6 +179,7 @@
 			.',  ('.$ptid.',7,"linkParameter","linkParameter",1,1,0,"",1)'
 			.',  ('.$ptid.',8,"url","url",1,1,1,"rtsp://172.17.188.35:5004/asset/vscontsrv%3a",1)'
 			.',  ('.$ptid.',9,"bannerTransactionId","bannerTransactionId",1,1,0,"",1)'
+			.',  ('.$ptid.',10,"投放上限","playTimeLimit",2,0,0,0,1)'
 			;
 		}
 		//barker
