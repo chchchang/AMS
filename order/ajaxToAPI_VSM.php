@@ -223,10 +223,18 @@
 				ORDER BY
 					託播單素材.素材順序
 			';
-			$orderMaterial=$my->getResultArray($sql,'i',$orderId)[0];
+			$orderMaterialArray=$my->getResultArray($sql,'i',$orderId);
+			$orderMaterial=$orderMaterialArray[0];
 			$explodedName = explode('.',$orderMaterial['素材原始檔名']);
 			$materialType = end($explodedName);
 			$materialName = 'ad/_____AMS_'.$orderMaterial['素材識別碼'].'.'.$materialType;
+			$focusMaterialName = 'ad/_____AMS_'.$orderMaterial['素材識別碼'].'.'.$materialType;
+			if(isset($orderMaterialArray[1])){
+				$orderMaterialFocus=$orderMaterialArray[1];
+				$explodedNameFocus = explode('.',$orderMaterialFocus['素材原始檔名']);
+				$materialTypeFocus = end($explodedNameFocus);
+				$focusMaterialName = 'ad/_____AMS_'.$orderMaterialFocus['素材識別碼'].'.'.$materialTypeFocus;
+			}
 			foreach($orderConfig as $pid=>$orderConfigData){
 				$bypostOrder[] = [
 					"transaction_id"=>$orderData["託播單識別碼"],
@@ -237,13 +245,14 @@
 					"end_datetime"=>$orderData['廣告期間結束時間'],
 					"hours"=>$orderData['廣告可被播出小時時段'],
 					"otherConfig"=>[
-						"focusImageId"=>$materialName,
+						"focusImageId"=>$focusMaterialName,
 						"unfocusImageId"=>$materialName,
 						"linkType"=>$orderConfigData['linkType'],
 						"link"=>$orderConfigData['link'],
 						"linkParameter"=>$orderConfigData['linkParameter'],
 						'material_link'=>$orderMaterial['點擊後開啟類型'],
-						'material_link_value'=>$orderMaterial['點擊後開啟位址']
+						'material_link_value'=>$orderMaterial['點擊後開啟位址'],
+						'SpEPG'=>$orderConfigData['SpEPG']
 					]
 				];
 			}

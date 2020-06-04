@@ -223,14 +223,15 @@ $( "#tabletime" ).datepicker({
 			onSelect:function() {
 				showSchedule();
 			},
-			beforeShowDay: processDates,
+			//beforeShowDay: processDates,
 			onChangeMonthYear: function(year, month, inst){
-				$.post( "../order/ajaxToDB_Order.php", { action: "查詢版位當月排程",版位識別碼:positionId,year:year,month:month}, 
+				/*$.post( "../order/ajaxToDB_Order.php", { action: "查詢版位當月排程",版位識別碼:positionId,year:year,month:month}, 
 				function(data){
 					orderDetail=data;
 					$( "#tabletime" ).datepicker( "refresh" );
 				},'json'
-				);
+				);*/
+				$( "#tabletime" ).datepicker( "refresh" );
 			}
 		});
 //為日曆上色
@@ -452,13 +453,13 @@ function showSchedule(){
 	$('#tables1,#tables2').html('');
 	
 	$.post('ajaxFunction.php',{method:'getSchedule',版位識別碼:positionId,startTime:startTime,endTime:endTime},function(json) {
-		var pName=$("#positiontype option:selected").text();
+		//var ptName=$("#positiontype option:selected").text();
 		for(var tablei in json){
 			$('#tables1').append('<div id = "TT'+tablei+'"></div>');
 			var TT;
-			if(pName=="前置廣告投放系統"){
+			if(ptName=="前置廣告投放系統"){
 				TT=new CreateTimetable_sequence('TT'+tablei,{託播單:json[tablei]});
-			}else if(pName=="首頁banner"||pName=="專區banner"||pName=="頻道short EPG banner"||pName=="專區vod"){
+			}else if(ptName=="首頁banner"||ptName=="專區banner"||ptName=="頻道short EPG banner"||ptName=="專區vod"){
 				TT=new CreateTimetable('TT'+tablei,{託播單:json[tablei],託播單代碼標題文字:'託播單識別碼/託播單CSMS群組識別碼'});
 			}
 			else{
@@ -473,11 +474,11 @@ function showSchedule(){
 			}
 		}
 		//實際排程表			
-		if(pName=="前置廣告投放系統"){
+		if(ptName=="前置廣告投放系統"){
 			//取得實際排程資料852
 			var byPost={
 				'action':"852取得排程表"
-				,'版位識別碼':版位識別碼
+				,'版位識別碼':positionId
 				,'date':startTime.split(" ")[0]
 			};
 			$.ajax({
@@ -506,11 +507,11 @@ function showSchedule(){
 				}
 			});
 		}
-		else if(pName=="首頁banner"||pName=="專區banner"||pName=="頻道short EPG banner"||pName=="專區vod"){
+		else if(ptName=="首頁banner"||ptName=="專區banner"||ptName=="頻道short EPG banner"||ptName=="專區vod"){
 			//取得實際排程資料851
 			var byPost={
 				'action':"851取得排程表"
-				,'版位識別碼':版位識別碼
+				,'版位識別碼':positionId
 				,'date':startTime.split(" ")[0]
 			};
 			$.post('ajaxToAPI.php',byPost
@@ -526,9 +527,9 @@ function showSchedule(){
 							var table2={託播單:[],'託播單代碼標題文字':'託播單CSMS群組識別碼'};//存放外廣用
 							var table3={託播單:[],'託播單代碼標題文字':'託播單CSMS群組識別碼'};//存放預設廣告用
 							for(var i in data){	
-								data[i]['版位類型名稱'] = pName;
-								data[i]['版位識別碼']=版位識別碼;
-								if(pName=="首頁banner"||pName=="專區banner"){
+								data[i]['版位類型名稱'] = ptName;
+								data[i]['版位識別碼']=positionId;
+								if(ptName=="首頁banner"||ptName=="專區banner"){
 									var status = '';
 									switch(data[i]['SCHD_STATUS']){
 										case '0':
@@ -562,7 +563,7 @@ function showSchedule(){
 									data[i]['hours'] = hours.join(',');
 								}
 								
-								else if(pName=="專區vod"){
+								else if(ptName=="專區vod"){
 									var status = '';
 									switch(data[i]['BAKADSCHD_STATUS']){
 										case '0':
@@ -591,7 +592,7 @@ function showSchedule(){
 									data[i]['hours'] = hours.join(',');
 								}
 								
-								else if(pName=="頻道short EPG banner"){
+								else if(ptName=="頻道short EPG banner"){
 									switch(data[i]['SEPG_STATUS']){
 										case '0':
 											status = '準備中';
@@ -644,7 +645,7 @@ function showSchedule(){
 								$('#tables2').append('<div id = "TT2'+tablei+'"></div>');
 								var TT2=new CreateTimetable('TT2'+tablei,tables[tablei]);
 								TT2.clickOnDataCell=function(x,y,rowNo,txId) {
-									$('#orderInfo').attr('src','../order/orderInfo.php?apiInfo=true&name='+txId+'&版位類型名稱='+pName);
+									$('#orderInfo').attr('src','../order/orderInfo.php?apiInfo=true&name='+txId+'&版位類型名稱='+ptName);
 									$( "#orderInfoDiv" ).dialog({height:$(window).height()*0.8, width:$(window).width()*0.8, title:"訂單詳細資料"});
 									$('#orderInfoDiv').dialog('open');
 								}
@@ -660,6 +661,79 @@ function showSchedule(){
 				}
 				,'json'
 			);
+		}
+		else if(ptName=="單一平台barker_vod"){
+			//取得VSM VOD廣告播放資料
+			var byPost={
+				'action':"單一平台barker_vod"
+				,'版位識別碼':positionId
+				,'date':startTime.split(" ")[0]
+			};
+			var T1data = json[0];
+			$.ajax({
+				url:'ajaxToAPI.php'
+				,data:byPost
+				,type:'POST'
+				,dataType:'json'
+				,timeout:5000
+				,success:
+				function(data){
+					if(typeof(data['Error'])!='undefined'){
+						alert(data['Error']);
+					}else{
+						$('#tables2').append('<div id = "TT2"></div>');
+						//比照取回的資訊
+						for(var T1id in T1data){
+							for(var transaction_id in data){
+								if(T1data[T1id]["託播單代碼"] == transaction_id){
+									T1data[T1id]["upTitle"]+="投放次數:"+data[transaction_id]["play_time"];
+									break;
+								}
+							}
+						}								
+						var TT2=new CreateTimetable_sequence('TT2',{託播單:T1data});
+					}
+					unMaskAll();
+				}
+				,error:function(){
+					alert('取得實際排程表失敗!');
+					unMaskAll();
+				}
+			});
+		}
+		else if(ptName=="Vod插廣告"){
+			//取得實際排程資料852
+			var byPost={
+				'action':"Vod插廣告"
+				,'版位識別碼':positionId
+				,'date':startTime.split(" ")[0]
+			};
+			$.ajax({
+				url:'ajaxToAPI.php'
+				,data:byPost
+				,type:'POST'
+				,dataType:'json'
+				,timeout:5000
+				,success:
+				function(data){
+					if(typeof(data['Error'])!='undefined'){
+						alert(data['Error']);
+					}else{
+						$('#tables2').append('<div id = "TT2"></div>');
+						var TT2=new CreateTimetable_sequence('TT2',{託播單:data});
+						TT2.clickOnDataCell=function(x,y,rowNo,txId) {
+							$('#orderInfo').attr('src','../order/orderInfo.php?apiInfo=true&name='+txId)
+							$( "#orderInfoDiv" ).dialog({height:$(window).height()*0.8, width:$(window).width()*0.8, title:"訂單詳細資料"});
+							$('#orderInfoDiv').dialog('open');
+						}
+					}
+					unMaskAll();
+				}
+				,error:function(){
+					alert('取得實際排程表失敗!');
+					unMaskAll();
+				}
+			});
 		}
 	},'json'
 	);

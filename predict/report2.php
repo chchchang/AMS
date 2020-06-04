@@ -23,6 +23,8 @@
 			$選擇平台='2';
 		else if($_POST['選擇平台']=='IAP')
 			$選擇平台='3';
+		else if($_POST['選擇平台']=='VSM')
+			$選擇平台='1';
 		else
 			$選擇平台='%';
 			
@@ -397,13 +399,12 @@
 <!DOCTYPE html>
 <html>
 <head>
-	<meta http-equiv="x-frame-options" content="sameorigin">
 	<meta http-equiv="Content-Type" content="text/html; charset=utf-8">
 	<script type="text/javascript" src="../tool/jquery-3.4.1.min.js"></script>
-	<script src="tool/jquery-ui-1.11.2.custom/jquery-ui.js"></script>
+	<script src="../tool/jquery-ui1.2/jquery-ui.js"></script>
 	<script type="text/javascript" src="tool/jquery.autocomplete.multiselect.js"></script>
 	<script type="text/javascript" src="tool/jquery-ui.multidatespicker.js"></script>
-	<link rel="stylesheet" href="<?=$SERVER_SITE.Config::PROJECT_ROOT?>predict/tool/jquery-ui-1.11.2.custom/jquery-ui.css">
+	<link rel="stylesheet" href="<?=$SERVER_SITE.Config::PROJECT_ROOT?>tool/jquery-ui1.2/jquery-ui.css">
 	<link rel="stylesheet" href="<?=$SERVER_SITE.Config::PROJECT_ROOT?>predict/css/normalize.min.css">
 	<link rel="stylesheet" href="<?=$SERVER_SITE.Config::PROJECT_ROOT?>predict/css/main.css">
 	<style id="antiClickjack">body{display:none !important;}</style>
@@ -533,9 +534,10 @@
 			<legend>報表選項</legend>
 			<div>選擇平台:<br>
 			<select id = '選擇平台'>
-				<option value = 'OMP+IAP'>OMP+IAP</option>
+				<option value = '全平台'>ALL</option>
 				<option value = 'OMP'>OMP</option>
 				<option value = 'IAP'>IAP</option>
+				<option value = 'VSM'>單一平台</option>
 			<select>
 			</div>
 			<br>

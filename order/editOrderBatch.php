@@ -795,7 +795,19 @@
 						el.autocomplete({
 							source :function( request, response,data) {
 										var order = el.attr('order');
-										if($("#點擊後開啟類型"+order).hasClass('VSM'))
+										if( $("#點擊後開啟類型"+order).val()=="OVA_SERVICE"){
+											$.post( "../order/autoComplete_forTVDM.php",{term: request.term, target: "OMP"},
+												function( data ) {
+												response(JSON.parse(data));
+											});
+										}
+										else if($("#點擊後開啟類型"+order).val()=="external"){
+											$.post( "../order/autoComplete_forTVDM.php",{term: request.term, target: "VSM"},
+												function( data ) {
+												response(JSON.parse(data));
+											});
+										}
+										else if($("#點擊後開啟類型"+order).hasClass('VSM'))
 										$.post( "../VSM/vsmLinkValueSelector/autoComplete_forVSMLink.php",{term: request.term, linkType: $("#點擊後開啟類型"+order).val()},
 											function( data ) {
 											response(JSON.parse(data));

@@ -62,6 +62,9 @@
 			'VSM'=>array(
 				//array('host'=>'10.144.200.141','username'=>'spscc','password'=>'spscc853','圖片素材路徑'=>'www/images/ad/','背景圖素材路徑'=>'www/images/ad/')
 				array('host'=>'localhost','username'=>'ams','password'=>'','圖片素材路徑'=>'www/images/ad/','背景圖素材路徑'=>'www/images/ad/')
+			),
+			'IAB'=>array(
+				array('host'=>'172.17.254.152','username'=>'ams','password'=>'smasmasma@3F','awaiting'=>'upload/SepgSpMD/awaiting/','complete'=>'upload/SepgSpMD/complete/')
 			)
 		);
 		

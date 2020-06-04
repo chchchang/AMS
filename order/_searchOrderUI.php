@@ -58,7 +58,7 @@
 			}
 		}).autocomplete({
 			source :function( request, response) {
-						$.post( "../order/autoComplete_forOrderSearchBox.php",{term: request.term, method:'託播單查詢'},
+						$.post( "../order/autoComplete_forSearchBox.php",{term: request.term, method:'searchText'},
 							function( data ) {
 							response(JSON.parse(data));
 						})

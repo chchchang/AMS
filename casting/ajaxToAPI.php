@@ -17,6 +17,9 @@
 			case "單一平台barker_vod":
 				getSchedule_VSM_barker();
 				break;
+			case "Vod插廣告":
+				getSchedule_VodAds();
+				break;
 		}
 	}
 	
@@ -281,5 +284,113 @@
 			exit(json_encode(array("Error"=>'無法連接單一平台API'),JSON_UNESCAPED_UNICODE));	
 		}
 		exit ($apiResult);
+	}
+	
+	function getSchedule_VodAds(){
+		global $logger, $my;
+		$url = Config::GET_API_SERVER_852_VOD_AD()."/mod/ads/api/vod";
+		//取得版位的ext設訂
+		//版位參數
+		$sql = "SELECT 版位其他參數名稱,版位其他參數預設值 
+		FROM 版位其他參數,版位
+		WHERE 版位.版位識別碼=? AND 版位.上層版位識別碼 = 版位其他參數.版位識別碼 AND 是否版位專用 = 1";
+		$res = $my->getResultArray($sql,'i',$_POST['版位識別碼']);
+		foreach($res as $row){
+			$options[$row['版位其他參數名稱']]=$row['版位其他參數預設值'];
+		}
+		$sql = "SELECT 版位其他參數名稱,版位其他參數預設值 
+		FROM 版位其他參數
+		WHERE 版位識別碼=? AND 是否版位專用 = 1";
+		if(!$res = $my->getResultArray($sql,'i',$_POST['版位識別碼']))$res = [];
+		foreach($res as $row){
+			$options[$row['版位其他參數名稱']]=$row['版位其他參數預設值'];
+		}
+		
+		
+		$byPost=array('ext'=>$options['ext'],'ams_sid'=>$_POST['版位識別碼'],'start'=>$_POST['date'].' 00:00:00','end'=>$_POST['date'].' 23:59:59');
+		$postvars = http_build_query($byPost);
+		// 建立CURL連線
+		if(!$apiResult=connec_to_Api($url,$postvars)){
+			$logger->error('無法連接VOD插廣告系統API');
+			exit(json_encode(array("Error"=>'無法連接前置廣告投放系統'),JSON_UNESCAPED_UNICODE));	
+		}
+		
+		$result = json_decode($apiResult, true);
+		//exit(json_encode(array('bypost'=>$byPost,'result'=>$apiResult,JSON_UNESCAPED_UNICODE)));
+		if($result['code']!=200){
+			$logger->error('VOD插廣告系統API錯誤:'.$apiResult);
+			exit(json_encode(array('Error'=>'API錯誤'.$result['status']),JSON_UNESCAPED_UNICODE));
+		}
+		//產生排程顯示用資料
+		$feedback=array();
+		foreach($result['vod'] as $vod){
+			//if($vod["mark"]!=0){
+				$playTimeSum = (intval($vod['back'])+intval($vod['finish']));
+				$tempArry=array();//產生timetable用
+				$tempArry['託播單代碼'] = $vod['ams_vid'];
+				$tempArry['upTitle'] = '['.$vod['title'].']  ['.$vod['starttime'].'~'.$vod['endtime'].'] 沒看完次數:'.$vod['back'].' 看完次數:'.$vod['finish'].' 已播放'.$playTimeSum
+										.' 按讚次數:'.$vod['likes'].' 排序'.$vod['sort']
+										.' 總次數:'.$playTimeSum
+										;
+				$sTime = explode(' ',$vod['starttime']);
+				$eTime = explode(' ',$vod['endtime']);
+				//當日大於開始日期
+				if($_POST['date']>$sTime[0]){
+					//當日在開始結束日期內
+					if($_POST['date']<$eTime[0]){
+						$tempArry['hours'] = array(1,2,3,4,5,6,7,8,9,10,11,12,13,14,15,16,17,18,19,20,21,22,23);
+						$tempArry['startTime'] = '00:00:00';
+						$tempArry['endTime'] = '23:59:59';
+						array_push($feedback,$tempArry);
+					}//結束日期等於當日
+					else if($_POST['date']==$eTime[0]&&$eTime[1]!='00:00:00'){
+						$time=explode(":",$eTime[1]);
+						$hours=array();
+						for($i=0;$i<intval($time[0]);$i++){
+							$hours[]=$i;
+						}
+						if($time[1]!='00'&&$time[2]!='00')
+							$hours[]=intval($time[0]);
+						$tempArry['hours'] = $hours;
+						$tempArry['startTime'] = '00:00:00';
+						$tempArry['endTime'] = $eTime[1];
+						array_push($feedback,$tempArry);
+					}
+				}
+				//當日等於開始日期
+				else if($_POST['date']==$sTime[0]){
+					//結束日大等於當日日
+					if($eTime[0]>$_POST['date']){
+						$time=explode(":",$sTime[1]);
+						$hours=array();
+						for($i=intval($time[0]);$i<24;$i++){
+							$hours[]=$i;
+						}
+						$tempArry['hours'] = $hours;
+						$tempArry['startTime'] = $sTime[1];
+						$tempArry['endTime'] = '23:59:59';
+						array_push($feedback,$tempArry);
+					}
+					//結束日期與開始日期都等於當日
+					else if($eTime[0]=$_POST['date']){
+						$time=explode(":",$sTime[1]);
+						$time2=explode(":",$eTime[1]);
+						$hours=array();
+						for($i=intval($time[0]);$i<intval($time2[0]);$i++){
+							$hours[]=$i;
+						}
+						if($time2[1]!='00'&&$time2[2]!='00')
+							$hours[]=intval($time2[0]);
+						$tempArry['hours'] = $hours;
+						$tempArry['startTime'] = $sTime[1];
+						$tempArry['endTime'] = $eTime[1];
+						array_push($feedback,$tempArry);
+					}
+				}
+				
+			//}
+		}
+
+		exit (json_encode($feedback,JSON_UNESCAPED_UNICODE));
 	}
 ?>

@@ -31,13 +31,13 @@
 	<thead>
 		<tr>
 			<th>MD</th>
-			<th>是否啟用</th>
+			<th>是否停用</th>
 		</tr>
 	</thead>
 	<tfoot>
 		<tr>
 			<th>MD</th>
-			<th>是否啟用</th>
+			<th>是否停用</th>
 		</tr>
 	</tfoot>
 </table>
@@ -48,7 +48,7 @@
 		<label for="MD">MD:</label>
 		<input type="text" name="MD" id="MD" class="text ui-widget-content ui-corner-all">
 		<hr>
-		<label for="status">是否啟用:</label>
+		<label for="status">是否停用:</label>
 		<input type="checkbox" name="status" id="status" value="enable" class="ui-corner-all">
 		<hr>
     </fieldset>
@@ -62,6 +62,7 @@ var ajaxDbUrl = "ajax_epg_banner_playing_device.php";
  
 $(document).ready(function() {
 	 var dialog, form;    
+	$( "#status" ).prop( "disabled", true );
 	//讀取table資料
     var table = $('#example').DataTable( {
         lengthChange: false,
@@ -90,7 +91,7 @@ $(document).ready(function() {
 	//新增按鈕
 	$("#newBtn").click(function(){
 		$( "#MD" ).prop( "disabled", false );
-		$('#status').prop('checked', false);
+		$('#status').prop('checked', true);
 		dialog.dialog('option', 'title', '新增MD授權資訊');
 		dialog.dialog('option', 'buttons',
 			{
@@ -108,10 +109,10 @@ $(document).ready(function() {
 		if(selectedRows.length!=0){
 			var selectedRow = selectedRows[0];
 			$('#MD').val(selectedRow['MD']);
-			if(selectedRow['status']=="啟用")
-				$('#status').prop('checked', true);
-			else
+			if(selectedRow['status']=="停用")
 				$('#status').prop('checked', false);
+			else
+				$('#status').prop('checked', true);
 
 			dialog.dialog('option', 'title', '修改MD授權資訊');
 			dialog.dialog('option', 'buttons',
@@ -164,7 +165,7 @@ $(document).ready(function() {
 	function addMD() {
 		var postData = {
 			'MD':$('#MD').val(),
-			'status':($('#status').is(":checked")?1:0)
+			'status':($('#status').is(":checked")?0:1)
 		}
 		$.post(ajaxDbUrl,{"action":"updateMdAuth","data":postData},
 			function(result){

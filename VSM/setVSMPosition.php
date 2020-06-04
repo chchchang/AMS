@@ -283,8 +283,9 @@
 		}
 		else{
 			//banner
-			$sql='INSERT INTO 版位素材類型 (版位識別碼,素材順序,素材類型識別碼,託播單素材是否必填,影片畫質識別碼,CREATED_PEOPLE)'
-			.' VALUES ('.$ptid.',1,2,0,1,1)'
+			$sql='INSERT INTO 版位素材類型 (版位識別碼,素材順序,顯示名稱,素材類型識別碼,託播單素材是否必填,影片畫質識別碼,CREATED_PEOPLE)'
+			.' VALUES ('.$ptid.',1,"圖片",2,0,1,1)'
+			.',  ('.$ptid.',2,"展開圖片",2,0,1,1)'
 			;
 			if(!$stmt=$my->prepare($sql)) {
 				exit('錯誤代碼('.$my->errno.')、錯誤訊息('.$my->error.')。');
@@ -319,6 +320,7 @@
 		.',  ('.$ptid.',6,"link","link",1,1,0,"",1)'
 		.',  ('.$ptid.',7,"linkParameter","linkParameter",1,1,0,"",1)'
 		.',  ('.$ptid.',8,"channel_number","channel_number",1,1,1,"",1)'
+		.',  ('.$ptid.',9,"白名單EPG","SpEPG",3,1,0,0,1)'
 		;
 		if(!$stmt=$my->prepare($sql)) {
 			exit('錯誤代碼('.$my->errno.')、錯誤訊息('.$my->error.')。');

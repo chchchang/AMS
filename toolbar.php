@@ -102,6 +102,8 @@
 	<li id="other/vastUrlManagement.php">聯播網廣告來源管理</li>
 	<li id="other/shortEPGBannerLimitManagement.php">EPG Banner投放上限設定</li>
 	<li id="VSM/epgBannerAuth/managementPage.php">單一平台EPG Banner撥放權限管理</li>
+	<li id="other/VSM/epgBannerSpMd/managementPage.php">單一平台EPG白名單匯入管理</li>
+	<li id="other/TVDM/managementPage.php">TVDM服務管理</li>
 	</ul>
 </li>
 

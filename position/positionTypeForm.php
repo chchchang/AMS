@@ -270,13 +270,13 @@ function showVal(json){
 		for(var i in json.materialArray){
 			materialTypeEdit(json.materialArray[i]);
 			var $li = $('.materialType').eq(json.materialArray[i].素材順序-1);
-			$li.removeClass('ui-state-disabled');
+			$li.children('a').removeClass('ui-state-disabled');
 			$li.find('input:checkbox').prop('checked',true);
 		}
 		for(var i in json.configArray){
 			otherConfigEdit(json.configArray[i]);
 			var $li = $('.otherConfig').eq(json.configArray[i].版位其他參數順序-1);
-			$li.removeClass('ui-state-disabled');
+			$li.children('a').removeClass('ui-state-disabled');
 			$li.find('input:checkbox').prop('checked',true);
 		}
 	}
@@ -417,21 +417,23 @@ var materialArray_parent =[];
 function materialTypeAdd(jobject,disable){
 	jobject.素材順序=materialArray.length+1;
 	var $li = $("<li class='ui-state-default materialType'/>");
+	$c=$('<a/>')
 	if(disable){
 		var $cbox = $('<input type = "checkbox">');
 		$cbox.change(function(){
 			if(this.checked) {
-				$(this).parent().removeClass('ui-state-disabled');
+				$(this).siblings('a').removeClass('ui-state-disabled');
 			}
 			else{
-				$(this).parent().addClass('ui-state-disabled');
+				$(this).siblings('a').addClass('ui-state-disabled');
 				materialTypeEdit(materialArray_parent[$(this).parent().index()]);
 			}
 		});
-		$li.addClass('ui-state-disabled').append($cbox);
+		$li.append($cbox);
+		$c.addClass('ui-state-disabled');
 	};
 
-	$c=$('<a/>')
+
 	$c.append(jobject.顯示名稱+' ');
 	if(jobject.是否必填==1){
 		$c.append('必填 ');
@@ -468,7 +470,7 @@ function materialTypeAdd(jobject,disable){
 		for(var i =0; i <materialArray.length;i++){
 			if(materialArray[i].素材順序 == order){
 				var data = 'materialArray['+i+']';
-				if($(this).parent().hasClass('ui-state-disabled')){
+				if($(this).siblings('a').hasClass('ui-state-disabled')){
 					data = 'materialArray_parent['+i+']';
 				}
 				
@@ -476,7 +478,7 @@ function materialTypeAdd(jobject,disable){
 					$('#dialogIframe').attr('src','materialType.php?action=info&data='+data);
 				else{
 					if(limitedEdit){
-						if($(this).parent().hasClass('ui-state-disabled'))
+						if($(this).siblings('a').hasClass('ui-state-disabled'))
 						$('#dialogIframe').attr('src','materialType.php?action=info&data='+data);
 						else
 						$('#dialogIframe').attr('src','materialType.php?action=limitedEdit&data='+data);
@@ -534,23 +536,24 @@ var configArray_parent =[];
 function otherConfigAdd(jobject,disable){
 	jobject.版位其他參數順序=configArray.length+1;
 	var $li = $("<li class='ui-state-default otherConfig'/>");
-	if(disable)
-		$li = $("<li class='ui-state-default ui-state-disabled otherConfig'/>");
+	
 	$li.attr('index',configArray.length);
+	$c=$('<a/>');
 	if(disable){
 		var $cbox = $('<input type = "checkbox">');
 		$cbox.change(function(){
 			if(this.checked) {
-				$(this).parent().removeClass('ui-state-disabled');
+				$(this).siblings('a').removeClass('ui-state-disabled');
 			}
 			else{
-				$(this).parent().addClass('ui-state-disabled');
+				$(this).siblings('a').addClass('ui-state-disabled');
 				otherConfigEdit(configArray_parent[$(this).parent().index()]);
 			}
 		});
-		$li.addClass('ui-state-disabled').append($cbox);
+		$li.append($cbox);
+		$c.addClass('ui-state-disabled');
 	};
-	$c=$('<a/>');
+	
 	if(jobject.是否版位專用==1){
 		$c.append('版位專用 ');
 	}else{
@@ -566,7 +569,7 @@ function otherConfigAdd(jobject,disable){
 		for(var i =0; i <configArray.length;i++){
 			if(configArray[i].版位其他參數順序 == order){
 				var data = 'configArray['+i+']';
-				if($(this).parent().hasClass('ui-state-disabled')){
+				if($(this).siblings('a').hasClass('ui-state-disabled')){
 					data = 'configArray_parent['+i+']';
 				}
 				
@@ -574,7 +577,7 @@ function otherConfigAdd(jobject,disable){
 					$('#dialogIframe').attr('src','otherConfig.php?action=info&data='+data);
 				else{
 					if(limitedEdit){
-						if($(this).parent().hasClass('ui-state-disabled'))
+						if($(this).siblings('a').hasClass('ui-state-disabled'))
 						$('#dialogIframe').attr('src','otherConfig.php?action=info&data='+data);
 						else
 						$('#dialogIframe').attr('src','otherConfig.php?action=limitedEdit&data='+data);
