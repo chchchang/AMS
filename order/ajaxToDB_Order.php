@@ -516,7 +516,10 @@
 		$sql="SELECT 版位名稱 FROM 版位 WHERE 版位識別碼=? AND DISABLE_TIME IS NULL AND DELETED_TIME IS NULL ";
 		
 		$PTN = $my->getResultArray($sql,'i',isset($_POST["版位類型識別碼"])?$_POST["版位類型識別碼"]:0);
-		$PTN =$PTN[0]['版位名稱'];
+		if(count($PTN)!=0)
+			$PTN =$PTN[0]['版位名稱'];
+		else
+			$PTN="";
 		
 		$sql="SELECT 版位識別碼,版位名稱 FROM 版位 WHERE 上層版位識別碼=? AND DISABLE_TIME IS NULL AND DELETED_TIME IS NULL ";
 		if($PTN == '頻道short EPG banner')
@@ -1444,11 +1447,14 @@
 								WHERE 託播單.託播單識別碼 = 託播單素材.託播單識別碼 AND 版位.版位識別碼 = 託播單.版位識別碼 AND 版位類型.版位識別碼 = 版位.上層版位識別碼 
 								AND 版位.版位名稱 LIKE ? AND  素材識別碼 = ? AND 託播單CSMS群組識別碼 != ? AND 託播單狀態識別碼 IN (0,1,2,3,4)'
 								.(count($OrderIdsGourpByMaterial[$mid][$area])>0?(' AND 託播單.託播單識別碼 NOT IN ('.implode(',',$OrderIdsGourpByMaterial[$mid][$area]).')'):'');
-						$compareOrder[$area] = $my->getResultArray($sql,'sis','%'.$area,$mid,$order['託播單CSMS群組識別碼'])[0];
+						if(!$compareResult=$my->getResultArray($sql,'sis','%'.$area,$mid,$order['託播單CSMS群組識別碼'])) 
+							$compareOrder[$area]=array();
+						else 
+							$compareOrder[$area] = $compareResult[0];
 					}
 					
 					//資料庫中沒有使用同素材的託播單
-					if(!isset($compareOrder[$area])){
+					if(count($compareOrder[$area])==0){
 						continue;
 					}
 					//檢查是否跨SEPG與其他banner使用素材

@@ -81,6 +81,14 @@
 			$materialType = end($fileNamePatterns);
 			$materialName = 'ad/_____AMS_'.$orderMaterial['素材識別碼'].'.'.$materialType;
 			foreach($orderConfig as $pid=>$orderConfigData){
+				if($orderMaterial['點擊後開啟類型'] == "netflixPage"){
+					if($material_link_value == ""){
+						$orderMaterial['點擊後開啟位址'] = "com.netflix.ninja:/http://www.netflix.com/browse?iid=".$orderConfigData["specific_iid"];
+					}
+					else
+						$orderMaterial['點擊後開啟位址'] = "com.netflix.ninja:/http://www.netflix.com/watch/".$material_link_value."?iid=".$orderConfigData["specific_iid"];
+					$orderMaterial['點擊後開啟類型'] = "app";
+				}
 				$bypostOrder[] = [
 					"transaction_id"=>$orderData["託播單識別碼"],
 					"mat_type_id"=>$orderConfigData['mat_type_id'],
@@ -312,6 +320,7 @@
 			$orderMaterials=$my->getResultArray($sql,'i',$orderId);
 			$materialName = "";
 			$thumbNailName = "";
+			$thumbNailContexName="";
 			foreach($orderMaterials as $orderMaterial){
 				$explodedName = explode('.',$orderMaterial['素材原始檔名']);
 				$materialType = end($explodedName);
@@ -382,6 +391,14 @@
 						$Materials["imageId"] = $materialName;
 						$material_link = $om["點擊後開啟類型"];
 						$material_link_value = $om["點擊後開啟位址"];
+						if($material_link == "netflixPage"){
+							if($material_link_value == ""){
+								$material_link_value = "com.netflix.ninja:/http://www.netflix.com/browse?iid=".$orderConfigData["specific_iid"];
+							}
+							else
+								$material_link_value = "com.netflix.ninja:/http://www.netflix.com/watch/".$material_link_value."?iid=".$orderConfigData["specific_iid"];
+							$material_link = "app";
+						}
 					}
 					if($om["素材類型識別碼"]==3){
 						if($om["影片畫質識別碼"]==null){

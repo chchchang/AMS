@@ -36,6 +36,7 @@
 			$logger->error('無法取得結果集，錯誤代碼('.$stmt->errno.')、錯誤訊息('.$stmt->error.')。');
 			exit(json_encode(array("dbError"=>'無法取得結果集，請聯絡系統管理員！'),JSON_UNESCAPED_UNICODE));
 		}
+		$result = array();
 		while($row = $res->fetch_array()){
 			foreach($row as $value){
 				if($value!=null&&$value!='')

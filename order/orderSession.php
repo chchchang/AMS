@@ -42,7 +42,7 @@ if(isset($_POST['saveEditList'])){
 		
 		//待更新的託播單
 		if(isset($saveEditList['edit'])){
-			if(!$_SESSION['AMS']['saveEditList']['edit'])
+			if(!isset($_SESSION['AMS']['saveEditList']['edit']))
 				$_SESSION['AMS']['saveEditList']['edit']=[];
 			
 			foreach($saveEditList['edit'] as $key=>$value){

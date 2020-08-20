@@ -179,7 +179,7 @@
 <head>
 <meta charset="utf-8">
 
-<script type="text/javascript" src="../tool/jquery-1.11.1.js"></script>
+<script type="text/javascript" src="../tool/jquery-3.4.1.min.js"></script>
 <script src="../tool/jquery-ui1.2/jquery-ui.js"></script>
 <script src="../tool/jquery-ui1.2/jquery-ui-timepicker-addon.js" type="text/javascript"></script>
 <script src="../tool/jquery-ui1.2/jquery-ui-sliderAccess.js" type="text/javascript"></script>
@@ -531,6 +531,8 @@
 		$('#configTbody,#materialTbody').empty();
 		otherConfigObj = {};
 		materialObj = {};
+		//20200804 有被選擇的託播單才執行以下行為
+		if(selectedOrder.length>0){
 		var promise = $.ajax({
 			async: false,
 			type : "POST",
@@ -749,11 +751,23 @@
 							.append($('<option value="Vod">Vod</option>'))
 							.append($('<option value="VODPoster">VODPoster</option>'))
 							.append($('<option value="Channel">Channel</option>'))
-							.append($('<option value="coverImageIdV">SEPG直向覆蓋圖片</option>'))
-							.append($('<option value="coverImageIdH">SEPG橫向覆蓋圖片</option>'))
 							.appendTo($tr).change(function(){
 								materialObj[$(this).attr('order')]['點擊後開啟類型'] = $(this).val();
 							}).val('NONE')
+							switch(json.版位類型名稱){
+								case "單一平台EPG":
+									$("#點擊後開啟類型"+i)
+									.append($('<option value="coverImageIdV">SEPG直向覆蓋圖片</option>'))
+									.append($('<option value="coverImageIdH">SEPG橫向覆蓋圖片</option>'))
+								break;
+								
+								case "單一平台advertising_page":
+								case "單一平台banner":
+									$("#點擊後開啟類型"+i)
+									.append($('<option value="netflixPage">NETFLIX</option>'))
+								break;
+							}
+							
 						}
 						else{
 							$('<select order='+i+' id="點擊後開啟類型'+i+'" class="linkType"/>')
@@ -856,6 +870,7 @@
 				$.getScript("newOrder_SEPGBanner_cover_extend.js");
 			}
 		)
+		}
 	}
 	function getObjectForSetConnectOrder(){
 		var re  ={

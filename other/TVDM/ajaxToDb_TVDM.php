@@ -70,7 +70,8 @@
 			$sql = $presql." (?,?,?,?,?,NOW(),?)";
 			//檢查暫存檔案是否存在，不存在不更新素材遠端url位置
 			$murl = $material["URL連結"];
-			$filetype =end(explode('.',$material["上傳原始檔名"]));
+			$temp = explode('.',$material["上傳原始檔名"]);
+			$filetype =end($temp);
 			$tempFile = "tempFile/".$_SESSION['AMS']['使用者識別碼']."/".$material["countid"].".".$filetype;
 			if(file_exists ( $tempFile )){
 				$newFile = $_POST["TVDM識別碼"]."hd_".$material["順序"].'.'.$filetype;
@@ -86,7 +87,8 @@
 			$sql = $presql." (?,?,?,?,?,NOW(),?)";
 			//檢查暫存檔案是否存在，不存在不更新素材遠端url位置
 			$murl = $material["URL連結"];
-			$filetype =end(explode('.',$material["上傳原始檔名"]));
+			$temp = explode('.',$material["上傳原始檔名"]);
+			$filetype =end($temp);
 			$tempFile = "tempFile/".$_SESSION['AMS']['使用者識別碼']."/".$material["countid"].".".$filetype;
 			if(file_exists ( $tempFile )){
 				$newFile = $_POST["TVDM識別碼"]."sd_".$material["順序"].'.'.$filetype;

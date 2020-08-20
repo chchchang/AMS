@@ -44,7 +44,7 @@
      * @returns {$.tokenize}
      */
     var getObject = function(options, el){
-
+					
         if(!el.data(DATA)){
             var obj = new $.tokenize($.extend({}, $.fn.tokenize.defaults, options));
             el.data(DATA, obj);
@@ -77,7 +77,6 @@
          * @param {jQuery} el jQuery object of the select
          */
         init: function(el){
-
             var $this = this;
             this.select = el.attr('multiple', 'multiple').css({margin: 0, padding: 0, border: 0}).hide();
 
@@ -582,7 +581,7 @@
          * @return {$.tokenize}
          */
         tokenAdd: function(value, text, first){
-
+			
             value = this.escape(value);
 
             if(value == undefined || value == ''){
@@ -794,9 +793,9 @@
     $.fn.tokenize = function(options){
 
         options = options || {};
-
+		
         var selector = this.filter('select');
-
+		
         if(selector.length > 1){
             var objects = [];
             selector.each(function(){

@@ -123,7 +123,7 @@
 <?php
 	include('../tool/sameOriginXfsBlock.php');
 ?>
-<script type="text/javascript" src="../tool/jquery-1.11.1.js"></script>
+<script type="text/javascript" src="../tool/jquery-3.4.1.min.js"></script>
 <script src="../tool/jquery-ui1.2/jquery-ui.js"></script>
 <script src="../tool/jquery-ui1.2/jquery-ui-timepicker-addon.js" type="text/javascript"></script>
 <script src="../tool/jquery-ui1.2/jquery-ui-sliderAccess.js" type="text/javascript"></script>

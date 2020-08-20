@@ -386,12 +386,25 @@
 								.append($('<option value="Vod">Vod</option>'))
 								.append($('<option value="VODPoster">VODPoster</option>'))
 								.append($('<option value="Channel">Channel</option>'))
-								.append($('<option value="coverImageIdV">SEPG直向覆蓋圖片</option>'))
-								.append($('<option value="coverImageIdH">SEPG橫向覆蓋圖片</option>'))
-								.appendTo($tr).change(function(){
+								.change(function(){
 									materialObj[$(this).attr('order')]['點擊後開啟類型'] = $(this).val();
 								}).val('NONE')
 							).appendTo($tr)
+							
+							switch(ptn){
+								case "單一平台EPG":
+									$tr.find("#點擊後開啟類型"+i)
+									.append($('<option value="coverImageIdV">SEPG直向覆蓋圖片</option>'))
+									.append($('<option value="coverImageIdH">SEPG橫向覆蓋圖片</option>'));
+									console.log($("#點擊後開啟類型"+i).val());
+								break;
+								
+								case "單一平台advertising_page":
+								case "單一平台banner":
+									$tr.find("#點擊後開啟類型"+i)
+									.append($('<option value="netflixPage">NETFLIX</option>'))
+								break;
+							}
 						}
 						else{
 						$('<td/>').append(
@@ -805,7 +818,7 @@
 			initialPositionSetting(positionTypeId);
 			$("#csmsGroupID").text((typeof(jdata.託播單CSMS群組識別碼)!='undefined'&&jdata.託播單CSMS群組識別碼!=null)?jdata.託播單CSMS群組識別碼:'');
 			//**多選
-			if ($('#position').val()==null){
+			if ($('#position').val()==null || $('#position').val().length == 0){
 				if($.isArray(jdata["版位識別碼"]))
 					setPosition(jdata["版位類型識別碼"],jdata["版位識別碼"]);
 				else

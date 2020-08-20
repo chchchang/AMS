@@ -473,7 +473,7 @@
 	include('../tool/sameOriginXfsBlock.php');
 ?>
 
-<script type="text/javascript" src="../tool/jquery-1.11.1.js"></script>
+<script type="text/javascript" src="../tool/jquery-3.4.1.min.js"></script>
 <link rel="stylesheet" href="<?=$SERVER_SITE.Config::PROJECT_ROOT?>tool/jquery-ui1.2/jquery-ui.css">
 <script src="../tool/jquery-ui1.2/jquery-ui.js"></script>
 <link href="<?=$SERVER_SITE.Config::PROJECT_ROOT?>tool/jquery-ui1.2/jquery-ui-timepicker-addon.css" rel="stylesheet"></link>
@@ -830,7 +830,7 @@
 		var EndDate= $("#EndDate").val();
 		
 		//**多選
-		if (!$.isArray($('#position').val())||$('#position').val().length==0){
+		if (!$.isArray($('#position').val()) || $('#position').val().length==0){
 			alert('請至少選擇一個版位');
 			return 0;
 		}

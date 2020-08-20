@@ -316,7 +316,7 @@
 <?php
 	include('../tool/sameOriginXfsBlock.php');
 ?>
-<script type="text/javascript" src="../tool/jquery-1.11.1.js"></script>
+<script type="text/javascript" src="../tool/jquery-3.4.1.min.js"></script>
 <script src="../tool/jquery-ui1.2/jquery-ui.js"></script>
 <script type="text/javascript" src="../tool/jquery-plugin/jquery.tokenize.js"></script>
 <script type="text/javascript" src="../tool/datagrid/CDataGrid.js"></script>
@@ -498,7 +498,7 @@
 	
 	//CSMS設定視窗的完成按鈕
 	$('#csmsGroupSubmit').click(function(){
-		if($('#positions').val() == null){
+		if($('#positions').val() == null || $('#positions').val().length==0){
 			alert('CSMS群組中須至少有一個頻道');
 			return 0;
 		}

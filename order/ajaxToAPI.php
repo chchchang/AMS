@@ -106,6 +106,7 @@
 		$failArray = array();
 		$groupArray = array();
 		$singleArray = array();
+		if(isset($_POST['selectedOrder']))
 		foreach($_POST['selectedOrder'] as $id){
 			if(!isset($_POST['ignoreMaterialChecking']) || $_POST['ignoreMaterialChecking']== false){
 				$mcheckRes = m_chckMaterial($id);

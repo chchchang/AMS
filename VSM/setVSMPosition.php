@@ -1,4 +1,7 @@
 <?php
+	/****
+	更新從VSM撈取最新版位資訊並更新
+	*****/
 	header("Content-Type:text/html; charset=utf-8");
 	require_once '../tool/MyLogger.php';
 	require_once '../tool/MyDB.php';
@@ -164,6 +167,7 @@
 			.',  ('.$ptid.',5,"linkType","linkType",1,1,0,"",1)'
 			.',  ('.$ptid.',6,"link","link",1,1,0,"",1)'
 			.',  ('.$ptid.',7,"linkParameter","linkParameter",1,1,0,"",1)'
+			.',  ('.$ptid.',8,"netflixId","specific_iid",1,1,1,"",1)'
 			;
 
 		}
@@ -227,6 +231,7 @@
 			.',  ('.$ptid.',9,"成人內容","isAdult",3,0,0,0,1)'
 			.',  ('.$ptid.',10,"影片url","url",1,1,1,"rtsp://172.17.188.35:5004/asset/vscontsrv%3a",1)'
 			.',  ('.$ptid.',11,"weight","weight",1,1,0,"1",1)'
+			.',  ('.$ptid.',12,"netflixId","specific_iid",1,1,1,"",1)'
 			;
 		}
 		else{
@@ -357,7 +362,7 @@
 			echo '版位建立完成，ID'.$pid.'<br>';
 		}
 		//建立版位類型其他參數
-		$sql='DELETE FROM 版位其他參數 WHERE 版位識別碼=?';
+		$sql='DELETE FROM 版位其他參數 WHERE 版位識別碼=? AND 版位其他參數順序 IN (1,2,3)';
 		
 		if(!$stmt=$my->prepare($sql)) {
 			exit('錯誤代碼('.$my->errno.')、錯誤訊息('.$my->error.')。');
