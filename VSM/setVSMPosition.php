@@ -201,10 +201,11 @@
 			.' VALUES ('.$ptid.',1,"mat_type_id","mat_type_id",1,1,1,?,1)'
 			.',  ('.$ptid.',2,"srv_category_id","srv_category_id",1,1,1,-1,1)'
 			.',  ('.$ptid.',3,"group_name","group_name",1,1,1,?,1)'
-			.',  ('.$ptid.',4,"weight","weight",2,1,0,1,1)'
+			.',  ('.$ptid.',4,"weight","weight",2,1,0,90,1)'
 			.',  ('.$ptid.',5,"linkType","linkType",1,1,0,"",1)'
 			.',  ('.$ptid.',6,"link","link",1,1,0,"",1)'
 			.',  ('.$ptid.',7,"linkParameter","linkParameter",1,1,0,"",1)'
+			.',  ('.$ptid.',8,"顯示頻率","frequence",2,1,0,1,1)'
 			;
 		}
 		//background_banner

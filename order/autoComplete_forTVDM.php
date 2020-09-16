@@ -18,6 +18,10 @@
 	if(isset($_POST['term'])){
 		$term = "%".$_POST['term']."%";
 		$sql="SELECT TVDM識別碼 FROM TVDM廣告服務 WHERE TVDM識別碼 LIKE ?";
+		
+		if($_POST["target"] == "OMP")
+			$sql="SELECT 點擊後開啟位址 FROM 託播單素材 WHERE 點擊後開啟位址 LIKE ? AND 點擊後開啟類型 = 'OVA_SERVICE'";
+		
 		if(!$stmt=$my->prepare($sql)) {
 			$logger->error('無法準備statement，錯誤代碼('.$my->errno.')、錯誤訊息('.$my->error.')。');
 			exit(json_encode(array("dbError"=>'無法準備statement，請聯絡系統管理員！'),JSON_UNESCAPED_UNICODE));
@@ -44,7 +48,7 @@
 					$url = "";
 					switch($_POST["target"]){
 						case "OMP" :
-							$url = "TVDM_".$value;
+							$url = $value;
 						break;
 						case "VSM" :
 							$url = Config_TVDM::GET_IAP_HD_URL($value);

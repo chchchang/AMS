@@ -32,7 +32,7 @@ if(isset($_POST['saveEditList'])){
 		
 		//待刪除的託單
 		if(isset($saveEditList['delete'])){
-			if(!$_SESSION['AMS']['saveEditList']['delete'])
+			if(!isset($_SESSION['AMS']['saveEditList']['delete']))
 				$_SESSION['AMS']['saveEditList']['delete']=[];
 			
 			foreach($saveEditList['delete'] as $key=>$value){

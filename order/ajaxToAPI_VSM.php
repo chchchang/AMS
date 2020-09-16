@@ -80,6 +80,7 @@
 			$fileNamePatterns= explode('.',$orderMaterial['素材原始檔名']);
 			$materialType = end($fileNamePatterns);
 			$materialName = 'ad/_____AMS_'.$orderMaterial['素材識別碼'].'.'.$materialType;
+			$material_link_value = "";
 			foreach($orderConfig as $pid=>$orderConfigData){
 				if($orderMaterial['點擊後開啟類型'] == "netflixPage"){
 					if($material_link_value == ""){
@@ -297,6 +298,7 @@
 						"link"=>$orderConfigData['link'],
 						"linkParameter"=>$orderConfigData['linkParameter'],
 						"weight"=>$orderConfigData['weight'],
+						"frequence"=>$orderConfigData['frequence'],
 						'material_link'=>$orderMaterial['點擊後開啟類型'],
 						'material_link_value'=>$orderMaterial['點擊後開啟位址']
 					]

@@ -8,7 +8,7 @@
 	$postvars = http_build_query($bypost,JSON_UNESCAPED_UNICODE);
 	if(!$apiResult=connec_to_Api_json(Config_VSM_Meta::GET_AUTOCOMPLETE_API(),'POST',$postvars)){
 		$logger->error('無法連VSM API');
-		exit(json_encode(array("success"=>false,"message"=>'無法連接VSM託播單API','id'=>$orderId),JSON_UNESCAPED_UNICODE));	
+		exit(json_encode(array("success"=>false,"message"=>'無法連接VSM託播單API'),JSON_UNESCAPED_UNICODE));	
 	}
 	exit($apiResult);
 		

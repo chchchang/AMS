@@ -62,7 +62,7 @@ if(isset($_POST['postAction'])){
 				//去除資料夾路徑
 				$ndirname = str_replace($completeDir,'',$n);
 				//取得日期
-				preg_match('/SepgSpMD\_(\S+)\.dat/', $ndirname, $matches);
+				preg_match('/SepgSpMD\_[\S+]\.dat/', $ndirname, $matches);
 				$id = $matches[1];
 				$srotArray[] = array("name"=>$ndirname,"id"=>$id);
 			};
@@ -89,7 +89,7 @@ if(isset($_POST['postAction'])){
 				if($n=='.'||$n=='..')
 					continue;
 				//取得日期
-				preg_match('/SepgSpMD\_(\S+)\.dat/', $n, $matches);
+				preg_match('/SepgSpMD\_[\S+]\.dat/', $n, $matches);
 				$id = $matches[1];
 				$srotArray[] = array("name"=>$n,"id"=>$id);
 			};
