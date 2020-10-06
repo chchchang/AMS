@@ -22,5 +22,5 @@ steps:
     php -version
   displayName: 'Use PHP version $(phpVersion)'
 
-- script: composer install --no-interaction --prefer-dist
-  displayName: 'composer install'
+- script: find . -type f -name '*.php' -exec php -l {} \; | (! grep -v "No syntax errors detected" )
+  displayName: 'check syntax errors'
