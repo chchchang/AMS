@@ -173,6 +173,11 @@ if(isset($_POST['postAction'])){
 				exit(json_encode(["success"=>true,"message"=>"本地檔案已刪除"]));
 			}
 		}
+		//取得最後匯入的檔案
+		else if($_POST['postAction'] == "getLastImportFileName"){
+			$result = getLastImportFileName();
+			exit(json_encode($result));
+		}
 	}
 	
 	function getConnect(){
@@ -194,7 +199,13 @@ if(isset($_POST['postAction'])){
 	//匯入檔案
 	function importFile($fileName){
 		$batch = new sepgSpMdParser($fileName);
-		return $batch->getDataAndAction();
+		$return = $batch->getDataAndAction();
+		if($return["success"]){
+			$lastImportRecordFileWriter  = fopen("lastImport.dat","w");
+			fwrite($lastImportRecordFileWriter,$fileName);
+			fclose($lastImportRecordFileWriter);
+		}
+		return $return;
 		//return ["success"=>true,"message"=>"移除遠端檔案失敗"];
 	}
 	
@@ -224,6 +235,13 @@ if(isset($_POST['postAction'])){
 	{
 		return strcmp($a['id'], $b['id']);
 	}
+
+	function getLastImportFileName(){
+		$lastImportRecordFileWriter  = fopen("lastImport.dat","r");
+		$lastfile = fgets($lastImportRecordFileWriter);
+		fclose($lastImportRecordFileWriter);
+		return ["success"=>true,"filename"=>$lastfile];
+	}
 ?>
 <head>
 	<meta http-equiv="Content-Type" content="text/html; charset=utf-8">
@@ -247,6 +265,10 @@ if(isset($_POST['postAction'])){
 </head>
 <body>
 
+<fieldset id = "lastfile">
+<legend>最後匯入的檔案</legend>
+<a id = "lastImportFile"></a>
+</fieldset>
 <fieldset id = "remote">
 <legend>遠端待處理資料檔案</legend>
 <div id = "datagridRemote" class = 'dataGrid'></div>
@@ -260,7 +282,7 @@ if(isset($_POST['postAction'])){
 <div id = "datagridLocal" class = 'dataGrid'></div>
 </fieldset>
 <script type="text/javascript">
-
+setLastImportFile();
 iniRemoteDataGrid();
 iniRemoteCompDataGrid();
 iniLocalDataGrid();
@@ -285,6 +307,19 @@ function iniRemoteDataGrid(){
 		}
 	}
 	,'json'
+	);
+}
+
+function setLastImportFile(){
+	var bypost={postAction:'getLastImportFileName'};
+	$.post("?",bypost,function(json){
+		if(json["success"]){
+			$("#lastImportFile").text(json["filename"]);
+		}
+		else{
+			$("#lastImportFile").text("");
+		}
+	},"json"
 	);
 }
 

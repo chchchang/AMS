@@ -107,7 +107,8 @@ class sepgSpMdParser{
 	}
 	
 	function postToVsm($url,$postdata){
-		$postvars = http_build_query($postdata);
+		return true;
+		/*$postvars = http_build_query($postdata);
 		// 建立CURL連線
 		$ch = curl_init();
 		curl_setopt($ch,CURLOPT_URL,$url);
@@ -117,7 +118,7 @@ class sepgSpMdParser{
 		curl_setopt($ch, CURLOPT_TIMEOUT, 500);
 		//curl_setopt($ch, CURLOPT_HEADER, true);
 		$apiResult = curl_exec($ch);
-		return $apiResult;
+		return $apiResult;*/
 	}
 
 }
