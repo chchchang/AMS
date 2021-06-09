@@ -82,6 +82,7 @@
 			case "單一平台marquee":
 			case "單一平台background_banner":
 			case "單一平台advertising_page":
+			case "單一平台floating_banner":
 				require_once 'ajaxToAPI_VSM.php';
 				sendOrder_VSM($_POST["託播單識別碼"]);
 				break;
@@ -92,6 +93,10 @@
 			case "Vod插廣告":
 				require_once 'ajaxToAPI_VodAds.php';
 				sendOrder_VodAds($_POST["託播單識別碼"]);
+				break;
+			case "奧運外掛專區廣告_2021":
+				require_once 'ajaxToAPI_Olympic2021.php';
+				sendOrder_olympic($_POST["託播單識別碼"]);
 				break;
 			default:{
 				recordResult('insert',1,null,null);
@@ -370,9 +375,10 @@
 						return array("success"=>false,"message"=>'素材尚未派送到VSM');
 					}
 					return array("success"=>true,"message"=>'success');
-				}else if($row['版位類型名稱']=='鑽石版位')
+				}else if($row['版位類型名稱']=='鑽石版位'||$row['版位類型名稱']=='奧運外掛專區廣告_2021')
 				{
 					//鑽石版位廣告送出時會同時派送素材，不需檢查
+					//奧運外掛圖片不需檢查
 					return array("success"=>true,"message"=>'success');
 				}
 				
@@ -468,6 +474,10 @@
 				require_once 'ajaxToAPI_VodAds.php';
 				cancelOrder_VodAds($_POST["託播單識別碼"]);
 				break;
+			case "奧運外掛專區廣告_2021":
+				require_once 'ajaxToAPI_Olympic2021.php';
+				cancelOrder_olympic($_POST["託播單識別碼"]);
+					break;
 			default:{
 				recordResult('delete',1,null,null);
 				changeOrderSate('取消送出',array($_POST["託播單識別碼"]));

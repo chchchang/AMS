@@ -68,9 +68,7 @@ class sepgSpMdParser{
 				"日期"=>$temp[4],
 				"說明"=>$temp[5],
 				);
-				if($data['身分']!="SepgSpMD")
-					continue;
-				else if($data['身分']=="SepgSpMD"){
+				if($data['身分']=="SepgSpMD"||$data['身分']=="SepgSpMd"){
 					array_push($postMDArray,$data['MD']);
 					if(count($postMDArray)>=$batchNum){
 						if(!$this->insertSpMd($postMDArray))

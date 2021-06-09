@@ -6,12 +6,10 @@
 		const PROJECT_ROOT='/AMS/';
 		
 		const DB_HOST='localhost';
-		//const DB_USER='AMS_Test';
-		const DB_USER='root';
-		//const DB_PASSWORD='AMS_stage';
-		const DB_PASSWORD='root';
-		//const DB_NAME='AMS_TEST';
-		//const DB_NAME='ams_csms_append';
+		const DB_USER='AMS_Test';
+		//const DB_USER='root';
+		const DB_PASSWORD='AMS_stage';
+		//const DB_PASSWORD='root';
 		const DB_NAME='ams_test';
 		
 		const OMP_N_ORACLE_DB_USER='OMPCHT15';
@@ -64,7 +62,12 @@
 				array('host'=>'localhost','username'=>'ams','password'=>'','圖片素材路徑'=>'www/images/ad/','背景圖素材路徑'=>'www/images/ad/')
 			),
 			'IAB'=>array(
-				array('host'=>'172.17.254.152','username'=>'ams','password'=>'smasmasma@3F','awaiting'=>'upload/SepgSpMD/awaiting/','complete'=>'upload/SepgSpMD/complete/')
+				//array('host'=>'172.17.254.152','username'=>'ams','password'=>'smasmasma@3F','awaiting'=>'upload/SepgSpMD/awaiting/','complete'=>'upload/SepgSpMD/complete/')
+				array('host'=>'localhost','username'=>'ams','password'=>'','awaiting'=>'upload/SepgSpMD/awaiting/','complete'=>'upload/SepgSpMD/complete/')
+			),
+			'IAB_SPEPGMD_MULTI'=>array(
+				//array('host'=>'172.17.254.152','username'=>'ams','password'=>'smasmasma@3F','awaiting'=>'upload/SepgSpMD_Multi/awaiting/','complete'=>'upload/SepgSpMD_Multi/complete/')
+				array('host'=>'localhost','username'=>'ams','password'=>'','awaiting'=>'upload/SepgSpMD_Multi/awaiting/','complete'=>'upload/SepgSpMD_Multi/complete/')
 			)
 		);
 		

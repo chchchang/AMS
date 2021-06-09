@@ -81,6 +81,12 @@
 		$limitedEdit = 'true';
 		echo '此版位類型已建立版位，素材與參數的修改將被限制。';
 	}
+
+	$inPicUrl = "";
+	foreach (glob ("image/".$id.".*") as $filename) {
+		$inPicUrl = $filename;
+		break;
+	}
 ?>
 <!DOCTYPE html>
 <html>
@@ -138,6 +144,7 @@ button{
 			<p>託播單介接API位址: <input id = "orderApi" type="text" value = "" ></p>
 			<p>排程表介接API位址: <input id = "schApi" type="text" value = "" ></p>
 			<p>使用記錄介接API位址: <input id = "logApi" type="text" value = "" ></p>
+			<p>版位示意圖: <img id = "infoPic" src="<?=$inPicUrl?>" alt="<?=$inPicUrl?>"><button type="button" class="darkButton" onclick = "uploadInfoPic()">上傳圖片</button></p>
 			<p>設定素材 <button type="button" class="darkButton" onclick = "addMaterial()">新增素材</button></p>
 			<ul id="sortableMaterial"></ul>
 			<p><label>其他參數:</label><button type="button" class="darkButton" onclick = "addConfig()">新增參數</button></p>
@@ -606,6 +613,10 @@ function otherConfigEdit(jobject){
 	$li.append(jobject.版位其他參數名稱+'('+jobject.版位其他參數顯示名稱+') 預設:'+jobject.版位其他參數預設值);
 	configArray.splice(jobject.版位其他參數順序-1,1,jobject);
 	$('#dialogDiv').dialog('close');
+}
+
+function uploadInfoPic(){
+	
 }
 
 </script>

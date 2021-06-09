@@ -73,6 +73,19 @@
 		}
 		$checkResult = json_decode($apiResult,true);
 		if($checkResult['status']=="Success"){
+			foreach($checkResult['data'] as $mresult){
+				if($mresult["action_status"]!="Success"){
+					$feedback=$mresult["error_msg"].":";
+					if(isset($mresult["imgBannerSD"]))
+						$feedback.="imgBannerSD";
+					else if(isset($mresult["imgBannerHD"]))
+					$feedback.="imgBannerHD";
+					else if(isset($mresult["imgEpgSD"]))
+					$feedback.="imgEpgSD";
+					else if(isset($mresult["imgEpgHD"]))
+					$feedback.="imgEpgHD";
+				}
+			}
 			recordResult($rcordaction,1,null,null);
 			changeOrderSate('送出',array($orderId));
 		}
@@ -284,7 +297,7 @@
 			else
 				$files[$name] = ["filename"=>"","content"=>""];
 		}
-		
+		$logger->info('鑽石版位素材上傳API:'.json_encode($files));
 		// curl
 		$curl = curl_init();
 		//$url_data = http_build_query($data);
@@ -311,6 +324,7 @@
 		//
 		$response = curl_exec($curl);
 		$info = curl_getinfo($curl);
+		$logger->info('鑽石版位素材上傳API回復:'.json_encode($response));
 		//echo "code: ${info['http_code']}";
 		//print_r($info['request_header']);
 		//var_dump($response);

@@ -150,6 +150,7 @@
 		<li id="material/newMaterialGroup.php">新增素材群組</li>
 		<li id="material/editMaterialGroup.php">修改素材群組</li>
 		<li id="material/searchMaterialGroup.php">查詢素材群組</li>
+		<li id="material/insertMaterialBatch.php">大批素材匯入</li>
 		<li id="material/newMaterial.php">新增素材</li>
 		<li id="material/editMaterial.php">修改素材</li>
 		<li id="material/editMaterialBatch.php">批次修改素材</li>

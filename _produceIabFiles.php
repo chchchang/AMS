@@ -157,6 +157,7 @@
 				,"bnrTransId4"
 				,"coverMaterialId"
 				,"static"
+				,"AdTargetListId"
 				)
 				;
 		fwrite($file,implode(GLUE,$header)."\n");
@@ -360,7 +361,8 @@
 				(isset($paras['bannerTransactionId3'])?$paras['bannerTransactionId3']:'NULL'),
 				(isset($paras['bannerTransactionId4'])?$paras['bannerTransactionId4']:'NULL'),
 				$cover_pic,
-				(isset($paras['static'])?$paras['static']:'NULL')
+				(isset($paras['static'])?$paras['static']:'NULL'),
+				(isset($paras['AdTargetListId'])?$paras['AdTargetListId']:'NULL')
 			);
 			fwrite($file,implode(GLUE,$temp)."\n");
 	
@@ -522,6 +524,17 @@
 				$namepart =  explode('_',$row['版位名稱']);
 				$row['版位名稱'] = $namepart[0];
 			}
+			$note = "";
+			if(isset($paras['SpEPG'])){
+				if($paras['SpEPG']==1){
+					$row['託播單名稱'].="[SEPG白名單廣告]";
+				}
+			}
+			if(isset($paras['adType'])){
+				if($paras['adType']==1){
+					$row['託播單名稱'].="[外廣]";
+				}
+			}
 			$temp = array(
 				$row['委刊單識別碼'],//adTransactionId
 				$oid,//adTransactionId_D
@@ -536,8 +549,8 @@
 				$hours[0],//assignStartTime
 				end($hours),//assignEndTime
 				','.$row['廣告可被播出小時時段'].',',//assignTime
-				$row['委刊單名稱'],//ADName
-				$row['託播單名稱'],//ADNameChar
+				nf_to_wf($row['委刊單名稱'], $types = 'nf_to_wf'),//ADName
+				nf_to_wf($row['託播單名稱'], $types = 'nf_to_wf'),//ADNameChar
 				$row['影片素材秒數'],//adfootage
 				"",//location
 				$row['點擊後開啟類型'].'&'.$row['點擊後開啟位址'],
@@ -562,7 +575,8 @@
 				(isset($paras['bannerTransactionId3'])?$paras['bannerTransactionId3']:'NULL'),
 				(isset($paras['bannerTransactionId4'])?$paras['bannerTransactionId4']:'NULL'),
 				$cover_pic,	
-				(isset($paras['static'])?$paras['static']:'NULL')
+				(isset($paras['static'])?$paras['static']:'NULL'),
+				(isset($paras['AdTargetListId'])?$paras['AdTargetListId']:'NULL')
 			);
 			fwrite($file,implode(GLUE,$temp)."\n");
 		}

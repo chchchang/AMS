@@ -7,7 +7,7 @@
 	require_once '../tool/MyDB.php';
 	require_once '../Config_VSM_Meta.php';
 	$logger=new MyLogger();
-	$mat_type_name = ['banner','barker_vod','barker','marquee','background_banner','advertising_page'];
+	$mat_type_name = ['banner','barker_vod','barker','marquee','background_banner','advertising_page','floating_banner'];
 	//$apiUrl = 'localhost/VSMAPI/getVSMPosition.php';	
 	$apiUrl = Config_VSM_Meta::GET_POSITION_API();	
 	//連線DB
@@ -76,7 +76,7 @@
 			//建立版位類型資料
 			$sql='INSERT INTO 版位 (版位名稱,CREATED_PEOPLE) VALUES ("'.$ptn.'",1)';
 			if(!$stmt=$my->prepare($sql)) {
-				$logger->error('無法準備statement，錯誤代碼('.$my->errno.')、錯誤訊息('.$my->error.')。');
+				$logger->error('無法準備statement，錯誤代碼('.$stmt->errno.')、錯誤訊息('.$stmt->errror.')。');
 				exit(json_encode(array("dbError"=>'無法準備statement，請聯絡系統管理員！'),JSON_UNESCAPED_UNICODE));
 			}
 			
@@ -131,14 +131,20 @@
 				;
 				
 			}
+			//floating_banner
+			else if($ptindex==6){
+				$sql.=' VALUES ('.$ptid.',1,"圖片",2,1,1,1)'
+				;
+				
+			}
 			else{
 				return 0;
 			}
 			if(!$stmt=$my->prepare($sql)) {
-				exit('錯誤代碼('.$my->errno.')、錯誤訊息('.$my->error.')。');
+				exit('錯誤代碼('.$stmt->errno.')、錯誤訊息('.$stmt->errror.')。');
 			}
 			if(!$stmt->execute()) {
-				exit('錯誤代碼('.$my->errno.')、錯誤訊息('.$my->error.')。');
+				exit('錯誤代碼('.$stmt->errno.')、錯誤訊息('.$stmt->errror.')。');
 			}
 			echo '版位類型素材建立完成<br>';
 			
@@ -147,15 +153,15 @@
 		$sql='DELETE FROM 版位其他參數 WHERE 版位識別碼=?';
 		
 		if(!$stmt=$my->prepare($sql)) {
-			exit('錯誤代碼('.$my->errno.')、錯誤訊息('.$my->error.')。');
+			exit('錯誤代碼('.$stmt->errno.')、錯誤訊息('.$stmt->errror.')。');
 		}
 		
 		if(!$stmt->bind_param('i',$ptid)) {
-			exit('錯誤代碼('.$my->errno.')、錯誤訊息('.$my->error.')。');
+			exit('錯誤代碼('.$stmt->errno.')、錯誤訊息('.$stmt->errror.')。');
 		}
 		
 		if(!$stmt->execute()) {
-			exit('錯誤代碼('.$my->errno.')、錯誤訊息('.$my->error.')。');
+			exit('錯誤代碼('.$stmt->errno.')、錯誤訊息('.$stmt->errror.')。');
 		}
 		//banner
 		if($ptindex==0){
@@ -163,7 +169,7 @@
 			.' VALUES ('.$ptid.',1,"mat_type_id","mat_type_id",1,1,1,?,1)'
 			.',  ('.$ptid.',2,"srv_category_id","srv_category_id",1,1,1,-1,1)'
 			.',  ('.$ptid.',3,"group_name","group_name",1,1,1,?,1)'
-			.',  ('.$ptid.',4,"weight","weight",2,1,0,1,1)'
+			.',  ('.$ptid.',4,"weight","weight",2,1,0,90,1)'
 			.',  ('.$ptid.',5,"linkType","linkType",1,1,0,"",1)'
 			.',  ('.$ptid.',6,"link","link",1,1,0,"",1)'
 			.',  ('.$ptid.',7,"linkParameter","linkParameter",1,1,0,"",1)'
@@ -181,7 +187,7 @@
 			.',  ('.$ptid.',5,"linkType","linkType",1,1,0,"",1)'
 			.',  ('.$ptid.',6,"link","link",1,1,0,"",1)'
 			.',  ('.$ptid.',7,"linkParameter","linkParameter",1,1,0,"",1)'
-			.',  ('.$ptid.',8,"url","url",1,1,1,"rtsp://172.17.188.35:5004/asset/vscontsrv%3a",1)'
+			.',  ('.$ptid.',8,"url","url",1,1,1,"rtsp://172.16.74.210:559/",1)'
 			.',  ('.$ptid.',9,"bannerTransactionId","bannerTransactionId",1,1,0,"",1)'
 			.',  ('.$ptid.',10,"投放上限","playTimeLimit",2,0,0,0,1)'
 			;
@@ -230,9 +236,19 @@
 			.',  ('.$ptid.',7,"內文","content",1,1,0,"",1)'
 			.',  ('.$ptid.',8,"內文顏色","contentColor",1,0,0,"#FF55555",1)'
 			.',  ('.$ptid.',9,"成人內容","isAdult",3,0,0,0,1)'
-			.',  ('.$ptid.',10,"影片url","url",1,1,1,"rtsp://172.17.188.35:5004/asset/vscontsrv%3a",1)'
-			.',  ('.$ptid.',11,"weight","weight",1,1,0,"1",1)'
+			.',  ('.$ptid.',10,"影片url","url",1,1,1,"rtsp://172.16.74.210:559/",1)'
+			.',  ('.$ptid.',11,"weight","weight",2,1,0,"1",1)'
 			.',  ('.$ptid.',12,"netflixId","specific_iid",1,1,1,"",1)'
+			;
+		}
+		//floating_banner
+		else if($ptindex==6){
+			$sql='INSERT INTO 版位其他參數 (版位識別碼,版位其他參數順序,版位其他參數顯示名稱,版位其他參數名稱,版位其他參數型態識別碼,版位其他參數是否必填,是否版位專用,版位其他參數預設值,CREATED_PEOPLE)'
+			.' VALUES ('.$ptid.',1,"mat_type_id","mat_type_id",1,1,1,?,1)'
+			.',  ('.$ptid.',2,"srv_category_id","srv_category_id",1,1,1,-1,1)'
+			.',  ('.$ptid.',3,"group_name","group_name",1,1,1,?,1)'
+			.',  ('.$ptid.',4,"weight","weight",2,1,0,"1",1)'
+			.',  ('.$ptid.',5,"觸發連結按鍵","keyCode",1,1,0,"info",1)'
 			;
 		}
 		else{
@@ -241,15 +257,15 @@
 		}
 		
 		if(!$stmt=$my->prepare($sql)) {
-			exit('錯誤代碼('.$my->errno.')、錯誤訊息('.$my->error.')。');
+			exit('錯誤代碼('.$stmt->errno.')、錯誤訊息('.$stmt->errror.')。');
 		}
 		
 		if(!$stmt->bind_param('ss',$PTData['mat_type_id'],$PTData['mat_type_name'])){
-			exit('錯誤代碼('.$my->errno.')、錯誤訊息('.$my->error.')。');
+			exit('錯誤代碼('.$stmt->errno.')、錯誤訊息('.$stmt->errror.')。');
 		}
 		
 		if(!$stmt->execute()) {
-			exit('錯誤代碼('.$my->errno.')、錯誤訊息('.$my->error.')。');
+			exit('錯誤代碼('.$stmt->errno.')、錯誤訊息('.$stmt->errror.')。');
 		}
 		echo '版位其他參數建立完成<br>';
 		return $ptid;
@@ -269,7 +285,7 @@
 			//建立版位類型資料
 			$sql='INSERT INTO 版位 (版位名稱,CREATED_PEOPLE) VALUES ("'.$ptn.'",1)';
 			if(!$stmt=$my->prepare($sql)) {
-				$logger->error('無法準備statement，錯誤代碼('.$my->errno.')、錯誤訊息('.$my->error.')。');
+				$logger->error('無法準備statement，錯誤代碼('.$stmt->errno.')、錯誤訊息('.$stmt->errror.')。');
 				exit(json_encode(array("dbError"=>'無法準備statement，請聯絡系統管理員！'),JSON_UNESCAPED_UNICODE));
 			}
 			
@@ -294,11 +310,11 @@
 			.',  ('.$ptid.',2,"展開圖片",2,0,1,1)'
 			;
 			if(!$stmt=$my->prepare($sql)) {
-				exit('錯誤代碼('.$my->errno.')、錯誤訊息('.$my->error.')。');
+				exit('錯誤代碼('.$stmt->errno.')、錯誤訊息('.$stmt->errror.')。');
 			}
 			
 			if(!$stmt->execute()) {
-				exit('錯誤代碼('.$my->errno.')、錯誤訊息('.$my->error.')。');
+				exit('錯誤代碼('.$stmt->errno.')、錯誤訊息('.$stmt->errror.')。');
 			}
 			echo '版位類型素材建立完成<br>';
 		}
@@ -306,15 +322,15 @@
 		$sql='DELETE FROM 版位其他參數 WHERE 版位識別碼=?';
 		
 		if(!$stmt=$my->prepare($sql)) {
-			exit('錯誤代碼('.$my->errno.')、錯誤訊息('.$my->error.')。');
+			exit('錯誤代碼('.$stmt->errno.')、錯誤訊息('.$stmt->errror.')。');
 		}
 		
 		if(!$stmt->bind_param('i',$ptid)) {
-			exit('錯誤代碼('.$my->errno.')、錯誤訊息('.$my->error.')。');
+			exit('錯誤代碼('.$stmt->errno.')、錯誤訊息('.$stmt->errror.')。');
 		}
 		
 		if(!$stmt->execute()) {
-			exit('錯誤代碼('.$my->errno.')、錯誤訊息('.$my->error.')。');
+			exit('錯誤代碼('.$stmt->errno.')、錯誤訊息('.$stmt->errror.')。');
 		}
 		
 		$sql='INSERT INTO 版位其他參數 (版位識別碼,版位其他參數順序,版位其他參數顯示名稱,版位其他參數名稱,版位其他參數型態識別碼,版位其他參數是否必填,是否版位專用,版位其他參數預設值,CREATED_PEOPLE)'
@@ -327,12 +343,13 @@
 		.',  ('.$ptid.',7,"linkParameter","linkParameter",1,1,0,"",1)'
 		.',  ('.$ptid.',8,"channel_number","channel_number",1,1,1,"",1)'
 		.',  ('.$ptid.',9,"白名單EPG","SpEPG",3,1,0,0,1)'
+		
 		;
 		if(!$stmt=$my->prepare($sql)) {
-			exit('錯誤代碼('.$my->errno.')、錯誤訊息('.$my->error.')。');
+			exit('錯誤代碼('.$stmt->errno.')、錯誤訊息('.$stmt->errror.')。');
 		}			
 		if(!$stmt->execute()) {
-			exit('錯誤代碼('.$my->errno.')、錯誤訊息('.$my->error.')。');
+			exit('錯誤代碼('.$stmt->errno.')、錯誤訊息('.$stmt->errror.')。');
 		}
 		echo '版位其他參數建立完成<br>';
 		return $ptid;
@@ -352,11 +369,11 @@
 			//建立版位類型資料
 			$sql='INSERT INTO 版位 (版位名稱,上層版位識別碼,CREATED_PEOPLE) VALUES ("'.$ptn.'",'.$ptid.',1)';
 			if(!$stmt=$my->prepare($sql)) {
-				exit('錯誤代碼('.$my->errno.')、錯誤訊息('.$my->error.')。');
+				exit('錯誤代碼('.$stmt->errno.')、錯誤訊息('.$stmt->errror.')。');
 			}
 			
 			if(!$stmt->execute()) {
-				exit('錯誤代碼('.$my->errno.')、錯誤訊息('.$my->error.')。');
+				exit('錯誤代碼('.$stmt->errno.')、錯誤訊息('.$stmt->errror.')。');
 			}
 			
 			$pid = $stmt->insert_id;
@@ -366,15 +383,15 @@
 		$sql='DELETE FROM 版位其他參數 WHERE 版位識別碼=? AND 版位其他參數順序 IN (1,2,3)';
 		
 		if(!$stmt=$my->prepare($sql)) {
-			exit('錯誤代碼('.$my->errno.')、錯誤訊息('.$my->error.')。');
+			exit('錯誤代碼('.$stmt->errno.')、錯誤訊息('.$stmt->errror.')。');
 		}
 		
 		if(!$stmt->bind_param('i',$pid)) {
-			exit('錯誤代碼('.$my->errno.')、錯誤訊息('.$my->error.')。');
+			exit('錯誤代碼('.$stmt->errno.')、錯誤訊息('.$stmt->errror.')。');
 		}
 		
 		if(!$stmt->execute()) {
-			exit('錯誤代碼('.$my->errno.')、錯誤訊息('.$my->error.')。');
+			exit('錯誤代碼('.$stmt->errno.')、錯誤訊息('.$stmt->errror.')。');
 		}
 		
 		$sql='INSERT INTO 版位其他參數 (版位識別碼,版位其他參數順序,版位其他參數顯示名稱,版位其他參數名稱,版位其他參數型態識別碼,版位其他參數是否必填,是否版位專用,版位其他參數預設值,CREATED_PEOPLE)'
@@ -384,15 +401,15 @@
 		;
 		;
 		if(!$stmt=$my->prepare($sql)) {
-			exit('錯誤代碼('.$my->errno.')、錯誤訊息('.$my->error.')。');
+			exit('錯誤代碼('.$stmt->errno.')、錯誤訊息('.$stmt->errror.')。');
 		}
 		
 		if(!$stmt->bind_param('sss',$PTData['mat_type_id'],$PTData['srv_category_id'],$PTData['group_name'])){
-			exit('錯誤代碼('.$my->errno.')、錯誤訊息('.$my->error.')。');
+			exit('錯誤代碼('.$stmt->errno.')、錯誤訊息('.$stmt->errror.')。');
 		}
 		
 		if(!$stmt->execute()) {
-			exit('錯誤代碼('.$my->errno.')、錯誤訊息('.$my->error.')。');
+			exit('錯誤代碼('.$stmt->errno.')、錯誤訊息('.$stmt->errror.')。');
 		}
 		
 		$ptid = $stmt->insert_id;
@@ -406,24 +423,37 @@
 		/*$sql='SELECT 版位.版位識別碼 FROM 版位 LEFT JOIN 版位其他參數 ON 版位.版位識別碼 = 版位其他參數.版位識別碼 
 			WHERE 版位其他參數.版位其他參數名稱 = "content_id" AND 版位其他參數預設值 LIKE ?';
 		$result =$my->getResultArray($sql,'s',$PTData['content_id']);*/
-		$sql='SELECT 版位.版位識別碼 FROM 版位 WHERE 版位名稱 LIKE ? AND 上層版位識別碼 = ? and DISABLE_TIME IS NULL AND DELETED_TIME IS NULL';
-		$result =$my->getResultArray($sql,'si',$PTData['channel_number'].'\_%',$ptid);
+		/*$sql='SELECT 版位.版位識別碼 FROM 版位 WHERE 版位名稱 LIKE ? AND 上層版位識別碼 = ? and DISABLE_TIME IS NULL AND DELETED_TIME IS NULL';
+		$result =$my->getResultArray($sql,'si',$PTData['channel_number'].'\_%',$ptid);*/
+		$sql='SELECT 版位識別碼 FROM 版位其他參數 
+			WHERE 版位其他參數.版位其他參數名稱 = "content_id" AND 版位其他參數預設值 LIKE ?';
+		$result =$my->getResultArray($sql,'s',$PTData['content_id']);
 		echo '建立版位'.$ptn.'<br>';
 		if(count($result)>0){
 			echo '已建立過版位'.$result[0]['版位識別碼'].'<br>';
 			$pid = $result[0]['版位識別碼'];
-			/*$sql = "UPDATE 版位 SET 版位名稱 = ? WHERE 版位識別碼 = ?";
-				$result =$my->getResultArray($sql,'si',$ptn,$pid);*/
+			$sql = "UPDATE 版位 SET 版位名稱 = ? WHERE 版位識別碼 = ?";
+			if(!$stmt=$my->prepare($sql)) {
+				exit('錯誤代碼('.$stmt->errno.')、錯誤訊息('.$stmt->errror.')。');
+			}
+			if(!$stmt->bind_param('si',$ptn,$pid)){
+				exit('錯誤代碼('.$stmt->errno.')、錯誤訊息('.$stmt->errror.')。');
+			}
+			if(!$stmt->execute()) {
+
+				exit('錯誤代碼('.$stmt->errno.')、錯誤訊息('.$stmt->error.')。');
+			}
+			
 		}
 		else{
 			//建立版位類型資料
 			$sql='INSERT INTO 版位 (版位名稱,上層版位識別碼,CREATED_PEOPLE) VALUES ("'.$ptn.'",'.$ptid.',1)';
 			if(!$stmt=$my->prepare($sql)) {
-				exit('錯誤代碼('.$my->errno.')、錯誤訊息('.$my->error.')。');
+				exit('錯誤代碼('.$stmt->errno.')、錯誤訊息('.$stmt->errror.')。');
 			}
 			
 			if(!$stmt->execute()) {
-				exit('錯誤代碼('.$my->errno.')、錯誤訊息('.$my->error.')。');
+				exit('錯誤代碼('.$stmt->errno.')、錯誤訊息('.$stmt->errror.')。');
 			}
 			
 			$pid = $stmt->insert_id;
@@ -433,15 +463,15 @@
 		$sql='DELETE FROM 版位其他參數 WHERE 版位識別碼=?';
 		
 		if(!$stmt=$my->prepare($sql)) {
-			exit('錯誤代碼('.$my->errno.')、錯誤訊息('.$my->error.')。');
+			exit('錯誤代碼('.$stmt->errno.')、錯誤訊息('.$stmt->errror.')。');
 		}
 		
 		if(!$stmt->bind_param('i',$pid)) {
-			exit('錯誤代碼('.$my->errno.')、錯誤訊息('.$my->error.')。');
+			exit('錯誤代碼('.$stmt->errno.')、錯誤訊息('.$stmt->errror.')。');
 		}
 		
 		if(!$stmt->execute()) {
-			exit('錯誤代碼('.$my->errno.')、錯誤訊息('.$my->error.')。');
+			exit('錯誤代碼('.$stmt->errno.')、錯誤訊息('.$stmt->errror.')。');
 		}
 		
 		$sql='INSERT INTO 版位其他參數 (版位識別碼,版位其他參數順序,版位其他參數顯示名稱,版位其他參數名稱,版位其他參數型態識別碼,版位其他參數是否必填,是否版位專用,版位其他參數預設值,CREATED_PEOPLE)'
@@ -449,15 +479,15 @@
 		,	('.$pid.',8,"channel_number","channel_number",1,1,1,?,1)'
 		;
 		if(!$stmt=$my->prepare($sql)) {
-			exit('錯誤代碼('.$my->errno.')、錯誤訊息('.$my->error.')。');
+			exit('錯誤代碼('.$stmt->errno.')、錯誤訊息('.$stmt->errror.')。');
 		}
 		
 		if(!$stmt->bind_param('ss',$PTData['content_id'],$PTData['channel_number'])){
-			exit('錯誤代碼('.$my->errno.')、錯誤訊息('.$my->error.')。');
+			exit('錯誤代碼('.$stmt->errno.')、錯誤訊息('.$stmt->errror.')。');
 		}
 		
 		if(!$stmt->execute()) {
-			exit('錯誤代碼('.$my->errno.')、錯誤訊息('.$my->error.')。');
+			exit('錯誤代碼('.$stmt->errno.')、錯誤訊息('.$stmt->errror.')。');
 		}
 		
 		$ptid = $stmt->insert_id;

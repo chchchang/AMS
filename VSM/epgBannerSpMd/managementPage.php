@@ -1,430 +1,246 @@
 <?php
-date_default_timezone_set("Asia/Taipei");
-require_once('../../tool/auth/authAJAX.php');
-require_once('../../Config_VSM_Meta.php');
-require_once('sepgSpMdParser.php');
-set_include_path('../../tool/phpseclib');
-include('Net/SFTP.php');
-//header("Content-Type: application/json; charset=utf-8");
-/*
-$batch = new sepgSpMdParser("SepgSpMD_1.dat");
-$batch->execute();
-*/
-
-if(isset($_POST['postAction'])){
-		$localDir = "localFile/";
-		$awaitingDir = Config::$FTP_SERVERS['IAB'][0]['awaiting'];
-		$completeDir = Config::$FTP_SERVERS['IAB'][0]['complete'];
-		if(!file_exists ($localDir)){
-			if (!mkdir($localDir, 0777, true)) 
-				exit(json_encode(array("success" => false,"message" => "原始檔案暫存資料夾建立失敗"),JSON_UNESCAPED_UNICODE));
-		}
-		//取得遠端檔案資訊
-		if($_POST['postAction']=='getRemoteFile'){
-			$conn = getConnect();
-			//掃描資料夾檔案並分析生效日期
-			//$nlist = ftp_nlist($conn,$dir);
-			$nlist = $conn->nlist($awaitingDir);
-			$srotArray = array();
-			foreach($nlist as $n){
-				if($n=='.'||$n=='..')
-					continue;
-				//去除資料夾路徑
-				$ndirname = str_replace($awaitingDir,'',$n);
-				//取得日期
-				preg_match('/SepgSpMD\_(\S+)\.dat/', $ndirname, $matches);
-				$id = $matches[1];
-				$srotArray[] = array("name"=>$ndirname,"id"=>$id);
-			};
-			//依照日期排序
-			usort($srotArray,"cmp");
-			
-			$data = array();
-			foreach($srotArray as $fileObj){
-				$data[] = array(array($fileObj["name"],"text"),array($fileObj["id"],"text"));
-			}
-			
-			exit(json_encode(array(
-					'header'=>array("檔案名稱","單號")
-					,'data'=>$data
-			),JSON_UNESCAPED_UNICODE));
-		}
-		
-		else if($_POST['postAction']=='getRemoteCompFile'){
-			$conn = getConnect();
-			//掃描資料夾檔案並分析生效日期
-			//$nlist = ftp_nlist($conn,$dir);
-			$nlist = $conn->nlist($completeDir);
-			$srotArray = array();
-			foreach($nlist as $n){
-				if($n=='.'||$n=='..')
-					continue;
-				//去除資料夾路徑
-				$ndirname = str_replace($completeDir,'',$n);
-				//取得日期
-				preg_match('/SepgSpMD\_[\S+]\.dat/', $ndirname, $matches);
-				$id = $matches[1];
-				$srotArray[] = array("name"=>$ndirname,"id"=>$id);
-			};
-			//依照日期排序
-			usort($srotArray,"cmp");
-			
-			$data = array();
-			foreach($srotArray as $fileObj){
-				$data[] = array(array($fileObj["name"],"text"),array($fileObj["id"],"text"));
-			}
-			
-			exit(json_encode(array(
-					'header'=>array("檔案名稱","單號")
-					,'data'=>$data
-			),JSON_UNESCAPED_UNICODE));
-		}
-		
-		//取本地檔案資訊
-		else if($_POST['postAction']=='getLocalFile'){
-			//掃描資料夾檔案並分析生效日期
-			$nlist = scandir($localDir);
-			$srotArray = array();
-			foreach($nlist as $n){
-				if($n=='.'||$n=='..')
-					continue;
-				//取得日期
-				preg_match('/SepgSpMD\_[\S+]\.dat/', $n, $matches);
-				$id = $matches[1];
-				$srotArray[] = array("name"=>$n,"id"=>$id);
-			};
-			//依照日期排序
-			usort($srotArray,"cmp");
-			
-			$data = array();
-			foreach($srotArray as $fileObj){
-				$data[] = array(array($fileObj["name"],"text"),array($fileObj["id"],"text"));
-			}
-			
-			exit(json_encode(array(
-					'header'=>array("檔案名稱","單號")
-					,'data'=>$data
-			),JSON_UNESCAPED_UNICODE));
-		}
-		//匯入遠端
-		else if($_POST['postAction'] == "importRemoteFile"){
-			$conn = getConnect();
-			$fileName = $_POST['fileName'];
-			$localFile = $localDir.$fileName;
-			$remoteFile = $awaitingDir.$fileName;
-			$remoteFile_complete = $completeDir.$fileName;
-			//下載檔案並匯入
-			//下載檔案
-			if(!$conn->get($remoteFile, $localFile)){
-				(new MyLogger())->error('無法下載FTP server('.$remoteFile.')檔案到('.$localFile.')。');
-				exit(json_encode(["success"=>false,"message"=>"下載遠端檔案失敗"]));
-			}
-			//匯入檔案
-			$result = importFile($localFile);
-			if(!$result["success"])
-				exit(json_encode($result));
-			//刪除遠端檔案
-			$result=deleteRemote($remoteFile,$conn);
-			if(!$result["success"])
-				exit(json_encode($result));
-			//上傳檔案到complete資料夾
-			$result=putToComplete($remoteFile_complete,$localFile,$conn);
-			if(!$result["success"])
-				exit(json_encode($result));
-			
-			exit(json_encode(["success"=>true,"message"=>"匯入遠端檔案成功"]));
-		}
-		else if($_POST['postAction'] == "importRemoteFileComp"){
-			$conn = getConnect();
-			$fileName = $_POST['fileName'];
-			$localFile = $localDir.$fileName;
-			$remoteFile_complete = $completeDir.$fileName;
-			//下載檔案並匯入
-			//下載檔案
-			if(!$conn->get($remoteFile_complete, $localFile)){
-				(new MyLogger())->error('無法下載FTP server('.$remoteFile.')檔案到('.$localFile.')。');
-				exit(json_encode(["success"=>false,"message"=>"下載遠端檔案失敗"]));
-			}
-			//匯入檔案
-			$result = importFile($localFile);
-			if(!$result["success"])
-				exit(json_encode($result));			
-			exit(json_encode(["success"=>true,"message"=>"匯入遠端檔案成功"]));
-		}
-		
-		//匯入本地檔案
-		else if($_POST['postAction'] == "importLocalFile"){
-			$fileName = $localDir.$_POST['fileName'];
-			//匯入檔案
-			$result = importFile($fileName);
-			if($result["success"])
-				exit(json_encode(["success"=>true,"message"=>"匯入本地檔案成功"]));
-			else
-				exit(json_encode($result));
-		}		
-		//刪除檔案
-		else if($_POST['postAction'] == "deleteLocalFile"){
-			$fileName = $localDir.$_POST['fileName'];
-			$upload = unlink($fileName);
-			// check upload status
-			if (!$upload) { 
-				exit(json_encode(["success"=>false,"message"=>"本地檔案刪除失敗"]));
-			} else {
-				exit(json_encode(["success"=>true,"message"=>"本地檔案已刪除"]));
-			}
-		}
-		//取得最後匯入的檔案
-		else if($_POST['postAction'] == "getLastImportFileName"){
-			$result = getLastImportFileName();
-			exit(json_encode($result));
-		}
-	}
-	
-	function getConnect(){
-		//設定連線資訊
-		$url = Config::$FTP_SERVERS['IAB'][0]['host'];
-		$usr = Config::$FTP_SERVERS['IAB'][0]['username'];
-		$pd = Config::$FTP_SERVERS['IAB'][0]['password'];
-		/*$conn = ftp_connect($url) or die("Could not connect");
-		ftp_pasv($conn, true); 
-		ftp_login($conn,$usr,$pd);*/
-		$conn = new Net_SFTP($url);
-		if (!$conn->login($usr, $pd)) {
-			(new MyLogger())->error('無法Sftp連線到FTP server('.$url.')');
-			return false;
-		}
-		return $conn;
-	}
-	
-	//匯入檔案
-	function importFile($fileName){
-		$batch = new sepgSpMdParser($fileName);
-		$return = $batch->getDataAndAction();
-		if($return["success"]){
-			$lastImportRecordFileWriter  = fopen("lastImport.dat","w");
-			fwrite($lastImportRecordFileWriter,$fileName);
-			fclose($lastImportRecordFileWriter);
-		}
-		return $return;
-		//return ["success"=>true,"message"=>"移除遠端檔案失敗"];
-	}
-	
-	//刪除遠端檔案
-	function deleteRemote($fileName,$conn){
-		$upload = $conn->delete($fileName); 
-		// check upload status
-		if (!$upload) { 
-			return ["success"=>false,"message"=>"移除遠端檔案失敗"];
-		} else {
-			return ["success"=>true,"message"=>"已將遠端檔案移除"];
-		}
-	}
-	
-	function putToComplete($remoteFile,$localFile,$conn){
-		$upload = $conn->put($remoteFile, $localFile, NET_SFTP_LOCAL_FILE);
-		// check upload status
-		if (!$upload) { 
-			return ["success"=>false,"message"=>"檔案上傳到completey資料夾失敗"];
-		} else {
-			return ["success"=>true,"message"=>"已將檔案上傳到complete資料夾"];
-		}
-	}
-	
-	
-	function cmp($a, $b)
-	{
-		return strcmp($a['id'], $b['id']);
-	}
-
-	function getLastImportFileName(){
-		$lastImportRecordFileWriter  = fopen("lastImport.dat","r");
-		$lastfile = fgets($lastImportRecordFileWriter);
-		fclose($lastImportRecordFileWriter);
-		return ["success"=>true,"filename"=>$lastfile];
-	}
+	include('../../tool/auth/authAJAX.php');
 ?>
 <head>
-	<meta http-equiv="Content-Type" content="text/html; charset=utf-8">
-	<script type="text/javascript" src="../../tool/jquery-3.4.1.min.js"></script>
-	<link rel="stylesheet" href="../../tool/jquery-ui1.2/jquery-ui.css">
-	<script src="../../tool/jquery-ui1.2/jquery-ui.min.js"></script>
-	<script type="text/javascript" src="../../tool/timetable/TimeTable.js?<?=time()?>"></script>
-	<script type="text/javascript" src="../../tool/datagrid/CDataGrid.js"></script>
-	<script src="../../tool/jquery.loadmask.js"></script>
-	<link rel="stylesheet" type="text/css" href="../../tool/jquery.loadmask.css" />
-	<link rel='stylesheet' type='text/css' href='../../external-stylesheet.css'/>
-	<style type="text/css">
-
-	td.highlight {border: none !important;padding: 1px 0 1px 1px !important;background: none !important;overflow:hidden;}
-	td.highlight a {background: #FFAA33 !important;  border: 1px #FF8800 solid !important;}
-	td.normal {border: none !important;padding: 1px 0 1px 1px !important;background: none !important;overflow:hidden;}
-	td.normal a {background:#DDDDDD !important;border: 1px #888888 solid !important;}
-	td.ui-datepicker-current-day a {border: 2px #E63F00 solid !important;}
-	.date{ width:200px}
-	</style>
+<meta http-equiv="Content-Type" content="text/html; charset=utf-8">
 </head>
 <body>
 
-<fieldset id = "lastfile">
-<legend>最後匯入的檔案</legend>
-<a id = "lastImportFile"></a>
-</fieldset>
-<fieldset id = "remote">
-<legend>遠端待處理資料檔案</legend>
-<div id = "datagridRemote" class = 'dataGrid'></div>
-</fieldset>
-<fieldset id = "remoteComp">
-<legend>遠端已處理資料檔案</legend>
-<div id = "datagridRemoteComp" class = 'dataGrid'></div>
-</fieldset>
-<fieldset id = "local">
-<legend>AMS端資料檔案</legend>
-<div id = "datagridLocal" class = 'dataGrid'></div>
-</fieldset>
-<script type="text/javascript">
-setLastImportFile();
-iniRemoteDataGrid();
-iniRemoteCompDataGrid();
-iniLocalDataGrid();
-function iniRemoteDataGrid(){
-	var bypost={postAction:'getRemoteFile'};
-	$.post("?",bypost,function(json){
-		json.header.push('匯入');
-		for(var row in json.data){
-			json.data[row].push(['匯入','button']);
+<link rel="stylesheet" type="text/css" href="../../tool/jquery-ui1.2/jquery-ui.theme.min.css"></script>
+<link rel="stylesheet" type="text/css" href="../../tool/jquery-ui1.2/jquery-ui.structure.min.css"></script>
+<link rel="stylesheet" type="text/css" href="../../tool/jquery-ui1.2/jquery-ui.min.css"></script>
+<link rel="stylesheet" type="text/css" href="../../tool/datatable/DataTables-1.10.15/css/jquery.dataTables.min.css"/>
+<link rel="stylesheet" type="text/css" href="../../tool/datatable/FixedColumns-3.2.2/css/fixedColumns.dataTables.min.css"/>
+<link rel="stylesheet" type="text/css" href="../../tool/datatable/FixedHeader-3.1.2/css/fixedHeader.dataTables.min.css"/>
+<link rel="stylesheet" type="text/css" href="../../tool/datatable/Scroller-1.4.2/css/scroller.dataTables.min.css"/>
+<link rel="stylesheet" type="text/css" href="../../tool/datatable/Select-1.2.2/css/select.dataTables.min.css"/>
+<link rel='stylesheet' type='text/css' href='<?=$SERVER_SITE.Config::PROJECT_ROOT?>external-stylesheet.css'/>
+<link rel="stylesheet" href="<?=$SERVER_SITE.Config::PROJECT_ROOT?>tool/jquery-ui1.2/jquery-ui.css"></link>
+
+<script type="text/javascript" src="../../tool/jquery-3.4.1.min.js"></script>
+<script type="text/javascript" src="../../tool/jquery-ui1.2/jquery-ui.min.js"></script>
+<script type="text/javascript" src="../../tool/datatable/DataTables-1.10.15/js/jquery.dataTables.min.js"></script>
+<script type="text/javascript" src="../../tool/datatable/FixedColumns-3.2.2/js/dataTables.fixedColumns.min.js"></script>
+<script type="text/javascript" src="../../tool/datatable/FixedHeader-3.1.2/js/dataTables.fixedHeader.min.js"></script>
+<script type="text/javascript" src="../../tool/datatable/Scroller-1.4.2/js/dataTables.scroller.min.js"></script>
+<script type="text/javascript" src="../../tool/datatable/Select-1.2.2/js/dataTables.select.min.js"></script>
+<script src="../../tool/jquery-ui1.2/jquery-ui.js"></script>
+
+
+<div id="tabs">
+  <ul>
+    <li><a href="#deliverTabs-1">現有白名單管理</a></li>
+    <li><a href="#deliverTabs-2">白名單檔案匯入管理</a></li>
+	<li><a href="#deliverTabs-3">MD查詢白名單</a></li>
+  </ul>
+  <div id="deliverTabs-1">
+	<fieldset>
+		<legend>單一平台北區</legend>
+		目前MD總數:<a id = "totalMdCountText_N"></a><br>
+		<button id = "deleteBtn_N" class="ui-button ui-widget ui-corner-all">刪除</button>
+		<table id="dataTable_N" class="display nowrap" cellspacing="0" width="100%">
+			<thead>
+				<tr>
+					<th>白名單單號</th>
+					<th>開始日期</th>
+					<th>結束日期</th>
+					<th>MD數目</th>
+				</tr>
+			</thead>
+			<tfoot>
+				<tr>
+					<th>白名單單號</th>
+					<th>開始日期</th>
+					<th>結束日期</th>
+					<th>MD數目</th>
+				</tr>
+			</tfoot>
+		</table>
+	</fieldset>
+
+	<fieldset>
+		<legend>單一平台南區</legend>
+		目前MD總數:<a id = "totalMdCountText_S"></a><br>
+		<button id = "deleteBtn_S" class="ui-button ui-widget ui-corner-all">刪除</button>
+		<table id="dataTable_S" class="display nowrap" cellspacing="0" width="100%">
+			<thead>
+				<tr>
+					<th>白名單單號</th>
+					<th>開始日期</th>
+					<th>結束日期</th>
+					<th>MD數目</th>
+				</tr>
+			</thead>
+			<tfoot>
+				<tr>
+					<th>白名單單號</th>
+					<th>開始日期</th>
+					<th>結束日期</th>
+					<th>MD數目</th>
+				</tr>
+			</tfoot>
+		</table>
+	</fieldset>
+  </div>
+  <div id="deliverTabs-2">
+	<iframe height = '1800px' width = "100%" frameBorder=0 src = "managementPageMultiImport.php">
+	</iframe>
+  </div>
+  <div id="deliverTabs-3">
+  <fieldset>
+	<legend>MD查詢名單</legend>
+		<input type="text" id="MDSearchText" class="searchInput" value='' placeholder="輸入MD號碼查詢所屬白名單"></input> <button id="MDSearchBtn" class="searchSubmit">查詢</button>
+		<div id = "MdSearchResult_N">
+		</div>
+		<div id = "MdSearchResult_S">
+		</div>
+	</fieldset>
+  </div>
+</div>
+
+
+
+
+
+<script>
+var ajaxDataUrl = "ajaxDataAdTargetList.php";
+var ajaxDataUrl_S = "ajaxDataAdTargetList_S.php";
+var ajaxDbUrl = "ajax_ad_target_list.php";
+ 
+$(document).ready(function() { 
+	//tabs UI 設定
+	$( "#tabs" ).tabs();
+		 
+	//讀取table資料
+    var table_N = $('#dataTable_N').DataTable( {
+        lengthChange: false,
+        ajax: ajaxDataUrl,
+        select: true
+	} );
+	
+	var table_S = $('#dataTable_S').DataTable( {
+        lengthChange: false,
+        ajax: ajaxDataUrl_S,
+        select: true
+    } );
+	
+	
+	
+	//MD總數
+	$.post(ajaxDbUrl,{"action":"getTotalMDCount","area":"N"},
+		function(result){
+			if(result["success"]){
+				$("#totalMdCountText_N").text(result["data"]);
+			}
+		},
+		'json'
+	);
+	$.post(ajaxDbUrl,{"action":"getTotalMDCount","area":"S"},
+		function(result){
+			if(result["success"]){
+				$("#totalMdCountText_S").text(result["data"]);
+			}
+		},
+		'json'
+	);
+	
+	//按下ENTER搜尋
+	$("#MdSearchResult").keypress(function(event){
+		if (event.keyCode == 13){
+				searchMd();
 		}
-		$("#datagridRemote").empty();
-		var DG=new DataGrid("datagridRemote",json.header,json.data);
-		//按鈕點擊
-		DG.buttonCellOnClick=function(y,x,row) {
-			if(row[x][0]== "匯入"){
-				var name = row[0][0];
-				var id = row[1][0];
-				$('body').mask('資料匯入中...');
-				importRemoteFile(name);
-				
+	});
+	$("#MDSearchBtn").click(function(){
+		searchMd();
+	});
+	//刪除按鈕
+	$("#deleteBtn_N").click(function(){    
+		var selectedRows = getSelectedRowData(table_N);
+		if(selectedRows.length!=0){
+			var tid = selectedRows[0]['白名單單號'];
+			if(confirm("確認要刪除該白名單("+tid+")的設定資訊?")){
+				$.post(ajaxDbUrl,{"action":"deleteTargetList","data":{"ad_target_list_id":tid}},
+					function(result){
+						if(result["success"]){
+							alert('刪除成功');
+							table_N.ajax.reload();
+						}
+						else{
+							alert(result['message']);
+						}
+					}
+				)
 			}
 		}
-	}
-	,'json'
-	);
-}
+	});
 
-function setLastImportFile(){
-	var bypost={postAction:'getLastImportFileName'};
-	$.post("?",bypost,function(json){
-		if(json["success"]){
-			$("#lastImportFile").text(json["filename"]);
-		}
-		else{
-			$("#lastImportFile").text("");
-		}
-	},"json"
-	);
-}
-
-function iniRemoteCompDataGrid(){
-	var bypost={postAction:'getRemoteCompFile'};
-	$.post("?",bypost,function(json){
-		json.header.push('匯入');
-		for(var row in json.data){
-			json.data[row].push(['匯入','button']);
-		}
-		$("#datagridRemoteComp").empty();
-		var DG=new DataGrid("datagridRemoteComp",json.header,json.data);
-		//按鈕點擊
-		DG.buttonCellOnClick=function(y,x,row) {
-			if(row[x][0]== "匯入"){
-				var name = row[0][0];
-				var id = row[1][0];
-				$('body').mask('資料匯入中...');
-				importRemoteFileComp(name);
+	$("#deleteBtn_S").click(function(){    
+		var selectedRows = getSelectedRowData(table_S);
+		if(selectedRows.length!=0){
+			var tid = selectedRows[0]['白名單單號'];
+			if(confirm("確認要刪除該白名單("+tid+")的設定資訊?")){
+				$.post(ajaxDbUrl,{"action":"deleteTargetList","data":{"ad_target_list_id":tid}},
+					function(result){
+						if(result["success"]){
+							alert('刪除成功');
+							table_S.ajax.reload();
+						}
+						else{
+							alert(result['message']);
+						}
+					}
+				)
 			}
 		}
-	}
-	,'json'
-	);
-}
-
-function iniLocalDataGrid(){
-	var bypost={postAction:'getLocalFile'};
-	$.post("?",bypost,function(json){
-		json.header.push('匯入檔案');
-		json.header.push('刪除檔案');
-		for(var row in json.data){
-			json.data[row].push(['匯入檔案','button']);
-			json.data[row].push(['刪除檔案','button']);
-		}
-		$("#datagridLocal").empty();
-		var DG=new DataGrid("datagridLocal",json.header,json.data);
-		//按鈕點擊
-		DG.buttonCellOnClick=function(y,x,row) {
-			if(row[x][0]== "匯入檔案"){
-				var name = row[0][0];
-				var id = row[1][0];
-				$('body').mask('資料匯入中...');
-				importLocalFile(name);
+	});
+	
+	//取得選擇的row
+	function getSelectedRowData(table){
+		var data=table.rows( { selected: true }).data();
+		var feedback = [];
+		for (var i=0; i < data.length ;i++){
+			var obj = {
+				"白名單單號":data[i][0],
+				"開始日期":data[i][1],
+				"結束日期":data[i][2],
+				"MD數目":data[i][3]
 			}
-			if(row[x][0]== "刪除檔案"){
-				var name = row[0][0];
-				var id = row[1][0];
-				deleteLocalFile(name);
-			}
-		}
+			feedback.push(obj);
+        }
+		console.log(feedback);
+		return feedback;
 	}
-	,'json'
-	);
-}
-
-function importRemoteFile(fileName){
-	var bypost={"postAction":'importRemoteFile',"fileName":fileName};
-	$.post("?",bypost,function(json){
-		if(json.success){
-			iniRemoteDataGrid();
-			iniLocalDataGrid();
-		}
-		alert(json.message);
-		$('body').unmask();
+	//以MD搜尋白名單
+	function searchMd(){
+		var MD = $("#MDSearchText").val();
+		console.log(MD);
+		$("#MdSearchResult_N,#MdSearchResult_S").empty();
+		$.post(ajaxDbUrl,{"action":"getTargetListByMD","area":"N","data":{"MD":MD}},
+			function(result){
+				if(result["success"]){
+					$("#MdSearchResult_N").append("北區:<br>");
+					result["data"].forEach(function(value){
+						$("#MdSearchResult_N").append(value+"<br>");
+					}
+					);
+				}
+			},
+			'json'
+		);
+		$.post(ajaxDbUrl,{"action":"getTargetListByMD","area":"S","data":{"MD":MD}},
+			function(result){
+				if(result["success"]){
+					$("#MdSearchResult_S").append("南區:<br>");
+					result["data"].forEach(function(value){
+						$("#MdSearchResult_S").append(value+"<br>");
+					}
+					);
+				}
+			},
+			'json'
+		);
 	}
-	,'json'
-	);
-}
-
-function importRemoteFileComp(fileName){
-	var bypost={"postAction":'importRemoteFileComp',"fileName":fileName};
-	$.post("?",bypost,function(json){
-		if(json.success){
-			iniRemoteCompDataGrid();
-			iniLocalDataGrid();
-		}
-		alert(json.message);
-		$('body').unmask();
-	}
-	,'json'
-	);
-}
-
-function importLocalFile(fileName){
-	var bypost={"postAction":'importLocalFile',"fileName":fileName};
-	$.post("?",bypost,function(json){
-		if(json.success)
-			iniLocalDataGrid();
-		alert(json.message);
-		$('body').unmask();
-	}
-	,'json'
-	);
-}
-
-function deleteLocalFile(fileName){
-	var bypost={"postAction":'deleteLocalFile',"fileName":fileName};
-	$.post("?",bypost,function(json){
-			if(json.success)
-				iniLocalDataGrid();
-			alert(json.message);
-		}
-		,'json'
-	);
-}
-</script>
+} );
+ </script>
+ 
 </body>

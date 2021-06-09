@@ -120,6 +120,7 @@
 					   ELSE 額外版位.版位名稱
 					END AS 投放版位,  
 					素材.素材識別碼 AS 素材識別碼,
+					素材.素材名稱 AS 素材名稱,
 					圖片素材寬度 AS 圖片寬,
 					圖片素材高度 AS 圖片高,
 					影片素材秒數 AS 影片秒數,
@@ -177,7 +178,7 @@
 					$timeString.='~'.$temp[count($temp)-1];
 					$orders[]=array(array($row['託播單識別碼'],'text'),array(($row['託播單CSMS群組識別碼']==null)?'':$row['託播單CSMS群組識別碼'],'text')
 					,array($row['託播單名稱'],'text'),array(($row['託播單說明']==null)?'':$row['託播單說明'],'text'),array($row['託播單狀態'],'text'),array('<font color="'.$color.'">'.$row['投放版位'].'</font>','html')
-					,array(($row['素材識別碼']==null)?'':'<font color="'.$color.'">'.$row['素材識別碼'].'</font>','html'),array(($row['圖片寬']==null)?'':'<font color="'.$color.'">'.$row['圖片寬'].'</font>','html')
+					,array(($row['素材識別碼']==null)?'':'<font color="'.$color.'">'.$row['素材識別碼'].":".$row['素材名稱'].'</font>','html'),array(($row['圖片寬']==null)?'':'<font color="'.$color.'">'.$row['圖片寬'].'</font>','html')
 					,array(($row['圖片高']==null)?'':'<font color="'.$color.'">'.$row['圖片高'].'</font>','html'),array(($row['影片秒數']==null)?'':'<font color="'.$color.'">'.$row['影片秒數'].'</font>','html')
 					,array(($row['點擊類型']==null)?'':'<font color="'.$color.'">'.$row['點擊類型'].'</font>','html'),array(($row['點擊位址']==null)?'':'<font color="'.$color.'">'.$row['點擊位址'].'</font>','html')
 					,array('<font color="'.$color.'">'.$row['開始'].'</font>','html'),array('<font color="'.$color.'">'.$row['結束'].'</font>','html'),array('<font color="'.$color.'">'.$timeString.'</font>','html')

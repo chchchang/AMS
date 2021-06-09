@@ -9,7 +9,7 @@
 date_default_timezone_set("Asia/Taipei");
 require_once('../../Config_VSM_Meta.php');
 require_once('../../Config.php');
-require_once('sepgSpMdParser.php');
+require_once('sepgSpMdParserMulti.php');
 require_once('../../tool/MyDB.php');
 set_include_path('../../tool/phpseclib');
 include('Net/SFTP.php');
@@ -27,21 +27,22 @@ class autoPraser{
 		//測試用用complete資料夾下的檔案
 		//$this->awaitingDir = Config::$FTP_SERVERS['IAB'][0]['complete'];
 		//正式
-		$this->awaitingDir = Config::$FTP_SERVERS['IAB'][0]['awaiting'];
-		$this->completeDir = Config::$FTP_SERVERS['IAB'][0]['complete'];
+		$this->awaitingDir = Config::$FTP_SERVERS['IAB_SPEPGMD_MULTI'][0]['awaiting'];
+
+		$this->completeDir = Config::$FTP_SERVERS['IAB_SPEPGMD_MULTI'][0]['complete'];
 		$this->conn = $this->getConnect();
         
 	}
 	function execute(){
 		if($this->conn){
 			$remoteFiles = $this->getRemote();
-			if(count($remoteFiles)>0){
-				$fileName = $remoteFiles[0];
-				$result = $this->importRemoteFile($fileName);
+			foreach($remoteFiles as $remoteFile){
+				$fileName = $remoteFile;
+				$this->importRemoteFile($fileName);
 			}
 		}
 		else{
-			echo "無法連線";
+			echo "無法連線\n";
 		}
 	}
     //檢查遠端檔案
@@ -56,13 +57,16 @@ class autoPraser{
 			}
 			//去除資料夾路徑
 			$ndirname = str_replace($this->awaitingDir,'',$n);
-			//取得日期
-			preg_match('/SepgSpMD\_(\S+)\.dat/', $ndirname, $matches);
-			$id = $matches[1];
+			//取得ID
+			preg_match('/(\S+)_SepgSpMd\_(\S+)\.dat/', $ndirname, $matches);
+			if(count($matches)==0)
+				preg_match('/(\S+)_SepgSpMD\_(\S+)\.dat/', $ndirname, $matches);
+			
+				$id = $matches[2];
 			$srotArray[] = array("name"=>$ndirname,"id"=>$id);
 		};
 		//依照日期排序
-		usort($srotArray,array('autoPraser','cmp'));
+		//usort($srotArray,array('autoPraser','cmp'));
 		
 		$data = array();
 		foreach($srotArray as $fileObj){
@@ -119,13 +123,8 @@ class autoPraser{
 	
 	//匯入檔案
 	function importFile($fileName){
-		$batch = new sepgSpMdParser($fileName);
+		$batch = new sepgSpMdParserMulti($fileName);
 		$return = $batch->getDataAndAction();
-		if($return["success"]){
-			$lastImportRecordFileWriter  = fopen("lastImport.dat","w");
-			fwrite($lastImportRecordFileWriter,$fileName);
-			fclose($lastImportRecordFileWriter);
-		}
 		return $return;
 	}
 	

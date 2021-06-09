@@ -38,14 +38,10 @@
 		}
 		$remoteFileName='_____AMS_'.$mid.'_'.$md5_result;
 		$url='http://172.17.251.133/api/getMediaStatus?source='.$remoteFileName;
-		print_r('遠端檔案名稱:'.$remoteFileName);
-		echo "<br>";
 		$ch=curl_init($url);
 		curl_setopt($ch,CURLOPT_RETURNTRANSFER,true);
 		$return=curl_exec($ch);
-		print_r((string)$return);
-		echo '</br></br>';
-		libxml_use_internal_errors(true); // !!!
+		libxml_use_internal_errors(true); 
 		if(curl_errno($ch))
 		{
 			$logger->error('錯誤代號:'.curl_errno($ch).'無法連接API:'.$url);
@@ -53,15 +49,16 @@
 		}
 		$return=preg_replace('~\s*(<([^-->]*)>[^<]*<!--\2-->|<[^>]*>)\s*~','$1',$return);
 		$xml=simplexml_load_string($return);
+		$feedback = array();
 		if($xml !== false)
 		{
-			echo '媒體編號:'.(string)$xml->mediaId."<br>";
-			echo 'chtnStatus:'.(string)$xml->chtnStatus."<br>";
-			echo 'chtcStatus:'.(string)$xml->chtcStatus."<br>";
-			echo 'chtsStatus:'.(string)$xml->chtsStatus."<br>";
-			echo 'chtnIapId:'.(string)$xml->chtnIapId."<br>";
-			echo 'chtsIapId:'.(string)$xml->chtsIapId."<br>";
-			echo 'cdnUrl:'.(string)$xml->cdnUrl."<br>";
+			$feedback['mediaId']=(string)$xml->mediaId;
+			$feedback['chtnStatus']=(string)$xml->chtnStatus;
+			$feedback['chtcStatus']=(string)$xml->chtcStatus;
+			$feedback['chtsStatus']=(string)$xml->chtsStatus;
+			$feedback['chtnIapId']=(string)$xml->chtnIapId;
+			$feedback['chtsIapId']=(string)$xml->chtsIapId;
+			$feedback['cdnUrl']=(string)$xml->cdnUrl;
 		}
 		else
 		{
@@ -70,6 +67,7 @@
 				echo($error->message);
 			}
 		}
+		exit(json_encode())
 			
 	}
 ?>
