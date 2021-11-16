@@ -1,3 +1,12 @@
+
+
+
+
+
+
+
+
+
 <?php
 /*****
 連線VSM資料庫取得白名單資訊
@@ -70,3 +79,5 @@ class GetVsmDataAdTargetList{
 
 
 ?>
+
+

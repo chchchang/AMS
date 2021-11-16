@@ -171,6 +171,7 @@
 			//取得素材資訊
 			$sql='
 				SELECT
+					素材順序,影片媒體編號,託播單素材.素材識別碼,可否點擊,點擊後開啟類型,點擊後開啟位址,影片畫質識別碼
 					素材順序,影片媒體編號,託播單素材.素材識別碼,可否點擊,點擊後開啟類型,點擊後開啟位址,影片畫質識別碼,素材原始檔名
 				FROM
 					託播單素材
@@ -184,6 +185,8 @@
 			foreach($orderConfig as $pid=>$orderConfigData){
 				$Materials = [
 					"url"=>"",
+					"sdUrl"=>""
+
 					"sdUrl"=>"",
 					"adContentId"=>"",
 					"sdAdContentId"=>"",
@@ -194,14 +197,19 @@
 				$material_link_value = "";
 				foreach($orderMaterials as $orderMaterial){
 					if($orderMaterial["影片畫質識別碼"] == 2){
+						$Materials["url"]= $orderConfigData['url'].$orderMaterial['影片媒體編號'].'_f';
 						//$Materials["url"]= $orderConfigData['url'].$orderMaterial['影片媒體編號'].'_f';
 						$Materials["url"] = getEdgeWareUrl($orderConfigData['url'],$orderMaterial['影片媒體編號']);
 						$material_link = $orderMaterial['點擊後開啟類型'];
 						$material_link_value = $orderMaterial['點擊後開啟位址'];
+
 						$Materials["adContentId"] = $orderMaterial['影片媒體編號'];
 						$Materials["cdnUrl"] = getCdnUrl($orderMaterial['素材識別碼'],$orderMaterial['素材原始檔名']);
 					}
 					else if($orderMaterial["影片畫質識別碼"] == 1){
+						$Materials["sdUrl"]= $orderConfigData['url'].$orderMaterial['影片媒體編號'].'_f';
+
+
 						//$Materials["sdUrl"]= $orderConfigData['url'].$orderMaterial['影片媒體編號'].'_f';
 						$Materials["sdUrl"] = getEdgeWareUrl($orderConfigData['url'],$orderMaterial['影片媒體編號']);
 						$Materials["sdAdContentId"] = $orderMaterial['影片媒體編號'];
@@ -228,6 +236,8 @@
 						"bannerTransactionId"=>$orderConfigData['bannerTransactionId'],
 						'material_link'=>$material_link,
 						'material_link_value'=>$material_link_value,
+						'playTimeLimit'=>$orderConfigData['playTimeLimit']
+
 						'playTimeLimit'=>$orderConfigData['playTimeLimit'],
 						'adContentId'=>$Materials["adContentId"],
 						'sdAdContentId'=>$Materials["sdAdContentId"],
@@ -288,6 +298,7 @@
 						"linkParameter"=>$orderConfigData['linkParameter'],
 						'material_link'=>$orderMaterial['點擊後開啟類型'],
 						'material_link_value'=>$orderMaterial['點擊後開啟位址'],
+						'SpEPG'=>$orderConfigData['SpEPG']
 						'SpEPG'=>$orderConfigData['SpEPG'],
 						'AdTargetListId'=>$orderConfigData['AdTargetListId']
 					]
@@ -302,6 +313,7 @@
 					$bypostOrder = [];
 				}
 			}
+			$action ='sendEPGOrder';
 			
 			if(count($bypostOrder)!=0){
 				if(!sendOrder_VSM_batch("insertAdTargetRelationOnly",$bypostOrder,$orderId,"S")){
@@ -414,6 +426,7 @@
 			else
 				exit(json_encode(array("success"=>false,"message"=>'託播單送出失敗 ','id'=>$orderId),JSON_UNESCAPED_UNICODE));
 		}
+		
 
 		if($ptn == '單一平台advertising_page'){
 			//取得素材資訊
@@ -434,6 +447,8 @@
 					"content"=>"",
 					"imageId"=>"",
 					"vodURL"=>"",
+					"sdVodURL"=>""
+
 					"sdVodURL"=>"",
 					"adContentId"=>"",
 					"sdAdContentId"=>"",
@@ -472,16 +487,20 @@
 							if($om['影片媒體編號']==""||$om['影片媒體編號']==null){
 								exit(json_encode(array("success"=>false,"message"=>'託播單送出失敗 '.$om["素材名稱"].'未取得媒體編號','id'=>$orderId),JSON_UNESCAPED_UNICODE));
 							}
+							$material_url = $orderConfigData['url'].$om['影片媒體編號'].'_f';
+							if($om["影片畫質識別碼"]==2)
 							//$material_url = $orderConfigData['url'].$om['影片媒體編號'].'_f';
 							$material_url = getEdgeWareUrl($orderConfigData['url'],$om['影片媒體編號']);
 							$cdn = getCdnUrl($om['素材識別碼'],$om['素材原始檔名']);
 							if($om["影片畫質識別碼"]==2){
 								$Materials["vodURL"] = $material_url;
+							else if ($om["影片畫質識別碼"]==1)
 								$Materials["adContentId"] = $om['影片媒體編號'];
 								$Materials["cdnUrl"] = $cdn;
 							}
 							else if ($om["影片畫質識別碼"]==1){
 								$Materials["sdVodURL"] = $material_url;
+
 								$Materials["sdAdContentId"] = $om['影片媒體編號'];
 								$Materials["sdCdnUrl"] = $cdn;
 							}
@@ -510,8 +529,10 @@
 						"weight"=>$orderConfigData['weight'],
 						"material_link"=>$material_link,
 						//"material_link"=>$orderMaterial['點擊後開啟類型'],
+						"material_link_value"=>$material_link_value
 						"material_link_value"=>$material_link_value,
 						//"material_link_value"=>$orderMaterial['點擊後開啟位址']
+
 						"adContentId"=>$Materials["adContentId"],
 						"sdAdContentId"=>$Materials["sdAdContentId"],
 						"cdnUrl"=>$Materials["cdnUrl"],
@@ -595,6 +616,8 @@
 			$checkResult=cancelEPGOrder_VSM_action($orderId);
 		if(!$checkResult['success'])
 			exit(json_encode(array("success"=>false,"message"=>'託播單取消送出失敗 '.$checkResult['message'],'id'=>$orderId),JSON_UNESCAPED_UNICODE));
+		
+		$bypostOrder = replace_new_line_charater($bypostOrder);
 	}
 
 	function sendOrder_VSM_batch($action,$bypostOrder,$orderId,$area="N"){
@@ -602,18 +625,22 @@
 		//新增
 		$bypost=['action'=>$action,'orderData'=>$bypostOrder];
 		$postvars = http_build_query($bypost);
+		if(!$apiResult=connec_to_Api_json(Config_VSM_Meta::GET_AD_API(),'POST',$postvars)){
 		$url = Config_VSM_Meta::GET_AD_API($area);
 		//$url = Config_VSM_Meta::GET_AD_API();
 		$logger->error('嘗試連線VSM API:'.$url);
 		if(!$apiResult=connec_to_Api_json($url,'POST',$postvars)){
 			$logger->error('無法連VSM API');
+			exit(json_encode(array("success"=>false,"message"=>'無法連接VSM託播單API','id'=>$orderId),JSON_UNESCAPED_UNICODE));	
 			exit(json_encode(array("success"=>false,"message"=>'無法連接VSM託播單API:'.$url,'id'=>$orderId),JSON_UNESCAPED_UNICODE));	
 		}
 		$checkResult = json_decode($apiResult,true);
 		
 		if($checkResult['success'])
+			changeOrderSate('送出',array($orderId));
 			return true;
 		else
+			exit(json_encode(array("success"=>false,"message"=>'託播單送出失敗 '.$checkResult['message'],'id'=>$orderId),JSON_UNESCAPED_UNICODE));	
 			return false;
 	}
 	
@@ -671,6 +698,7 @@
 		curl_setopt($ch, CURLOPT_TIMEOUT, 500);
 		//curl_setopt($ch, CURLOPT_HEADER, true);
 		$apiResult = curl_exec($ch);
+		//$logger->error('錯誤代號:'.$apiResult .'/無法連接API:'.$url);
 		if(curl_errno($ch))
 		{
 			$logger->error('錯誤代號:'.curl_errno($ch).'無法連接API:'.$url);
@@ -696,6 +724,12 @@
         }
         return $result;
 	}
+
+
+
+
+
+
 
 	function getEdgeWareUrl($relprefix,$contentId){
 		$contentIdPre4 = substr($contentId, 0,4);
