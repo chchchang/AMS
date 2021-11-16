@@ -696,7 +696,7 @@
 			}
 		}
 		
-		$sendAction = getActionFormRemote($res[0]['版位類型名稱'],$sendAction,$area,$res[0]['託播單CSMS群組識別碼']);
+		//$sendAction = getActionFormRemote($res[0]['版位類型名稱'],$sendAction,$area,$res[0]['託播單CSMS群組識別碼']);
 		return array('area'=>$area,'sendAction'=>$sendAction,'gId'=>$res[0]['託播單CSMS群組識別碼'],'startTime'=>$startTime,'endTime'=>$endTime);
 	}
 	

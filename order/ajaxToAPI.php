@@ -82,6 +82,7 @@
 			case "單一平台marquee":
 			case "單一平台background_banner":
 			case "單一平台advertising_page":
+			case "單一平台floating_banner":
 				require_once 'ajaxToAPI_VSM.php';
 				sendOrder_VSM($_POST["託播單識別碼"]);
 				break;

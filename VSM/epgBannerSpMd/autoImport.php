@@ -10,7 +10,6 @@ date_default_timezone_set("Asia/Taipei");
 require_once('../../Config_VSM_Meta.php');
 require_once('../../Config.php');
 require_once('sepgSpMdParser.php');
-require_once('../../tool/MyLogger.php');
 require_once('../../tool/MyDB.php');
 set_include_path('../../tool/phpseclib');
 include('Net/SFTP.php');
@@ -29,7 +28,6 @@ class autoPraser{
 		//$this->awaitingDir = Config::$FTP_SERVERS['IAB'][0]['complete'];
 		//正式
 		$this->awaitingDir = Config::$FTP_SERVERS['IAB'][0]['awaiting'];
-
 		$this->completeDir = Config::$FTP_SERVERS['IAB'][0]['complete'];
 		$this->conn = $this->getConnect();
         
@@ -37,11 +35,9 @@ class autoPraser{
 	function execute(){
 		if($this->conn){
 			$remoteFiles = $this->getRemote();
-			print_r($remoteFiles);
 			if(count($remoteFiles)>0){
 				$fileName = $remoteFiles[0];
 				$result = $this->importRemoteFile($fileName);
-				print_r($result);
 			}
 		}
 		else{
@@ -55,8 +51,9 @@ class autoPraser{
 		$nlist = $this->conn->nlist($this->awaitingDir);
 		$srotArray = array();
 		foreach($nlist as $n){
-			if($n=='.'||$n=='..')
+			if($n=='.'||$n=='..'){
 				continue;
+			}
 			//去除資料夾路徑
 			$ndirname = str_replace($this->awaitingDir,'',$n);
 			//取得日期
@@ -82,23 +79,25 @@ class autoPraser{
 		//下載檔案並匯入
 		//下載檔案
 		if(!$this->conn->get($remoteFile, $localFile)){
-			(new MyLogger())->error('無法下載FTP server('.$remoteFile.')檔案到('.$localFile.')。');
-			exit("下載遠端檔案失敗");
+			exit('無法下載FTP server('.$remoteFile.')檔案到('.$localFile.')。');
 		}
 		//匯入檔案
 		$result = $this->importFile($localFile);
-		if(!$result["success"])
+		if(!$result["success"]){
 			exit(($result["message"]));
+		}
 		//刪除遠端檔案
 		$result=$this->deleteRemote($remoteFile,$this->conn);
-		if(!$result["success"])
+		if(!$result["success"]){
 			exit(($result["message"]));
+		}
 		//上傳檔案到complete資料夾
 		$result=$this->putToComplete($remoteFile_complete,$localFile,$this->conn);
-		if(!$result["success"])
+		if(!$result["success"]){
 			exit(($result["message"]));
-		
-		(new MyLogger())->info('匯入遠端檔案成功'.$fileName.'成功');		
+		}
+
+		echo '匯入遠端檔案成功'.$fileName.'成功\n';
 		return $result;
     }
 
@@ -112,7 +111,7 @@ class autoPraser{
 		ftp_login($conn,$usr,$pd);*/
 		$conn = new Net_SFTP($url);
 		if (!$conn->login($usr, $pd)) {
-			(new MyLogger())->error('無法Sftp連線到FTP server('.$url.')');
+			echo '無法Sftp連線到FTP server('.$url.')\n';
 			return false;
 		}
 		return $conn;
@@ -135,8 +134,7 @@ class autoPraser{
 		$upload = $conn->delete($fileName); 
 		// check upload status
 		if (!$upload) { 
-			(new MyLogger())->error('移除遠端檔案'.$fileName.'失敗');
-			return ["success"=>false,"message"=>"移除遠端檔案失敗"];
+			return ["success"=>false,"message"=>'移除遠端檔案'.$fileName.'失敗'];
 		} else {
 			return ["success"=>true,"message"=>"已將遠端檔案移除"];
 		}
@@ -146,8 +144,7 @@ class autoPraser{
 		$upload = $conn->put($remoteFile, $localFile, NET_SFTP_LOCAL_FILE);
 		// check upload status
 		if (!$upload) { 
-			(new MyLogger())->error('檔案'.$remoteFile.'上傳到complete資料夾失敗失敗');
-			return ["success"=>false,"message"=>"檔案上傳到complete資料夾失敗"];
+			return ["success"=>false,"message"=>'檔案'.$remoteFile.'上傳到complete資料夾失敗失敗'];
 		} else {
 			return ["success"=>true,"message"=>"已將檔案上傳到complete資料夾"];
 		}
