@@ -28,6 +28,7 @@ class autoPraser{
 		//$this->awaitingDir = Config::$FTP_SERVERS['IAB'][0]['complete'];
 		//正式
 		$this->awaitingDir = Config::$FTP_SERVERS['IAB'][0]['awaiting'];
+
 		$this->completeDir = Config::$FTP_SERVERS['IAB'][0]['complete'];
 		$this->conn = $this->getConnect();
         

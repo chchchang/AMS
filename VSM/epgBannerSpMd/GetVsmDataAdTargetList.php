@@ -1,12 +1,3 @@
-
-
-
-
-
-
-
-
-
 <?php
 /*****
 連線VSM資料庫取得白名單資訊
@@ -19,7 +10,6 @@ class GetVsmDataAdTargetList{
             $this->url =Config_VSM_Meta::VSM_API_ROOT_S.'epgBannerAuth/ajax_ad_target_list.php';
         }
         else{
-            
             $this->url = Config_VSM_Meta::VSM_API_ROOT.'epgBannerAuth/ajax_ad_target_list.php';
         }
     }
@@ -79,5 +69,3 @@ class GetVsmDataAdTargetList{
 
 
 ?>
-
-

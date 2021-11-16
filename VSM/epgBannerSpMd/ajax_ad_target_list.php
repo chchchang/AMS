@@ -1,19 +1,11 @@
-
-
-
-
-
-
-
-
 <?php
 /*****
 連線資料庫並取得或更新白名單資訊
 *****/
 header("Content-Type: application/json; charset=utf-8");
 require_once '../../Config_VSM_Meta.php';
-$url_n = Config_VSM_Meta::VSM_API_ROOT.'epgBannerAuth/ajax_ad_tadret_list.php';
-$url_s = Config_VSM_Meta::VSM_API_ROOT_S.'epgBannerAuth/ajax_ad_tadret_list.php';
+$url_n = Config_VSM_Meta::VSM_API_ROOT.'epgBannerAuth/ajax_ad_target_list.php';
+$url_s = Config_VSM_Meta::VSM_API_ROOT_S.'epgBannerAuth/ajax_ad_target_list.php';
 if($_POST["area"]=="S"){
     $url = $url_s;
 }

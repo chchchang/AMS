@@ -15,14 +15,11 @@ class sepgSpMdParserMulti{
 	var $url_s = "";
 	function __construct($filename){
 		$this->mdFileName = $filename;
-		//錯誤名稱 下次修正
 		$this->url_n = Config_VSM_Meta::VSM_API_ROOT.'epgBannerAuth/ajax_ad_target_list.php';
 		$this->url_s = Config_VSM_Meta::VSM_API_ROOT_S.'epgBannerAuth/ajax_ad_target_list.php';
-		//$this->url_n = Config_VSM_Meta::VSM_API_ROOT.'epgBannerAuth/ajax_ad_tadret_list.php';
-		//$this->url_s = Config_VSM_Meta::VSM_API_ROOT_S.'epgBannerAuth/ajax_ad_tadret_list.php';
 		$this->logfile = fopen("log/sepgSpMdParserMulti.log.".date("Ymd"), "a+");
 		//*******test 
-		/*$this->url_n = 'http://172.18.44.99/_ad_target_list.php';
+		/*$this->url_n = 'http://172.18.44.99/epgBannerAuth/ajax_ad_target_list.php';
 		$this->url_s = 'http://172.18.44.99/epgBannerAuth/ajax_ad_target_list.php';*/
 	}
 	
