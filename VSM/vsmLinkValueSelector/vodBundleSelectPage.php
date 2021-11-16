@@ -19,6 +19,8 @@ date_default_timezone_set("Asia/Taipei");
 	<th>畫質</th> 
 	<th>類型</th>
 	<th>路徑</th>
+	<th>上架時間</th>
+	<th>下架時間</th>
 </tr>
 </thead>
 <tbody style="width:100%" id = "dataGridTBody" >
@@ -62,7 +64,10 @@ function showDataGrid(gridData){
 		var cid = row["category_id"];
 		var pen = row["product_name_en"];
 		var purl = row["poster_url"];
+		var start = row["start_time"];
+		var end = row["end_time"];
 		$("<tr><td><button class = 'darkButton selectBtn'>選擇</button></td><td class='pid'>"+pid+"</td><td class='pn'>"+pn+"</td><td class='quality'>"+quality+"</td><td class='ptn'>"+ptn+"</td><td class='cid'>"+cid+"</td>"
+		+"<td class='start_time'>"+start+"</td><td class='end_time'>"+end+"</td>"
 		+"<td class='product_name_en' hidden>"+pen+"</td><td class='poster_url' hidden>"+purl+"</td></tr>").appendTo("#dataGridTBody");
 	}
 	setSelectBtnTrigger();
@@ -86,7 +91,12 @@ function setSelectBtnTrigger(){
 				selectValues["product_name_en"] = $(this).text();
 			else if($(this).hasClass("poster_url"))
 				selectValues["poster_url"] = $(this).text();
+			else if($(this).hasClass("start_time"))
+				selectValues["start_time"] = $(this).text();
+			else if($(this).hasClass("end_time"))
+				selectValues["end_time"] = $(this).text();
 		});
+		console.log(selectValues);
 		window.parent.$("#vodBundleSelectorSubFrame").trigger("selectVod",[selectValues]);
 	});
 }

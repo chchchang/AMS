@@ -7,14 +7,11 @@ class GetVsmDataAdTargetList{
     var $url = "";
     function __construct($area){
         if($area == "S"){
-            //錯誤名稱 下次修正
-            //$this->url =Config_VSM_Meta::VSM_API_ROOT_S.'epgBannerAuth/ajax_ad_target_list.php';
-            $this->url =Config_VSM_Meta::VSM_API_ROOT_S.'epgBannerAuth/ajax_ad_tadret_list.php';
+            $this->url =Config_VSM_Meta::VSM_API_ROOT_S.'epgBannerAuth/ajax_ad_target_list.php';
         }
         else{
-            //錯誤名稱 下次修正
-            //$this->url = Config_VSM_Meta::VSM_API_ROOT.'epgBannerAuth/ajax_ad_target_list.php';
-            $this->url =Config_VSM_Meta::VSM_API_ROOT.'epgBannerAuth/ajax_ad_tadret_list.php';
+            
+            $this->url = Config_VSM_Meta::VSM_API_ROOT.'epgBannerAuth/ajax_ad_target_list.php';
         }
     }
 

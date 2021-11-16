@@ -22,13 +22,19 @@
 			$stmt->execute();
 			$res=$stmt->get_result();
 			if(!$row=$res->fetch_assoc())
-				$msg='<script>alert("現在密碼輸入錯誤！");</script>';
+				$msg='<script>alert("當前密碼輸入錯誤！");</script>';
 			else{
-				$sql='UPDATE 使用者 SET 使用者密碼=?,LAST_UPDATE_TIME=CURRENT_TIMESTAMP,LAST_UPDATE_PEOPLE=? WHERE 使用者識別碼=? AND 使用者密碼=?';
-				$stmt=$my->prepare($sql);
-				$stmt->bind_param('sisi',$使用者新密碼,$_SESSION['AMS']['使用者識別碼'],$_SESSION['AMS']['使用者識別碼'],$使用者舊密碼);
-				$stmt->execute();
-				$msg='<script>alert("修改成功，請重新登入。");top.window.location.replace("logout.php");</script>';
+				if($row['父代使用者密碼']==$使用者新密碼||$row['祖代使用者密碼']==$使用者新密碼)
+				{
+					$msg='<script>alert("新密碼不可與前三代密碼相同!");</script>';
+				}
+				else{
+					$sql='UPDATE 使用者 SET 祖代使用者密碼=父代使用者密碼,父代使用者密碼=使用者密碼,使用者密碼=?,LAST_UPDATE_TIME=CURRENT_TIMESTAMP,LAST_UPDATE_PEOPLE=? WHERE 使用者識別碼=? AND 使用者密碼=?';
+					$stmt=$my->prepare($sql);
+					$stmt->bind_param('sisi',$使用者新密碼,$_SESSION['AMS']['使用者識別碼'],$_SESSION['AMS']['使用者識別碼'],$使用者舊密碼);
+					$stmt->execute();
+					$msg='<script>alert("修改成功，請重新登入。");top.window.location.replace("logout.php");</script>';
+				}
 			}
 		}
 	}
@@ -44,7 +50,7 @@
 	<fieldset>
     <legend>修改密碼：</legend>
 	<table cellspacing="0">
-	<tr> <td>請輸入現在密碼：</td><td><input type="password" name="old" autocomplete="off"></td></tr>
+	<tr> <td>請輸入當前密碼：</td><td><input type="password" name="old" autocomplete="off"></td></tr>
 	<tr>
 	<td>請輸入新密碼：</td><td><input type="password" name="new1" autocomplete="off" onKeyUp=pwStrength(this.value) onBlur=pwStrength(this.value)>
 	</td>

@@ -118,5 +118,12 @@
 			}
 			return true;
 		}
+		
+		//取得檔案最後調整時間
+		public static function getFileAccessTime($host,$username,$password,$remote){
+			if(!$sftp=self::connect($host,$username,$password))
+				return false;
+			return $sftp->filemtime($remote);
+		}
 	}
 ?>

@@ -81,12 +81,6 @@
 		$limitedEdit = 'true';
 		echo '此版位類型已建立版位，素材與參數的修改將被限制。';
 	}
-
-	$inPicUrl = "";
-	foreach (glob ("image/".$id.".*") as $filename) {
-		$inPicUrl = $filename;
-		break;
-	}
 ?>
 <!DOCTYPE html>
 <html>
@@ -96,6 +90,7 @@
 ?>
 <script type="text/javascript" src="../tool/jquery-3.4.1.min.js"></script>
 <script type="text/javascript" src="../tool/ajax/ajaxToDB.js"></script> 
+<script type="text/javascript" src="../tool/jquery-plugin/jquery.form.js"></script>
 <link rel="stylesheet" href="<?=$SERVER_SITE.Config::PROJECT_ROOT?>tool/jquery-ui1.2/jquery-ui.css">
 <script src="../tool/jquery-ui1.2/jquery-ui.js"></script>
 <link rel='stylesheet' type='text/css' href='<?=$SERVER_SITE.Config::PROJECT_ROOT?>external-stylesheet.css' /> 
@@ -144,7 +139,7 @@ button{
 			<p>託播單介接API位址: <input id = "orderApi" type="text" value = "" ></p>
 			<p>排程表介接API位址: <input id = "schApi" type="text" value = "" ></p>
 			<p>使用記錄介接API位址: <input id = "logApi" type="text" value = "" ></p>
-			<p>版位示意圖: <img id = "infoPic" src="<?=$inPicUrl?>" alt="<?=$inPicUrl?>"><button type="button" class="darkButton" onclick = "uploadInfoPic()">上傳圖片</button></p>
+			<p>版位示意圖: <img id = "infoPic" src="" onerror="this.style.display='none'"><button type="button" class="darkButton2" onclick = "openInfoPicDia()" id="updateInfoPicBtn">更新圖片</button></p>
 			<p>設定素材 <button type="button" class="darkButton" onclick = "addMaterial()">新增素材</button></p>
 			<ul id="sortableMaterial"></ul>
 			<p><label>其他參數:</label><button type="button" class="darkButton" onclick = "addConfig()">新增參數</button></p>
@@ -154,13 +149,20 @@ button{
 	</div>
 	<div id='dialogDiv'><iframe id = 'dialogIframe' width='100%' height='100%'></iframe></div>
 </div>
+<div id = "uploadInfoPicDialog">
+<table>
+	<tr><th>上傳的素材檔案:</th><td><form action="ajaxUploadingFile.php" method="post" enctype="multipart/form-data" id="uploadFileForm">
+		<input type="hidden" name="MAX_FILE_SIZE" value="800000000">
+		<input type="file" name="fileToUpload" id="fileToUpload" accept="image/gif,image/jpeg,image/png,image/jpg"></form><button type="button" class="darkButton2" onclick = "uploadInfoPic()">上傳</button></form></td></tr>
+</table>
+</div>
 <script type="text/javascript">
 var action = '<?=$action?>';
 var id = <?=$id?>;
 var positionPage=<?=$positionPage?>;
 var limitedEdit = <?=$limitedEdit?>;
 var removeIntent = false;
-$( "#dialogDiv" ).dialog(
+$( "#dialogDiv,#uploadInfoPicDialog" ).dialog(
 	{autoOpen: false,
 	width: 600,
 	height: 400,
@@ -211,6 +213,7 @@ if(!positionPage){
 	$( "#sortableMaterial,#sortableOther" ).disableSelection();
 	if(action=='edit'||action=='info'){
 		getDBVal();
+		$("#updateInfoPicBtn").show();
 	}
 
 	if(action=='info'){
@@ -301,6 +304,14 @@ function showVal(json){
 	if(action=='info'){
 		$('input').prop('disabled',true);
 	}
+	$.post("ajaxPositionInfoPic.php",{"action":"getInfoPic","版位識別碼":id}
+		,function(data){
+			if(data["success"]){
+				$("#infoPic").attr("src",data["src"])
+			}
+		}
+		,"json"
+	);
 }
 
 function clearVal(){
@@ -615,8 +626,44 @@ function otherConfigEdit(jobject){
 	$('#dialogDiv').dialog('close');
 }
 
+function openInfoPicDia(){
+	$("#uploadInfoPicDialog").dialog("open");
+}
+
 function uploadInfoPic(){
+	var options = { 
+		// target:        '#output1',   // target element(s) to be updated with server response 
+        //beforeSubmit:  showRequest,  // pre-submit callback 
+        success:	upLoadResponse, // post-submit callback 
+		dataType:	'json',
+		data: {
+			"版位識別碼":id
+        }, 
+        // other available options: 
+        //url:       url         // override for form's 'action' attribute 
+        //type:      type        // 'get' or 'post', override for form's 'method' attribute 
+        //dataType:  null        // 'xml', 'script', or 'json' (expected server response type) 
+        //clearForm: true        // clear all form fields after successful submit 
+        //resetForm: true        // reset the form after successful submit 
+
+        // $.ajax options can be used here too, for example: 
+        //timeout:   3000 
+    }; 
+	$( "#dialog_form2" ).dialog('open');
+	$("#uploadFileForm").ajaxForm(options).submit();
 	
+	function upLoadResponse(response, statusText, xhr, $form)  {
+		if(statusText=='success'){
+			
+			if(response['success']){
+				//saveToDb();
+				$( "#uploadInfoPicDialog" ).dialog('close');
+			}
+			else{
+				alert(response['message']);
+			}
+		}
+	}
 }
 
 </script>

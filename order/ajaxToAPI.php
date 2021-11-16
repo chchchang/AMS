@@ -318,7 +318,7 @@
 			//確認素材是否被派送
 			if($row2['素材類型名稱']=='影片'){
 				//檢查影片是否派送
-				if($row['版位類型名稱']=='前置廣告投放系統' || $row['版位類型名稱']=='專區vod'){
+				if($row['版位類型名稱']=='前置廣告投放系統' || $row['版位類型名稱']=='專區vod' || $row['版位類型名稱']=='單一平台barker_vod'){
 					if($row2['影片媒體編號']==null || $row2['影片媒體編號']==''){
 						return array("success"=>false,"message"=>'素材尚未派送至自動派片系統');
 					}
@@ -366,13 +366,19 @@
 					$type = '專區';
 				else if(substr($row['版位類型名稱'],0,12)=='單一平台'){
 					require_once '../tool/SFTP.php';
+					$expiredDate = date("Y-m-d",strtotime("-3 Months"));
 					foreach(Config::$FTP_SERVERS['VSM'] as $server){
 						$遠端路徑=$server['圖片素材路徑'];
 						$fileNamePatterns = explode(".",$row2['素材原始檔名']);
 						$fileName ='_____AMS_'.$row2['素材識別碼'].'.'.end($fileNamePatterns);
 						$isfile =SFTP::isFile($server['host'],$server['username'],$server['password'],$遠端路徑.$fileName);
-						if(!$isfile)
-						return array("success"=>false,"message"=>'素材尚未派送到VSM');
+						if(!$isfile){
+							return array("success"=>false,"message"=>'素材尚未派送到VSM');
+						}
+						$lastMDate = date("Y-m-d", SFTP::getFileAccessTime($server['host'],$server['username'],$server['password'],$遠端路徑.$fileName));
+						if($expiredDate>=$lastMDate){
+							return array("success"=>false,"message"=>'素材過舊，請重新派送。');
+						}
 					}
 					return array("success"=>true,"message"=>'success');
 				}else if($row['版位類型名稱']=='鑽石版位'||$row['版位類型名稱']=='奧運外掛專區廣告_2021')

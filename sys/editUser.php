@@ -41,6 +41,32 @@
 			$msg='<script>alert("修改成功！")</script>';
 		}
 	}
+	else if(isset($_POST['使用者識別碼'])&&isset($_POST['method'])&&$_POST['method']=="reset") {
+		$sql='UPDATE 使用者 SET 使用者密碼="5ceacb98fa3a434e46e0722a22bcf037",啟用=1,LAST_UPDATE_TIME=NOW(),LAST_UPDATE_PEOPLE=? WHERE 使用者識別碼=?';
+		if(!$stmt=$my->prepare($sql)) {
+			$logger->error('無法準備statement，錯誤代碼('.$my->errno.')、錯誤訊息('.$my->error.')。');
+			exit('無法準備statement，請聯絡系統管理員！');
+		}
+		
+		if(!$stmt->bind_param('ii',$_SESSION['AMS']['使用者識別碼'],$_POST['使用者識別碼'])) {
+			$logger->error('無法繫結資料，錯誤代碼('.$stmt->errno.')、錯誤訊息('.$stmt->error.')。');
+			exit('無法繫結資料，請聯絡系統管理員！');
+		}
+		
+		if(!$stmt->execute()) {
+			if($stmt->errno==1062){
+				$msg='<script>alert("修改失敗-重複的使用者帳號！")</script>';
+			}
+			else{
+				$logger->error('無法執行statement，錯誤代碼('.$stmt->errno.')、錯誤訊息('.$stmt->error.')。');
+				exit('無法執行statement，請聯絡系統管理員！');
+			}
+		}
+		else {
+			$logger->info('"使用者識別碼('.$_SESSION['AMS']['使用者識別碼'].')"修改"使用者識別碼('.intval($_POST['使用者識別碼']).')"資料成功');
+			$msg='<script>alert("重置成功！")</script>';
+		}
+	}
 	
 	//再處理查詢
 	$searchBy=isset($_GET['searchBy'])?'%'.$_GET['searchBy'].'%':'%';
@@ -74,9 +100,9 @@
 	
 	$DG1_data=array();
 	while($row=$res->fetch_assoc()) {
-		$DG1_data[]=array(array($row['使用者識別碼']),array($row['使用者帳號']),array($row['使用者姓名']),array($row['使用者電話']),array($row['啟用']==1?'啟用':'停用'),array('修改','button'),array($row['啟用']==1?'停用':'啟用','button'));
+		$DG1_data[]=array(array($row['使用者識別碼']),array($row['使用者帳號']),array($row['使用者姓名']),array($row['使用者電話']),array($row['啟用']==1?'啟用':'停用'),array('修改','button'),array($row['啟用']==1?'停用':'啟用','button'),array('重置','button'));
 	}
-	$DG1_header=array('使用者識別碼','使用者帳號','使用者姓名','使用者電話','狀態','修改','切換所訂狀態');
+	$DG1_header=array('使用者識別碼','使用者帳號','使用者姓名','使用者電話','狀態','修改','切換鎖定狀態',"重置");
 	$DG1_header=json_encode($DG1_header,JSON_UNESCAPED_UNICODE);
 	$DG1_data=json_encode($DG1_data,JSON_UNESCAPED_UNICODE);
 ?>
@@ -118,7 +144,7 @@
 						$('form[method=post]').show(500);
 					}
 					else if(row[x][0]=='停用'){
-						$.post('ajaxToDb_user.php',{'method':'停用使用者','使用者識別碼':row[0][0]},
+						$.post('',{'method':'停用使用者','使用者識別碼':row[0][0]},
 							function(data){
 								alert(data);
 								 location.reload();
@@ -126,7 +152,15 @@
 						);
 					}
 					else if(row[x][0]=='啟用'){
-						$.post('ajaxToDb_user.php',{'method':'啟用使用者','使用者識別碼':row[0][0]},
+						$.post('',{'method':'啟用使用者','使用者識別碼':row[0][0]},
+							function(data){
+								alert(data);
+								 location.reload();
+							}
+						);
+					}
+					else if(row[x][0]=='重置'){
+						$.post('',{'method':'reset','使用者識別碼':row[0][0]},
 							function(data){
 								alert(data);
 								 location.reload();

@@ -139,6 +139,9 @@
 <meta http-equiv="Content-Type" content="text/html; charset=utf-8">
 <script type="text/javascript" src="tool/jquery-3.4.1.min.js"></script>
 <script type="text/javascript" src="tool/jquery-plugin/jquery.placeholder.min.js"></script>
+<script type="text/javascript" src="tool/jquery-plugin/jquery.keypad/js/jquery.plugin.min.js"></script>
+<script type="text/javascript" src="tool/jquery-plugin/jquery.keypad/js/jquery.keypad.min.js"></script>
+<link rel="stylesheet" href="tool/jquery-plugin/jquery.keypad/css/jquery.keypad.css">
 <style type="text/css">
 body{
 text-align:center
@@ -271,10 +274,21 @@ filter: progid:DXImageTransform.Microsoft.gradient( startColorstr='#bfffffff', e
 	   //top.location = self.location;
 	}
 $(function(){
-		// 幫有 placeholder 屬性的輸入框加上提示效果
-		$('input').placeholder();
-	});
+	// 幫有 placeholder 屬性的輸入框加上提示效果
+	$('input').placeholder();
 
+	//動態鍵盤
+	$('#magicword').keypad({
+		buttonImageOnly: true,
+		keypadOnly:false,
+		layout: [
+				'1234567890' + $.keypad.CLOSE,
+				'abcdefghij' + $.keypad.CLEAR,
+				'klmnopqrst' + $.keypad.BACK,
+				'uvwxyz@_-.' + $.keypad.SHIFT
+				]
+	});
+});
 </script>
 </head>
 <body>

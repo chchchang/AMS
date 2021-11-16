@@ -145,6 +145,7 @@ td.ui-datepicker-current-day a {border: 2px #E63F00 solid !important;}
 					 select: function( event, ui ) {
 						$("#position").combobox('setText','');
 						setPosition(this.value);
+						setPositionInfoPic();
 					 }
 				});
 			}
@@ -173,8 +174,22 @@ td.ui-datepicker-current-day a {border: 2px #E63F00 solid !important;}
 			select: function( event, ui ) {
 				positionId=this.value;
 				setDatePicker(new Date());
+				setPositionInfoPic();
 			}
 		});
+
+		//顯示板位示意圖
+		function setPositionInfoPic(){
+			console.log($( "#position option:selected" ).val()+"  "+$( "#positiontype option:selected" ).val());
+			$.post("../position/ajaxPositionInfoPic.php",{"action":"getInfoPic","版位識別碼":$( "#position option:selected" ).val(),"版位類型識別碼":$( "#positiontype option:selected" ).val()}
+				,function(data){
+					if(data["success"]){
+						$("#positionInfoPic").attr("src",data["src"]);
+					}
+				}
+				,"json"
+			);
+		}
 		
 		$('#previousDate').click(function() {
 			if($('#time').datepicker('getDate')) {
@@ -670,7 +685,7 @@ td.ui-datepicker-current-day a {border: 2px #E63F00 solid !important;}
 </head>
 <body>
 <p>版位類型:<select id="positiontype" name="positiontype"></select> 版位名稱:<select id="position" ></select> <button id='selectOrder' class ='darkButton' onClick='openSelectDia()'>利用託播單查詢排程</button></p>
-
+<p><img id="positionInfoPic" src="" /></p>
 <div><button id="previousDate">上一日</button><input type="text" id="time"><button id="nextDate">下一日</button></div>
 <br>
 

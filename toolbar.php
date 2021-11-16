@@ -104,6 +104,7 @@
 	<li id="VSM/epgBannerAuth/managementPage.php">單一平台EPG Banner撥放權限管理</li>
 	<li id="other/VSM/epgBannerSpMd/managementPage.php">單一平台EPG白名單匯入管理</li>
 	<li id="other/TVDM/managementPage.php">TVDM服務管理</li>
+	<li id="other/OlympicHotPoint/managementPage.php">2021奧運熱點回看URL設定</li>
 	</ul>
 </li>
 

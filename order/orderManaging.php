@@ -122,6 +122,7 @@ u{
 <div id="dialog_form"><iframe id="dialog_iframe" width="100%" height="100%" frameborder="0" scrolling="yes"></iframe></div>
 <div id="dialog_form2"><iframe id="dialog_iframe2" width="100%" height="100%" frameborder="0" scrolling="yes"></iframe></div>
 <p>版位類型:<select id="positiontype"></select> 版位名稱:<select id="position" ></select><button type="button" onclick = "createOrder()" id ="newOrderBtn" >新增託播單到此版位</button></p>
+<p><img id="positionInfoPic" src="" /></p>
 <div id = "dateDiv">
 <button id="preday">上一日</button><input type="text" id="datePicker" style="width:100px" readonly></input><button id="nextday">下一日</button>	
 <div id = 'timetables'>
@@ -174,6 +175,8 @@ u{
 			$( "#positiontype" ).combobox({
 				 select: function( event, ui ) {
 					setPosition(this.value,"");
+					//顯示板位類型示意圖
+					setPositionInfoPic();
 				 }
 			});
 		}
@@ -208,6 +211,28 @@ u{
 				}
 				$( "#position" ).val(selectedId);
 				prepareTimeTable(selectedId);
+				setPositionInfoPic();
+
+				$( "#position" ).combobox({
+					select: function( event, ui ) {
+					//顯示板位類型示意圖
+					setPositionInfoPic();
+					}
+				});
+			}
+			,"json"
+		);
+		
+	}
+
+	//顯示板位示意圖
+	function setPositionInfoPic(){
+		console.log($( "#position option:selected" ).val()+"  "+$( "#positiontype option:selected" ).val());
+		$.post("../position/ajaxPositionInfoPic.php",{"action":"getInfoPic","版位識別碼":$( "#position option:selected" ).val(),"版位類型識別碼":$( "#positiontype option:selected" ).val()}
+			,function(data){
+				if(data["success"]){
+					$("#positionInfoPic").attr("src",data["src"]);
+				}
 			}
 			,"json"
 		);

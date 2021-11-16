@@ -7,7 +7,7 @@
 			$sql ='
 			SELECT 版位.版位名稱 ,版位.版位識別碼
 			FROM 版位,版位 版位類型
-			WHERE 版位.上層版位識別碼 = 版位類型.版位識別碼 AND 版位類型.版位名稱 = "頻道short EPG banner"
+			WHERE 版位.上層版位識別碼 = 版位類型.版位識別碼 AND 版位類型.版位名稱 = "頻道short EPG banner" AND 版位.DISABLE_TIME IS NULL AND 版位.DELETED_TIME IS NULL
 			';
 			$result=$my->getResultArray($sql);
 			exit(json_encode($result,JSON_UNESCAPED_UNICODE));

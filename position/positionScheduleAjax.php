@@ -207,9 +207,9 @@ function getPositionSchedule(){
 	$edate=date_create($_POST["結束日期"]);
 	$diff=date_diff($sdate,$edate)->format("%a");
 	$YearMonth = array();
-	$temp='<tr><th style="min-width:150px;max-height:42px">年月</th><th rowspan = 2 colspan=3></th>';
+	$temp='<tr><th style="min-width:150px;max-height:42px">年月</th><th rowspan = 2 colspan=4></th>';
 	$temp2='<tr><th>日</th>';
-	$temp3='<tr><th>星期</th><th>no</th><th>託播單名稱</th><th>狀態</th>';
+	$temp3='<tr><th>星期</th><th>no</th><th>託播單識別碼</th><th>託播單名稱</th><th>狀態</th>';
 	for($i =0;$i<=$diff;$i++){
 		$date = strtotime($_POST["開始日期"]. ' + '.$i.' days');
 		$ym=date('Y-m', $date);
@@ -260,6 +260,7 @@ function getPositionSchedule(){
 				if(!$first)
 					$scheduleHtml.='<tr>';
 				$scheduleHtml.='<td bgcolor="'.$bgcolor[$positionCount%count($bgcolor)].'">'.(++$orderNum).'</td>';
+				$scheduleHtml.='<td bgcolor="'.$bgcolor[$positionCount%count($bgcolor)].'">'.$order['託播單識別碼'].'</td>';
 				$scheduleHtml.='<td bgcolor="'.$bgcolor[$positionCount%count($bgcolor)].'">'.$order['託播單名稱'].'</td>';
 				$scheduleHtml.='<td bgcolor="'.$bgcolor[$positionCount%count($bgcolor)].'">'.$orderStatusName.'</td>';
 				$std = explode(' ',$order['廣告期間開始時間'])[0];

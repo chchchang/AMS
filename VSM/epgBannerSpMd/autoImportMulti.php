@@ -58,12 +58,16 @@ class autoPraser{
 			//去除資料夾路徑
 			$ndirname = str_replace($this->awaitingDir,'',$n);
 			//取得ID
-			preg_match('/(\S+)_SepgSpMd\_(\S+)\.dat/', $ndirname, $matches);
-			if(count($matches)==0)
-				preg_match('/(\S+)_SepgSpMD\_(\S+)\.dat/', $ndirname, $matches);
-			
+			preg_match('/(\S+)_SepgSpMd\_(\S+)\_(\S+)\.dat/i', $ndirname, $matches);
+			if(count($matches)==4){
 				$id = $matches[2];
-			$srotArray[] = array("name"=>$ndirname,"id"=>$id);
+				$startDate = $matches[3];
+				//若白名單在五天內生效才自動include
+				$currentDate = date("Ymd", time() + 3600*24*5);
+				echo $currentDate."\n";
+				if($currentDate>=$startDate)
+					$srotArray[] = array("name"=>$ndirname,"id"=>$id);
+			}
 		};
 		//依照日期排序
 		//usort($srotArray,array('autoPraser','cmp'));

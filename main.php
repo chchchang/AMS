@@ -1,4 +1,7 @@
 <?php
+	/**
+	 * 2021/09/24 首頁顯示託播單時僅顯示個人託播單
+	 */
 	include('tool/auth/auth.php');
 	define('PAGE_SIZE',10);
 	if(isset($_POST['action'])){
@@ -18,11 +21,6 @@
 					託播單狀態.託播單狀態名稱 IN (\'預約\') AND
 					託播單.CREATED_PEOPLE=使用者.使用者識別碼 AND
 					託播單.預約到期時間>=\''.date('Ymd').'\'
-				ORDER BY
-					託播單.預約到期時間 ASC,
-					託播單.廣告期間開始時間 ASC,
-					託播單.廣告期間結束時間 ASC,
-					託播單.託播單識別碼
 			';
 			if(!$result=$my->getResultArray($sql)) $result=array();
 			$totalRowCount=$result[0]['C'];
@@ -43,7 +41,7 @@
 					託播單狀態.託播單狀態名稱 IN (\'預約\') AND
 					託播單.CREATED_PEOPLE=使用者.使用者識別碼 AND
 					託播單.預約到期時間>=\''.date('Ymd').'\'
-				ORDER BY '.$_POST['order'].' '.$_POST['asc'].' '.
+				ORDER BY FIELD(使用者.使用者識別碼, "'.$_SESSION['AMS']['使用者識別碼'].'")  DESC,'.$_POST['order'].' '.$_POST['asc'].' '.
 				'LIMIT ?,'.PAGE_SIZE.'
 			';
 			if(!$result=$my->getResultArray($sql,'i',$fromRowNo)) $result=array();			
@@ -76,11 +74,6 @@
 					託播單狀態.託播單狀態名稱 IN (\'確定\') AND
 					託播單.CREATED_PEOPLE=使用者.使用者識別碼 AND
 					託播單.預約到期時間>=\''.date('Ymd').'\'
-				ORDER BY
-					託播單.預約到期時間 ASC,
-					託播單.廣告期間開始時間 ASC,
-					託播單.廣告期間結束時間 ASC,
-					託播單.託播單識別碼
 			';
 			if(!$result=$my->getResultArray($sql)) $result=array();
 			$totalRowCount=$result[0]['C'];
@@ -101,7 +94,7 @@
 					託播單狀態.託播單狀態名稱 IN (\'確定\') AND
 					託播單.CREATED_PEOPLE=使用者.使用者識別碼 AND
 					託播單.預約到期時間>=\''.date('Ymd').'\'
-				ORDER BY '.$_POST['order'].' '.$_POST['asc'].' '.
+				ORDER BY FIELD(使用者.使用者識別碼, "'.$_SESSION['AMS']['使用者識別碼'].'")  DESC,'.$_POST['order'].' '.$_POST['asc'].' '.
 				'LIMIT ?,'.PAGE_SIZE.'
 			';
 			if(!$result=$my->getResultArray($sql,'i',$fromRowNo)) $result=array();			
@@ -169,7 +162,7 @@
 					AND	版位素材類型.託播單素材是否必填=true
 					AND (素材.素材原始檔名 IS NULL OR 素材.素材原始檔名=\'\')
 					AND	託播單.預約到期時間>=\''.date('Ymd').'\'
-				ORDER BY '.$_POST['order'].' '.$_POST['asc'].' '.
+				ORDER BY FIELD(使用者.使用者識別碼, "'.$_SESSION['AMS']['使用者識別碼'].'")  DESC,'.$_POST['order'].' '.$_POST['asc'].' '.
 				'LIMIT ?,'.PAGE_SIZE.'
 			';
 			if(!$result=$my->getResultArray($sql,'i',$fromRowNo)) $result=array();			
@@ -223,7 +216,7 @@
 					INNER JOIN 使用者 ON 託播單.CREATED_PEOPLE=使用者.使用者識別碼
 				WHERE
 					託播單狀態.託播單狀態名稱=\'待處理\'
-				ORDER BY '.$_POST['order'].' '.$_POST['asc'].' '.
+				ORDER BY FIELD(使用者.使用者識別碼, "'.$_SESSION['AMS']['使用者識別碼'].'") DESC,'.$_POST['order'].' '.$_POST['asc'].' '.
 				'LIMIT ?,'.PAGE_SIZE.'
 			';
 			if(!$result=$my->getResultArray($sql,'i',$fromRowNo)) $result=array();			
@@ -280,7 +273,7 @@
 					版位類型.版位名稱 IN("首頁banner","專區banner","頻道short EPG banner","專區vod")
 					AND 託播單狀態.託播單狀態名稱 IN("確定","送出","逾期")
 					AND 託播單.託播單送出後是否成功 = 0
-				ORDER BY '.$_POST['order'].' '.$_POST['asc'].' '.
+				ORDER BY FIELD(使用者.使用者識別碼, "'.$_SESSION['AMS']['使用者識別碼'].'")  DESC,'.$_POST['order'].' '.$_POST['asc'].' '.
 				'LIMIT ?,'.PAGE_SIZE.'
 			';
 			if(!$result=$my->getResultArray($sql,'i',$fromRowNo)) $result=array();			
@@ -341,7 +334,7 @@
 					AND 託播單.託播單送出後內部錯誤訊息 IS NOT NULL
 					AND	託播單.廣告期間結束時間>=\''.date('Ymd').'\'
 		
-				ORDER BY '.$_POST['order'].' '.$_POST['asc'].' '.
+				ORDER BY FIELD(使用者.使用者識別碼, "'.$_SESSION['AMS']['使用者識別碼'].'")  DESC,'.$_POST['order'].' '.$_POST['asc'].' '.
 				'LIMIT ?,'.PAGE_SIZE.'
 			';
 			if(!$result=$my->getResultArray($sql,'i',$fromRowNo)) $result=array();			

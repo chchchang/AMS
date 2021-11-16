@@ -28,7 +28,7 @@
 		$mid = $row['素材識別碼'];
 		
 		//查詢pms派送狀況
-		$local='/opt/rh/httpd24/root/var/www/html/AMS/material/uploadedFile/'.$mid.'.'.$type;
+		$local='/var/www/html/AMS/material/uploadedFile/'.$mid.'.'.$type;
 		$local=Config::GET_MATERIAL_FOLDER().$mid.'.'.$type;
 		if(($md5_result=md5_file($local))===false){
 			$json=array('success'=>false,'error'=>'計算檔案md5值失敗！'.$local);

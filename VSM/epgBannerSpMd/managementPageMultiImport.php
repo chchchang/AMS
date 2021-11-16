@@ -225,9 +225,9 @@ if(isset($_POST['postAction'])){
 	function getIdByFileName($ndirname){
 		//取得ID
 		$matches = array();
-		preg_match('/(\S+)_SepgSpMd\_(\S+)\.dat/', $ndirname, $matches);
+		preg_match('/(\S+)_SepgSpMd\_(\S+)\_(\S+)\.dat/i', $ndirname, $matches);
 		if(count($matches)==0)
-			preg_match('/(\S+)_SepgSpMD\_(\S+)\.dat/', $ndirname, $matches);
+			preg_match('/(\S+)_SepgSpMd\_(\S+)\.dat/i', $ndirname, $matches);
 		$id = $matches[2];
 		return $id;
 	}

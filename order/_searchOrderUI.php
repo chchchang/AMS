@@ -13,7 +13,8 @@
 		廣告主:<select id="_searchOUI_adOwner"></select> 委刊單:<select id="_searchOUI_orderList" ></select>
 	</div>
 	<div id="_searchOUI_tabs-3">
-		版位類型:<select id="_searchOUI_positiontype"></select> 版位名稱:<select id="_searchOUI_position" ></select>
+		<p>版位類型:<select id="_searchOUI_positiontype"></select> 版位名稱:<select id="_searchOUI_position" ></select></p>
+		<p><img id="_searchOUI_positionInfoPic" src="" onerror="this.style.display='none'"/></p>
 	</div>
 	<div id="_searchOUI_tabs-4">
 		素材群組:<select id="_searchOUI_materialGroup"></select> 素材:<select id="_searchOUI_material" ></select>
@@ -25,6 +26,7 @@
 </div>
 <script>
 	$(function() {
+		var URLORIGIN = window.location.origin+"/AMS/";
 		//datePicker
 		$( "#_searchOUI_startDate,#_searchOUI_endDate" )
 		.datepicker({
@@ -35,7 +37,7 @@
 			monthNamesShort: ["1","2","3","4","5","6","7","8","9","10","11","12"],
 		})
 		//狀態選擇
-		$.post('../order/ajaxFunction_OrderInfo.php',{method:'託播單狀態名稱'},
+		$.post(URLORIGIN+'order/ajaxFunction_OrderInfo.php',{method:'託播單狀態名稱'},
 			function(json){
 				//console.log(json);
 				$(document.createElement("option"))
@@ -54,11 +56,11 @@
 		//Enter搜尋
 		$("#_searchOUI_searchOrder").keypress(function(event){
 			if (event.keyCode == 13){
-				showOrderDG();
+					showOrderDG();
 			}
 		}).autocomplete({
 			source :function( request, response) {
-						$.post( "../order/autoComplete_forSearchBox.php",{term: request.term, method:'searchText'},
+						$.post( URLORIGIN+"order/autoComplete_forOrderSearchBox.php",{term: request.term, method:'託播單查詢'},
 							function( data ) {
 							response(JSON.parse(data));
 						})
@@ -66,7 +68,7 @@
 		});
 		
 		$('#_searchOUI_searchOrderButton').click(function(){
-			showOrderDG();
+				showOrderDG();
 		});
 		
 		$( "#_searchOUI_tabs" ).tabs();
@@ -75,7 +77,7 @@
 		$('input[placeholder]').placeholder();
 		
 		//廣告主自動完成選項
-		$.post('../order/newOrderByPage.php',{method:'getAdOwnerSelection'}
+		$.post(URLORIGIN+'order/newOrderByPage.php',{method:'getAdOwnerSelection'}
 			,function(json){
 				$(document.createElement("option")).text('').val('').appendTo($("#_searchOUI_adOwner"));
 				for(var i in json){
@@ -98,7 +100,7 @@
 		//委刊單自動完成選項
 		function setOrderListSelection(ownerId){
 			$('#_searchOUI_orderList').html('');
-			$.post('../order/newOrderByPage.php',{method:'getOrderListSelection',ownerId: ownerId}
+			$.post(URLORIGIN+'order/newOrderByPage.php',{method:'getOrderListSelection',ownerId: ownerId}
 			,function(json){
 				$(document.createElement("option")).text('').val('').appendTo($("#_searchOUI_orderList"));
 				for(var i in json){
@@ -116,7 +118,7 @@
 		}
 		
 		//版位類型自動完成選項
-		$.post('../order/orderManaging.php',{method:'getPositionTypeSelection'}
+		$.post(URLORIGIN+'order/orderManaging.php',{method:'getPositionTypeSelection'}
 			,function(positionTypeOption){
 				$(document.createElement("option")).text('').val('').appendTo($("#_searchOUI_positiontype"));
 				for(var i in positionTypeOption){
@@ -129,6 +131,7 @@
 				$( "#_searchOUI_positiontype" ).combobox({
 					 select: function( event, ui ) {
 						_searchOUI_setPosition(this.value);
+						_searchOUI_setPositionInfoPic();
 					 }
 				});
 				
@@ -148,7 +151,7 @@
 		//版位自動完成選項
 		function _searchOUI_setPosition(pId){
 			$("#_searchOUI_position").empty();
-			$.post( "../order/ajaxToDB_Order.php", { action: "getPositionByPositionType",版位類型識別碼:pId }, 
+			$.post( URLORIGIN+"order/ajaxToDB_Order.php", { action: "getPositionByPositionType",版位類型識別碼:pId }, 
 				function( data ) {
 					$(document.createElement("option")).text('').val('').appendTo($("#_searchOUI_position"));
 					for(var i in data){
@@ -160,7 +163,25 @@
 					$('#_searchOUI_position').combobox();
 					$( "#_searchOUI_position" ).combobox('setText','');
 					$( "#_searchOUI_position" ).val('');
+					_searchOUI_setPositionInfoPic();
+					$( "#_searchOUI_position" ).combobox({
+						select: function( event, ui ) {
+							_searchOUI_setPositionInfoPic();
+						}
+					});
 					
+				}
+				,"json"
+			);
+		}
+		
+		//顯示板位示意圖
+		function _searchOUI_setPositionInfoPic(){
+			$.post(URLORIGIN+"position/ajaxPositionInfoPic.php",{"action":"getInfoPic","版位識別碼":$( "#_searchOUI_position option:selected" ).val(),"版位類型識別碼":$( "#_searchOUI_positiontype option:selected" ).val()}
+				,function(data){
+					if(data["success"]){
+						$("#_searchOUI_positionInfoPic").attr("src",data["src"]);
+					}
 				}
 				,"json"
 			);
@@ -168,7 +189,7 @@
 		
 		//設訂素材群組資料
 		$("#_searchOUI_materialGroup").combobox();
-		$.post('../material/ajaxFunction_MaterialInfo.php',{method:'取得素材群組'},
+		$.post(URLORIGIN+'material/ajaxFunction_MaterialInfo.php',{method:'取得素材群組'},
 		function(json){
 			var materialGroup=json;
 			$(document.createElement("option")).text('未指定').val(0).appendTo($("#_searchOUI_materialGroup"));
@@ -191,7 +212,7 @@
 		//設訂素材資料
 		$("#_searchOUI_material").combobox();
 		function setMaterial(selectedId){
-			$.post('../order/ajaxToDB_Order.php',{action:'取得可用素材',素材群組識別碼:$('#_searchOUI_materialGroup').val()},
+			$.post(URLORIGIN+'order/ajaxToDB_Order.php',{action:'取得可用素材',素材群組識別碼:$('#_searchOUI_materialGroup').val()},
 			function(json){
 				if(json.success){
 					$select = $("#_searchOUI_material");

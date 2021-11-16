@@ -124,7 +124,8 @@
   </div>
   <div id="tabs-2">
 		<div  class ="Center" style="width:100%">版位類型:<select id="positiontype"></select> 版位名稱:<select id="position" ></select></div>
-		 <button id = 'tabs2Pre'>上一步</button> <button id = 'tabs2Next'>下一步</button>
+		<p><img id="positionInfoPic" src="" /></p>
+		<button id = 'tabs2Pre'>上一步</button> <button id = 'tabs2Next'>下一步</button>
   </div>
   <div id='tabs-3'>
 	廣告主: <a id="選擇的廣告主"></a> &nbsp &nbsp 委刊單: <a id="選擇的委刊單"></a><br>
@@ -233,6 +234,7 @@
 				$( "#positiontype" ).combobox({
 					 select: function( event, ui ) {
 						setPosition(this.value);
+						setPositionInfoPic()
 					 }
 				});
 			}
@@ -259,11 +261,31 @@
 						$( "#position" ).combobox('setText','');
 						$( "#position" ).val(null);
 					}
+					setPositionInfoPic();
+					$( "#position" ).combobox({
+					select: function( event, ui ) {
+						//顯示板位類型示意圖
+						setPositionInfoPic();
+						}
+					});
 				}
 				,"json"
 			);
 		}
-	});	
+	});
+
+	//顯示板位示意圖
+	function setPositionInfoPic(){
+		console.log($( "#position option:selected" ).val()+"  "+$( "#positiontype option:selected" ).val());
+		$.post("../position/ajaxPositionInfoPic.php",{"action":"getInfoPic","版位識別碼":$( "#position option:selected" ).val(),"版位類型識別碼":$( "#positiontype option:selected" ).val()}
+			,function(data){
+				if(data["success"]){
+					$("#positionInfoPic").attr("src",data["src"]);
+				}
+			}
+			,"json"
+		);
+	}
 	
 	//託播單新增
 		function newOrderSaved(savedOrder){
