@@ -115,6 +115,20 @@
 			$API_SERVER_852_TESTING = 'http://172.18.4.141:80';
 			return (self::TEST_MOD)? $API_SERVER_852_TESTING : $API_SERVER_852;
 		}
+
+		//2021奧運廣告API
+		public static function GET_API_SERVER_852_OLYMPIC2021(){
+			$API_SERVER_852 = 'http://172.17.156.10';
+			$API_SERVER_852_TESTING = 'http://172.17.156.15';
+			return (self::TEST_MOD)? $API_SERVER_852_TESTING : $API_SERVER_852;
+		}
+
+		//20211220在地專區大banner
+		public static function GET_API_SERVER_852_LOCALBIGBANNER(){
+			$API_SERVER_852 = 'http://172.17.156.9/mod/hd/local/api/ad/';
+			$API_SERVER_852_TESTING = 'http://172.17.156.15/mod/hd/local/api/ad/';
+			return (self::TEST_MOD)? $API_SERVER_852_TESTING : $API_SERVER_852;
+		}
 		
 	}
 ?>

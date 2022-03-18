@@ -53,12 +53,7 @@
 		}
 		
 		public static function isFile($host,$username,$password,$remote){
-			if(!$ftp_stream=self::connect($host))
-				return false;
-			if(!self::login($ftp_stream,$username,$password))
-				return false;
-			if(!ftp_pasv($ftp_stream,true))
-				return false;
+			$ftp_stream=self::getConnectStream($host,$username,$password);
 			$result=ftp_nlist($ftp_stream,$remote);
 			if(($result!==false)&&(count($result)>=1)&&($result[0]===$remote))
 				return true;
@@ -74,12 +69,7 @@
 		}
 		
 		public static function get($host,$username,$password,$local,$remote){
- 			if(!$ftp_stream=self::connect($host))
-				return false;
-			if(!self::login($ftp_stream,$username,$password))
-				return false;
-			if(!ftp_pasv($ftp_stream,true))
-				return false;
+			$ftp_stream=self::getConnectStream($host,$username,$password);
 			if(!ftp_get($ftp_stream,$local,$remote,FTP_BINARY)){
 				(new MyLogger())->error('無法下載FTP server('.$remote.')檔案到('.$local.')。');
 				return false;
@@ -88,10 +78,7 @@
 		}
 		
 		public static function delete($host,$username,$password,$remote){
- 			if(!$ftp_stream=self::connect($host))
-				return false;
-			if(!self::login($ftp_stream,$username,$password))
-				return false;
+			$ftp_stream=self::getConnectStream($host,$username,$password);
 			if(!ftp_delete($ftp_stream,$remote)){
 				(new MyLogger())->error('無法刪除FTP server('.$remote.')檔案。');
 				return false;
@@ -100,10 +87,7 @@
 		}
 		
 		public static function rename($host,$username,$password,$old_file,$new_file){
-			if(!$ftp_stream=self::connect($host))
-				return false;
-			if(!$login_result =self::login($ftp_stream,$username,$password))
-				return false;
+			$ftp_stream=self::getConnectStream($host,$username,$password);
 			if (!@ftp_rename($ftp_stream, $old_file, $new_file)) {
 				(new MyLogger())->error("更改檔名($new_file)失敗！");
 				return false;
@@ -116,18 +100,13 @@
 				(new MyLogger())->error('找不到檔案('.$local.')，取消上傳！');
 				return false;
 			}
-			if(!$ftp_stream=self::connect($host))
-				return false;
-			if(!self::login($ftp_stream,$username,$password))
-				return false;
-			if(!ftp_pasv($ftp_stream,true))
-				return false;
+			$ftp_stream=self::getConnectStream($host,$username,$password);
 			if(!ftp_put($ftp_stream,$processingName,$local,FTP_BINARY)){
 				(new MyLogger())->error('無法上傳檔案('.$local.')到FTP server('.$processingName.')。');
 				return false;
 			}
 			if (!@ftp_rename($ftp_stream, $processingName, $remote)) {
-				(new MyLogger())->error("更改檔名($new_file)失敗！");
+				(new MyLogger())->error("更改檔名($remote)失敗！");
 				if(!ftp_delete($ftp_stream,$processingName)){
 					(new MyLogger())->error('無法刪除FTP server('.$processingName.')檔案。');
 					return false;
@@ -135,6 +114,20 @@
 				return false;
 			}
 			return true;
+		}
+
+		private static function getConnectStream($host,$username,$password){
+			if(!$ftp_stream=self::connect($host))
+				return false;
+			if(!self::login($ftp_stream,$username,$password))
+				return false;
+			/*if(!ftp_set_option($ftp_stream, FTP_USEPASVADDRESS, false))
+				return false;*/
+			/*if(!ftp_pasv($ftp_stream,true))
+				return false;*/
+			if(!ftp_pasv($ftp_stream,false))
+				return false;
+			return $ftp_stream;
 		}
 	}
 ?>

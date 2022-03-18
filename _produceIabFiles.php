@@ -3,7 +3,7 @@
 	header("Content-Type:text/html; charset=utf-8");
 	require_once dirname(__FILE__).'/tool/MyDB.php';
 	require_once dirname(__FILE__).'/tool/MyLogger.php';
-	define('HOME','/home/ams/IabFiles/');
+	define('HOME','/home/ams/cronjob/IabFiles/');
 	//define('HOME','order/851/');
 	define('GLUE','$');
 	$my=new MyDB(true);
@@ -770,7 +770,7 @@
 		}else if( $types == 'wf_to_nf' ){// 轉半形
 			return str_replace($wft, $nft, $strs);
 		}else{
-			return $strtmp;
+			return $strs;
 		}
 	}
 	

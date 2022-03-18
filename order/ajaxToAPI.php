@@ -25,18 +25,18 @@
 				orderInfo_852();
 				break;
 			case "851產生檔案":
-				require_once 'ajaxToAPI_CSMS.php';
+				require_once 'ajaxToAPIMoudle/ajaxToAPI_CSMS.php';
 				produceFileBetch_851(isset($_POST['APIAction'])?$_POST['APIAction']:'send');
 				break;
 			case "851託播單資料":
-				require_once 'ajaxToAPI_CSMS.php';
+				require_once 'ajaxToAPIMoudle/ajaxToAPI_CSMS.php';
 				orderInfo_851();
 				break;
 			case "群組託播單":
 				groupingOrder();
 				break;
 			case "批次產生檔案"://csms
-				require_once 'ajaxToAPI_CSMS.php';
+				require_once 'ajaxToAPIMoudle/ajaxToAPI_CSMS.php';
 				produceFileBetch_851(isset($_POST['APIAction'])?$_POST['APIAction']:'send');
 				break;
 		}
@@ -69,11 +69,11 @@
 			//case "頻道short EPG banner":
 			case "專區vod":
 			case "Vod+廣告":
-				require_once 'ajaxToAPI_CSMS.php';
+				require_once 'ajaxToAPIMoudle/ajaxToAPI_CSMS.php';
 				produceFile_851('send');
 				break;
 			case "barker頻道":
-				require_once 'ajaxToAPI_CAMPS.php';
+				require_once 'ajaxToAPIMoudle/ajaxToAPI_CAMPS.php';
 				sendOrder_CAMPS($_POST["託播單識別碼"]);
 				break;
 			case "單一平台banner":
@@ -83,20 +83,24 @@
 			case "單一平台background_banner":
 			case "單一平台advertising_page":
 			case "單一平台floating_banner":
-				require_once 'ajaxToAPI_VSM.php';
+				require_once 'ajaxToAPIMoudle/ajaxToAPI_VSM.php';
 				sendOrder_VSM($_POST["託播單識別碼"]);
 				break;
 			case "鑽石版位":
-				require_once 'ajaxToAPI_diamond.php';
+				require_once 'ajaxToAPIMoudle/ajaxToAPI_diamond.php';
 				sendOrder_diamond($_POST["託播單識別碼"]);
 				break;
 			case "Vod插廣告":
-				require_once 'ajaxToAPI_VodAds.php';
+				require_once 'ajaxToAPIMoudle/ajaxToAPI_VodAds.php';
 				sendOrder_VodAds($_POST["託播單識別碼"]);
 				break;
 			case "奧運外掛專區廣告_2021":
-				require_once 'ajaxToAPI_Olympic2021.php';
+				require_once 'ajaxToAPIMoudle/ajaxToAPI_Olympic2021.php';
 				sendOrder_olympic($_POST["託播單識別碼"]);
+				break;
+			case "在地專區大BANNER廣告":
+				require_once 'ajaxToAPIMoudle/ajaxToAPI_localBigBanner.php';
+				sendOrder_localBigBanner($_POST["託播單識別碼"]);
 				break;
 			default:{
 				recordResult('insert',1,null,null);
@@ -381,7 +385,7 @@
 						}
 					}
 					return array("success"=>true,"message"=>'success');
-				}else if($row['版位類型名稱']=='鑽石版位'||$row['版位類型名稱']=='奧運外掛專區廣告_2021')
+				}else if($row['版位類型名稱']=='鑽石版位'||$row['版位類型名稱']=='奧運外掛專區廣告_2021'||$row['版位類型名稱']=='在地專區大BANNER廣告')
 				{
 					//鑽石版位廣告送出時會同時派送素材，不需檢查
 					//奧運外掛圖片不需檢查
@@ -453,11 +457,11 @@
 			//case "頻道short EPG banner":
 			case "專區vod":
 			case "Vod+廣告":
-				require_once 'ajaxToAPI_CSMS.php';
+				require_once 'ajaxToAPIMoudle/ajaxToAPI_CSMS.php';
 				produceFile_851('delete');
 				break;
 			case 'barker頻道':
-				require_once 'ajaxToAPI_CAMPS.php';
+				require_once 'ajaxToAPIMoudle/ajaxToAPI_CAMPS.php';
 				cancelOrder_CAMPS($_POST["託播單識別碼"]);
 				break;
 			case "單一平台banner":
@@ -465,25 +469,29 @@
 			case "單一平台marquee":
 			case "單一平台background_banner":
 			case "單一平台advertising_page":
-				require_once 'ajaxToAPI_VSM.php';
+				require_once 'ajaxToAPIMoudle/ajaxToAPI_VSM.php';
 				cancelOrder_VSM($_POST["託播單識別碼"]);
 				break;
 			case "單一平台EPG":
-				require_once 'ajaxToAPI_VSM.php';
+				require_once 'ajaxToAPIMoudle/ajaxToAPI_VSM.php';
 				cancelEPGOrder_VSM($_POST["託播單識別碼"]);
 					break;
 			case "鑽石版位":
-				require_once 'ajaxToAPI_diamond.php';
+				require_once 'ajaxToAPIMoudle/ajaxToAPI_diamond.php';
 				cancelOrder_diamond($_POST["託播單識別碼"]);
 				break;
 			case "Vod插廣告":
-				require_once 'ajaxToAPI_VodAds.php';
+				require_once 'ajaxToAPIMoudle/ajaxToAPI_VodAds.php';
 				cancelOrder_VodAds($_POST["託播單識別碼"]);
 				break;
 			case "奧運外掛專區廣告_2021":
-				require_once 'ajaxToAPI_Olympic2021.php';
+				require_once 'ajaxToAPIMoudle/ajaxToAPI_Olympic2021.php';
 				cancelOrder_olympic($_POST["託播單識別碼"]);
 					break;
+			case "在地專區大BANNER廣告":
+				require_once 'ajaxToAPIMoudle/ajaxToAPI_localBigBanner.php';
+				cancelOrder_localBigBanner($_POST["託播單識別碼"]);
+				break;
 			default:{
 				recordResult('delete',1,null,null);
 				changeOrderSate('取消送出',array($_POST["託播單識別碼"]));
@@ -600,7 +608,8 @@
 			'sort'=>$result3['影片排序'],
 			'hq'=>$result1['影片媒體編號'],
 			'iaps'=>$result1['影片媒體編號南'],
-			'iapn'=>$result1['影片媒體編號北']
+			'iapn'=>$result1['影片媒體編號北'],
+			'hd'=>""  //2021-12-09 強制塞入空白hd素材編號，避免取消HD素材時沒有更新到投放系統
 		);
 		if(isset($result1HD['影片媒體編號']))
 			$orderByPost['hd'] = $result1HD['影片媒體編號'];

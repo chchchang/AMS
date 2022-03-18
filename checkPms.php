@@ -24,7 +24,8 @@
 		$row = $res->fetch_assoc();
 		if($row['素材類型識別碼']!=3)
 			exit('非影片素材');
-		$type = end(explode('.',$row['素材原始檔名']));
+		$tmp = explode('.',$row['素材原始檔名']);
+		$type = end($tmp);
 		$mid = $row['素材識別碼'];
 		
 		//查詢pms派送狀況

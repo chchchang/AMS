@@ -4,7 +4,7 @@ require_once dirname(__FILE__).'/Config.php';
 $my = new mysqli(Config::DB_HOST,Config::DB_USER,Config::DB_PASSWORD,Config::DB_NAME);
 $my->query("SET NAMES utf8"); 
 
-$FILEPATH = "/opt/rh/httpd24/root/var/www/html/AMS/material/uploadedFile/";
+$FILEPATH = "/var/www/html/AMS/material/uploadedFile/";
 //$DEADLINE = date('Y-m-d',strtotime('-1 year'));
 $DEADLINE = date('Y-m-d',strtotime('-180 days'));
 $LIMIT = "1000";
@@ -12,7 +12,7 @@ $LIMIT = "1000";
 print_r($DEADLINE);
 deleteOrderData();
 deleteMaterialFiles();
-deleteMaterialByOutDateList("/opt/rh/httpd24/root/var/www/html/AMS/outdatedMaterialList.dat");
+deleteMaterialByOutDateList("/var/www/html/AMS/outdatedMaterialList.dat");
 
 $my->close();
 
