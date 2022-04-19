@@ -670,13 +670,23 @@
 			var jdata;
 			//修改或顯示暫存的新訂單 回復暫存的資訊
 			if(action=="edit"||action=="info"){
-				jdata = JSON.parse('<?php if(isset($_SESSION['AMS']['saveOrder'])) echo json_encode($_SESSION['AMS']['saveOrder'],JSON_UNESCAPED_UNICODE); else echo"[]"?>');
+				$.post("orderSession.php",{"getOrder":1},
+				function(jdata){
+					if(action=="edit")
+						jdata=jdata[<?php if(isset($_GET["edit"])) echo htmlspecialchars($_GET["edit"], ENT_QUOTES, 'UTF-8'); else echo 0;?>];
+					else 
+						jdata=jdata[<?php if(isset($_GET["info"])) echo htmlspecialchars($_GET["info"], ENT_QUOTES, 'UTF-8'); else echo 0;?>];
+					jdata['版位識別碼'] = String(jdata['版位識別碼']).split(',');
+					showVal(jdata)
+					}
+				,"json");
+				/*jdata = JSON.parse('<?php //if(isset($_SESSION['AMS']['saveOrder'])) echo json_encode($_SESSION['AMS']['saveOrder'],JSON_UNESCAPED_UNICODE); else echo"[]"?>');
 				if(action=="edit")
-					jdata=jdata[<?php if(isset($_GET["edit"])) echo htmlspecialchars($_GET["edit"], ENT_QUOTES, 'UTF-8'); else echo 0;?>];
+					jdata=jdata[<?php //if(isset($_GET["edit"])) echo htmlspecialchars($_GET["edit"], ENT_QUOTES, 'UTF-8'); else echo 0;?>];
 				else 
-					jdata=jdata[<?php if(isset($_GET["info"])) echo htmlspecialchars($_GET["info"], ENT_QUOTES, 'UTF-8'); else echo 0;?>];
+					jdata=jdata[<?php //if(isset($_GET["info"])) echo htmlspecialchars($_GET["info"], ENT_QUOTES, 'UTF-8'); else echo 0;?>];
 				jdata['版位識別碼'] = String(jdata['版位識別碼']).split(',');
-				showVal(jdata);
+				showVal(jdata);*/
 			}
 			//顯示資料庫中的資料
 			else if(action=='update'||action=='orderInDb'){

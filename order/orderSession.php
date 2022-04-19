@@ -94,35 +94,35 @@ if(isset($_POST['clearOrderSession'])){
 if(isset($_POST['getOrder']))
 	if(isset($_SESSION['AMS']['saveOrder']))
 		//echo $_SESSION['AMS']['saveOrder'];
-		echo json_encode(($_SESSION['AMS']['saveOrder']),JSON_UNESCAPED_UNICODE);
+		echo json_encode(htmldecopde($_SESSION['AMS']['saveOrder']),JSON_UNESCAPED_UNICODE);
 	else echo "";
 
 if(isset($_POST['getAdOwner']))
 	if(isset($_SESSION['AMS']['saveAdOwner']))
 		//echo $_SESSION['AMS']['saveAdOwner'];
-		echo json_encode(($_SESSION['AMS']['saveAdOwner']),JSON_UNESCAPED_UNICODE);
+		echo json_encode(htmldecopde($_SESSION['AMS']['saveAdOwner']),JSON_UNESCAPED_UNICODE);
 	else echo "";
 	
 if(isset($_POST['getOrderList']))
 	if(isset($_SESSION['AMS']['saveOrderList']))
 		//echo $_SESSION['AMS']['saveOrderList'];
-		echo json_encode(($_SESSION['AMS']['saveOrderList']),JSON_UNESCAPED_UNICODE);
+		echo json_encode(htmldecopde($_SESSION['AMS']['saveOrderList']),JSON_UNESCAPED_UNICODE);
 	else echo "";
 	
 if(isset($_POST['getEditList']))
 	if(isset($_SESSION['AMS']['saveEditList']))
 		//echo $_SESSION['AMS']['saveEditList'];
-		echo json_encode(($_SESSION['AMS']['saveEditList']),JSON_UNESCAPED_UNICODE);
+		echo json_encode(htmldecopde($_SESSION['AMS']['saveEditList']),JSON_UNESCAPED_UNICODE);
 	else echo "";
 	
 if(isset($_POST['getLastOrder']))
 	if(isset($_SESSION['AMS']['saveLastOrder']))
-		echo json_encode(($_SESSION['AMS']['saveLastOrder']),JSON_UNESCAPED_UNICODE);
+		echo json_encode(htmldecopde($_SESSION['AMS']['saveLastOrder']),JSON_UNESCAPED_UNICODE);
 	else echo "[]";
 	
 if(isset($_POST['getLastMaterialGroup']))
 	if(isset($_SESSION['AMS']['saveLastMaterialGroup']))
-		echo json_encode(($_SESSION['AMS']['saveLastMaterialGroup']),JSON_UNESCAPED_UNICODE);
+		echo json_encode(htmldecopde($_SESSION['AMS']['saveLastMaterialGroup']),JSON_UNESCAPED_UNICODE);
 	else echo "[]";
 	
 function htmlescape($data){
@@ -135,4 +135,16 @@ function htmlescape($data){
 			return htmlspecialchars($data, ENT_QUOTES, 'UTF-8');
 	}
 }
+
+function htmldecopde($data){
+	if(gettype($data)=="array")
+		return array_map('htmldecopde',$data);
+	else{
+		if($data == null)
+			return null;
+		else
+			return htmlspecialchars_decode($data, ENT_QUOTES);
+	}
+}
+
 ?>

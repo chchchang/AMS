@@ -54,6 +54,8 @@
 		
 		public static function isFile($host,$username,$password,$remote){
 			$ftp_stream=self::getConnectStream($host,$username,$password);
+			if(!ftp_pasv($ftp_stream,true))
+				return false;
 			$result=ftp_nlist($ftp_stream,$remote);
 			if(($result!==false)&&(count($result)>=1)&&($result[0]===$remote))
 				return true;
@@ -101,6 +103,8 @@
 				return false;
 			}
 			$ftp_stream=self::getConnectStream($host,$username,$password);
+			if(!ftp_pasv($ftp_stream,true))
+				return false;
 			if(!ftp_put($ftp_stream,$processingName,$local,FTP_BINARY)){
 				(new MyLogger())->error('無法上傳檔案('.$local.')到FTP server('.$processingName.')。');
 				return false;
@@ -125,7 +129,7 @@
 				return false;*/
 			/*if(!ftp_pasv($ftp_stream,true))
 				return false;*/
-			if(!ftp_pasv($ftp_stream,false))
+			if(!ftp_pasv($ftp_stream,true))
 				return false;
 			return $ftp_stream;
 		}
