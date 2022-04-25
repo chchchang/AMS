@@ -400,7 +400,7 @@
 		$action =  "new";
 	
 	//取得版位名稱以及初始參數
-	$changedOrderId=0;$版位識別碼=0;$版位類型識別碼=0;$saveBtnText = '暫存';
+	$changedOrderId=0;$positionId=0;$positionTyepId=0;$saveBtnText = '暫存';
 	if(isset($_GET["update"])) 
 		$changedOrderId=htmlspecialchars($_GET["update"], ENT_QUOTES, 'UTF-8');
 	else if(isset($_GET["edit"]))
@@ -413,10 +413,10 @@
 	//有指定的託播單，檢查託播單的版位，決定是否要跳轉
 	if($action!='new'){
 		if($action=='edit'){
-			$版位類型名稱=$_SESSION['AMS']['saveOrder'][$_GET["edit"]]['版位類型名稱'];
+			$positionTyepName=$_SESSION['AMS']['saveOrder'][$_GET["edit"]]['版位類型名稱'];
 		}
 		else if($action=='info'){
-			$版位類型名稱=$_SESSION['AMS']['saveOrder'][$_GET["info"]]['版位類型名稱'];
+			$positionTyepName=$_SESSION['AMS']['saveOrder'][$_GET["info"]]['版位類型名稱'];
 		}
 		else{
 			$sql = 'SELECT 版位類型.版位名稱 AS 版位類型名稱 
@@ -431,26 +431,26 @@
 			if(!$stmt->execute()) {
 				exit(json_encode(array("success"=>false,"message"=>'無法執行statement，請聯絡系統管理員！'),JSON_UNESCAPED_UNICODE));
 			}
-			$stmt->bind_result($版位類型名稱);
+			$stmt->bind_result($positionTyepName);
 			$stmt->fetch();
 		}
 	}
 	else{
 		if(isset($_GET["positionId"])) 
-			$版位識別碼=htmlspecialchars($_GET["positionId"], ENT_QUOTES, 'UTF-8'); 
+			$positionId=htmlspecialchars($_GET["positionId"], ENT_QUOTES, 'UTF-8'); 
 		if(isset($_GET["positionTypeId"])) 
-			$版位類型識別碼=htmlspecialchars($_GET["positionTypeId"], ENT_QUOTES, 'UTF-8'); 
+			$positionTyepId=htmlspecialchars($_GET["positionTypeId"], ENT_QUOTES, 'UTF-8'); 
 		$sql = 'SELECT 版位類型.版位名稱 AS 版位類型名稱 FROM 版位 版位類型,版位 WHERE 版位.上層版位識別碼 = 版位類型.版位識別碼 AND 版位.版位識別碼=?';	
 		if(!$stmt=$my->prepare($sql)) {
 			exit(json_encode(array("success"=>false,"message"=>'無法準備statement，請聯絡系統管理員！'),JSON_UNESCAPED_UNICODE));
 		}
-		if(!$stmt->bind_param('i',$版位識別碼)){
+		if(!$stmt->bind_param('i',$positionId)){
 			exit(json_encode(array("success"=>false,"message"=>'無法繫結資料，請聯絡系統管理員！'),JSON_UNESCAPED_UNICODE));
 		}
 		if(!$stmt->execute()) {
 			exit(json_encode(array("success"=>false,"message"=>'無法執行statement，請聯絡系統管理員！'),JSON_UNESCAPED_UNICODE));
 		}
-		$stmt->bind_result($版位類型名稱);
+		$stmt->bind_result($positionTyepName);
 		$stmt->fetch();
 	}
 
@@ -460,9 +460,9 @@
 	
 	//自動代入委刊單名稱用
 	if(isset($_GET["orderListName"]))
-		$委刊單名稱 = htmlspecialchars($_GET["orderListName"], ENT_QUOTES, 'UTF-8');
+		$orderListName = htmlspecialchars($_GET["orderListName"], ENT_QUOTES, 'UTF-8');
 	else
-		$委刊單名稱 = '';
+		$orderListName = '';
 		
 ?>
 <!DOCTYPE html>
@@ -612,8 +612,8 @@
 	</div>
 <script>
 	//********設定
-	var positionTypeId =<?=$版位類型識別碼?>;
-	var positionId =<?=$版位識別碼?>;
+	var positionTypeId =<?=$positionTyepId?>;
+	var positionId =<?=$positionId?>;
 	//判對動作是新增訂單(new)/修改暫存訂單資訊(edit)/顯示暫存訂單資訊(info)/修改舊有訂單(update)/顯示API託播單資訊(orderFromApi)
 	var action ="<?= $action?>";
 	var changedOrderId = <?=$changedOrderId?>;
@@ -647,7 +647,7 @@
 									"版位名稱":json["版位名稱"],
 									"版位類型識別碼":json["版位類型識別碼"],
 									"版位識別碼":json["版位識別碼"],
-									"託播單名稱":"<?=$委刊單名稱?>",
+									"託播單名稱":"<?=$orderListName?>",
 									"託播單說明":'',
 									"廣告期間開始時間":'',
 									"廣告期間結束時間":'',

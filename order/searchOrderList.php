@@ -1,8 +1,8 @@
 <?php 
 	include('../tool/auth/auth.php');
-	$指訂委刊單 = -1;
+	$orderListId = -1;
 	if(isset($_GET["orderListId"])) 
-		$指訂委刊單=htmlspecialchars($_GET["orderListId"], ENT_QUOTES, 'UTF-8');
+		$orderListId=htmlspecialchars($_GET["orderListId"], ENT_QUOTES, 'UTF-8');
 ?>
 <!doctype html>
 <html>
@@ -151,7 +151,7 @@
 	,'json'
 	);
 	
-	var 指訂委刊單 = <?=$指訂委刊單?>;
+	var 指訂委刊單 = <?=$orderListId?>;
 	if(指訂委刊單!=-1){
 		$('#tabs').hide();
 		showOrderList({orderListId : 指訂委刊單});

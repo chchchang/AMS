@@ -246,25 +246,25 @@
 				//整理書出資訊:互動專區代碼 IP&PORT 託播單號 媒體代碼 媒體名稱 媒體種類 媒體長度 託播型式 開始日期 開始時間 結束日期 結束時間
 				$stt = explode(' ',$schData['start_time']);
 				$ett = explode(' ',$schData['stop_time']);
-				//$互動專區代碼  = ($positionMeta==[])?'null':($positionMeta['channel_id'].' '.$positionMeta['版位名稱']);
-				$互動專區代碼  = ($positionMeta==[])?'null':($positionMeta['serCode'].' '.$positionMeta['版位名稱']);
+				//$serCode  = ($positionMeta==[])?'null':($positionMeta['channel_id'].' '.$positionMeta['版位名稱']);
+				$serCode  = ($positionMeta==[])?'null':($positionMeta['serCode'].' '.$positionMeta['版位名稱']);
 				$IPPORT = $schData['ip'].':'.$schData['port'];
-				$託播單號 = ($orderMeta_db==[])?'null':($orderMeta_db['託播單識別碼']);//AMS資料庫版本
-				//$託播單號 = ($orderMeta==[])?'null':($orderMeta['transaction_id']);//CAMPS API版本
-				$媒體代碼 = ($orderMeta_db==[])?'null':($orderMeta_db['素材識別碼']);//AMS資料庫版本
-				//$媒體代碼 = ($orderMeta==[])?'null':($orderMeta['material_id']);//CAMPS API版本
-				//$媒體名稱 = ($orderMeta_db==[])?'null':($orderMeta_db['託播單名稱']);//AMS資料庫版本
-				$媒體名稱 = ($orderMeta==[])?'null':($orderMeta['ad_name']);//CAMPS API版本
-				$媒體名稱 = str_replace(",","，",$媒體名稱);
-				$媒體種類 = 'v';
-				$媒體長度 = $schData['length'];
-				$託播型式 = 1;
-				$開始日期 = $stt[0];
-				$開始時間 = $stt[1];
-				$結束日期 = $ett[0];
-				$結束時間 = $ett[1];
+				$orderId = ($orderMeta_db==[])?'null':($orderMeta_db['託播單識別碼']);//AMS資料庫版本
+				//$orderId = ($orderMeta==[])?'null':($orderMeta['transaction_id']);//CAMPS API版本
+				$mediaId = ($orderMeta_db==[])?'null':($orderMeta_db['素材識別碼']);//AMS資料庫版本
+				//$mediaId = ($orderMeta==[])?'null':($orderMeta['material_id']);//CAMPS API版本
+				//$mediaName = ($orderMeta_db==[])?'null':($orderMeta_db['託播單名稱']);//AMS資料庫版本
+				$mediaName = ($orderMeta==[])?'null':($orderMeta['ad_name']);//CAMPS API版本
+				$mediaName = str_replace(",","，",$mediaName);
+				$mediaType = 'v';
+				$mediaLength = $schData['length'];
+				$playType = 1;
+				$startDate = $stt[0];
+				$startTime = $stt[1];
+				$endDate = $ett[0];
+				$endTime = $ett[1];
 				
-				$temp=array($互動專區代碼,$IPPORT,$託播單號,$媒體代碼,$媒體名稱,$媒體種類,$媒體長度,$託播型式,$開始日期,$開始時間,$結束日期,$結束時間);
+				$temp=array($serCode,$IPPORT,$orderId,$mediaId,$mediaName,$mediaType,$mediaLength,$playType,$startDate,$startTime,$endDate,$endTime);
 				fwrite($file,implode(',',$temp)."\n");
 			}
 		}

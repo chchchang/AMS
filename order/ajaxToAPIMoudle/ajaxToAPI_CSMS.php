@@ -552,9 +552,9 @@
 					}
 					$mInfo2 = $res->fetch_assoc();
 					
-					$SD影片=($result1['影片畫質識別碼']===1?$result1['素材識別碼']:(isset($otherMaterial[0]['影片畫質識別碼'])?($otherMaterial[0]['影片畫質識別碼']===1?$otherMaterial[0]['素材識別碼']:null):null));
-					$HD影片=($result1['影片畫質識別碼']===2?$result1['素材識別碼']:(isset($otherMaterial[0]['影片畫質識別碼'])?($otherMaterial[0]['影片畫質識別碼']===2?$otherMaterial[0]['素材識別碼']:null):null));
-					if($SD影片!=null){
+					$SDVideo=($result1['影片畫質識別碼']===1?$result1['素材識別碼']:(isset($otherMaterial[0]['影片畫質識別碼'])?($otherMaterial[0]['影片畫質識別碼']===1?$otherMaterial[0]['素材識別碼']:null):null));
+					$HDVideo=($result1['影片畫質識別碼']===2?$result1['素材識別碼']:(isset($otherMaterial[0]['影片畫質識別碼'])?($otherMaterial[0]['影片畫質識別碼']===2?$otherMaterial[0]['素材識別碼']:null):null));
+					if($SDVideo!=null){
 						$sql = 'SELECT 素材原始檔名,
 									影片素材秒數
 								FROM 素材
@@ -563,7 +563,7 @@
 						if(!$stmt=$my->prepare($sql)) {
 							exit(json_encode(array("success"=>false,'message'=>'資料庫錯誤','id'=>$_POST["託播單識別碼"]),JSON_UNESCAPED_UNICODE));
 						}
-						if(!$stmt->bind_param('i',$SD影片)) {
+						if(!$stmt->bind_param('i',$SDVideo)) {
 							exit(json_encode(array("success"=>false,'message'=>'資料庫錯誤','id'=>$_POST["託播單識別碼"]),JSON_UNESCAPED_UNICODE));
 						}
 						if(!$stmt->execute()) {
@@ -576,12 +576,12 @@
 						$fileNameA=explode('.',$mInfo['素材原始檔名']);
 						$type = end($fileNameA);
 						//*!*!*!staging 取代
-						$SD影片 = '_____AMS_'.$SD影片.'_'.md5_file(MATERIAL_FOLDER.$SD影片.'.'.$type);
-						//$SD影片 = '_____AMS_24_dc433015e5a1f26282b5fcc08000a1dc';
+						$SDVideo = '_____AMS_'.$SDVideo.'_'.md5_file(MATERIAL_FOLDER.$SDVideo.'.'.$type);
+						//$SDVideo = '_____AMS_24_dc433015e5a1f26282b5fcc08000a1dc';
 						//*!*!*!staging end
 					}
 					
-					if($HD影片!=null){
+					if($HDVideo!=null){
 						$sql = 'SELECT 素材原始檔名
 								FROM 素材
 								WHERE 素材.素材識別碼 = ?
@@ -589,7 +589,7 @@
 						if(!$stmt=$my->prepare($sql)) {
 							exit(json_encode(array("success"=>false,'message'=>'資料庫錯誤','id'=>$_POST["託播單識別碼"]),JSON_UNESCAPED_UNICODE));
 						}
-						if(!$stmt->bind_param('i',$HD影片)) {
+						if(!$stmt->bind_param('i',$HDVideo)) {
 							exit(json_encode(array("success"=>false,'message'=>'資料庫錯誤','id'=>$_POST["託播單識別碼"]),JSON_UNESCAPED_UNICODE));
 						}
 						if(!$stmt->execute()) {
@@ -602,11 +602,11 @@
 						$fileNameA = explode('.',$mInfo['素材原始檔名']);
 						$type = end($fileNameA);
 						//*!*!*!staging 取代
-						$HD影片 = '_____AMS_'.$HD影片.'_'.md5_file(MATERIAL_FOLDER.$HD影片.'.'.$type);
-						//$HD影片 = '_____AMS_24_dc433015e5a1f26282b5fcc08000a1dc';
+						$HDVideo = '_____AMS_'.$HDVideo.'_'.md5_file(MATERIAL_FOLDER.$HDVideo.'.'.$type);
+						//$HDVideo = '_____AMS_24_dc433015e5a1f26282b5fcc08000a1dc';
 						//*!*!*!staging end
 					}
-					$data=[$result1['託播單CSMS群組識別碼'],$SD影片,$HD影片,$result3['bakadDisplayMax'],$result1['點擊後開啟類型'],$result1['點擊後開啟位址'],$result3['serCode'],$result1['廣告期間開始時間'],$result1['廣告期間結束時間']
+					$data=[$result1['託播單CSMS群組識別碼'],$SDVideo,$HDVideo,$result3['bakadDisplayMax'],$result1['點擊後開啟類型'],$result1['點擊後開啟位址'],$result3['serCode'],$result1['廣告期間開始時間'],$result1['廣告期間結束時間']
 					,$startTime,$endTime,$result3['bakadschdDisplaySequence'],$result3['bakadschdDisplayMax'],$result3['bannerTransactionId1'],$result3['bannerTransactionId2'],$result3['bannerTransactionId3'],$result3['bannerTransactionId4']
 					];
 					break;
@@ -616,10 +616,10 @@
 							WHERE 素材.素材識別碼 = ?
 							';
 					$data['video']= [$result1['託播單CSMS群組識別碼'].'_video',$result3['vodmovBnrIsRandom']];
-					$VOD主影片=($result1['影片畫質識別碼']===1?$result1['素材識別碼']:null);
+					$mainVod=($result1['影片畫質識別碼']===1?$result1['素材識別碼']:null);
 					$fileNameA = explode('.',$mInfo['素材原始檔名']);
 					$type = end($fileNameA);
-					$VOD主影片 = '_____AMS_'.$VOD主影片.'_'.md5_file(MATERIAL_FOLDER.$VOD主影片.'.'.$type);
+					$mainVod = '_____AMS_'.$mainVod.'_'.md5_file(MATERIAL_FOLDER.$mainVod.'.'.$type);
 					$data = [];
 					foreach($otherMaterial as $material){
 						if($material['素材類型識別碼']==3){
@@ -701,17 +701,17 @@
 	}
 	
 	
-	function getActionFormRemote($版位類型名稱,$動作,$區域,$託播單CSMS群組識別碼){
+	function getActionFormRemote($positionTypeName,$action,$area,$CSMSGroupId){
 		require_once '../tool/OracleDB.php';
 		//return true;
 		//取得OMP資料庫檔案並比較
-		if($區域==='N'){
+		if($area==='N'){
 			$DB_U = Config::OMP_N_ORACLE_DB_USER;
 			$DB_T_O = Config::OMP_N_ORACLE_DB_TABLE_OWNER;
 			$DB_P = Config::OMP_N_ORACLE_DB_PASSWORD;
 			$DB_S = Config::OMP_N_ORACLE_DB_CONN_STR;
 		}
-		else if($區域==='C'){
+		else if($area==='C'){
 			$DB_U = Config::OMP_C_ORACLE_DB_USER;
 			$DB_T_O = Config::OMP_C_ORACLE_DB_TABLE_OWNER;
 			$DB_P = Config::OMP_C_ORACLE_DB_PASSWORD;
@@ -728,7 +728,7 @@
 			
 		$inner_error = '';//記錄內部錯誤訊息用
 		//OMP資料STATUS:0 準備中, 1 上架, 2 下架
-		if($版位類型名稱 == '首頁banner' || $版位類型名稱 == '專區banner'){
+		if($positionTypeName == '首頁banner' || $positionTypeName == '專區banner'){
 			$sql='
 				SELECT
 					CAS.TRANSACTION_ID,
@@ -759,11 +759,11 @@
 					CAS.TRANSACTION_ID=:TID
 			';
 			$vars=array(
-				array('bv_name'=>':TID','variable'=>$託播單CSMS群組識別碼)
+				array('bv_name'=>':TID','variable'=>$CSMSGroupId)
 			);
 			$result=$oracleDB->getResultArray($sql,$vars);
 		}
-		else if($版位類型名稱 == '頻道short EPG banner'){
+		else if($positionTypeName == '頻道short EPG banner'){
 			$sql='
 				SELECT
 					CSS.SEPG_TRANSACTION_ID,
@@ -795,11 +795,11 @@
 					CSS.SEPG_TRANSACTION_ID
 			';
 			$vars=array(
-				array('bv_name'=>':TID','variable'=>$託播單CSMS群組識別碼)
+				array('bv_name'=>':TID','variable'=>$CSMSGroupId)
 			);
 			$result=$oracleDB->getResultArray($sql,$vars);
 		}
-		else if($版位類型名稱 == '專區vod'){
+		else if($positionTypeName == '專區vod'){
 			$sql='
 				SELECT
 					CBAS.BAKADSCHD_TRANSACTION_ID,
@@ -840,7 +840,7 @@
 					CBAS.BAKADSCHD_TRANSACTION_ID
 			';
 			$vars=array(
-				array('bv_name'=>':TID','variable'=>$託播單CSMS群組識別碼)
+				array('bv_name'=>':TID','variable'=>$CSMSGroupId)
 			);
 			$result=$oracleDB->getResultArray($sql,$vars);
 			
@@ -862,7 +862,7 @@
 			}
 			$result = $resultTemp;
 		}
-		switch($動作){
+		switch($action){
 			case 'insert':
 			case 'update':
 				if(count($result)==0){

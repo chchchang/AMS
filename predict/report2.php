@@ -20,13 +20,13 @@
 		$actualDates=array();
 		
 		if($_POST['選擇平台']=='OMP')
-			$選擇平台='2';
+			$platform='2';
 		else if($_POST['選擇平台']=='IAP')
-			$選擇平台='3';
+			$platform='3';
 		else if($_POST['選擇平台']=='VSM')
-			$選擇平台='1';
+			$platform='1';
 		else
-			$選擇平台='%';
+			$platform='%';
 			
 		if(isset($_POST["實際日期期間"])){
 			$param_type.='ss';
@@ -66,7 +66,7 @@
 		$a_params = array();
 		$a_params[] = &$param_type;
 		$a_params[] = &$_POST['生效日期'];
-		$a_params[] = &$選擇平台;
+		$a_params[] = &$platform;
 		if(isset($_POST["實際日期期間"])){
 			$a_params[] = &$_POST["實際日期期間"][0];
 			$a_params[] = &$_POST["實際日期期間"][1];
@@ -106,19 +106,19 @@
 		if(!$stmt->execute()) {
 			exit('無法執行statement，錯誤代碼('.$stmt->errno.')、錯誤訊息('.$stmt->error.')。');
 		}
-		$stmt->bind_result($頻道號碼,$頻道名稱,$廣告分類,$平台識別碼,$日期,$曝光數0,$曝光數1,$曝光數2,$曝光數3,$曝光數4,$曝光數5,$曝光數6,$曝光數7,$曝光數8,$曝光數9,$曝光數10,$曝光數11,$曝光數12,$曝光數13,$曝光數14,$曝光數15,$曝光數16,$曝光數17,$曝光數18,$曝光數19,$曝光數20,$曝光數21,$曝光數22,$曝光數23);
+		$stmt->bind_result($channelNum,$channelName,$adGroup,$platformId,$dateDate,$impression0,$impression1,$impression2,$impression3,$impression4,$impression5,$impression6,$impression7,$impression8,$impression9,$impression10,$impression11,$impression12,$impression13,$impression14,$impression15,$impression16,$impression17,$impression18,$impression19,$impression20,$impression21,$impression22,$impression23);
 		while($stmt->fetch()) {
-			/*if($平台識別碼==2)
-				$平台識別碼='OMP';
-			else if($平台識別碼==3)
-				$平台識別碼='IAP';*/
-			$曝光數ARRAY= array($曝光數0,$曝光數1,$曝光數2,$曝光數3,$曝光數4,$曝光數5,$曝光數6,$曝光數7,$曝光數8,$曝光數9,$曝光數10,$曝光數11,$曝光數12,$曝光數13,$曝光數14,$曝光數15,$曝光數16,$曝光數17,$曝光數18,$曝光數19,$曝光數20,$曝光數21,$曝光數22,$曝光數23);
-			$平台識別碼=$_POST['選擇平台'];
+			/*if($platformId==2)
+				$platformId='OMP';
+			else if($platformId==3)
+				$platformId='IAP';*/
+			$impressionArray= array($impression0,$impression1,$impression2,$impression3,$impression4,$impression5,$impression6,$impression7,$impression8,$impression9,$impression10,$impression11,$impression12,$impression13,$impression14,$impression15,$impression16,$impression17,$impression18,$impression19,$impression20,$impression21,$impression22,$impression23);
+			$platformId=$_POST['選擇平台'];
 			for($i = 0;$i<24;$i++){
-				if(isset($result[$頻道號碼][$頻道名稱][$廣告分類][$平台識別碼][strval($i)][$日期]))
-					$result[$頻道號碼][$頻道名稱][$廣告分類][$平台識別碼][strval($i)][$日期]+=$曝光數ARRAY[$i];
+				if(isset($result[$channelNum][$channelName][$adGroup][$platformId][strval($i)][$dateDate]))
+					$result[$channelNum][$channelName][$adGroup][$platformId][strval($i)][$dateDate]+=$impressionArray[$i];
 				else
-					$result[$頻道號碼][$頻道名稱][$廣告分類][$平台識別碼][strval($i)][$日期]=$曝光數ARRAY[$i];
+					$result[$channelNum][$channelName][$adGroup][$platformId][strval($i)][$dateDate]=$impressionArray[$i];
 			}
 		}
 		
@@ -130,11 +130,11 @@
 		$predictDates=array();
 		
 		if($_POST['選擇平台']=='OMP')
-			$選擇平台='2';
+			$platform='2';
 		else if($_POST['選擇平台']=='IAP')
-			$選擇平台='3';
+			$platform='3';
 		else
-			$選擇平台='%';
+			$platform='%';
 		
 		if(isset($_POST["預測日期期間"])){
 			$param_type.='ss';
@@ -175,7 +175,7 @@
 		$a_params = array();
 		$a_params[] = &$param_type;
 		$a_params[] = &$_POST['生效日期'];
-		$a_params[] = &$選擇平台;
+		$a_params[] = &$platform;
 			
 		if(isset($_POST["預測日期期間"])){
 			$a_params[] = &$_POST["預測日期期間"][0];
@@ -215,19 +215,19 @@
 		if(!$stmt->execute()) {
 			exit('無法執行statement，錯誤代碼('.$stmt->errno.')、錯誤訊息('.$stmt->error.')。');
 		}	
-		$stmt->bind_result($頻道號碼,$頻道名稱,$廣告分類,$平台識別碼,$日期,$預測數0,$預測數1,$預測數2,$預測數3,$預測數4,$預測數5,$預測數6,$預測數7,$預測數8,$預測數9,$預測數10,$預測數11,$預測數12,$預測數13,$預測數14,$預測數15,$預測數16,$預測數17,$預測數18,$預測數19,$預測數20,$預測數21,$預測數22,$預測數23);
+		$stmt->bind_result($channelNum,$channelName,$adGroup,$platformId,$dateDate,$rediction0,$rediction1,$rediction2,$rediction3,$rediction4,$rediction5,$rediction6,$rediction7,$rediction8,$rediction9,$rediction10,$rediction11,$rediction12,$rediction13,$rediction14,$rediction15,$rediction16,$rediction17,$rediction18,$rediction19,$rediction20,$rediction21,$rediction22,$rediction23);
 		while($stmt->fetch()) {
-			/*if($平台識別碼==2)
-				$平台識別碼='OMP';
-			else if($平台識別碼==3)
-				$平台識別碼='IAP';*/
-			$預測數ARRAY= array($預測數0,$預測數1,$預測數2,$預測數3,$預測數4,$預測數5,$預測數6,$預測數7,$預測數8,$預測數9,$預測數10,$預測數11,$預測數12,$預測數13,$預測數14,$預測數15,$預測數16,$預測數17,$預測數18,$預測數19,$預測數20,$預測數21,$預測數22,$預測數23);
-			$平台識別碼=$_POST['選擇平台'];
+			/*if($platformId==2)
+				$platformId='OMP';
+			else if($platformId==3)
+				$platformId='IAP';*/
+			$redictionArray= array($rediction0,$rediction1,$rediction2,$rediction3,$rediction4,$rediction5,$rediction6,$rediction7,$rediction8,$rediction9,$rediction10,$rediction11,$rediction12,$rediction13,$rediction14,$rediction15,$rediction16,$rediction17,$rediction18,$rediction19,$rediction20,$rediction21,$rediction22,$rediction23);
+			$platformId=$_POST['選擇平台'];
 			for($i = 0;$i<24;$i++){
-				if(isset($result_predict[$頻道號碼][$頻道名稱][$廣告分類][$平台識別碼][strval($i)][$日期]))
-					$result_predict[$頻道號碼][$頻道名稱][$廣告分類][$平台識別碼][strval($i)][$日期]+=$預測數ARRAY[$i];
+				if(isset($result_predict[$channelNum][$channelName][$adGroup][$platformId][strval($i)][$dateDate]))
+					$result_predict[$channelNum][$channelName][$adGroup][$platformId][strval($i)][$dateDate]+=$redictionArray[$i];
 				else
-					$result_predict[$頻道號碼][$頻道名稱][$廣告分類][$平台識別碼][strval($i)][$日期]=$預測數ARRAY[$i];
+					$result_predict[$channelNum][$channelName][$adGroup][$platformId][strval($i)][$dateDate]=$redictionArray[$i];
 			}
 		}
 		
@@ -279,9 +279,9 @@
 			$logger->error('無法取得結果集，錯誤代碼('.$my->errno.')、錯誤訊息('.$my->error.')。');
 			return(array("dbError"=>'無法取得結果集，請聯絡系統管理員！'));
 		}
-		$頻道=array();
+		$channel=array();
 		while($row=$res->fetch_array()){
-			array_push($頻道,$row["頻道號碼"].":".$row["頻道名稱"]);
+			array_push($channel,$row["頻道號碼"].":".$row["頻道名稱"]);
 		}
 		
 		$sql='SELECT 廣告分類 FROM 預測_頻道表,預測_廣告分類 WHERE 生效日期=? AND 預測_頻道表.頻道號碼=預測_廣告分類.頻道號碼 GROUP BY 廣告分類';
@@ -299,12 +299,12 @@
 			$logger->error('無法取得結果集，錯誤代碼('.$my->errno.')、錯誤訊息('.$my->error.')。');
 			return(array("dbError"=>'無法取得結果集，請聯絡系統管理員！'));
 		}
-		$廣告分類=array();
+		$adGroup=array();
 		while($row=$res->fetch_array()){
-			array_push($廣告分類,$row["廣告分類"]);
+			array_push($adGroup,$row["廣告分類"]);
 		}
 		$stmt->close();
-		exit(json_encode(array('頻道'=>$頻道,'廣告分類'=>$廣告分類),JSON_UNESCAPED_UNICODE));
+		exit(json_encode(array('頻道'=>$channel,'廣告分類'=>$adGroup),JSON_UNESCAPED_UNICODE));
 	}
 	
 	//產生excel檔案
@@ -314,13 +314,13 @@
 		$allSum	= ['全頻道','','',$_POST['選擇平台'],'全時段'];
 		//header
 		$forExcel[]=['頻道號碼','頻道名稱','廣告分類','平台','時段'];
-		/*foreach($result as $頻道號碼=>$v1){
-		foreach($v1 as $頻道名稱=>$v2){
-		foreach($v2 as $廣告分類=>$v3){
-		foreach($v3 as $平台識別碼=>$v4){
+		/*foreach($result as $channelNum=>$v1){
+		foreach($v1 as $channelName=>$v2){
+		foreach($v2 as $adGroup=>$v3){
+		foreach($v3 as $platformId=>$v4){
 		foreach($v4 as $時段=>$v5){
-		foreach($v5 as $日期=>$v6){
-			$forExcel[0][]= $日期;
+		foreach($v5 as $dateDate=>$v6){
+			$forExcel[0][]= $dateDate;
 			$allSum[]=0;
 		}
 		break;}break;}break;}break;}break;}*/
@@ -334,14 +334,14 @@
 			$forExcel[0][]='預估值';
 			
 		array_unshift($forExcel,array($sheetName));
-		foreach($result as $頻道號碼=>$v1){
-			$c1 = $頻道號碼;
+		foreach($result as $channelNum=>$v1){
+			$c1 = $channelNum;
 			$temp = array();
-		foreach($v1 as $頻道名稱=>$v2){
-			$c2 = $頻道名稱;
-		foreach($v2 as $廣告分類=>$v3){
-			$c3 = $廣告分類;
-			foreach($v3 as $平台識別碼=>$v4){
+		foreach($v1 as $channelName=>$v2){
+			$c2 = $channelName;
+		foreach($v2 as $adGroup=>$v3){
+			$c3 = $adGroup;
+			foreach($v3 as $platformId=>$v4){
 				foreach($v4 as $時段=>$v5){
 					$subRow = ['','','','',$時段];
 					$localSum=0;
@@ -351,9 +351,9 @@
 						$dateCount[$date]= 0;
 					}
 					//塞入資料到預設array
-					foreach($v5 as $日期=>$v6){
+					foreach($v5 as $dateDate=>$v6){
 						//$subRow[]=$v6;
-						$dateCount[$日期] = $v6;
+						$dateCount[$dateDate] = $v6;
 						$localSum+=$v6;
 					}
 					//從預設array塞入資料到row中

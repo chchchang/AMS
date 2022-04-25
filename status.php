@@ -19,13 +19,13 @@
 					託播單.預約到期時間>=\''.date('Ymd').'\'
 			';
 			if(!$result=$my->getResultArray($sql)) $result=array();
-			$預約=array();
-			$確定=array();
+			$$reservedOrder=array();
+			$confirmedOrder=array();
 			foreach($result as $row){			
 				if($row['託播單狀態名稱']==='預約')
-					$預約[]=$row;
+					$$reservedOrder[]=$row;
 				else
-					$確定[]=$row;
+					$confirmedOrder[]=$row;
 			}
 						
 			//取得將過期但尚未選擇素材的託播單建立者
@@ -48,7 +48,7 @@
 					AND	託播單.預約到期時間>=\''.date('Ymd').'\'
 			';
 			if(!$result=$my->getResultArray($sql)) $result=array();
-			$素材未到 = $result;
+			$materialLost = $result;
 
 			//取得待處理狀態的託播單建立者
 			$sql='
@@ -62,7 +62,7 @@
 					託播單狀態.託播單狀態名稱=\'待處理\'
 			';
 			if(!$result=$my->getResultArray($sql)) $result=array();
-			$待處理 = $result;
+			$processingOrder = $result;
 			
 			//取得送出失敗的託播單建立者
 			$sql='
@@ -80,7 +80,7 @@
 					AND 託播單.託播單送出後是否成功 = 0
 			';
 			if(!$result=$my->getResultArray($sql)) $result=array();
-			$送出失敗 = $result;
+			$sendFailed = $result;
 		
 			//取得尚未結束播出且有內部告醒訊息的託播單建立者
 			$sql='
@@ -97,9 +97,9 @@
 					AND	託播單.廣告期間結束時間>=\''.date('Ymd').'\'
 			';
 			if(!$result=$my->getResultArray($sql)) $result=array();
-			$內部錯誤 = $result;
+			$innerError = $result;
 			header('Content-Type: application/json');
-			exit(json_encode(['預約'=>$預約,'確定'=>$確定,'素材未到'=>$素材未到,'待處理'=>$待處理,'送出失敗'=>$送出失敗,'內部錯誤'=>$內部錯誤]));
+			exit(json_encode(['預約'=>$$reservedOrder,'確定'=>$confirmedOrder,'素材未到'=>$materialLost,'待處理'=>$processingOrder,'送出失敗'=>$sendFailed,'內部錯誤'=>$innerError]));
 		}
 	}
 ?>

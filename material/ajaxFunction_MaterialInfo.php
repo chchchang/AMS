@@ -283,12 +283,12 @@
 			else
 				$mgId=$_POST['searchBy'];
 			$fromRowNo=isset($_POST['pageNo'])&&intval($_POST['pageNo'])>0?(intval($_POST['pageNo'])-1)*PAGE_SIZE:0;
-			$修改頁面 =(isset($_POST['修改素材群組頁面'])&&$_POST['修改素材群組頁面'])?true:false;
+			$editingPage =(isset($_POST['修改素材群組頁面'])&&$_POST['修改素材群組頁面'])?true:false;
 			//取得總筆數
 			$sql="SELECT COUNT(1) COUNT
 				FROM 素材群組
 				WHERE (素材群組識別碼 LIKE ? OR 素材群組名稱 LIKE ? OR 素材群組說明 LIKE ?) AND DELETED_TIME IS NULL "
-				.($修改頁面?"":" AND DISABLE_TIME IS NULL ");
+				.($editingPage?"":" AND DISABLE_TIME IS NULL ");
 			if(!$stmt=$my->prepare($sql)) {
 				$logger->error('無法準備statement，錯誤代碼('.$my->errno.')、錯誤訊息('.$my->error.')。');
 				exit('無法準備statement，請聯絡系統管理員！');
@@ -318,7 +318,7 @@
 				SELECT 素材群組識別碼,素材群組名稱,素材群組有效開始時間,素材群組有效結束時間,素材群組說明,DISABLE_TIME AS 是否隱藏
 				FROM 素材群組 
 				WHERE (素材群組識別碼 LIKE ? OR 素材群組名稱 LIKE ? OR 素材群組說明 LIKE ?) AND DELETED_TIME IS NULL "
-				.($修改頁面?"":" AND DISABLE_TIME IS NULL ")
+				.($editingPage?"":" AND DISABLE_TIME IS NULL ")
 				."ORDER BY ".$_POST['order'].' '.$_POST['asc'].' '.
 				'LIMIT ?,'.PAGE_SIZE.'
 			';
@@ -346,7 +346,7 @@
 						$row[$key]='';
 				}
 				$temp = [[$row['素材群組識別碼']],[$row['素材群組名稱']],[$row['素材群組有效開始時間']],[$row['素材群組有效結束時間']],[$row['素材群組說明']]];
-				if($修改頁面){
+				if($editingPage){
 					if($row['是否隱藏']!='')
 						$temp[]=['是'];
 					else
@@ -355,7 +355,7 @@
 				array_push($a,$temp);
 			}
 			$header = array('素材群組識別碼','素材群組名稱','素材群組有效開始時間','素材群組有效結束時間','素材群組說明');
-			if($修改頁面) $header[]='是否隱藏';
+			if($editingPage) $header[]='是否隱藏';
 			exit(json_encode(array('pageNo'=>($fromRowNo/PAGE_SIZE)+1,'maxPageNo'=>ceil($totalRowCount/PAGE_SIZE),'header'=>$header
 							,'data'=>$a,'sortable'=>$header),JSON_UNESCAPED_UNICODE));
 		}

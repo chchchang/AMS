@@ -139,7 +139,7 @@
 	if(!$stmt->execute()) {
 		exit(json_encode(array("dbError"=>'無法執行statement，請聯絡系統管理員！'),JSON_UNESCAPED_UNICODE));
 	}
-	$stmt->bind_result($廣告主識別碼,$委刊單識別碼,$版位識別碼,$版位類型名稱,$託播單識別碼);
+	$stmt->bind_result($adOwnerId,$orderListId,$positionId,$positionTypeName,$orderId);
 	$stmt->fetch();
 	
 	$parent = "";
@@ -152,7 +152,7 @@
 	if(isset($_GET['apiInfo'])&&$_GET['apiInfo']==true)
 		$apiInfo=1;
 	if(isset($_GET['版位類型名稱'])&&$_GET['版位類型名稱']==true)
-		$版位類型名稱=$_GET['版位類型名稱'];
+		$positionTypeName=$_GET['版位類型名稱'];
 ?>
 <!DOCTYPE html>
 <html>
@@ -188,7 +188,7 @@
 <h3 id = "alertMessage"></h3>
 <table class='styledTable2'>
 <tr><th id ='idText'>託播單識別碼</th><th>廣告主</th><th>委刊單</th><th>託播單狀態</th></tr>
-<tr><td><?=htmlspecialchars($託播單識別碼, ENT_QUOTES, 'UTF-8')?></td><td><a id='owner'></a></td><td><a id = 'orderlist'></a></td>
+<tr><td><?=htmlspecialchars($orderId, ENT_QUOTES, 'UTF-8')?></td><td><a id='owner'></a></td><td><a id = 'orderlist'></a></td>
 <td> <a id = "playStatus"></a> <button class="darkButton" type="button" id="checkBtn">確定</button><button class="darkButton" type="button" id="sendBtn">送出</button></td></tr>
 <tr></tr>
 </table>
@@ -197,8 +197,8 @@
 
 <script>
 	var ajaxToApi="ajaxToAPI.php";
-	var 版位類型名稱='<?=$版位類型名稱?>';
-	var id= <?php echo htmlspecialchars($託播單識別碼, ENT_QUOTES, 'UTF-8');?>;
+	var 版位類型名稱='<?=$positionTypeName?>';
+	var id= <?php echo htmlspecialchars($orderId, ENT_QUOTES, 'UTF-8');?>;
 	var change= <?=$change?>, apiInfo= <?=$apiInfo?>;
 	if(apiInfo==1)
 		orderInfoFromApi();
@@ -225,11 +225,11 @@
 	}
 	
 	$('#ownerIfoButton').click(function(e){	
-		parent.openOnwerInfoDialog(<?=$廣告主識別碼?>);
+		parent.openOnwerInfoDialog(<?=$adOwnerId?>);
 	});
 	
 	$('#orderListIfoButton').click(function(e){	
-		parent.openOrderListInfoDialog(<?=$委刊單識別碼?>);
+		parent.openOrderListInfoDialog(<?=$orderListId?>);
 	});
 	
 	//DB要資料

@@ -65,9 +65,9 @@
 	$adOwner =json_encode($adOwner,JSON_UNESCAPED_UNICODE);
 	$my->close();
 	
-	$委刊單名稱 = '';
+	$orderListName = '';
 	if(isset($_GET['orderName']))
-		$委刊單名稱 = htmlspecialchars($_GET["orderName"], ENT_QUOTES, 'UTF-8');
+		$orderListName = htmlspecialchars($_GET["orderName"], ENT_QUOTES, 'UTF-8');
 ?>
 <!DOCTYPE html>
 <html>
@@ -116,7 +116,7 @@ button{
 <script>
 	var ajaxtodbPath="ajaxToDB_Order.php";
 	var adOwner = <?=$adOwner?>;
-	var 委刊單名稱 = '<?=$委刊單名稱?>';
+	var 委刊單名稱 = '<?=$orderListName?>';
 	var action="<?php if(isset($_GET['action'])) echo htmlspecialchars($_GET['action'], ENT_QUOTES, 'UTF-8'); else echo "new";?>";
 	if(action =="new"){
 		$("#orderListIdRow").remove();

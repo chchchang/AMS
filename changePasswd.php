@@ -12,26 +12,26 @@
 		else if(strlen($_POST['new1'])<Config::MIN_PASSWD_LENGTH)
 			$msg='<script>alert("新密碼長度過短！");</script>';
 		else{
-			$使用者舊密碼=md5('AMS_USER_PASSWORD_'.$_POST['old']);
-			$使用者新密碼=md5('AMS_USER_PASSWORD_'.$_POST['new1']);
+			$oldpwd=md5('AMS_USER_PASSWORD_'.$_POST['old']);
+			$newpwd=md5('AMS_USER_PASSWORD_'.$_POST['new1']);
 			$my=new MyDB();
 			
 			$sql='SELECT * FROM 使用者 WHERE 使用者識別碼=? AND 使用者密碼=?';
 			$stmt=$my->prepare($sql);
-			$stmt->bind_param('is',$_SESSION['AMS']['使用者識別碼'],$使用者舊密碼);
+			$stmt->bind_param('is',$_SESSION['AMS']['使用者識別碼'],$oldpwd);
 			$stmt->execute();
 			$res=$stmt->get_result();
 			if(!$row=$res->fetch_assoc())
 				$msg='<script>alert("當前密碼輸入錯誤！");</script>';
 			else{
-				if($row['父代使用者密碼']==$使用者新密碼||$row['祖代使用者密碼']==$使用者新密碼)
+				if($row['父代使用者密碼']==$newpwd||$row['祖代使用者密碼']==$newpwd)
 				{
 					$msg='<script>alert("新密碼不可與前三代密碼相同!");</script>';
 				}
 				else{
 					$sql='UPDATE 使用者 SET 祖代使用者密碼=父代使用者密碼,父代使用者密碼=使用者密碼,使用者密碼=?,LAST_UPDATE_TIME=CURRENT_TIMESTAMP,LAST_UPDATE_PEOPLE=? WHERE 使用者識別碼=? AND 使用者密碼=?';
 					$stmt=$my->prepare($sql);
-					$stmt->bind_param('sisi',$使用者新密碼,$_SESSION['AMS']['使用者識別碼'],$_SESSION['AMS']['使用者識別碼'],$使用者舊密碼);
+					$stmt->bind_param('sisi',$newpwd,$_SESSION['AMS']['使用者識別碼'],$_SESSION['AMS']['使用者識別碼'],$oldpwd);
 					$stmt->execute();
 					$msg='<script>alert("修改成功，請重新登入。");top.window.location.replace("logout.php");</script>';
 				}

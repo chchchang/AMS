@@ -64,32 +64,32 @@
 		if(!$stmt->execute()) {
 			exit('無法執行statement，錯誤代碼('.$stmt->errno.')、錯誤訊息('.$stmt->error.')。');
 		}
-		$stmt->bind_result($頻道號碼,$頻道名稱,$平台識別碼,$日期,$曝光數0,$曝光數1,$曝光數2,$曝光數3,$曝光數4,$曝光數5,$曝光數6,$曝光數7,$曝光數8,$曝光數9,$曝光數10,$曝光數11,$曝光數12,$曝光數13,$曝光數14,$曝光數15,$曝光數16,$曝光數17,$曝光數18,$曝光數19,$曝光數20,$曝光數21,$曝光數22,$曝光數23);
+		$stmt->bind_result($channelNum,$channelName,$platformId,$dataDate,$impression0,$impression1,$impression2,$impression3,$impression4,$impression5,$impression6,$impression7,$impression8,$impression9,$impression10,$impression11,$impression12,$impression13,$impression14,$impression15,$impression16,$impression17,$impression18,$impression19,$impression20,$impression21,$impression22,$impression23);
 		while($stmt->fetch()) {
-			$result[$頻道號碼][$頻道名稱][$平台識別碼][$日期]['曝光數0']=$曝光數0;
-			$result[$頻道號碼][$頻道名稱][$平台識別碼][$日期]['曝光數1']=$曝光數1;
-			$result[$頻道號碼][$頻道名稱][$平台識別碼][$日期]['曝光數2']=$曝光數2;
-			$result[$頻道號碼][$頻道名稱][$平台識別碼][$日期]['曝光數3']=$曝光數3;
-			$result[$頻道號碼][$頻道名稱][$平台識別碼][$日期]['曝光數4']=$曝光數4;
-			$result[$頻道號碼][$頻道名稱][$平台識別碼][$日期]['曝光數5']=$曝光數5;
-			$result[$頻道號碼][$頻道名稱][$平台識別碼][$日期]['曝光數6']=$曝光數6;
-			$result[$頻道號碼][$頻道名稱][$平台識別碼][$日期]['曝光數7']=$曝光數7;
-			$result[$頻道號碼][$頻道名稱][$平台識別碼][$日期]['曝光數8']=$曝光數8;
-			$result[$頻道號碼][$頻道名稱][$平台識別碼][$日期]['曝光數9']=$曝光數9;
-			$result[$頻道號碼][$頻道名稱][$平台識別碼][$日期]['曝光數10']=$曝光數10;
-			$result[$頻道號碼][$頻道名稱][$平台識別碼][$日期]['曝光數11']=$曝光數11;
-			$result[$頻道號碼][$頻道名稱][$平台識別碼][$日期]['曝光數12']=$曝光數12;
-			$result[$頻道號碼][$頻道名稱][$平台識別碼][$日期]['曝光數13']=$曝光數13;
-			$result[$頻道號碼][$頻道名稱][$平台識別碼][$日期]['曝光數14']=$曝光數14;
-			$result[$頻道號碼][$頻道名稱][$平台識別碼][$日期]['曝光數15']=$曝光數15;
-			$result[$頻道號碼][$頻道名稱][$平台識別碼][$日期]['曝光數16']=$曝光數16;
-			$result[$頻道號碼][$頻道名稱][$平台識別碼][$日期]['曝光數17']=$曝光數17;
-			$result[$頻道號碼][$頻道名稱][$平台識別碼][$日期]['曝光數18']=$曝光數18;
-			$result[$頻道號碼][$頻道名稱][$平台識別碼][$日期]['曝光數19']=$曝光數19;
-			$result[$頻道號碼][$頻道名稱][$平台識別碼][$日期]['曝光數20']=$曝光數20;
-			$result[$頻道號碼][$頻道名稱][$平台識別碼][$日期]['曝光數21']=$曝光數21;
-			$result[$頻道號碼][$頻道名稱][$平台識別碼][$日期]['曝光數22']=$曝光數22;
-			$result[$頻道號碼][$頻道名稱][$平台識別碼][$日期]['曝光數23']=$曝光數23;
+			$result[$channelNum][$channelName][$platformId][$dataDate]['曝光數0']=$impression0;
+			$result[$channelNum][$channelName][$platformId][$dataDate]['曝光數1']=$impression1;
+			$result[$channelNum][$channelName][$platformId][$dataDate]['曝光數2']=$impression2;
+			$result[$channelNum][$channelName][$platformId][$dataDate]['曝光數3']=$impression3;
+			$result[$channelNum][$channelName][$platformId][$dataDate]['曝光數4']=$impression4;
+			$result[$channelNum][$channelName][$platformId][$dataDate]['曝光數5']=$impression5;
+			$result[$channelNum][$channelName][$platformId][$dataDate]['曝光數6']=$impression6;
+			$result[$channelNum][$channelName][$platformId][$dataDate]['曝光數7']=$impression7;
+			$result[$channelNum][$channelName][$platformId][$dataDate]['曝光數8']=$impression8;
+			$result[$channelNum][$channelName][$platformId][$dataDate]['曝光數9']=$impression9;
+			$result[$channelNum][$channelName][$platformId][$dataDate]['曝光數10']=$impression10;
+			$result[$channelNum][$channelName][$platformId][$dataDate]['曝光數11']=$impression11;
+			$result[$channelNum][$channelName][$platformId][$dataDate]['曝光數12']=$impression12;
+			$result[$channelNum][$channelName][$platformId][$dataDate]['曝光數13']=$impression13;
+			$result[$channelNum][$channelName][$platformId][$dataDate]['曝光數14']=$impression14;
+			$result[$channelNum][$channelName][$platformId][$dataDate]['曝光數15']=$impression15;
+			$result[$channelNum][$channelName][$platformId][$dataDate]['曝光數16']=$impression16;
+			$result[$channelNum][$channelName][$platformId][$dataDate]['曝光數17']=$impression17;
+			$result[$channelNum][$channelName][$platformId][$dataDate]['曝光數18']=$impression18;
+			$result[$channelNum][$channelName][$platformId][$dataDate]['曝光數19']=$impression19;
+			$result[$channelNum][$channelName][$platformId][$dataDate]['曝光數20']=$impression20;
+			$result[$channelNum][$channelName][$platformId][$dataDate]['曝光數21']=$impression21;
+			$result[$channelNum][$channelName][$platformId][$dataDate]['曝光數22']=$impression22;
+			$result[$channelNum][$channelName][$platformId][$dataDate]['曝光數23']=$impression23;
 		}
 		
 		
@@ -148,46 +148,46 @@
 		if(!$stmt->execute()) {
 			exit('無法執行statement，錯誤代碼('.$stmt->errno.')、錯誤訊息('.$stmt->error.')。');
 		}	
-		$stmt->bind_result($頻道號碼,$頻道名稱,$平台識別碼,$日期,$預測數0,$預測數1,$預測數2,$預測數3,$預測數4,$預測數5,$預測數6,$預測數7,$預測數8,$預測數9,$預測數10,$預測數11,$預測數12,$預測數13,$預測數14,$預測數15,$預測數16,$預測數17,$預測數18,$預測數19,$預測數20,$預測數21,$預測數22,$預測數23);
+		$stmt->bind_result($channelNum,$channelName,$platformId,$dataDate,$rediction0,$rediction1,$rediction2,$rediction3,$rediction4,$rediction5,$rediction6,$rediction7,$rediction8,$rediction9,$rediction10,$rediction11,$rediction12,$rediction13,$rediction14,$rediction15,$rediction16,$rediction17,$rediction18,$rediction19,$rediction20,$rediction21,$rediction22,$rediction23);
 		while($stmt->fetch()) {
-			$result[$頻道號碼][$頻道名稱][$平台識別碼][$日期]['預測數0']=$預測數0;
-			$result[$頻道號碼][$頻道名稱][$平台識別碼][$日期]['預測數1']=$預測數1;
-			$result[$頻道號碼][$頻道名稱][$平台識別碼][$日期]['預測數2']=$預測數2;
-			$result[$頻道號碼][$頻道名稱][$平台識別碼][$日期]['預測數3']=$預測數3;
-			$result[$頻道號碼][$頻道名稱][$平台識別碼][$日期]['預測數4']=$預測數4;
-			$result[$頻道號碼][$頻道名稱][$平台識別碼][$日期]['預測數5']=$預測數5;
-			$result[$頻道號碼][$頻道名稱][$平台識別碼][$日期]['預測數6']=$預測數6;
-			$result[$頻道號碼][$頻道名稱][$平台識別碼][$日期]['預測數7']=$預測數7;
-			$result[$頻道號碼][$頻道名稱][$平台識別碼][$日期]['預測數8']=$預測數8;
-			$result[$頻道號碼][$頻道名稱][$平台識別碼][$日期]['預測數9']=$預測數9;
-			$result[$頻道號碼][$頻道名稱][$平台識別碼][$日期]['預測數10']=$預測數10;
-			$result[$頻道號碼][$頻道名稱][$平台識別碼][$日期]['預測數11']=$預測數11;
-			$result[$頻道號碼][$頻道名稱][$平台識別碼][$日期]['預測數12']=$預測數12;
-			$result[$頻道號碼][$頻道名稱][$平台識別碼][$日期]['預測數13']=$預測數13;
-			$result[$頻道號碼][$頻道名稱][$平台識別碼][$日期]['預測數14']=$預測數14;
-			$result[$頻道號碼][$頻道名稱][$平台識別碼][$日期]['預測數15']=$預測數15;
-			$result[$頻道號碼][$頻道名稱][$平台識別碼][$日期]['預測數16']=$預測數16;
-			$result[$頻道號碼][$頻道名稱][$平台識別碼][$日期]['預測數17']=$預測數17;
-			$result[$頻道號碼][$頻道名稱][$平台識別碼][$日期]['預測數18']=$預測數18;
-			$result[$頻道號碼][$頻道名稱][$平台識別碼][$日期]['預測數19']=$預測數19;
-			$result[$頻道號碼][$頻道名稱][$平台識別碼][$日期]['預測數20']=$預測數20;
-			$result[$頻道號碼][$頻道名稱][$平台識別碼][$日期]['預測數21']=$預測數21;
-			$result[$頻道號碼][$頻道名稱][$平台識別碼][$日期]['預測數22']=$預測數22;
-			$result[$頻道號碼][$頻道名稱][$平台識別碼][$日期]['預測數23']=$預測數23;
+			$result[$channelNum][$channelName][$platformId][$dataDate]['預測數0']=$rediction0;
+			$result[$channelNum][$channelName][$platformId][$dataDate]['預測數1']=$rediction1;
+			$result[$channelNum][$channelName][$platformId][$dataDate]['預測數2']=$rediction2;
+			$result[$channelNum][$channelName][$platformId][$dataDate]['預測數3']=$rediction3;
+			$result[$channelNum][$channelName][$platformId][$dataDate]['預測數4']=$rediction4;
+			$result[$channelNum][$channelName][$platformId][$dataDate]['預測數5']=$rediction5;
+			$result[$channelNum][$channelName][$platformId][$dataDate]['預測數6']=$rediction6;
+			$result[$channelNum][$channelName][$platformId][$dataDate]['預測數7']=$rediction7;
+			$result[$channelNum][$channelName][$platformId][$dataDate]['預測數8']=$rediction8;
+			$result[$channelNum][$channelName][$platformId][$dataDate]['預測數9']=$rediction9;
+			$result[$channelNum][$channelName][$platformId][$dataDate]['預測數10']=$rediction10;
+			$result[$channelNum][$channelName][$platformId][$dataDate]['預測數11']=$rediction11;
+			$result[$channelNum][$channelName][$platformId][$dataDate]['預測數12']=$rediction12;
+			$result[$channelNum][$channelName][$platformId][$dataDate]['預測數13']=$rediction13;
+			$result[$channelNum][$channelName][$platformId][$dataDate]['預測數14']=$rediction14;
+			$result[$channelNum][$channelName][$platformId][$dataDate]['預測數15']=$rediction15;
+			$result[$channelNum][$channelName][$platformId][$dataDate]['預測數16']=$rediction16;
+			$result[$channelNum][$channelName][$platformId][$dataDate]['預測數17']=$rediction17;
+			$result[$channelNum][$channelName][$platformId][$dataDate]['預測數18']=$rediction18;
+			$result[$channelNum][$channelName][$platformId][$dataDate]['預測數19']=$rediction19;
+			$result[$channelNum][$channelName][$platformId][$dataDate]['預測數20']=$rediction20;
+			$result[$channelNum][$channelName][$platformId][$dataDate]['預測數21']=$rediction21;
+			$result[$channelNum][$channelName][$platformId][$dataDate]['預測數22']=$rediction22;
+			$result[$channelNum][$channelName][$platformId][$dataDate]['預測數23']=$rediction23;
 		}
 		/*echo '<table border="1"><tr><td>頻道號碼</td><td>頻道名稱</td><td>平台識別碼</td><td>日期</td><td>實際/預測</td><td>時段0</td><td>時段1</td><td>時段2</td><td>時段3</td><td>時段4</td><td>時段5</td><td>時段6</td><td>時段7</td><td>時段8</td><td>時段9</td><td>時段10</td><td>時段11</td><td>時段12</td><td>時段13</td><td>時段14</td><td>時段15</td><td>時段16</td><td>時段17</td><td>時段18</td><td>時段19</td><td>時段20</td><td>時段21</td><td>時段22</td><td>時段23</td></tr>';
-		foreach($result as $頻道號碼=>$v) {
-		foreach($v as $頻道名稱=>$v2) {
-		foreach($v2 as $平台識別碼=>$v3) {
-		foreach($v3 as $日期=>$v4) {
+		foreach($result as $channelNum=>$v) {
+		foreach($v as $channelName=>$v2) {
+		foreach($v2 as $platformId=>$v3) {
+		foreach($v3 as $dataDate=>$v4) {
 			if(isset($v4['曝光數0'])) {
-				echo '<tr><td>'.$頻道號碼.'</td><td>'.$頻道名稱.'</td><td>'.$平台識別碼.'</td><td>'.$日期.'</td><td>實際</td>';
+				echo '<tr><td>'.$channelNum.'</td><td>'.$channelName.'</td><td>'.$platformId.'</td><td>'.$dataDate.'</td><td>實際</td>';
 				for($i=0;$i<24;$i++)
 					echo '<td>'.$v4['曝光數'.$i].'</td>';
 				echo '</tr>';
 			}
 			else {
-				echo '<tr><td>'.$頻道號碼.'</td><td>'.$頻道名稱.'</td><td>'.$平台識別碼.'</td><td>'.$日期.'</td><td>預測</td>';
+				echo '<tr><td>'.$channelNum.'</td><td>'.$channelName.'</td><td>'.$platformId.'</td><td>'.$dataDate.'</td><td>預測</td>';
 				for($i=0;$i<24;$i++)
 					echo '<td>'.$v4['預測數'.$i].'</td>';
 				echo '</tr>';
@@ -210,12 +210,12 @@
 		$logger->error('無法取得結果集，錯誤代碼('.$my->errno.')、錯誤訊息('.$my->error.')。');
 		return(array("dbError"=>'無法取得結果集，請聯絡系統管理員！'));
 	}
-	$頻道=array();
+	$channel=array();
 	while($row=$res->fetch_array()){
-		array_push($頻道,$row["頻道號碼"].":".$row["頻道名稱"]);
+		array_push($channel,$row["頻道號碼"].":".$row["頻道名稱"]);
 	}
-	$頻道=json_encode($頻道,JSON_UNESCAPED_UNICODE);
-	//echo $頻道名稱;
+	$channel=json_encode($channel,JSON_UNESCAPED_UNICODE);
+	//echo $channelName;
 	$stmt->close();
 ?>
 <!DOCTYPE html>
@@ -354,7 +354,7 @@
 			}
 		});
 		
-		var availableTags = <?=$頻道?>;
+		var availableTags = <?=$channel?>;
 		$( "#tags" ).autocomplete({
 			source: availableTags,
 			multiselect: true

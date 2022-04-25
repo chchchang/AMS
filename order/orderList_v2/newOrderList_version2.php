@@ -85,9 +85,9 @@
 	$my->close();
 	
 	//頁面基本行為相關
-	$委刊單名稱 = '';
+	$orderListName = '';
 	if(isset($_GET['orderName']))
-		$委刊單名稱 = htmlspecialchars($_GET["orderName"], ENT_QUOTES, 'UTF-8');
+		$orderListName = htmlspecialchars($_GET["orderName"], ENT_QUOTES, 'UTF-8');
 	//頁面執行行為，新增(預設，new)、修改(edit)或顯示(info)
 	$pageAction = 'new';
 	if(isset($_GET["pageAction"]))
@@ -223,7 +223,7 @@ table {
 	var ajaxtodbPath="../ajaxToDB_Order.php";
 	var ajaxtodbPath_v2="ajaxToDB_NewOrderList.php";
 	var adOwner = <?=$adOwner?>;
-	var 委刊單名稱 = '<?=$委刊單名稱?>';
+	var 委刊單名稱 = '<?=$orderListName?>';
 	var oid = '<?=$oid?>';
 	var pageAction="<?=$pageAction;?>";
 	if(pageAction =="new"){

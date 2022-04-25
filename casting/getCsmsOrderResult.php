@@ -34,30 +34,30 @@
 			break;
 		}
 		
-		$託播單CSMS群組識別碼=$row['託播單CSMS群組識別碼'];
-		$result2[$託播單CSMS群組識別碼]['版位類型名稱']=$row['版位類型名稱'];	//一個"託播單CSMS群組識別碼"之下只會有一個"版位類型名稱"所以不需要再以陣列儲存
+		$CSMSGroupId=$row['託播單CSMS群組識別碼'];
+		$result2[$CSMSGroupId]['版位類型名稱']=$row['版位類型名稱'];	//一個"託播單CSMS群組識別碼"之下只會有一個"版位類型名稱"所以不需要再以陣列儲存
 		if(preg_match('/_北$/',$row['版位名稱'])){
-			$result2[$託播單CSMS群組識別碼]['託播單群組']['N'][]=array('版位名稱'=>$row['版位名稱'],'託播單識別碼'=>$row['託播單識別碼'],'託播單送出結果'=>['action'=>$action,'success'=>$row['託播單送出後是否成功']==0?false:true]);
+			$result2[$CSMSGroupId]['託播單群組']['N'][]=array('版位名稱'=>$row['版位名稱'],'託播單識別碼'=>$row['託播單識別碼'],'託播單送出結果'=>['action'=>$action,'success'=>$row['託播單送出後是否成功']==0?false:true]);
 		}
 		else if(preg_match('/_中$/',$row['版位名稱'])){
-			$result2[$託播單CSMS群組識別碼]['託播單群組']['C'][]=array('版位名稱'=>$row['版位名稱'],'託播單識別碼'=>$row['託播單識別碼'],'託播單送出結果'=>['action'=>$action,'success'=>$row['託播單送出後是否成功']==0?false:true]);
+			$result2[$CSMSGroupId]['託播單群組']['C'][]=array('版位名稱'=>$row['版位名稱'],'託播單識別碼'=>$row['託播單識別碼'],'託播單送出結果'=>['action'=>$action,'success'=>$row['託播單送出後是否成功']==0?false:true]);
 		}
 		else if(preg_match('/_南$/',$row['版位名稱'])){
-			$result2[$託播單CSMS群組識別碼]['託播單群組']['S'][]=array('版位名稱'=>$row['版位名稱'],'託播單識別碼'=>$row['託播單識別碼'],'託播單送出結果'=>['action'=>$action,'success'=>$row['託播單送出後是否成功']==0?false:true]);
+			$result2[$CSMSGroupId]['託播單群組']['S'][]=array('版位名稱'=>$row['版位名稱'],'託播單識別碼'=>$row['託播單識別碼'],'託播單送出結果'=>['action'=>$action,'success'=>$row['託播單送出後是否成功']==0?false:true]);
 		}
 	}
 	
 	//根據"以託播單CSMS群組識別碼為主索引的關聯式陣列"到各區CSMS"處理結果資料夾路徑"下取得指定檔案(該檔案檔名由"版位類型名稱"、"託播單CSMS群組識別碼"、"託播單送出結果"等資訊組合而成)
-	foreach($result2 as $託播單CSMS群組識別碼=>$result3){
-		foreach($result3['託播單群組'] as $區域=>$託播單群組){
+	foreach($result2 as $CSMSGroupId=>$result3){
+		foreach($result3['託播單群組'] as $area=>$orderGroup){
 			//找出從處理結果路徑下載檔案所需的必要資訊
-			$託播單識別碼群組=array();
-			$託播單送出結果群組=array();
-			foreach($託播單群組 as $託播單){
-				$託播單識別碼群組[]=$託播單['託播單識別碼'];
-				$託播單送出結果群組[]=$託播單['託播單送出結果'];
+			$orderIdArray=array();
+			$sendResultArray=array();
+			foreach($orderGroup as $order){
+				$orderIdArray[]=$order['託播單識別碼'];
+				$sendResultArray[]=$order['託播單送出結果'];
 			}
-			$託播單送出結果=$託播單送出結果群組[0];	//由於只有"頻道short EPG banner"版位的託播單因為要合併送出的關係而使得此群組內的託播單會超過1張，但這些託播單都是一起被送出，故送出結果也都相同，因此只需要參考任一個即可，目前固定參考第1個的值。
+			$sendResult=$sendResultArray[0];	//由於只有"頻道short EPG banner"版位的託播單因為要合併送出的關係而使得此群組內的託播單會超過1張，但這些託播單都是一起被送出，故送出結果也都相同，因此只需要參考任一個即可，目前固定參考第1個的值。
 			/*
 				託播單送出結果	下一個動作
 				null	insert
@@ -68,42 +68,42 @@
 				delete成功	update
 				delete失敗	delete
 			*/
-			if($託播單送出結果['action']===null)
-				$下一個動作='insert';
+			if($sendResult['action']===null)
+				$nextAction='insert';
 				
-			else if($託播單送出結果['action']==='insert'&&$託播單送出結果['success']===true)
-				$下一個動作='delete';
+			else if($sendResult['action']==='insert'&&$sendResult['success']===true)
+				$nextAction='delete';
 				
-			else if($託播單送出結果['action']==='insert'&&$託播單送出結果['success']===false)
-				$下一個動作='insert';
-			else if($託播單送出結果['action']==='update'&&$託播單送出結果['success']===true)
-				$下一個動作='delete';
-			else if($託播單送出結果['action']==='update'&&$託播單送出結果['success']===false)
-				$下一個動作='update';
-			else if($託播單送出結果['action']==='delete'&&$託播單送出結果['success']===true)
-				$下一個動作='update';
-			else if($託播單送出結果['action']==='delete'&&$託播單送出結果['success']===false)
-				$下一個動作='delete';
+			else if($sendResult['action']==='insert'&&$sendResult['success']===false)
+				$nextAction='insert';
+			else if($sendResult['action']==='update'&&$sendResult['success']===true)
+				$nextAction='delete';
+			else if($sendResult['action']==='update'&&$sendResult['success']===false)
+				$nextAction='update';
+			else if($sendResult['action']==='delete'&&$sendResult['success']===true)
+				$nextAction='update';
+			else if($sendResult['action']==='delete'&&$sendResult['success']===false)
+				$nextAction='delete';
 			if(preg_match('/^首頁banner$/',$result3['版位類型名稱'])||preg_match('/^專區banner$/',$result3['版位類型名稱'])){
-				$檔名='csad.'.$下一個動作.'.'.$託播單CSMS群組識別碼.'.xls.fin';
+				$fileName='csad.'.$nextAction.'.'.$CSMSGroupId.'.xls.fin';
 			}
 			else if(preg_match('/^頻道short EPG banner$/',$result3['版位類型名稱'])){
-				$檔名='sepg.'.$下一個動作.'.'.$託播單CSMS群組識別碼.'.xls.fin';
+				$fileName='sepg.'.$nextAction.'.'.$CSMSGroupId.'.xls.fin';
 			}
 			else if(preg_match('/^專區vod$/',$result3['版位類型名稱'])){
-				$檔名='barkerad.'.$下一個動作.'.'.$託播單CSMS群組識別碼.'.xls.fin';
+				$fileName='barkerad.'.$nextAction.'.'.$CSMSGroupId.'.xls.fin';
 			}
 			else{
 				exit('版位類型名稱"'.$result3['版位類型名稱'].'"非屬白名單內，中止執行！');
 			}
 			
 			//從處理結果路徑下載檔案進行處理
-			$託播單識別碼群組列表=join(',',$託播單識別碼群組);
-			$host=Config::$FTP_SERVERS['CSMS_'.$區域][0]['host'];
-			$username=Config::$FTP_SERVERS['CSMS_'.$區域][0]['username'];
-			$password=Config::$FTP_SERVERS['CSMS_'.$區域][0]['password'];
-			$local=dirname(__FILE__).'/local/'.$區域.'/'.$檔名;
-			$remote=Config::$FTP_SERVERS['CSMS_'.$區域][0]['處理結果資料夾路徑'].'/'.$檔名;;
+			$orderIdsSting=join(',',$orderIdArray);
+			$host=Config::$FTP_SERVERS['CSMS_'.$area][0]['host'];
+			$username=Config::$FTP_SERVERS['CSMS_'.$area][0]['username'];
+			$password=Config::$FTP_SERVERS['CSMS_'.$area][0]['password'];
+			$local=dirname(__FILE__).'/local/'.$area.'/'.$fileName;
+			$remote=Config::$FTP_SERVERS['CSMS_'.$area][0]['處理結果資料夾路徑'].'/'.$fileName;;
 		if(FTP::isFile($host,$username,$password,$remote)){	//遠端檔案存在
 			if(FTP::get($host,$username,$password,$local,$remote)){	//下載檔案成功
 				if(filesize($local)!==false){	//再次確認下載檔案成功
@@ -116,90 +116,90 @@
 						update	成功	送出	2	update,true,null
 						delete	失敗	送出	2	delete,false,<error>
 					*/
-					$外部錯誤訊息 = null;
-					$內部錯誤訊息 = null;
-					$送出行為識別碼 = null;
-					$送出是否成功 = null;
+					$externalErrorMessage = null;
+					$internalErrorMessage = null;
+					$nextActionId = null;
+					$sendResultFlg = null;
 					//依照下一個動作決定送出行為識別碼
-					switch($下一個動作){
+					switch($nextAction){
 						case'insert':
-							$送出行為識別碼 = 1;
+							$nextActionId = 1;
 						break;
 						case'update':
-							$送出行為識別碼 = 2;
+							$nextActionId = 2;
 						break;
 						case'delete':
-							$送出行為識別碼 = 3;
+							$nextActionId = 3;
 						break;
 					}
 					
 					
 					if(filesize($local)===0){	//檔案大小等於0表示處理結果為成功
-						$送出是否成功=1;
+						$sendResultFlg=1;
 						//送出後的雙重檢查，若不通過，記錄內部錯誤訊息:投放系統託播單資訊與AMS不一致
-						$doubleCheck=doubleCheckData($result3['版位類型名稱'],$下一個動作,$區域,$託播單識別碼群組列表,$託播單CSMS群組識別碼,$託播單識別碼群組);
+						$doubleCheck=doubleCheckData($result3['版位類型名稱'],$nextAction,$area,$orderIdsSting,$CSMSGroupId,$orderIdArray);
 						if(!$doubleCheck['success']){
-							$送出是否成功 = 0;
-							$新的託播單狀態識別碼=($下一個動作==='delete')?2:1;
+							$sendResultFlg = 0;
+							$newOrderStateId=($nextAction==='delete')?2:1;
 						}
 						else{
-							$送出是否成功 = 1;
-							$新的託播單狀態識別碼=($下一個動作==='delete')?1:2;
+							$sendResultFlg = 1;
+							$newOrderStateId=($nextAction==='delete')?1:2;
 						}
 						//刪除本地檔案
-						unlink('../order/851/'.$託播單識別碼群組[0].'.xls');
-						$內部錯誤訊息 = $doubleCheck['inner_error'];
+						unlink('../order/851/'.$orderIdArray[0].'.xls');
+						$internalErrorMessage = $doubleCheck['inner_error'];
 					}
 					else{	//檔案大小不等於0表示處理結果為失敗
-						$新的託播單狀態識別碼=($下一個動作==='delete')?2:1;
-						$送出是否成功 = 0;
-						$外部錯誤訊息 = '<error>';
+						$newOrderStateId=($nextAction==='delete')?2:1;
+						$sendResultFlg = 0;
+						$externalErrorMessage = '<error>';
 					}
 					
 					$stmt=$my->prepare('UPDATE 託播單 SET 託播單狀態識別碼=?,託播單送出行為識別碼=?,託播單送出後是否成功=?,託播單送出後內部錯誤訊息=?,託播單送出後外部錯誤訊息=?
-										WHERE 託播單識別碼 IN('.$託播單識別碼群組列表.')');
-					$stmt->bind_param('iiiss',$新的託播單狀態識別碼,$送出行為識別碼,$送出是否成功,$內部錯誤訊息,$外部錯誤訊息);
+										WHERE 託播單識別碼 IN('.$orderIdsSting.')');
+					$stmt->bind_param('iiiss',$newOrderStateId,$nextActionId,$sendResultFlg,$internalErrorMessage,$externalErrorMessage);
 					if($stmt->execute()){
 						FTP::delete($host,$username,$password,$remote);	//處理完成後刪除遠端上的檔案
-						if($送出是否成功 == 1){
-							$updateOrderWithSameMaterial = updateOrderWithSameMaterial($託播單識別碼群組);
-							$結果=' 下載遠端檔案成功，並且更新託播單狀態識別碼與送出結果成功。'.$updateOrderWithSameMaterial['message'];
+						if($sendResultFlg == 1){
+							$updateOrderWithSameMaterial = updateOrderWithSameMaterial($orderIdArray);
+							$feedBackMessage=' 下載遠端檔案成功，並且更新託播單狀態識別碼與送出結果成功。'.$updateOrderWithSameMaterial['message'];
 						}
 						else
-							$結果=' 下載遠端檔案成功，並且更新託播單狀態識別碼與送出結果成功。';
+							$feedBackMessage=' 下載遠端檔案成功，並且更新託播單狀態識別碼與送出結果成功。';
 					}
 					else
-						$結果=' 下載遠端檔案成功，但是更新託播單狀態識別碼與送出結果失敗！';
+						$feedBackMessage=' 下載遠端檔案成功，但是更新託播單狀態識別碼與送出結果失敗！';
 				}
 				else
-					$結果='下載遠端檔案成功，但是取得本機檔案大小失敗！';
+					$feedBackMessage='下載遠端檔案成功，但是取得本機檔案大小失敗！';
 			}
 			else
-				$結果='下載遠端檔案失敗！';
+				$feedBackMessage='下載遠端檔案失敗！';
 		}
 		else
-			$結果='遠端檔案不存在！';
+			$feedBackMessage='遠端檔案不存在！';
 			
-			echo date('Y-m-d H:i:s')."\t".'區域："'.$區域.'"'."\t".'遠端："'.$remote.'"'."\t".'本機："'.$local.'"'."\t".'託播單CSMS群組識別碼："'.$託播單CSMS群組識別碼.'"'."\t".'託播單識別碼群組列表："'.$託播單識別碼群組列表.'"'."\t".'結果："'.$結果.'"'."\n";
+			echo date('Y-m-d H:i:s')."\t".'區域："'.$area.'"'."\t".'遠端："'.$remote.'"'."\t".'本機："'.$local.'"'."\t".'託播單CSMS群組識別碼："'.$CSMSGroupId.'"'."\t".'託播單識別碼群組列表："'.$orderIdsSting.'"'."\t".'結果："'.$feedBackMessage.'"'."\n";
 		}
 	}
 	
-	function doubleCheckData($版位類型名稱,$下一個動作,$區域,$託播單識別碼群組列表,$託播單CSMS群組識別碼,$託播單識別碼群組){
+	function doubleCheckData($positionTypeName,$nextAction,$area,$orderIdsSting,$CSMSGroupId,$orderIdArray){
 		require_once '../tool/PHPExcel/Classes/PHPExcel.php';
 		require_once '../tool/OracleDB.php';
 		//return true;
 		//讀取本地送出檔案用reader
-		$filename = '../order/851/'.$託播單識別碼群組[0].'.xls';
+		$filename = '../order/851/'.$orderIdArray[0].'.xls';
 		$reader = PHPExcel_IOFactory::load($filename);
 		$sheet=$reader->getActiveSheet();
 		//取得OMP資料庫檔案並比較
-		if($區域==='N'){
+		if($area==='N'){
 			$DB_U = Config::OMP_N_ORACLE_DB_USER;
 			$DB_T_O = Config::OMP_N_ORACLE_DB_TABLE_OWNER;
 			$DB_P = Config::OMP_N_ORACLE_DB_PASSWORD;
 			$DB_S = Config::OMP_N_ORACLE_DB_CONN_STR;
 		}
-		else if($區域==='C'){
+		else if($area==='C'){
 			$DB_U = Config::OMP_C_ORACLE_DB_USER;
 			$DB_T_O = Config::OMP_C_ORACLE_DB_TABLE_OWNER;
 			$DB_P = Config::OMP_C_ORACLE_DB_PASSWORD;
@@ -216,7 +216,7 @@
 			
 		$inner_error = '';//記錄內部錯誤訊息用
 		//OMP資料STATUS:0 準備中, 1 上架, 2 下架
-		if($版位類型名稱 == '首頁banner' || $版位類型名稱 == '專區banner'){
+		if($positionTypeName == '首頁banner' || $positionTypeName == '專區banner'){
 			$sql='
 				SELECT
 					CAS.TRANSACTION_ID,
@@ -247,12 +247,12 @@
 					CAS.TRANSACTION_ID=:TID
 			';
 			$vars=array(
-				array('bv_name'=>':TID','variable'=>$託播單CSMS群組識別碼)
+				array('bv_name'=>':TID','variable'=>$CSMSGroupId)
 			);
 			$result=$oracleDB->getResultArray($sql,$vars);
 			
 			//比較結果
-			switch($下一個動作){
+			switch($nextAction){
 				case 'insert':
 					if(count($result)==0)
 						return array('success'=>false,'inner_error'=>'檔案處理成功但託播單未上架');
@@ -314,7 +314,7 @@
 				break;
 			}
 		}
-		else if($版位類型名稱 == '頻道short EPG banner'){
+		else if($positionTypeName == '頻道short EPG banner'){
 			$sql='
 				SELECT
 					CSS.SEPG_TRANSACTION_ID,
@@ -346,12 +346,12 @@
 					CSS.SEPG_TRANSACTION_ID
 			';
 			$vars=array(
-				array('bv_name'=>':TID','variable'=>$託播單CSMS群組識別碼)
+				array('bv_name'=>':TID','variable'=>$CSMSGroupId)
 			);
 			$result=$oracleDB->getResultArray($sql,$vars);
 			
 			//比較結果
-			switch($下一個動作){
+			switch($nextAction){
 				case 'insert':
 					if(count($result)==0)
 						return array('success'=>false,'inner_error'=>'檔案處理成功但託播單未上架');
@@ -431,7 +431,7 @@
 				break;
 			}
 		}
-		else if($版位類型名稱 == '專區vod'){
+		else if($positionTypeName == '專區vod'){
 			$sql='
 				SELECT
 					CBAS.BAKADSCHD_TRANSACTION_ID,
@@ -472,7 +472,7 @@
 					CBAS.BAKADSCHD_TRANSACTION_ID
 			';
 			$vars=array(
-				array('bv_name'=>':TID','variable'=>$託播單CSMS群組識別碼)
+				array('bv_name'=>':TID','variable'=>$CSMSGroupId)
 			);
 			$result=$oracleDB->getResultArray($sql,$vars);
 			
@@ -494,7 +494,7 @@
 			}
 			$result = $resultTemp;
 			//比較結果
-			switch($下一個動作){
+			switch($nextAction){
 				case 'insert':
 					if(count($result)==0)
 						return array('success'=>false,'inner_error'=>'檔案處理成功但託播單未上架');
@@ -578,7 +578,7 @@
 			}
 		}
 	}
-	function updateOrderWithSameMaterial($託播單識別碼群組){
+	function updateOrderWithSameMaterial($orderIdArray){
 		require_once('../tool/MyDB.php');
 		$my=new MyDB(true);
 		//取得這次更新會影響的託播單識別碼 (至少會有一張)
@@ -595,7 +595,7 @@
 				B.託播單識別碼 = ?
 				AND 託播單A.託播單狀態識別碼 IN (2,4)
 		';
-		if(!$result = $my->getResultArray($sql,'i',$託播單識別碼群組[0]))
+		if(!$result = $my->getResultArray($sql,'i',$orderIdArray[0]))
 			return(['success'=>false,'message'=>'資料庫錯誤，無法取得使用相同素材的託播單資訊']);
 		$changedOrderIds = [];
 		foreach($result as $row){
@@ -623,7 +623,7 @@
 				B.託播單識別碼 = ?
 				AND 託播單A.託播單狀態識別碼 IN (2,4)
 		';
-		if(!$my->execute($sql,'i',$託播單識別碼群組[0])){
+		if(!$my->execute($sql,'i',$orderIdArray[0])){
 			return(['success'=>false,'message'=>'資料庫錯誤，無法修改使用相同素材的託播單資訊']);
 			$my->rollback();
 			$my->close();
@@ -646,7 +646,7 @@
 				AND A.託播單識別碼 IN ('.implode(',',$changedOrderIds).')
 				AND 版位其他參數B.版位其他參數名稱 ="adType"
 		';
-		if(!$my->execute($sql,'i',$託播單識別碼群組[0])){
+		if(!$my->execute($sql,'i',$orderIdArray[0])){
 			return(['success'=>false,'message'=>'資料庫錯誤，無法修改使用相同素材的託播單資訊']);
 			$my->rollback();
 			$my->close();

@@ -4,8 +4,8 @@
 	$hostRes = array();
 	require '../tool/SFTP.php';
 	foreach(Config::$FTP_SERVERS['VSM'] as $server){
-		$遠端路徑=$server['圖片素材路徑'];
-		$result[]=SFTP::isFile($server['host'],$server['username'],$server['password'],$遠端路徑.$_POST['remote'])?true:false;
+		$remotePath=$server['圖片素材路徑'];
+		$result[]=SFTP::isFile($server['host'],$server['username'],$server['password'],$remotePath.$_POST['remote'])?true:false;
 		//$result[]=true;
 		$hostRes[$server['host']]=$result[count($result)-1];
 	}

@@ -372,14 +372,14 @@
 					require_once '../tool/SFTP.php';
 					$expiredDate = date("Y-m-d",strtotime("-3 Months"));
 					foreach(Config::$FTP_SERVERS['VSM'] as $server){
-						$遠端路徑=$server['圖片素材路徑'];
+						$remotePath=$server['圖片素材路徑'];
 						$fileNamePatterns = explode(".",$row2['素材原始檔名']);
 						$fileName ='_____AMS_'.$row2['素材識別碼'].'.'.end($fileNamePatterns);
-						$isfile =SFTP::isFile($server['host'],$server['username'],$server['password'],$遠端路徑.$fileName);
+						$isfile =SFTP::isFile($server['host'],$server['username'],$server['password'],$remotePath.$fileName);
 						if(!$isfile){
 							return array("success"=>false,"message"=>'素材尚未派送到VSM');
 						}
-						$lastMDate = date("Y-m-d", SFTP::getFileAccessTime($server['host'],$server['username'],$server['password'],$遠端路徑.$fileName));
+						$lastMDate = date("Y-m-d", SFTP::getFileAccessTime($server['host'],$server['username'],$server['password'],$remotePath.$fileName));
 						if($expiredDate>=$lastMDate){
 							return array("success"=>false,"message"=>'素材過舊，請重新派送。');
 						}

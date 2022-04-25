@@ -105,13 +105,13 @@
 		
 	$row=$result[0];
 	
-	$版位類型識別碼=$row['版位識別碼'];
-	$版位識別碼=0;
+	$positionTypeId=$row['版位識別碼'];
+	$positionId=0;
 	$saveBtnText = '新增託播單';
 	if(isset($_GET["positionId"])) 
-		$版位識別碼=htmlspecialchars($_GET["positionId"], ENT_QUOTES, 'UTF-8'); 
+		$positionId=htmlspecialchars($_GET["positionId"], ENT_QUOTES, 'UTF-8'); 
 	if(isset($_GET["positionTypeId"])) 
-		$版位類型識別碼=htmlspecialchars($_GET["positionTypeId"], ENT_QUOTES, 'UTF-8'); 
+		$positionTypeId=htmlspecialchars($_GET["positionTypeId"], ENT_QUOTES, 'UTF-8'); 
 	if(isset($_GET["saveBtnText"])) 
 		$saveBtnText=htmlspecialchars($_GET["saveBtnText"], ENT_QUOTES, 'UTF-8');
 	$orderObject=htmlspecialchars($_GET["orderObject"], ENT_QUOTES, 'UTF-8');
@@ -234,7 +234,7 @@
 		return yyyy +'-'+ (mm[1]?mm:"0"+mm[0]) +'-'+ (dd[1]?dd:"0"+dd[0]); // padding
 	};
 //********設定
-	var positionTypeId =<?=$版位類型識別碼?>;
+	var positionTypeId =<?=$positionTypeId?>;
 	var orderObject =parent.<?=$orderObject?>;
 	//設定各頻道的tabs
 	$.post('',{method:'頻道取得版位','頻道':orderObject}
@@ -969,7 +969,7 @@
 	//代入現有託播單資訊處理
 	function selectOrderFun(){
 		$('#mainFram').hide();
-		$('#selectOrder').attr('src','../order/selectOrder.php?positionType='+<?=$版位類型識別碼?>).attr('height',$(window).height()-100).show();	
+		$('#selectOrder').attr('src','../order/selectOrder.php?positionType='+<?=$positionTypeId?>).attr('height',$(window).height()-100).show();	
 		$('#closeSelection').show();
 	}
 	//由selectOrder呼叫，託播單被選擇

@@ -721,11 +721,11 @@
 		$insertIds=array();
 		if(isset($_POST['orders'])){
 			//$orders = json_decode($_POST['orders'],true); 於排程檢察時已執行果此步驟
-			$託播單CSMS群組=[];
+			$CSMSGroup=[];
 			foreach($orders as $order){		
 				//檢查是否要建立CSMS群組
 				if(isset($order["託播單CSMS群組識別碼"])){
-					if(!array_key_exists($order["託播單CSMS群組識別碼"],$託播單CSMS群組)){
+					if(!array_key_exists($order["託播單CSMS群組識別碼"],$CSMSGroup)){
 						//建立新群組
 						$sql="INSERT INTO 託播單CSMS群組 (CREATED_PEOPLE) VALUES(?)";
 						if(!$stmt=$my->prepare($sql)) {
@@ -742,12 +742,12 @@
 							$Error=json_encode(array("dbError"=>'無法執行statement，請聯絡系統管理員！'),JSON_UNESCAPED_UNICODE);
 							goto exitWithError;
 						}
-						$託播單CSMS群組[$order["託播單CSMS群組識別碼"]]=$stmt->insert_id;
+						$CSMSGroup[$order["託播單CSMS群組識別碼"]]=$stmt->insert_id;
 					}
-					$託播單CSMS群組識別碼=$託播單CSMS群組[$order["託播單CSMS群組識別碼"]];
+					$CSMSGroupId=$CSMSGroup[$order["託播單CSMS群組識別碼"]];
 				}
 				else
-					$託播單CSMS群組識別碼=NULL;
+					$CSMSGroupId=NULL;
 				
 				if(!isset($order["廣告可被播出小時時段"]))
 					$order["廣告可被播出小時時段"]='';
@@ -771,7 +771,7 @@
 				
 				if(!$stmt->bind_param('iissssssiii', $_POST['orderListId'],$order["版位識別碼"],$order["託播單名稱"],$order["託播單說明"],$start,$end
 										,$order["廣告可被播出小時時段"],$order["預約到期時間"],$order["售價"]
-										,$_SESSION['AMS']['使用者識別碼'],$託播單CSMS群組識別碼)) {
+										,$_SESSION['AMS']['使用者識別碼'],$CSMSGroupId)) {
 					$Error=json_encode(array("dbError"=>'無法繫結資料，請聯絡系統管理員！'),JSON_UNESCAPED_UNICODE);
 					goto exitWithError;
 				}
@@ -784,18 +784,18 @@
 				
 				//新增素材
 				if(isset($order['素材']))
-				foreach($order['素材'] as $mOrder=>$素材){
-					if($素材['素材識別碼']!=null &&$素材['素材識別碼']!=''){
-						$素材["點擊後開啟類型"]=($素材["點擊後開啟類型"]=="")?null:$素材["點擊後開啟類型"];
-						$素材["點擊後開啟位址"]=($素材["點擊後開啟位址"]=="")?null:$素材["點擊後開啟位址"];
+				foreach($order['素材'] as $mOrder=>$mOrderMaterial){
+					if($mOrderMaterial['素材識別碼']!=null &&$mOrderMaterial['素材識別碼']!=''){
+						$mOrderMaterial["點擊後開啟類型"]=($mOrderMaterial["點擊後開啟類型"]=="")?null:$mOrderMaterial["點擊後開啟類型"];
+						$mOrderMaterial["點擊後開啟位址"]=($mOrderMaterial["點擊後開啟位址"]=="")?null:$mOrderMaterial["點擊後開啟位址"];
 						$sql="INSERT INTO 託播單素材 (託播單識別碼,素材順序,素材識別碼,可否點擊,點擊後開啟類型,點擊後開啟位址,CREATED_PEOPLE)
 						VALUES (?,?,?,?,?,?,?)";
 						if(!$stmt=$my->prepare($sql)) {
 							$Error=json_encode(array("dbError"=>'無法準備statement，請聯絡系統管理員！'),JSON_UNESCAPED_UNICODE);
 							goto exitWithError;
 						}
-						if(!$stmt->bind_param('iiiissi', $newId,$mOrder,$素材['素材識別碼'],$素材['可否點擊'],$素材["點擊後開啟類型"]
-												,$素材["點擊後開啟位址"],$_SESSION['AMS']['使用者識別碼'])) {
+						if(!$stmt->bind_param('iiiissi', $newId,$mOrder,$mOrderMaterial['素材識別碼'],$mOrderMaterial['可否點擊'],$mOrderMaterial["點擊後開啟類型"]
+												,$mOrderMaterial["點擊後開啟位址"],$_SESSION['AMS']['使用者識別碼'])) {
 							$Error=json_encode(array("dbError"=>'無法繫結資料，請聯絡系統管理員！'),JSON_UNESCAPED_UNICODE);
 							goto exitWithError;
 						}
@@ -808,14 +808,14 @@
 				
 				//新增其他參數
 				if(isset($order['其他參數']))
-				foreach($order['其他參數'] as $cOrder=>$其他參數){
+				foreach($order['其他參數'] as $cOrder=>$orderConfig){
 						$sql="INSERT INTO 託播單其他參數 (託播單識別碼,託播單其他參數順序,託播單其他參數值,CREATED_PEOPLE)
 						VALUES (?,?,?,?)";
 						if(!$stmt=$my->prepare($sql)) {
 							$Error=json_encode(array("dbError"=>'無法準備statement，請聯絡系統管理員！'),JSON_UNESCAPED_UNICODE);
 							goto exitWithError;
 						}
-						if(!$stmt->bind_param('iisi', $newId,$cOrder,$其他參數,$_SESSION['AMS']['使用者識別碼'])) {
+						if(!$stmt->bind_param('iisi', $newId,$cOrder,$orderConfig,$_SESSION['AMS']['使用者識別碼'])) {
 							$Error=json_encode(array("dbError"=>'無法繫結資料，請聯絡系統管理員！'),JSON_UNESCAPED_UNICODE);
 							goto exitWithError;
 						}
@@ -935,18 +935,18 @@
 
 			//新增素材
 				if(isset($edit['素材']))
-				foreach($edit['素材'] as $mOrder=>$素材){
-					if($素材['素材識別碼']!=null &&$素材['素材識別碼']!=''){
-						$素材["點擊後開啟類型"]=($素材["點擊後開啟類型"]=="")?null:$素材["點擊後開啟類型"];
-						$素材["點擊後開啟位址"]=($素材["點擊後開啟位址"]=="")?null:$素材["點擊後開啟位址"];
+				foreach($edit['素材'] as $mOrder=>$mOrderMaterial){
+					if($mOrderMaterial['素材識別碼']!=null &&$mOrderMaterial['素材識別碼']!=''){
+						$mOrderMaterial["點擊後開啟類型"]=($mOrderMaterial["點擊後開啟類型"]=="")?null:$mOrderMaterial["點擊後開啟類型"];
+						$mOrderMaterial["點擊後開啟位址"]=($mOrderMaterial["點擊後開啟位址"]=="")?null:$mOrderMaterial["點擊後開啟位址"];
 						$sql="INSERT INTO 託播單素材 (託播單識別碼,素材順序,素材識別碼,可否點擊,點擊後開啟類型,點擊後開啟位址,CREATED_PEOPLE)
 						VALUES (?,?,?,?,?,?,?)";
 						if(!$stmt=$my->prepare($sql)) {
 							$Error=json_encode(array("dbError"=>'無法準備statement，請聯絡系統管理員！'),JSON_UNESCAPED_UNICODE);
 							goto exitWithError;
 						}
-						if(!$stmt->bind_param('iiiissi', $edit["託播單識別碼"],$mOrder,$素材['素材識別碼'],$素材['可否點擊'],$素材["點擊後開啟類型"]
-												,$素材["點擊後開啟位址"],$_SESSION['AMS']['使用者識別碼'])) {
+						if(!$stmt->bind_param('iiiissi', $edit["託播單識別碼"],$mOrder,$mOrderMaterial['素材識別碼'],$mOrderMaterial['可否點擊'],$mOrderMaterial["點擊後開啟類型"]
+												,$mOrderMaterial["點擊後開啟位址"],$_SESSION['AMS']['使用者識別碼'])) {
 							$Error=json_encode(array("dbError"=>'無法繫結資料，請聯絡系統管理員！'),JSON_UNESCAPED_UNICODE);
 							goto exitWithError;
 						}
@@ -959,14 +959,14 @@
 				
 				//新增其他參數
 				if(isset($edit['其他參數']))
-				foreach($edit['其他參數'] as $cOrder=>$其他參數){
+				foreach($edit['其他參數'] as $cOrder=>$orderConfig){
 						$sql="INSERT INTO 託播單其他參數 (託播單識別碼,託播單其他參數順序,託播單其他參數值,CREATED_PEOPLE)
 						VALUES (?,?,?,?)";
 						if(!$stmt=$my->prepare($sql)) {
 							$Error=json_encode(array("dbError"=>'無法準備statement，請聯絡系統管理員！'),JSON_UNESCAPED_UNICODE);
 							goto exitWithError;
 						}
-						if(!$stmt->bind_param('iisi',$edit["託播單識別碼"],$cOrder,$其他參數,$_SESSION['AMS']['使用者識別碼'])) {
+						if(!$stmt->bind_param('iisi',$edit["託播單識別碼"],$cOrder,$orderConfig,$_SESSION['AMS']['使用者識別碼'])) {
 							$Error=json_encode(array("dbError"=>'無法繫結資料，請聯絡系統管理員！'),JSON_UNESCAPED_UNICODE);
 							goto exitWithError;
 						}

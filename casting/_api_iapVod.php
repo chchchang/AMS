@@ -154,19 +154,19 @@
 			eixtWhitCode(500);
 		}
 		$sd = [];$hd = [];
-		$SD影片 = '';
-		$HD影片 = '';
+		$SDVideo = '';
+		$HDVideo = '';
 		while($row = $result->fetch_assoc()){
 			$mNameA = explode('.',$row['素材原始檔名']);
 			$type = end($mNameA);
 						
 			if($row['影片畫質識別碼']==1){
 				$sd = $row;
-				$SD影片 = '_____AMS_'.$row['素材識別碼'].'_'.md5_file(Config::GET_MATERIAL_FOLDER().$row['素材識別碼'].'.'.$type);
+				$SDVideo = '_____AMS_'.$row['素材識別碼'].'_'.md5_file(Config::GET_MATERIAL_FOLDER().$row['素材識別碼'].'.'.$type);
 			}
 			else if($row['影片畫質識別碼']==2){
 				$hd = $row;
-				$HD影片 = '_____AMS_'.$row['素材識別碼'].'_'.md5_file(Config::GET_MATERIAL_FOLDER().$row['素材識別碼'].'.'.$type);
+				$HDVideo = '_____AMS_'.$row['素材識別碼'].'_'.md5_file(Config::GET_MATERIAL_FOLDER().$row['素材識別碼'].'.'.$type);
 			}
 		}
 		
@@ -322,8 +322,8 @@
 		
 		$data[]=array(
 			'bakadschdTransactionId'=>$order['託播單CSMS群組識別碼'],
-			'sdVodcntTitle'=>$SD影片,
-			'hdVodcntTitle'=>$HD影片,
+			'sdVodcntTitle'=>$SDVideo,
+			'hdVodcntTitle'=>$HDVideo,
 			'sdChtnIapId' => $sd['影片媒體編號北'],
 			'sdChtsIapId' => $sd['影片媒體編號南'],
 			'hdChtnIapId' => isset($hd['影片媒體編號北'])?$hd['影片媒體編號北']:null,

@@ -70,11 +70,11 @@
 		$insertIds=array();
 		$state = $commit?0:6;
 		
-		$託播單CSMS群組=[];
+		$CSMSGroup=[];
 		foreach($orders as $order){
 			//檢查是否要建立CSMS群組
 			if(isset($order["託播單CSMS群組識別碼"])){
-				if(!array_key_exists($order["託播單CSMS群組識別碼"],$託播單CSMS群組)){
+				if(!array_key_exists($order["託播單CSMS群組識別碼"],$CSMSGroup)){
 					//建立新群組
 					$sql="INSERT INTO 託播單CSMS群組 (CREATED_PEOPLE) VALUES(?)";
 					if(!$stmt=$my->prepare($sql)) {
@@ -91,12 +91,12 @@
 						$Error=json_encode(array("dbError"=>'無法執行statement，請聯絡系統管理員！'),JSON_UNESCAPED_UNICODE);
 						return array('success'=>false,'message'=>'資料庫錯誤，請聯絡系統管理員！');
 					}
-					$託播單CSMS群組[$order["託播單CSMS群組識別碼"]]=$stmt->insert_id;
+					$CSMSGroup[$order["託播單CSMS群組識別碼"]]=$stmt->insert_id;
 				}
-				$託播單CSMS群組識別碼=$託播單CSMS群組[$order["託播單CSMS群組識別碼"]];
+				$CSMSGroupID=$CSMSGroup[$order["託播單CSMS群組識別碼"]];
 			}
 			else
-				$託播單CSMS群組識別碼=NULL;
+				$CSMSGroupID=NULL;
 			//新增託播單
 			$sql="INSERT INTO 託播單 (委刊單識別碼,版位識別碼,託播單名稱,託播單說明,廣告期間開始時間,廣告期間結束時間,廣告可被播出小時時段,預約到期時間,售價,託播單狀態識別碼,
 			CREATED_PEOPLE,託播單CSMS群組識別碼)"
@@ -112,7 +112,7 @@
 			
 			if(!$stmt->bind_param('iissssssiiii', $order['委刊單識別碼'],$order["版位識別碼"],$order["託播單名稱"],$order["託播單說明"],$start,$end
 									,(isset($order["廣告可被播出小時時段"]))?$order["廣告可被播出小時時段"]:'',$order["預約到期時間"],$order["售價"]
-									,$state,$_SESSION['AMS']['使用者識別碼'],$託播單CSMS群組識別碼)) {
+									,$state,$_SESSION['AMS']['使用者識別碼'],$CSMSGroupID)) {
 				return array('success'=>false,'message'=>'資料庫錯誤，請聯絡系統管理員！');
 			}
 			
@@ -123,17 +123,17 @@
 			
 			//新增素材
 			if(isset($order['素材']))
-			foreach($order['素材'] as $mOrder=>$素材){
-				if($素材['素材識別碼']!=null &&$素材['素材識別碼']!=''){
-					$素材["點擊後開啟類型"]=($素材["點擊後開啟類型"]=="")?null:$素材["點擊後開啟類型"];
-					$素材["點擊後開啟位址"]=($素材["點擊後開啟位址"]=="")?null:$素材["點擊後開啟位址"];
+			foreach($order['素材'] as $mOrder=>$material){
+				if($material['素材識別碼']!=null &&$material['素材識別碼']!=''){
+					$material["點擊後開啟類型"]=($material["點擊後開啟類型"]=="")?null:$material["點擊後開啟類型"];
+					$material["點擊後開啟位址"]=($material["點擊後開啟位址"]=="")?null:$material["點擊後開啟位址"];
 					$sql="INSERT INTO 託播單素材 (託播單識別碼,素材順序,素材識別碼,可否點擊,點擊後開啟類型,點擊後開啟位址,CREATED_PEOPLE)
 					VALUES (?,?,?,?,?,?,?)";
 					if(!$stmt=$my->prepare($sql)) {
 						return array('success'=>false,'message'=>'資料庫錯誤，請聯絡系統管理員！');
 					}
-					if(!$stmt->bind_param('iiiissi', $newId,$mOrder,$素材['素材識別碼'],$素材['可否點擊'],$素材["點擊後開啟類型"]
-											,$素材["點擊後開啟位址"],$_SESSION['AMS']['使用者識別碼'])) {
+					if(!$stmt->bind_param('iiiissi', $newId,$mOrder,$material['素材識別碼'],$material['可否點擊'],$material["點擊後開啟類型"]
+											,$material["點擊後開啟位址"],$_SESSION['AMS']['使用者識別碼'])) {
 						return array('success'=>false,'message'=>'資料庫錯誤，請聯絡系統管理員！');
 					}
 					if(!$stmt->execute()) {
@@ -144,14 +144,14 @@
 			
 			//新增其他參數
 			if(isset($order['其他參數']))
-			foreach($order['其他參數'] as $cOrder=>$其他參數){
-					$其他參數=($其他參數==null)?null:$其他參數;
+			foreach($order['其他參數'] as $cOrder=>$otherData){
+					$otherData=($otherData==null)?null:$otherData;
 					$sql="INSERT INTO 託播單其他參數 (託播單識別碼,託播單其他參數順序,託播單其他參數值,CREATED_PEOPLE)
 					VALUES (?,?,?,?)";
 					if(!$stmt=$my->prepare($sql)) {
 						return array('success'=>false,'message'=>'資料庫錯誤，請聯絡系統管理員！');
 					}
-					if(!$stmt->bind_param('iisi', $newId,$cOrder,$其他參數,$_SESSION['AMS']['使用者識別碼'])) {
+					if(!$stmt->bind_param('iisi', $newId,$cOrder,$otherData,$_SESSION['AMS']['使用者識別碼'])) {
 						return array('success'=>false,'message'=>'資料庫錯誤，請聯絡系統管理員！');
 					}
 					if(!$stmt->execute()) {
@@ -274,14 +274,14 @@
 			
 			//新增其他參數
 			if(isset($edit['其他參數']))
-			foreach($edit['其他參數'] as $cOrder=>$其他參數){
+			foreach($edit['其他參數'] as $cOrder=>$otherData){
 				$sql="INSERT INTO 託播單其他參數 (託播單識別碼,託播單其他參數順序,託播單其他參數值,CREATED_PEOPLE)
 				VALUES (?,?,?,?)";
-				$其他參數=($其他參數==null)?null:$其他參數;
+				$otherData=($otherData==null)?null:$otherData;
 				if(!$stmt=$my->prepare($sql)) {
 					return array('success'=>false,'message'=>'資料庫錯誤，請聯絡系統管理員！');
 				}
-				if(!$stmt->bind_param('iisi',$edit["託播單識別碼"],$cOrder,$其他參數,$_SESSION['AMS']['使用者識別碼'])) {
+				if(!$stmt->bind_param('iisi',$edit["託播單識別碼"],$cOrder,$otherData,$_SESSION['AMS']['使用者識別碼'])) {
 					return array('success'=>false,'message'=>'資料庫錯誤，請聯絡系統管理員！');
 				}
 				if(!$stmt->execute()) {

@@ -21,13 +21,13 @@
 	else{
 		$my=new MyDB(true);
 		$sql='UPDATE 素材 SET CAMPS影片派送時間=?,LAST_UPDATE_TIME=?,LAST_UPDATE_PEOPLE=? WHERE 素材識別碼=?';
-		$CAMPS影片派送時間=date('Y-m-d H:i:s');
+		$CAPMSSendTime=date('Y-m-d H:i:s');
 		if(
 			($stmt=$my->prepare($sql))
-			&&($stmt->bind_param('ssii',$CAMPS影片派送時間,$CAMPS影片派送時間,$_SESSION['AMS']['使用者識別碼'],$_POST['素材識別碼']))
+			&&($stmt->bind_param('ssii',$CAPMSSendTime,$CAPMSSendTime,$_SESSION['AMS']['使用者識別碼'],$_POST['素材識別碼']))
 			&&($stmt->execute())
 		){
-			$json=array('success'=>true,'CAMPS影片派送時間'=>$CAMPS影片派送時間);
+			$json=array('success'=>true,'CAMPS影片派送時間'=>$CAPMSSendTime);
 		}
 		else{
 			$json=array('success'=>false,'error'=>'更新派送狀態失敗！');
