@@ -1,4 +1,5 @@
 <?php
+	//20220510 增加素材尚未派送的檢查機制
 	//前置設定
 	include('../tool/auth/authAJAX.php');
 	include('checkIfMaterialSyn.php');
@@ -363,15 +364,24 @@
 				}
 				//barker不檢查素材
 			}else if($row2['素材類型名稱']=='圖片'){
+				$picRes = json_decode($row2['圖片素材派送結果']);
 				//版位類型
 				if($row['版位類型名稱']=='頻道short EPG banner')
 					$type = 'EPG';
 				else if($row['版位類型名稱']=='專區banner' || $row['版位類型名稱']=='首頁banner')
 					$type = '專區';
 				else if(substr($row['版位類型名稱'],0,12)=='單一平台'){
+					if(count($picRes) == 0){
+						return array("success"=>false,"message"=>'素材尚未派送');
+					}
+					
 					require_once '../tool/SFTP.php';
 					$expiredDate = date("Y-m-d",strtotime("-3 Months"));
+
 					foreach(Config::$FTP_SERVERS['VSM'] as $server){
+						if(!in_array($server["host"], $picRes)){
+							return array("success"=>false,"message"=>'素材尚未派送到VSM');
+						}
 						$remotePath=$server['圖片素材路徑'];
 						$fileNamePatterns = explode(".",$row2['素材原始檔名']);
 						$fileName ='_____AMS_'.$row2['素材識別碼'].'.'.end($fileNamePatterns);
@@ -391,24 +401,23 @@
 					//奧運外掛圖片不需檢查
 					return array("success"=>true,"message"=>'success');
 				}
-				
-				if($area=='IAP')
+				else if($area=='IAP')
 				{
 					//IAP版位目前沒有素材伺服器，不需檢查
 					return array("success"=>true,"message"=>'success');
 				}
-				//檢查圖便是否派送
-				$picRes = json_decode($row2['圖片素材派送結果']);
-				if(count($picRes) == 0)
-					return array("success"=>false,"message"=>'素材尚未派送');
-				else{
-					$serverArray = [];	
-					foreach(Config::$FTP_SERVERS['OMP_'.$area] as $server){
-						$serverArray[] = $server['host'];
+				else{//OPM
+					if(count($picRes) == 0)
+						return array("success"=>false,"message"=>'素材尚未派送');
+					else{
+						$serverArray = [];	
+						foreach(Config::$FTP_SERVERS['OMP_'.$area] as $server){
+							$serverArray[] = $server['host'];
+						}
+						$intersect=array_intersect($serverArray,$picRes);
+						if($serverArray != $intersect)
+						return array("success"=>false,"message"=>'素材尚未派送');
 					}
-					$intersect=array_intersect($serverArray,$picRes);
-					if($serverArray != $intersect)
-					return array("success"=>false,"message"=>'素材尚未派送');
 				}
 			}
 			

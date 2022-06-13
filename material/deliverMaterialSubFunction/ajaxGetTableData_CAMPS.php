@@ -1,6 +1,6 @@
 <?php
 //function getTableData($sqlparas){
-	global $my;
+	global $my,$logger;
 	$showAll = (isset($_POST['顯示全部']) && $_POST['顯示全部'])?true:false;
 	$DG_header=array('素材識別碼','素材名稱','素材說明','素材原始檔名','影片素材秒數','CAMPS影片派送時間','CAMPS影片媒體編號');
 	//取得資料
@@ -21,7 +21,8 @@
 		ORDER BY '.((isset($_POST['order']))?$_POST['order']:'素材識別碼').' '.$_POST['asc'].
 		($showAll?'':(' LIMIT ?, '.PAGE_SIZE));
 	$defString = 'sssssssssssssss'.($showAll?'':'i');
-	$a_params =[&$sql,&$defString,&$sqlparas["materialGroup"],&$sqlparas["startDate"],&$sqlparas["endDate"],&$sqlparas["startDate"],&$sqlparas["endDate"],&$sqlparas["startDate"],&$sqlparas["endDate"],&$sqlparas["startDate"],&$sqlparas["searchBy"],&$sqlparas["searchBy"],&$sqlparas["searchBy"],&$sqlparas["searchBy"],&$sqlparas["searchBy"],&$sqlparas["CAMPS開始時間"],&$sqlparas["CAMPS結束時間"]];
+	$logger->info($sql);
+	$a_params =[&$sql,&$defString,&$sqlparas["materialGroup"],&$sqlparas["startDate"],&$sqlparas["endDate"],&$sqlparas["startDate"],&$sqlparas["endDate"],&$sqlparas["startDate"],&$sqlparas["endDate"],&$sqlparas["startDate"],&$sqlparas["searchBy"],&$sqlparas["searchBy"],&$sqlparas["searchBy"],&$sqlparas["searchBy"],&$sqlparas["searchBy"],&$sqlparas["startDateCAMPS"],&$sqlparas["endDateCAMPS"]];
 	if(!$showAll)
 		$a_params[] =&$sqlparas["fromRowNo"];
 	$result=call_user_func_array(array($my, 'getResultArray'), $a_params);

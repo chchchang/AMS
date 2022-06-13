@@ -589,15 +589,16 @@
 		//新增
 		$bypost=['action'=>$action,'orderData'=>$bypostOrder];
 		$postvars = http_build_query($bypost);
+		$logger->info('postvars:'.$postvars);
 		$url = Config_VSM_Meta::GET_AD_API($area);
 		//$url = Config_VSM_Meta::GET_AD_API();
-		$logger->error('嘗試連線VSM API:'.$url);
+		$logger->info('嘗試連線VSM API:'.$url);
 		if(!$apiResult=connec_to_Api_json($url,'POST',$postvars)){
 			$logger->error('無法連VSM API');
 			exit(json_encode(array("success"=>false,"message"=>'無法連接VSM託播單API:'.$url,'id'=>$orderId),JSON_UNESCAPED_UNICODE));	
 		}
 		$checkResult = json_decode($apiResult,true);
-		
+		$logger->info('message:'.$checkResult["message"]);
 		if($checkResult['success'])
 			return true;
 		else
@@ -665,6 +666,7 @@
 			return false;
 		}
 		curl_close($ch);
+		$logger->error('apiResult:'.$apiResult);
 		return $apiResult;
 	}
 	

@@ -33,7 +33,7 @@ var buttonOnClick=function(event){
 			if(json.error!==''){
 				$(狀態node).unmask();
 				$(event.target).unmask();
-				狀態node.innerHTML=json.error;
+				狀態node.innerHTML=HtmlSanitizer.SanitizeHtml(json.error);
 			}else{
 				var buff='';
 				for(var i in json.result)

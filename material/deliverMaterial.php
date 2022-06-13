@@ -169,6 +169,7 @@
 <script src="../tool/jquery-ui1.2/jquery-ui.js"></script>
 <script type="text/javascript" src="../tool/autoCompleteComboBox.js"></script>
 <script type="text/javascript" src="../tool/jquery-plugin/jquery.placeholder.min.js"></script>
+<script src="../tool/HtmlSanitizer.js"></script>
 </head>
 <body>
 

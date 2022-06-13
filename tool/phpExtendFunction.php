@@ -100,5 +100,18 @@ class PHPExtendFunction{
 		$return[]=$tail->format($returnFormat);
 		return $return;
 	}
+
+	public static function cleanStr($string){
+		$arra = str_split($string);
+		$arra2 = array();
+		foreach($arra as $key){
+			array_push($arra2,ord($key));
+		}
+		$result = "";
+		foreach($arra2 as $key){
+			$result=$result.chr($key);
+		}
+		return $result;
+	}
 }
 ?>

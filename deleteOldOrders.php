@@ -121,7 +121,7 @@ function deleteData($outDatedOrders){
 function deleteMaterialFiles(){
 	global $my,$FILEPATH,$DEADLINE,$LIMIT;
 	$sql='SELECT 素材.素材識別碼,素材原始檔名,CAMPS影片派送時間 FROM 素材 LEFT JOIN 託播單素材 ON 素材.素材識別碼 = 託播單素材.素材識別碼 WHERE 託播單素材.素材識別碼 IS NULL AND 素材.CREATED_TIME <"'.$DEADLINE.
-	'" LIMIT '.$LIMIT
+	'" AND (素材.素材有效結束時間 <"'.$DEADLINE.'" OR 素材.素材有效結束時間 IS NULL) LIMIT '.$LIMIT
 			;
 	if(!$stmt=$my->prepare($sql)) {
 		exit($my->error);

@@ -3,3 +3,5 @@ ignore/*
 material/uploadedFile/*
 material/tempFile/*
 predict/export/*
+*.log
+*.txt

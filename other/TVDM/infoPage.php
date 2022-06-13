@@ -39,7 +39,7 @@
 			$imageFilename='images/'.$TVDMId.$quality."_".$material["順序"].".".$type;
 			if(file_exists($imageFilename)){
 				$tempfilename='tempFile/'.$_SESSION['AMS']['使用者識別碼'].'/'.$count.".".$type;
-				copy($imageFilename,$tempfilename);
+				copy(PHPExtendFunction::cleanStr($imageFilename),PHPExtendFunction::cleanStr($tempfilename));
 			}
 		}
 		$count++;
@@ -57,6 +57,7 @@
 <link rel='stylesheet' type='text/css' href='<?=$SERVER_SITE.Config::PROJECT_ROOT?>external-stylesheet.css'/>
 <link href="../../tool/jquery-ui1.2/jquery-ui-timepicker-addon.css" rel="stylesheet"></link>
 <script src="../../tool/jquery-ui1.2/jquery-ui-timepicker-addon.js" type="text/javascript"></script>
+<script src="../../tool/HtmlSanitizer.js"></script>
 <style type="text/css">
 table.sortableTable {
   border: 1px solid #1C6EA4;
@@ -163,7 +164,7 @@ var materialLimit={"SD":{"width":720,"high":480,"size":200},"HD":{"width":1280,"
 //識別每一筆素材使用的ID，與素材順序無關
 var materialCount = 0;
 
-$("#tvdmId").val("<?=$TVDMId?>");
+$("#tvdmId").val("<?=PHPExtendFunction::cleanStr($TVDMId)?>");
 $('#uploadDialog').dialog({
 	autoOpen:false,
 	//width:'80%',
@@ -312,10 +313,10 @@ function appendMaterial(mdata){
 		mdata["畫質"] = "HD";
 	}
 	
-	$( "#"+tableId+" tbody" ).append("<tr id = '"+mdata["畫質"]+"mtr"+materialCount+"'><td class = 'materialOrder'>"
-	+"</td><td class = 'materialName'>"+mdata["上傳原始檔名"]
-	+"</td><td class = 'materialUrl'>"+mdata["URL連結"]
-	+"</td><td><button class='editMaterilBtn' quality='"+mdata["畫質"]+"' countid='"+(materialCount)+"'>更改</button></td><td><button class='deleteMaterilBtn'  quality='"+mdata["畫質"]+"' countid='"+(materialCount)+"'>移除</button></td></tr>");
+	$( "#"+tableId+" tbody" ).append("<tr id = '"+HtmlSanitizer.SanitizeHtml(mdata["畫質"])+"mtr"+materialCount+"'><td class = 'materialOrder'>"
+	+"</td><td class = 'materialName'>"+HtmlSanitizer.SanitizeHtml(mdata["上傳原始檔名"])
+	+"</td><td class = 'materialUrl'>"+HtmlSanitizer.SanitizeHtml(mdata["URL連結"])
+	+"</td><td><button class='editMaterilBtn' quality='"+HtmlSanitizer.SanitizeHtml(mdata["畫質"])+"' countid='"+(materialCount)+"'>更改</button></td><td><button class='deleteMaterilBtn'  quality='"+HtmlSanitizer.SanitizeHtml(mdata["畫質"])+"' countid='"+(materialCount)+"'>移除</button></td></tr>");
 	materialCount++;
 	var order = 0;
 	$("#"+tableId+" tbody tr").each( function(e) {

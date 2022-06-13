@@ -25,6 +25,7 @@
 <script type="text/javascript" src="../../tool/datatable/Scroller-1.4.2/js/dataTables.scroller.min.js"></script>
 <script type="text/javascript" src="../../tool/datatable/Select-1.2.2/js/dataTables.select.min.js"></script>
 <script src="../../tool/jquery-ui1.2/jquery-ui.js"></script>
+<script src="../../tool/HtmlSanitizer.js"></script>
 
 
 <div id="tabs">
@@ -220,7 +221,7 @@ $(document).ready(function() {
 				if(result["success"]){
 					$("#MdSearchResult_N").append("北區:<br>");
 					result["data"].forEach(function(value){
-						$("#MdSearchResult_N").append(value+"<br>");
+						$("#MdSearchResult_N").append(HtmlSanitizer.SanitizeHtml(value)+"<br>");
 					}
 					);
 				}
@@ -232,7 +233,7 @@ $(document).ready(function() {
 				if(result["success"]){
 					$("#MdSearchResult_S").append("南區:<br>");
 					result["data"].forEach(function(value){
-						$("#MdSearchResult_S").append(value+"<br>");
+						$("#MdSearchResult_S").append(HtmlSanitizer.SanitizeHtml(value)+"<br>");
 					}
 					);
 				}

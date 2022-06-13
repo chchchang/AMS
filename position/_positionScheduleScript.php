@@ -1,11 +1,13 @@
-
+<script src="../tool/GeneralSanitizer.js"></script>
 <script type="text/javascript">
 	//匯出excel表格
 	function exportExcel(){
-	  var html = '&lt;meta http-equiv="content-type" content="application/vnd.ms-excel; charset=UTF-8" />&lt;title>Excel&lt;/title>';
+	  //var html = '&lt;meta http-equiv="content-type" content="application/vnd.ms-excel; charset=UTF-8" />&lt;title>Excel&lt;/title>';
+	  var html = ""; 
 	  html += '';
 	  html += document.getElementById('pschedule').outerHTML + '';
-	  window.open('data:application/vnd.ms-excel,' + encodeURIComponent(html));
+	  window.open('data:application/vnd.ms-excel,<meta http-equiv=Content-Type content=text/html;charset=utf-8>' + encodeURIComponent(html));
+
 	}
 
 	var showAminationTime=500;
@@ -64,7 +66,7 @@
 		$.post( "../position/positionSchedule.php", { method: "取得託播單用參數",版位類型識別碼:pId }, 
 			function( data ) {
 				for(i in  data){
-					$("#psch_sortByProperty").append('<option value="'+data[i]["版位其他參數順序"]+'">'+data[i]["版位其他參數顯示名稱"]+'</option>');
+					$("#psch_sortByProperty").append(GeneralSanitizer.sanitize('<option value="'+HtmlSanitizer.SanitizeHtml(data[i]["版位其他參數順序"])+'">'+HtmlSanitizer.SanitizeHtml(data[i]["版位其他參數顯示名稱"])+'</option>'));
 				}
 				//取得cookie紀錄的最常選用參數
 				$.post( "../position/positionScheduleAjax.php", { action: "取得常用參數",版位類型識別碼:pId }, 
@@ -186,7 +188,7 @@
 				//清空資料表
 				$('#pschedule').remove();
 				//增加資料
-				$('#schDiv').append(data.table).css({"max-height": ($(window).height()-100)+"px"});
+				$('#schDiv').append(GeneralSanitizer.sanitize(data.table)).css({"max-height": ($(window).height()-100)+"px"});
 				$('.orderSch').css("cursor","pointer").click(
 					function(e){
 						$("#dialog_iframe").attr("src",'../order/orderInfo.php?name='+$(this).attr('orderId')).css({"width":"100%","height":"100%"});
@@ -206,23 +208,23 @@
 	//將資料表上色
 	function colorOrderSch(){
 		var usedValue =[];
-		var key = 'orderId';
+		var element = 'orderId';
 		switch($('#coloringMethod').find(":selected").val()){
 			case '依版位識別碼上色':
-				key = '版位識別碼';
+				element = '版位識別碼';
 				break;
 			case '依委刊單識別碼上色':
-				key = '委刊單識別碼';
+				element = '委刊單識別碼';
 				break;
 			case '依素材識別碼上色':
-				key = '素材識別碼';
+				element = '素材識別碼';
 				break;
 			case '依託播單識別碼上色':
-				key = 'orderId';
+				element = 'orderId';
 				break;
 		}
 		$('.orderSch').each(function(){
-			var val = $(this).attr(key);
+			var val = $(this).attr(element);
 			var index  = $.inArray(val,usedValue);
 			if(index == -1){
 				index = usedValue.length;

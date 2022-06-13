@@ -16,6 +16,7 @@ include('../tool/auth/auth.php');
 <script src="../tool/jquery-ui1.2/jquery-ui-sliderAccess.js" type="text/javascript"></script>
 <script type="text/javascript" src="../tool/autoCompleteComboBox.js"></script>
 <script type="text/javascript" src="../tool/jquery-plugin/jquery.form.js"></script> 
+<script src="../tool/HtmlSanitizer.js"></script>
 <link rel='stylesheet' type='text/css' href='<?=$SERVER_SITE.Config::PROJECT_ROOT?>external-stylesheet.css' /> 
 <style type="text/css">
 .Center{
@@ -757,7 +758,7 @@ function checkMaterialOption(mLimitOption){
 	if(mLimitOption==null)
 		return 0;
 	
-	var $tr = $('<tr/>').append($('<td>'+mLimitOption.素材順序+'</td>'));
+	var $tr = $('<tr/>').append($('<td>'+HtmlSanitizer.SanitizeHtml(mLimitOption.素材順序)+'</td>'));
 	var $td = $('<td/>');
 	switch(mLimitOption.素材類型名稱){
 		case '文字':
@@ -768,7 +769,7 @@ function checkMaterialOption(mLimitOption){
 								+'X'+((mLimitOption.每則圖片素材最大高度==null)?'無限制':mLimitOption.每則圖片素材最大高度));
 			break;
 		case '影片':
-			var ftname = $('#影片畫質>option[value='+mLimitOption.影片畫質識別碼+']').text();
+			var ftname = $('#影片畫質>option[value='+HtmlSanitizer.SanitizeHtml(mLimitOption.影片畫質識別碼)+']').text();
 			$td.text('影片 畫質:'+ftname+' 秒數:'+((mLimitOption.每則影片素材最大秒數==null)?'無限制':mLimitOption.每則影片素材最大秒數));
 			break;
 	}

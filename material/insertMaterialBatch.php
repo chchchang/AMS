@@ -336,6 +336,7 @@
 	<script type="text/javascript" src="../tool/ajax/ajaxToDB.js"></script> 
 	<script type="text/javascript" src="../tool/jquery-plugin/jquery.form.js"></script> 
 	<link rel='stylesheet' type='text/css' href='../external-stylesheet.css'/>
+	<script src="../tool/GeneralSanitizer.js"></script>
 	<style type="text/css">
 	</style>
 </head>
@@ -376,7 +377,7 @@
 			$.post(null,{postAction:"export",data:obj},
 			function(json){
 				if(json["success"])
-					window.location.href = "download.php?path="+json["filepath"];
+					window.location.href = "download.php?path="+GeneralSanitizer.sanitize(json["filepath"]);
 			},'json');
 		});
 	}
@@ -391,7 +392,7 @@
 			$.post(null,{postAction:"export",data:data},
 			function(json){
 				if(json["success"])
-					window.location.href = "download.php?path="+json["filepath"];
+					window.location.href = "download.php?path="+GeneralSanitizer.sanitize(json["filepath"]);
 			},'json');
 	});
 </script>

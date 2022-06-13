@@ -191,6 +191,8 @@
 <link rel="stylesheet" href="<?=$SERVER_SITE.Config::PROJECT_ROOT?>tool/jquery-ui1.2/jquery-ui.css"></link>
 <script type="text/javascript" src="../order/newOrder_852.js?<?=time()?>"></script>
 <script type="text/javascript" src="../order/newOrder_851.js?<?=time()?>"></script>
+<script src="../tool/HtmlSanitizer.js"></script>
+<script src="../tool/GeneralSanitizer.js"></script>
 <link rel='stylesheet' type='text/css' href='<?=$SERVER_SITE.Config::PROJECT_ROOT?>external-stylesheet.css'/>
 <style type="text/css">
   	.Center{
@@ -438,14 +440,14 @@
 			$.post('../order/ajaxFunction_OrderInfo.php',{'method':'素材設定資訊','素材識別碼':$('#Material').val()}
 				,function(data){
 					for(var i in data){
-						$('<tr><td>'+data[i]['區域']+'</td><td>'+data[i]['託播單狀態名稱']+'</td><td>'+data[i]['點擊後開啟類型']+'</td><td>'+data[i]['點擊後開啟位址']+'</td>'
+						$('<tr><td>'+HtmlSanitizer.SanitizeHtml(data[i]['區域'])+'</td><td>'+HtmlSanitizer.SanitizeHtml(data[i]['託播單狀態名稱'])+'</td><td>'+HtmlSanitizer.SanitizeHtml(data[i]['點擊後開啟類型'])+'</td><td>'+HtmlSanitizer.SanitizeHtml(data[i]['點擊後開啟位址'])+'</td>'
 						+'<td><button id ="selectMateriaWithConfing'+i+'" index='+i+'>套用</button><input type="hidden" id="materialJson'+i+'"></input></td></tr>')
 						.appendTo('#matrialConifgTbody');
 						$('#materialJson'+i).val(JSON.stringify(data[i]));
 						$('#selectMateriaWithConfing'+i).click(
 							function(){
 								var index = $(this).attr('index');
-								var config =  $.parseJSON($('#materialJson'+index).val());
+								var config =  $.parseJSON(GeneralSanitizer.sanitize($('#materialJson'+index).val()));
 								var 素材順序 = $('#選擇素材順序').text();
 								materialObj[素材順序].可否點擊 = config.可否點擊;
 								materialObj[素材順序].點擊後開啟類型 = config.點擊後開啟類型;
@@ -1134,13 +1136,13 @@
 					
 					//日期檢察
 					if(json.廣告期間結束時間<=json.廣告期間開始時間){
-						$('#uploadResult_f').append('<p>託播單'+json.託播單識別碼+' 修改失敗: 廣告開始時間必須小於結束時間</p>');
+						$('#uploadResult_f').append('<p>託播單'+HtmlSanitizer.SanitizeHtml(json.託播單識別碼)+' 修改失敗: 廣告開始時間必須小於結束時間</p>');
 						return 0;
 					}
 					
 					//日期檢察
 					if(json.預約到期時間.split(' ')[0]>json.廣告期間結束時間.split(' ')[0]){
-						$('#uploadResult_f').append('<p>託播單'+json.託播單識別碼+' 修改失敗:預約到期時間必須小於等於廣告期間結束時間</p>');
+						$('#uploadResult_f').append('<p>託播單'+HtmlSanitizer.SanitizeHtml(json.託播單識別碼)+' 修改失敗:預約到期時間必須小於等於廣告期間結束時間</p>');
 						return 0;
 					}
 					checkTime(json);
@@ -1154,7 +1156,7 @@
 			$.post('?',{action:"版位檢察",託播單識別碼:order.託播單識別碼,StartDate:order.廣告期間開始時間,StartDate:order.廣告期間開始時間,EndDate:order.廣告期間結束時間}
 				,function(json){
 					if(!json.success)
-						$('#uploadResult_f').append('<p>託播單'+order.託播單識別碼+' 修改失敗: '+json.message+'</p>');
+						$('#uploadResult_f').append('<p>託播單'+HtmlSanitizer.SanitizeHtml(order.託播單識別碼)+' 修改失敗: '+HtmlSanitizer.SanitizeHtml(json.message)+'</p>');
 					else
 						checkMetrial(order)
 				}
@@ -1169,7 +1171,7 @@
 					updateOrder(order);
 				}
 				else
-					$('#uploadResult_f').append('<p>託播單'+order.託播單識別碼+' 修改失敗: '+data.message+'</p>');
+					$('#uploadResult_f').append('<p>託播單'+HtmlSanitizer.SanitizeHtml(order.託播單識別碼)+' 修改失敗: '+HtmlSanitizer.SanitizeHtml(data.message)+'</p>');
 			}
 			,'json'
 			);
@@ -1184,7 +1186,7 @@
 					bypost,
 					function(data){
 						if(data["dbError"]!=undefined){
-							$('#uploadResult_f').append('<p>託播單'+jobject.託播單識別碼+' 修改失敗: '+data.dbError+'</p>');
+							$('#uploadResult_f').append('<p>託播單'+HtmlSanitizer.SanitizeHtml(jobject.託播單識別碼)+' 修改失敗: '+HtmlSanitizer.SanitizeHtml(data.dbError)+'</p>');
 							return 0;
 						}
 						if(data["success"]){
@@ -1198,7 +1200,7 @@
 								$('#uploadResult_s').append('<p>託播單'+id+' 修改成功</p>');
 						}
 						else{
-							$('#uploadResult_f').append('<p>託播單'+jobject.託播單識別碼+' 修改失敗: '+data.message+'</p>');
+							$('#uploadResult_f').append('<p>託播單'+HtmlSanitizer.SanitizeHtml(jobject.託播單識別碼)+' 修改失敗: '+HtmlSanitizer.SanitizeHtml(data.message)+'</p>');
 						}
 					}
 					,'json'

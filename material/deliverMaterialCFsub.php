@@ -1,5 +1,6 @@
 <?php
-	require '../tool/auth/auth.php';
+	//require '../tool/auth/auth.php';
+	require '../tool/auth/authAJAX.php';
 	define('PAGE_SIZE',10);
 	define('MATERIALPATH',Config::GET_MATERIAL_FOLDER());
 	
@@ -192,7 +193,6 @@
 <script src="../tool/jquery-ui1.2/jquery-ui.js"></script>
 <script type="text/javascript" src="../tool/autoCompleteComboBox.js"></script>
 <script type="text/javascript" src="../tool/jquery-plugin/jquery.placeholder.min.js"></script>
-<script src="../tool/HtmlSanitizer.js"></script>
 <body>
 
 <select id="deliverAction" class ="pretty-select">
@@ -278,6 +278,8 @@ $(document).ready(function(){
 			,"僅顯示未派送":$('#僅顯示尚未派送項目').prop('checked')
 			,"僅顯示未取得編號":$('#僅顯示未取得媒體編號項目').prop('checked')
 			,"素材是否已到":$("input[name=素材是否已到]:checked").val()
+			,"CAMPS開始時間":$("#_searchMUI_startDate_CAMPS").val()
+			,"CAMPS結束時間":$("#_searchMUI_endDate_CAMPS").val()
 			,ajaxTarget:$("#deliverAction").val()
 		};
 		if($('#showAll').prop('checked'))

@@ -322,6 +322,7 @@
 <script type="text/javascript" src="../tool/datagrid/CDataGrid.js"></script>
 <script type="text/javascript" src="../tool/autoCompleteComboBox.js"></script>
 <script type="text/javascript" src="../tool/jquery-plugin/jquery.placeholder.min.js"></script>
+<script src="../tool/HtmlSanitizer.js"></script>
 <script type="text/javascript" src="newOrder_851.js?<?=time()?>"></script>
 <link rel="stylesheet" href="<?=$SERVER_SITE.Config::PROJECT_ROOT?>tool/jquery-ui1.2/jquery-ui.css">
 <link rel="stylesheet" type="text/css" href="<?=$SERVER_SITE.Config::PROJECT_ROOT?>tool/jquery-plugin/jquery.tokenize.css" />
@@ -383,7 +384,7 @@
 	$.post('',{method:'getAllSepgCh'},
 		function(data){
 			for(var i in data){
-				$('#positions').append('<option value='+data[i]['版位識別碼']+'>'+data[i]['版位識別碼']+':'+data[i]['版位名稱']+'</option>');
+				$('#positions').append('<option value='+HtmlSanitizer.SanitizeHtml(data[i]['版位識別碼'])+'>'+HtmlSanitizer.SanitizeHtml(data[i]['版位識別碼'])+':'+HtmlSanitizer.SanitizeHtml(data[i]['版位名稱'])+'</option>');
 			}
 			$('#positions').tokenize({
 				placeholder:"輸入識別碼或關鍵字該版位類型下的版位"

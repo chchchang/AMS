@@ -79,6 +79,7 @@
 <link href="<?=$SERVER_SITE.Config::PROJECT_ROOT?>tool/jquery-ui1.2/jquery-ui-timepicker-addon.css" rel="stylesheet"></link>
 <script src="../tool/jquery-ui1.2/jquery-ui-timepicker-addon.js" type="text/javascript"></script>
 <script src="../tool/jquery-ui1.2/jquery-ui-sliderAccess.js" type="text/javascript"></script>
+<script src="../tool/HtmlSanitizer.js"></script>
 <link rel='stylesheet' type='text/css' href='<?=$SERVER_SITE.Config::PROJECT_ROOT?>external-stylesheet.css'/>
 </head>
 <body>
@@ -266,7 +267,7 @@
 				getMergeOrders(merge[index]);
 			}
 			else{
-				$('#successOrder').append('<p>託播單'+orders[0]+'沒有選擇其他同版位的託播單可合併。</p>');
+				$('#successOrder').append('<p>託播單'+HtmlSanitizer.SanitizeHtml(orders[0])+'沒有選擇其他同版位的託播單可合併。</p>');
 			}
 		}
 		
@@ -283,9 +284,9 @@
 					$.post('ajaxToDB_Booking.php',{'action':'合併銷售前預約託播單','edit':JSON.stringify([jdata]),'delete':mergeids['合併託播單'].slice(0, mergeids['合併託播單'].length-1)}
 						,function(data){
 							if(data['success'])
-								$('#successOrder').append('<p>'+data['message']+'</p>');
+								$('#successOrder').append('<p>'+HtmlSanitizer.SanitizeHtml(data['message'])+'</p>');
 							else
-								$('#falseOrder').append('<p>'+data['message']+'</p>');
+								$('#falseOrder').append('<p>'+HtmlSanitizer.SanitizeHtml(data['message'])+'</p>');
 						}
 						,'json'
 					);

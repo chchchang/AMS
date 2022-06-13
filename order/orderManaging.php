@@ -71,6 +71,7 @@
 <script type="text/javascript" src="../tool/ajax/ajaxToDB.js"></script> 
 <script type="text/javascript" src="../tool/datagrid/CDataGrid.js"></script>
 <script type="text/javascript" src="../tool/autoCompleteComboBox.js"></script>
+<script src="../tool/HtmlSanitizer.js"></script>
 <script src="../tool/jquery.loadmask.js"></script>
 <script type="text/javascript" src="../tool/jquery-plugin/jquery.placeholder.min.js"></script>
 <link rel="stylesheet" type="text/css" href="<?=$SERVER_SITE.Config::PROJECT_ROOT?>tool/jquery.loadmask.css" />
@@ -1122,7 +1123,7 @@ u{
 						//制做警告訊息是窗
 						$('<div id = "tempDia" style="text-align:center"><div width="100%" id = "tempDia_Message"></div><hr>是否繼續?<br><button id ="tempDia_True">是</button>&nbsp;&nbsp;&nbsp;<button id ="tempDia_False">否</button></div>').appendTo('body');
 						for(var i in alertMessage){
-							$('#tempDia_Message').append('<p>'+alertMessage[i]+'</p>');
+							$('#tempDia_Message').append('<p>'+HtmlSanitizer.SanitizeHtml(alertMessage[i])+'</p>');
 						}
 						$('#tempDia').dialog({
 							width: $(window).width()*0.5,

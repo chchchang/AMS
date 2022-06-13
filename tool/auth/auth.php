@@ -43,7 +43,7 @@
 			exit('<script>location.replace("'.Config::PROJECT_ROOT.'login.php");</script>');
 	}
 	else {
-		/*$my=new MyDB(true);
+		$my=new MyDB(true);
 		$sql='
 			SELECT 頁面.頁面路徑 FROM 權限
 			INNER JOIN 使用者 ON 權限.使用者識別碼=使用者.使用者識別碼
@@ -54,6 +54,6 @@
 		if($result===false)
 			exit('取得使用權限資料過程中發生錯誤！');
 		else if(count($result)===0)
-			exit('沒有權限使用此頁面或功能！');*/
+			exit('沒有權限使用此頁面或功能！');
 	}
 ?>

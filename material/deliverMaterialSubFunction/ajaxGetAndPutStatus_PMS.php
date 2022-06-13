@@ -1,6 +1,16 @@
 <?php
+	//20220510 增加取得狀態前的是否派送檢查
 	//function getAndPutStatus(){
-	//先透過API取得狀態
+		//先檢查有無派送過
+		$my = new MyDB();
+		$sql='SELECT 影片派送時間 FROM 素材 WHERE 素材識別碼=?';
+		$sended=$my->getResultArray($sql,'i',$_POST["素材識別碼"]);
+		if($sended==null||$sended[0]["影片派送時間"]==null||$sended[0]["影片派送時間"]==""){
+			$json=array('success'=>false,'error'=>'請先派送影片');
+			header('Content-Type: application/json');
+			exit(json_encode($json));
+		}
+		//透過API取得狀態
 		global $logger;
 		$local=MATERIALPATH.$_POST['素材識別碼'].'.'.$_POST['副檔名'];
 		if(is_file($local)===false){
@@ -12,9 +22,9 @@
 			header('Content-Type: application/json; charset=utf-8');
 			exit(json_encode($json));
 		}
-		$片名='_____AMS_'.$_POST['素材識別碼'].'_'.$md5_result;
-		//$url='http://172.17.251.134/PMS4/pts_media_status.php?v_id=2305&source='.$片名;
-		$url=Config::PMS_SEARCH_URL.$片名;
+		$videoName='_____AMS_'.$_POST['素材識別碼'].'_'.$md5_result;
+		//$url='http://172.17.251.134/PMS4/pts_media_status.php?v_id=2305&source='.$videoName;
+		$url=Config::PMS_SEARCH_URL.$videoName;
 		$ch=curl_init($url);
 		curl_setopt($ch,CURLOPT_RETURNTRANSFER,true);
 		$xmlString= curl_exec($ch);

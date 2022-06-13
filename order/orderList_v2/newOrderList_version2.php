@@ -1,5 +1,6 @@
 <?php
 	include('../../tool/auth/authAJAX.php');
+	require_once '../../tool/phpExtendFunction.php';
 	$my=new mysqli(Config::DB_HOST,Config::DB_USER,Config::DB_PASSWORD,Config::DB_NAME);
 	if($my->connect_errno) {
 		$logger->error('無法連線到資料庫，錯誤代碼('.$my->connect_errno.')、錯誤訊息('.$my->connect_error.')。');
@@ -16,7 +17,7 @@
 			$term = '%'.$_POST['term'].'%';
 			$result=array();
 			$sql="SELECT DISTINCT ".$_POST['column']." as value,".$_POST['column']." as id FROM 委刊單 WHERE ".$_POST['column']." LIKE ?";
-			if(!$stmt=$my->prepare($sql)) {
+			if(!$stmt=$my->prepare(PHPExtendFunction::cleanStr($sql))) {
 				$logger->error('無法準備statement，錯誤代碼('.$my->errno.')、錯誤訊息('.$my->error.')。');
 				exit(json_encode(array("dbError"=>'無法準備statement，請聯絡系統管理員！'),JSON_UNESCAPED_UNICODE));
 			}
@@ -119,6 +120,7 @@
 <link href="../../tool/jquery-ui1.2/jquery-ui-timepicker-addon.css" rel="stylesheet"></link>
 <script src="../../tool/jquery-ui1.2/jquery-ui-timepicker-addon.js" type="text/javascript"></script>
 <script src="../../tool/jquery-ui1.2/jquery-ui-sliderAccess.js" type="text/javascript"></script>
+<script src="../tool/GeneralSanitizer.js"></script>
 <script type="text/javascript" src="../../order/newOrder_851.js?<?=time()?>"></script>
 <style type="text/css">
 
@@ -425,7 +427,7 @@ table {
 			append=append+'<td><button id="'+sid+'_Update" scheduleTempId = '+sid+'>修改</button><input type="text" id = "'+sid+'_jsonvaule"></input></td>'
 			+'<td><button id="'+sid+'_Remove" scheduleTempId = '+sid+'>刪除</button></td>'
 		}
-		$("#"+sid).append(append);
+		$("#"+sid).append(GeneralSanitizer.sanitize(append));
 		$('#'+sid+'_jsonvaule').val(JSON.stringify(scheduleData)).hide();
 		$('#'+sid+'_jsonvaule').val(JSON.stringify(scheduleData)).hide();
 		$('#'+sid+'_Update').click(function(){

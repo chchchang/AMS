@@ -41,14 +41,14 @@ var buttonOnClick=function(event){
 			if(json.error!==''){
 				$(狀態node).unmask();
 				$(event.target).unmask();
-				狀態node.innerHTML=json.error;
+				狀態node.innerHTML=HtmlSanitizer.SanitizeHtml(json.error);
 			}else{
 				//再上傳圖檔到EPG資料夾下
 				$.post(null,{action:'putAll',area:area,type:'EPG',local:local,remote:remote,'素材識別碼':mid,ajaxTarget:"OMP"},function(json2){
 					if(json2.error!==''){
 						$(狀態node).unmask();
 						$(event.target).unmask();
-						狀態node.innerHTML=json.error;
+						狀態node.innerHTML=HtmlSanitizer.SanitizeHtml(json.error);
 					}
 					else{
 						var buff='';

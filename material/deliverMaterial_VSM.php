@@ -169,6 +169,7 @@
 <script src="../tool/jquery-ui1.2/jquery-ui.js"></script>
 <script type="text/javascript" src="../tool/autoCompleteComboBox.js"></script>
 <script type="text/javascript" src="../tool/jquery-plugin/jquery.placeholder.min.js"></script>
+<script src="../tool/HtmlSanitizer.js"></script>
 </head>
 <body>
 <?php include('_searchMaterialUI.php'); ?>
@@ -241,7 +242,7 @@ $(document).ready(function(){
 				if(json.error!==''){
 					$(狀態node).unmask();
 					$(event.target).unmask();
-					狀態node.innerHTML=json.error;
+					狀態node.innerHTML=HtmlSanitizer.SanitizeHtml(json.error);
 				}else{
 					var buff='';
 					for(var i in json.result)

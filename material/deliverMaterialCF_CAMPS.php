@@ -1,4 +1,5 @@
 <?php
+	//20220510 增加取得狀態前的是否派送檢查
 	require '../tool/auth/auth.php';
 	define('PAGE_SIZE',10);
 	define('MATERIALPATH',Config::GET_MATERIAL_FOLDER());
@@ -111,6 +112,17 @@
 		}
 		//更新狀態
 		else if(($_POST['action']==='getAndPutStatus')&&isset($_POST['素材識別碼'])&&isset($_POST['素材原始檔名'])){
+			//先檢查有無派送過
+			$my = new MyDB();
+			$sql='SELECT CAMPS影片派送時間 FROM 素材 WHERE 素材識別碼=?';
+			$sended=$my->getResultArray($sql,'i',$_POST["素材識別碼"]);
+			if($sended==null||$sended[0]["CAMPS影片派送時間"]==null||$sended[0]["CAMPS影片派送時間"]==""){
+				$json=array('success'=>false,'error'=>'請先派送影片');
+				header('Content-Type: application/json');
+				exit(json_encode($json));
+			}
+
+			//有派送過 更新狀態
 			$materialUrl=Config::$CAMPS_API['material'];
 			$local=MATERIALPATH.$_POST['素材識別碼'].'.'.$_POST['副檔名'];
 			if(($md5_result=md5_file($local))===false){
@@ -288,6 +300,7 @@
 <script src="../tool/jquery-ui1.2/jquery-ui.js"></script>
 <script type="text/javascript" src="../tool/autoCompleteComboBox.js"></script>
 <script type="text/javascript" src="../tool/jquery-plugin/jquery.placeholder.min.js"></script>
+<script src="../tool/HtmlSanitizer.js"></script>
 <body>
 <?php include('_searchMaterialUI.php'); ?>
 <input type="checkbox" id="僅顯示尚未派送項目">僅顯示未派送項目 <input type="checkbox" id="僅顯示未取得媒體編號項目">僅顯示未取得媒體編號項目 &nbsp;
@@ -348,7 +361,7 @@ $(document).ready(function(){
 		
 		if(buttonName==='刪除遠端影片'){
 			$.post(null,{action:'deleteRemote',素材識別碼:value素材識別碼},function(json){
-					node執行結果.innerHTML=json.message;
+					node執行結果.innerHTML=HtmlSanitizer.SanitizeHtml(json.message);
 					$(event.target).unmask();
 					$(node影片派送時間).unmask();
 					$(node影片媒體編號).unmask();
@@ -367,37 +380,43 @@ $(document).ready(function(){
 				};
 				//無論是取得結果或是派送影片皆須先取得狀態(取得狀態蘊含更新狀態)
 				副檔名=value素材原始檔名.substr(value素材原始檔名.lastIndexOf('.')+1);
-				$.post(null,{action:'getAndPutStatus',素材識別碼:value素材識別碼,副檔名:副檔名,素材原始檔名:value素材原始檔名},function(json){
-					if(!json.success)
-						node執行結果.innerHTML=json.error;
-					else{
-						if(json.mediaId===''){
-							node影片媒體編號.innerHTML=json.mediaId;
-							if(buttonName==='取得結果') node執行結果.innerHTML='查無資料，請重新派送影片。';
-							if(buttonName==='派送影片'){
-								$.post(null,{action:'uploadCF',素材識別碼:value素材識別碼,副檔名:副檔名,素材原始檔名:value素材原始檔名},function(json){
-									if(!json.success)
-										node執行結果.innerHTML=json.error;
-									else{
-										node影片派送時間.innerHTML=json.CAMPS影片派送時間;
-										node執行結果.innerHTML='上傳影片成功，請等待CAMPS處理影片。';
-										//上傳成功後，若mediaId原先不為空表示重覆派送，則進行提醒重送已送出託播單。
-										if(value影片媒體編號!=='') showReordersAlert(getReordersJson);
-									}
-								},'json');
+				if(buttonName==='取得結果'){
+					$.post(null,{action:'getAndPutStatus',素材識別碼:value素材識別碼,副檔名:副檔名,素材原始檔名:value素材原始檔名},function(json){
+						if(!json.success)
+							node執行結果.innerHTML=HtmlSanitizer.SanitizeHtml(json.error);
+						else{
+							if(json.mediaId===''){
+								node影片媒體編號.innerHTML=HtmlSanitizer.SanitizeHtml(json.mediaId);
+								node執行結果.innerHTML='查無資料，請重新派送影片。';
+							
+							}
+							else{
+								node影片媒體編號.innerHTML=HtmlSanitizer.SanitizeHtml(json.mediaId);
+								//if(buttonName==='派送影片') node執行結果.innerHTML='已派送，請檢視各欄位結果，不可重覆派送！';
+								//取得結果成功後，若mediaId原先不為空且新的mediaId不同於原先的值，則表示重覆派送需進行提醒重送已送出託播單。
+								if(buttonName==='取得結果'&&value影片媒體編號!==''&&value影片媒體編號.search(json.mediaId)==-1) showReordersAlert(getReordersJson);
 							}
 						}
+						$(event.target).unmask();
+						$(node影片派送時間).unmask();
+						$(node影片媒體編號).unmask();
+					},'json');
+				}
+				if(buttonName==='派送影片'){
+					$.post(null,{action:'uploadCF',素材識別碼:value素材識別碼,副檔名:副檔名,素材原始檔名:value素材原始檔名},function(json){
+						if(!json.success)
+							node執行結果.innerHTML=HtmlSanitizer.SanitizeHtml(json.error);
 						else{
-							node影片媒體編號.innerHTML=json.mediaId;
-							if(buttonName==='派送影片') node執行結果.innerHTML='已派送，請檢視各欄位結果，不可重覆派送！';
-							//取得結果成功後，若mediaId原先不為空且新的mediaId不同於原先的值，則表示重覆派送需進行提醒重送已送出託播單。
-							if(buttonName==='取得結果'&&value影片媒體編號!==''&&value影片媒體編號.search(json.mediaId)==-1) showReordersAlert(getReordersJson);
+							node影片派送時間.innerHTML=HtmlSanitizer.SanitizeHtml(json.CAMPS影片派送時間);
+							node執行結果.innerHTML='上傳影片成功，請等待CAMPS處理影片。';
+							//上傳成功後，若mediaId原先不為空表示重覆派送，則進行提醒重送已送出託播單。
+							if(value影片媒體編號!=='') showReordersAlert(getReordersJson);
 						}
-					}
-					$(event.target).unmask();
-					$(node影片派送時間).unmask();
-					$(node影片媒體編號).unmask();
-				},'json');
+						$(event.target).unmask();
+						$(node影片派送時間).unmask();
+						$(node影片媒體編號).unmask();
+					},'json');
+				}
 			},'json');
 		}
 	}

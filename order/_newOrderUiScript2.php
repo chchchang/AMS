@@ -1,9 +1,3 @@
-<script type="text/javascript" src="newOrder_VSM.js?<?=time()?>"></script>
-<script type="text/javascript" src="../VSM/vsmLinkValueSelector/VodBundleSelector.js"></script>
-<script type="text/javascript" src="../VSM/vsmLinkValueSelector/VodPosterSelector.js"></script>
-<script type="text/javascript" src="../VSM/vsmLinkValueSelector/appSelector.js"></script>
-<script type="text/javascript" src="../tool/HtmlSanitizer.jss"></script>
-<script>
 //********設定
 	if(typeof(positionTypeId)=='undefined')
 		alert('請設定positionTypeId');
@@ -387,25 +381,12 @@
 								.append($('<option value="Vod">Vod</option>'))
 								.append($('<option value="VODPoster">VODPoster</option>'))
 								.append($('<option value="Channel">Channel</option>'))
-								.change(function(){
+								.append($('<option value="coverImageIdV">SEPG直向覆蓋圖片</option>'))
+								.append($('<option value="coverImageIdH">SEPG橫向覆蓋圖片</option>'))
+								.appendTo($tr).change(function(){
 									materialObj[$(this).attr('order')]['點擊後開啟類型'] = $(this).val();
 								}).val('NONE')
 							).appendTo($tr)
-							
-							switch(ptn){
-								case "單一平台EPG":
-									$tr.find("#點擊後開啟類型"+i)
-									.append($('<option value="coverImageIdV">SEPG直向覆蓋圖片</option>'))
-									.append($('<option value="coverImageIdH">SEPG橫向覆蓋圖片</option>'));
-									console.log($("#點擊後開啟類型"+i).val());
-								break;
-								
-								case "單一平台advertising_page":
-								case "單一平台banner":
-									$tr.find("#點擊後開啟類型"+i)
-									.append($('<option value="netflixPage">NETFLIX</option>'))
-								break;
-							}
 						}
 						else{
 						$('<td/>').append(
@@ -619,14 +600,14 @@
 			$.post('../order/ajaxFunction_OrderInfo.php',{'method':'素材設定資訊','素材識別碼':$('#Material').val()}
 				,function(data){
 					for(var i in data){
-						$('<tr><td>'+HtmlSanitizer.SanitizeHtml(data[i]['區域'])+'</td><td>'+HtmlSanitizer.SanitizeHtml(data[i]['託播單狀態名稱'])+'</td><td>'+HtmlSanitizer.SanitizeHtml(data[i]['點擊後開啟類型'])+'</td><td>'+HtmlSanitizer.SanitizeHtml(data[i]['點擊後開啟位址'])+'</td>'
+						$('<tr><td>'+data[i]['區域']+'</td><td>'+data[i]['託播單狀態名稱']+'</td><td>'+data[i]['點擊後開啟類型']+'</td><td>'+data[i]['點擊後開啟位址']+'</td>'
 						+'<td><button id ="selectMateriaWithConfing'+i+'" index='+i+'>套用</button><input type="hidden" id="materialJson'+i+'"></input></td></tr>')
 						.appendTo('#matrialConifgTbody');
 						$('#materialJson'+i).val(JSON.stringify(data[i]));
 						$('#selectMateriaWithConfing'+i).click(
 							function(){
 								var index = $(this).attr('index');
-								var config =  $.parseJSON(HtmlSanitizer.SanitizeHtml($('#materialJson'+index).val()));
+								var config =  $.parseJSON($('#materialJson'+index).val());
 								var 素材順序 = $('#選擇素材順序').text();
 								materialObj[素材順序].可否點擊 = config.可否點擊;
 								materialObj[素材順序].點擊後開啟類型 = config.點擊後開啟類型;
@@ -819,7 +800,8 @@
 			initialPositionSetting(positionTypeId);
 			$("#csmsGroupID").text((typeof(jdata.託播單CSMS群組識別碼)!='undefined'&&jdata.託播單CSMS群組識別碼!=null)?jdata.託播單CSMS群組識別碼:'');
 			//**多選
-			if ($('#position').val()==null || $('#position').val().length == 0){
+			if ($('#position').val()==null||$('#position').val().length == 0){
+				console.log($('#position'));
 				if($.isArray(jdata["版位識別碼"]))
 					setPosition(jdata["版位類型識別碼"],jdata["版位識別碼"]);
 				else
@@ -970,5 +952,3 @@
 		$('#selectOrder').attr('src','../order/selectOrder.php?positionType='+positionTypeId+'&position='+positionId).attr('height',$(window).height()-100).show();	
 		$('#closeSelection').show();
 	}
-	
- </script>

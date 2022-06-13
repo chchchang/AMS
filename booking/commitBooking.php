@@ -42,6 +42,8 @@
 <script type="text/javascript" src="../order/newOrder_852.js?<?=time()?>"></script>
 <script type="text/javascript" src="../order/newOrder_851.js?<?=time()?>"></script>
 <link rel='stylesheet' type='text/css' href='<?=$SERVER_SITE.Config::PROJECT_ROOT?>external-stylesheet.css'/>
+<script src="../tool/GeneralSanitizer.js"></script>
+<script src="../tool/HtmlSanitizer.js"></script>
 <style>
 #commitGroup {
 	float: right;
@@ -187,10 +189,10 @@
 							$.post('../booking/ajaxToDB_Booking.php',{'action':'確認銷售前預約託播單','orders':JSON.stringify(order)},
 								function(data){
 									if(data.success){
-										$('#successOrder').append(data.message);
+										$('#successOrder').append(HtmlSanitizer.SanitizeHtml(data.message));
 									}
 									else{
-										$('#falseOrder').append(data.message);
+										$('#falseOrder').append(HtmlSanitizer.SanitizeHtml(data.message));
 									}
 									DG.update();
 								}
@@ -246,7 +248,7 @@
 			function(order){
 				//檢查必填資訊
 				if(order['委刊單識別碼']==null){
-					$('#falseOrder').append('<p>託播單'+order['託播單識別碼']+'確認失敗: 委刊單未選擇</p>');
+					$('#falseOrder').append('<p>託播單'+HtmlSanitizer.SanitizeHtml(order['託播單識別碼'])+'確認失敗: 委刊單未選擇</p>');
 					orderToCommit.completeNum++;
 					if(orderToCommit.completeNum == orderToCommit_originalid.length){
 						openGroupingDialog(orderToCommit['orders']);
@@ -254,7 +256,7 @@
 					return 0;
 				}
 				if(order['託播單名稱']==null){
-					$('#falseOrder').append('<p>託播單'+order['託播單識別碼']+'確認失敗: 託播單名稱未輸入</p>');
+					$('#falseOrder').append('<p>託播單'+HtmlSanitizer.SanitizeHtml(order['託播單識別碼'])+'確認失敗: 託播單名稱未輸入</p>');
 					orderToCommit.completeNum++;
 					if(orderToCommit.completeNum == orderToCommit_originalid.length){
 						openGroupingDialog(orderToCommit['orders']);
@@ -617,10 +619,10 @@
 		$.post('../booking/ajaxToDB_Booking.php',{'action':'確認銷售前預約託播單','orders':JSON.stringify(orderToCommit['orders'])},
 			function(data){
 				if(data.success){
-					$('#successOrder').append('<p>'+data.message+'</p>');
+					$('#successOrder').append('<p>'+HtmlSanitizer.SanitizeHtml(data.message)+'</p>');
 				}
 				else{
-					$('#falseOrder').append('<p>'+data.message+'</p>');
+					$('#falseOrder').append('<p>'+HtmlSanitizer.SanitizeHtml(data.message)+'</p>');
 				}
 				$( "#dialog_form" ).dialog( "close" );
 			}

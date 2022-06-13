@@ -90,7 +90,9 @@
 			'order'=>'http://172.17.251.130:8080/barker/transaction',
 			'position'=>'http://172.17.251.130:8080/barker/channel',
 			'material'=>'http://172.17.251.130:8080/barker/material',
-			'delete_remote_material'=>'http://172.17.251.130:8080/barker/deleteFile?AMS_FILE_ID='
+			'delete_remote_material'=>'http://172.17.251.130:8080/barker/deleteFile?AMS_FILE_ID=',
+			"channel"=>'http://172.17.251.130:8080/barker/channel',
+			"playlist"=>'http://172.17.251.130:8080/barker/playlist'//可帶參數:?channel_id=47&date=2022-05-05
 		);
 		
 		static protected $_root= null;

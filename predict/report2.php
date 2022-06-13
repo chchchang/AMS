@@ -408,6 +408,7 @@
 	<link rel="stylesheet" href="<?=$SERVER_SITE.Config::PROJECT_ROOT?>predict/css/normalize.min.css">
 	<link rel="stylesheet" href="<?=$SERVER_SITE.Config::PROJECT_ROOT?>predict/css/main.css">
 	<style id="antiClickjack">body{display:none !important;}</style>
+	<script src="../tool/HtmlSanitizer.js"></script>
 	<style type="text/css">
 		body{
 			padding-top:15px; 
@@ -689,7 +690,7 @@
 					$("#adCheck").empty();
 					var adType=json.廣告分類;
 					for(var i =0;i<adType.length;i++){
-						$('<input type="checkbox" name="adCheckBox" value="'+adType[i]+'"/><a>'+adType[i]+'</a><br>').appendTo("#adCheck");
+						$('<input type="checkbox" name="adCheckBox" value="'+HtmlSanitizer.SanitizeHtml(adType[i])+'"/><a>'+HtmlSanitizer.SanitizeHtml(adType[i])+'</a><br>').appendTo("#adCheck");
 					}
 				}
 				,'json'

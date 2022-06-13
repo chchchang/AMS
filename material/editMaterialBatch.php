@@ -16,7 +16,8 @@
 <script src="../tool/jquery-ui1.2/jquery-ui-timepicker-addon.js" type="text/javascript"></script>
 <script src="../tool/jquery-ui1.2/jquery-ui-sliderAccess.js" type="text/javascript"></script>
 <script type="text/javascript" src="../tool/autoCompleteComboBox.js"></script>
-<script type="text/javascript" src="../tool/jquery-plugin/jquery.form.js"></script> 
+<script type="text/javascript" src="../tool/jquery-plugin/jquery.form.js"></script>
+<script src="../tool/HtmlSanitizer.js"></script>
 <link rel="stylesheet" href="<?=$SERVER_SITE.Config::PROJECT_ROOT?>tool/jquery-ui1.2/jquery-ui.css"></link>
 <link rel='stylesheet' type='text/css' href='<?=$SERVER_SITE.Config::PROJECT_ROOT?>external-stylesheet.css' />
 <style type="text/css">
@@ -649,12 +650,12 @@ function saveToDb(){
 			data['素材說明']=$("#素材說明").val();
 			if($('#素材類型設定CB').prop('checked')){
 				if(data['素材類型識別碼']!=material[$("input[name='materailRadio']:checked").val()]){
-					$('#uploadResult_f').append('<p>素材'+data.素材識別碼+' 修改失敗: 素材類型不符</p>');
+					$('#uploadResult_f').append('<p>素材'+HtmlSanitizer.SanitizeHtml(data.素材識別碼)+' 修改失敗: 素材類型不符</p>');
 					doneCheck();
 					return 0;
 				}
 				if(data['素材類型識別碼']==material['圖片'] && (data['素材原始檔名']!=''||data['素材原始檔名']!=null) && !$('#素材原始檔名CB').prop('checked') && $("#fileToUpload").val()==''){
-					$('#uploadResult_f').append('<p>素材'+data.素材識別碼+' 修改失敗: 圖片素材已存在，若非新上傳檔案則無法修改寬高</p>');
+					$('#uploadResult_f').append('<p>素材'+HtmlSanitizer.SanitizeHtml(data.素材識別碼)+' 修改失敗: 圖片素材已存在，若非新上傳檔案則無法修改寬高</p>');
 					doneCheck();
 					return 0;
 				}
@@ -677,7 +678,7 @@ function saveToDb(){
 				var newname = ($("#fileToUpload").val()=='')?$("#素材原始檔名").val():$("#fileToUpload").val().split('\\').pop();
 				var ftype =$("input[name='fileRadio']:checked").val();
 				if(data['素材類型識別碼']!=material[ftype]){
-					$('#uploadResult_f').append('<p>素材編號'+data.素材識別碼+' 修改失敗: 檔案類型不符</p>');
+					$('#uploadResult_f').append('<p>素材編號'+HtmlSanitizer.SanitizeHtml(data.素材識別碼)+' 修改失敗: 檔案類型不符</p>');
 					doneCheck();
 					return 0;
 				}
@@ -686,7 +687,7 @@ function saveToDb(){
 				var type2 = newname.split('.').pop();
 				if(ftype == '圖片')
 					if(type1!=''&&type1!=type2){
-						$('#uploadResult_f').append('<p>素材編號'+data.素材識別碼+' 修改失敗: 圖片副檔名不同</p>');
+						$('#uploadResult_f').append('<p>素材編號'+HtmlSanitizer.SanitizeHtml(data.素材識別碼)+' 修改失敗: 圖片副檔名不同</p>');
 						doneCheck();
 						return 0;
 					}
@@ -717,22 +718,22 @@ function saveToDb(){
 										}
 										else
 											message ='。素材檔案更動，請重新派送素材';
-										$('#uploadResult_s').append('<p>素材編號'+json['id']+' 修改成功'+message+'</p>');
+										$('#uploadResult_s').append('<p>素材編號'+HtmlSanitizer.SanitizeHtml(json['id'])+' 修改成功'+message+'</p>');
 									}
 									else
-										$('#uploadResult_s').append('<p>素材編號'+json['id']+' 修改成功。素材檔案更動，請重新派送素材</p>');
+										$('#uploadResult_s').append('<p>素材編號'+HtmlSanitizer.SanitizeHtml(json['id'])+' 修改成功。素材檔案更動，請重新派送素材</p>');
 									deleteMaterial(json['id']);
 								}
 							},'json'
 						);
 					}
 					else{
-						$('#uploadResult_s').append('<p>素材編號'+result['id']+' 修改成功。</p>');
+						$('#uploadResult_s').append('<p>素材編號'+HtmlSanitizer.SanitizeHtml(result['id'])+' 修改成功。</p>');
 						deleteMaterial(result['id']);
 					}
 				}
 				else{
-					$('#uploadResult_f').append('<p>素材編號'+result['id']+' 修改失敗。'+result['message']+'</p>');
+					$('#uploadResult_f').append('<p>素材編號'+HtmlSanitizer.SanitizeHtml(result['id'])+' 修改失敗。'+HtmlSanitizer.SanitizeHtml(result['message'])+'</p>');
 				}
 				doneCheck()
 			});
