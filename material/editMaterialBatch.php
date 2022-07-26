@@ -446,7 +446,7 @@ $("input[name='fileRadio']").change(function(){
 			break;
 		case "影片":
 			$("#fileToUpload").prop('accept', "*").val('');
-			$('#mtypeMessage').text('(接受ts/mpg檔案)').show();
+			//$('#mtypeMessage').text('(接受ts/mpg檔案)').show();
 			break;
 		default:
 			break;
@@ -587,7 +587,7 @@ function uploadFile(){
 		
 			break;
 		case '影片':
-			var file = control.files[0];
+			/*var file = control.files[0];
 			var ext = file.name.split('.').pop().toLowerCase();
 			var headerType = file.type;
 			var tempIndex = $.inArray(ext, ['ts','mpg']);
@@ -599,7 +599,7 @@ function uploadFile(){
 			if(headerTypes[tempIndex]!= headerType) {	
 				alert('檔案header定義類型錯誤!'+headerTypes[tempIndex]+headerType);
 				return 0;
-			}
+			}*/
 			break;
 	}
 	

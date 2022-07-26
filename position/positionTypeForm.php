@@ -463,18 +463,18 @@ function materialTypeAdd(jobject,disable){
 		jobject.素材類型 ='圖片';
 	else if(jobject.素材類型識別碼==3)
 		jobject.素材類型 ='影片';
-	$c.append(jobject.素材類型+' 每小時上限:'+((jobject.每小時最大素材筆數=='')?'無':HtmlSanitizer.SanitizeHtml(jobject.每小時最大素材筆數)));
+	$c.append(jobject.素材類型+' 每小時上限:'+((jobject.每小時最大素材筆數==''||jobject.每小時最大素材筆數==null)?'無':HtmlSanitizer.SanitizeHtml(jobject.每小時最大素材筆數)));
 	switch(jobject.素材類型){
 		case '文字':
-			$c.append(' 字數上限:'+((jobject.每則文字素材最大字數=='')?'無':HtmlSanitizer.SanitizeHtml(jobject.每則文字素材最大字數)));
+			$c.append(' 字數上限:'+((jobject.每則文字素材最大字數==''||jobject.每小時最大素材筆數==null)?'無':HtmlSanitizer.SanitizeHtml(jobject.每則文字素材最大字數)));
 			break;
 		case '圖片':
-			$c.append(' 寬度上限:'+((jobject.每則圖片素材最大寬度=='')?'無':HtmlSanitizer.SanitizeHtml(jobject.每則圖片素材最大寬度))+' '
-			+' 高度上限:'+((jobject.每則圖片素材最大高度=='')?'無':HtmlSanitizer.SanitizeHtml(jobject.每則圖片素材最大高度)));
+			$c.append(' 寬度上限:'+((jobject.每則圖片素材最大寬度==''||jobject.每小時最大素材筆數==null)?'無':HtmlSanitizer.SanitizeHtml(jobject.每則圖片素材最大寬度))+' '
+			+' 高度上限:'+((jobject.每則圖片素材最大高度==''||jobject.每小時最大素材筆數==null)?'無':HtmlSanitizer.SanitizeHtml(jobject.每則圖片素材最大高度)));
 			break;
 		case '影片':
-		$c.append(' 合計秒數上限:'+((jobject.每小時最大影片素材合計秒數=='')?'無':HtmlSanitizer.SanitizeHtml(jobject.每小時最大影片素材合計秒數))+' '
-		+' 單一秒數上限:'+((jobject.每則影片素材最大秒數=='')?'無':HtmlSanitizer.SanitizeHtml(jobject.每則影片素材最大秒數)));
+		$c.append(' 合計秒數上限:'+((jobject.每小時最大影片素材合計秒數==''||jobject.每小時最大素材筆數==null)?'無':HtmlSanitizer.SanitizeHtml(jobject.每小時最大影片素材合計秒數))+' '
+		+' 單一秒數上限:'+((jobject.每則影片素材最大秒數==''||jobject.每小時最大素材筆數==null)?'無':HtmlSanitizer.SanitizeHtml(jobject.每則影片素材最大秒數)));
 			break;
 	}
 

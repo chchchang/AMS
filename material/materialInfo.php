@@ -375,7 +375,7 @@ function refresh(){
 			$('#影片媒體編號北').val(data["影片媒體編號北"]);
 			$('#影片媒體編號南').val(data["影片媒體編號南"]);
 			$("#fileToUpload").prop('accept', "*").val('');
-			$('#mtypeMessage').text('(接受ts/mpg檔案)').show();
+			//$('#mtypeMessage').text('(接受ts/mpg檔案)').show();
 			break;
 		default:
 				break;
@@ -518,7 +518,7 @@ function uploadFile(){
 			}
 			break;
 		case '影片':
-			if($.inArray(ext, ['ts','mpg']) == -1) {	
+			/*if($.inArray(ext, ['ts','mpg']) == -1) {	
 				alert('檔案類型錯誤!');
 				return 0;
 			}

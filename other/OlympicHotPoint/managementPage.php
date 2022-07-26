@@ -84,8 +84,8 @@
 <div style='float:right'>
 <button id = 'selectall' class='darkButton'>全選</button> <button id = 'unselectall' class='darkButton'>取消全選</button> <button id = 'selectCurrent' class='darkButton'>全選本頁</button> <button id = 'unselectCurrent' class='darkButton'>取消本頁</button>
 </div>
-<p style='clean:both'><br></p>
-<div id = "datagrid" style='clean:both'></div>
+<p style='clear:both'><br></p>
+<div id = "datagrid" style='clear:both'></div>
 <div class ='basicBlock Center'>
 <button id = 'checkall'>確定託播單</button>
 </div>

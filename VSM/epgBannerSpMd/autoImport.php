@@ -80,22 +80,26 @@ class autoPraser{
 		//下載檔案並匯入
 		//下載檔案
 		if(!$this->conn->get($remoteFile, $localFile)){
-			exit('無法下載FTP server('.$remoteFile.')檔案到('.$localFile.')。');
+			echo '無法下載FTP server('.$remoteFile.')檔案到('.$localFile.')。\n';
+			return false;
 		}
 		//匯入檔案
 		$result = $this->importFile($localFile);
 		if(!$result["success"]){
-			exit(($result["message"]));
+			echo(($result["message"]));
+			return false;
 		}
 		//刪除遠端檔案
 		$result=$this->deleteRemote($remoteFile,$this->conn);
 		if(!$result["success"]){
-			exit(($result["message"]));
+			echo(($result["message"]));
+			return false;
 		}
 		//上傳檔案到complete資料夾
 		$result=$this->putToComplete($remoteFile_complete,$localFile,$this->conn);
 		if(!$result["success"]){
-			exit(($result["message"]));
+			echo(($result["message"]));
+			return false;
 		}
 
 		echo '匯入遠端檔案成功'.$fileName.'成功\n';

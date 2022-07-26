@@ -94,15 +94,21 @@
 		<li id="position/positionCAMPS.php">同步CAMPS版位</li>
 	</ul>
 	</li>-->
-	<li id="http://172.17.251.133/camps">CAMPS管理業面</li>
-	<li id="setBarkerPosition.php">CAMPS版位資訊更新</li>
+	<li>CAMPS投放系統
+		<ul>
+		<li id="http://172.17.251.133/camps">CAMPS管理業面</li>
+		<li id="setBarkerPosition.php">CAMPS版位資訊更新</li>
+		<li id="other/newBarker/importMsgManagement.php">端點Barker匯入訊息</li>
+		<li id="../AMS_React/barkerRecordManagement">端點Barker管理</li>
+		</ul>
+	</li>
 	<li id="other/vsmBGManagement.php">單一平台黃金版位管理</li>
 	<li id="VSM/setVSMPosition.php">更新VSM版位</li>
 	<li id="other/updateOrderPara.php">VOD插廣告/單一平台廣告參數更新</li>
 	<li id="other/vastUrlManagement.php">聯播網廣告來源管理</li>
 	<li id="other/shortEPGBannerLimitManagement.php">EPG Banner投放上限設定</li>
 	<li id="VSM/epgBannerAuth/managementPage.php">單一平台EPG Banner撥放權限管理</li>
-	<li id="other/VSM/epgBannerSpMd/managementPage.php">單一平台EPG白名單匯入管理</li>
+	<li id="VSM/epgBannerSpMd/managementPage.php">單一平台EPG白名單匯入管理</li>
 	<li id="other/TVDM/managementPage.php">TVDM服務管理</li>
 	<li id="other/OlympicHotPoint/managementPage.php">2021奧運熱點回看URL設定</li>
 	</ul>
@@ -156,10 +162,10 @@
 		<li id="material/editMaterial.php">修改素材</li>
 		<li id="material/editMaterialBatch.php">批次修改素材</li>
 		<li id="material/searchMaterial.php">查詢素材</li>
-		<li id="material/deliverMaterial.php">派送素材(圖片)</li>
+		<!--<li id="material/deliverMaterial.php">派送素材(圖片)</li>
 		<li id="material/deliverMaterial_VSM.php">單一平台派送素材(圖片)</li>
 		<li id="material/deliverMaterialCF.php">派送素材(影片)</li>
-		<li id="material/deliverMaterialCF_CAMPS.php">CAMPS派送素材</li>
+		<li id="material/deliverMaterialCF_CAMPS.php">CAMPS派送素材</li>-->
 		<li id="material/deliverMaterialV2.php">派送素材2.0</li>
 	</ul>
 </li>

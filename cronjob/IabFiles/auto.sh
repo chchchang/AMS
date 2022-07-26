@@ -6,14 +6,16 @@ orbitlogFile=`date -d "yesterday" '+%Y-%m-%d'`_orbitLogs.txt
 materialFile=`date '+%Y-%m-%d'`_materials.txt
 orderListFile=`date '+%Y-%m-%d'`_orderList.txt
 orderFile=`date '+%Y-%m-%d'`_orders.txt
+NewPumpingServerFile=`date -d "yesterday" '+%Y-%m-%d'`_NewPumpingServer.txt
 logFile=log/`date '+%Y-%m-%d'`.log
 
-if [ ! -f "$orbitlogFile" ] || [ ! -f "$materialFile" ] || [ ! -f "$orderListFile" ] || [ ! -f "$orderFile" ]; then
+if [ ! -f "$orbitlogFile" ] || [ ! -f "$materialFile" ] || [ ! -f "$orderListFile" ] || [ ! -f "$orderFile" ] || [ ! -f "$NewPumpingServerFile" ]; then
 echo
 date '+%Y-%m-%d %H:%M:%S' >> ${logFile}
 echo 開始產生檔案 >> ${logFile}
 php74 /var/www/html/AMS/_produceIabFiles.php >> ${logFile}
 #php74 /www/html/AMS/getOrbitLogs.php
+php74 getNewPumpingBarkerlog.php >> ${logFile}
 
 if [ -r materials_append.txt ]; then
   echo "append orers" >> ${logFile}
@@ -47,7 +49,7 @@ echo
 date '+%Y-%m-%d %H:%M:%S' >> ${logFile}
 echo 開始上傳檔案 >> ${logFile}
 #scp `date '+%Y-%m-%d'`_materials.txt `date '+%Y-%m-%d'`_orderList.txt `date '+%Y-%m-%d'`_orders.txt `date -d "yesterday" '+%Y-%m-%d'`_orbitLogs.txt reporter@172.17.254.155:/oradata/reporter/share/tps2/AMS
-./put_cloud_sftp  ${orbitlogFile} ${materialFile} ${orderListFile} ${orderFile}# ${orbitlogFileHours}
+./put_cloud_sftp  ${orbitlogFile} ${materialFile} ${orderListFile} ${orderFile} ${NewPumpingServerFile}# ${orbitlogFileHours}
 rm allfiledone
 echo
 date '+%Y-%m-%d %H:%M:%S' >> ${logFile}

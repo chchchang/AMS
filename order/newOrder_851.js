@@ -13,7 +13,8 @@
 				var name = $(this).text().split(':');
 				name.splice(0,1);
 				name=name.join(':')//pname = 版位名稱(含區域)
-				if(name==pname+"_北"||name==pname+"_中"||name==pname+"_南"||name==pname+"_IAP")
+				//if(name==pname+"_北"||name==pname+"_中"||name==pname+"_南"||name==pname+"_IAP")
+				if(name==pname+"_IAP")//20220711 OMP以下架，保留iap廣告即可
 					$($position).data('tokenize').tokenAdd($(this).val(),$(this).text());
 			})
 		}
@@ -35,7 +36,8 @@
 				var name = $(this).text().split(':');
 				name.splice(0,1);
 				name=name.join(':')//pname = 版位名稱(含區域)
-				if(name==pname+"_北"||name==pname+"_中"||name==pname+"_南"||name==pname+"_IAP"){
+				//if(name==pname+"_北"||name==pname+"_中"||name==pname+"_南"||name==pname+"_IAP"){
+				if(name==pname+"_北"||name==pname+"_中"||name==pname+"_南"){//20220711 OMP以下架，保留iap廣告即可
 					$($position).data('tokenize').tokenRemove($(this).val());
 				}
 			})

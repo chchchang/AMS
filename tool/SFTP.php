@@ -26,8 +26,21 @@
 				return false;
 				
 			if(!$sftp->put($remote, $local, NET_SFTP_LOCAL_FILE)){
-				(new MyLogger())->error('無法上傳檔案('.$remote.')到FTP server('.$host.')');
-				return false;
+				//無法上傳檔案，嘗試建立資料夾
+				$path = explode("/",$remote);
+				array_pop($path);
+				$path = implode("/",$path);
+				(new MyLogger())->info('無法上傳檔案('.$remote.')到FTP server('.$host.')，嘗試建立資料夾('.$path.')');	
+				if($sftp->mkdir($path,true)){
+					if(!$sftp->put($remote, $local, NET_SFTP_LOCAL_FILE)){
+						(new MyLogger())->error('無法上傳檔案('.$remote.')到FTP server('.$host.')');	
+						return false;
+					}
+				}
+				else{
+					(new MyLogger())->error('無法上傳檔案('.$remote.')到FTP server('.$host.')');
+					return false;
+				}
 			}
 			return true;
 		}
@@ -78,7 +91,7 @@
  			if(!$sftp=self::connect($host,$username,$password))
 				return false;
 			if(!$sftp->delete($remote)){
-				(new MyLogger())->error('無法刪除FTP server('.$remote.')檔案。');
+				(new MyLogger())->error('無法刪除SFTP server('.$remote.')檔案。');
 				return false;
 			}
 			return true;
@@ -103,15 +116,15 @@
 				return false;
 				
 			if(!$sftp->put($processingName, $local, NET_SFTP_LOCAL_FILE)){
-				(new MyLogger())->error('無法上傳檔案('.$processingName.')到FTP server('.$host.')');
+				(new MyLogger())->error('無法上傳檔案('.$processingName.')到SFTP server('.$host.')');
 				return false;
 			}
 			//先嘗試刪除要更更改的檔名
 			$sftp->delete($remote);
 			if (!$sftp->rename($processingName,$remote)) {
-				(new MyLogger())->error("更改檔名($new_file)失敗！");
+				(new MyLogger())->error("更改檔名($remote)失敗！");
 				if(!$sftp->delete($processingName)){
-					(new MyLogger())->error('無法刪除FTP server('.$processingName.')檔案。');
+					(new MyLogger())->error('無法刪除SFTP server('.$processingName.')檔案。');
 					return false;
 				}
 				return false;
