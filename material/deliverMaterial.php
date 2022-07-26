@@ -174,7 +174,7 @@
 <body>
 
 <select id="deliverAction" class ="pretty-select">
-<option value="OMP">OMP圖片</option>
+<!---<option value="OMP">OMP圖片</option> OMP已下架，隱藏介面--->
 <option value="VSM">單一平台圖片</option>
 </select>
 <?php include('_searchMaterialUI.php'); ?>

@@ -1,7 +1,10 @@
-log/*
+0b7d6e5a265d20715443e19a1f7609c6/log/*
+0b7d6e5a265d20715443e19a1f7609c6/apiLog/*
 ignore/*
 material/uploadedFile/*
 material/tempFile/*
 predict/export/*
 *.log
 *.txt
+*.json
+*.dat
