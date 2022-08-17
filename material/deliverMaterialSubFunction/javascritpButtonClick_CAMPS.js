@@ -78,7 +78,7 @@ var buttonOnClick=function(event){
 					},'json');
 				}
 				else if(buttonName == "派送影片"){
-					$.post(null,{action:'uploadCF',素材識別碼:value素材識別碼,副檔名:副檔名,素材原始檔名:value素材原始檔名,ajaxTarget:"CAMPS"},function(json){
+					/*$.post(null,{action:'uploadCF',素材識別碼:value素材識別碼,副檔名:副檔名,素材原始檔名:value素材原始檔名,ajaxTarget:"CAMPS"},function(json){
 						if(!json.success)
 							//node執行結果.innerHTML=HtmlSanitizer.SanitizeHtml(json.error);
 							node執行結果.innerHTML=json.error;
@@ -89,6 +89,18 @@ var buttonOnClick=function(event){
 							//上傳成功後，若mediaId原先不為空表示重覆派送，則進行提醒重送已送出託播單。
 							showReordersAlert(getReordersJson);
 						}
+					},'json');*/
+					//上方是CAMPS派送，目前已不使用
+					//下方式端點barker派送程式碼
+					$.post("../api/barker/sendMaterialToPumping.php",{素材識別碼:value素材識別碼},function(json){
+						node執行結果.innerHTML=json.message;
+						showReordersAlert(getReordersJson);
+					},'json');
+				}
+				else if(buttonName == "上傳到端點barker"){
+					$.post("../api/barker/sendMaterialToPumping.php",{素材識別碼:value素材識別碼},function(json){
+						node執行結果.innerHTML=json.message;
+						showReordersAlert(getReordersJson);
 					},'json');
 				}
 				$(event.target).unmask();

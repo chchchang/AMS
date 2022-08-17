@@ -389,7 +389,7 @@
 						if(!$isfile){
 							return array("success"=>false,"message"=>'素材尚未派送到VSM');
 						}
-						$lastMDate = date("Y-m-d", SFTP::getFileAccessTime($server['host'],$server['username'],$server['password'],$remotePath.$fileName));
+						$lastMDate = date("Y-m-d", SFTP::getFileModifiedTime($server['host'],$server['username'],$server['password'],$remotePath.$fileName));
 						if($expiredDate>=$lastMDate){
 							return array("success"=>false,"message"=>'素材過舊，請重新派送。');
 						}

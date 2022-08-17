@@ -931,11 +931,15 @@
 			$("#position").data('tokenize').disable();
 			$('#clearPosition').hide();
 		}
-		//***單一平台託播單開啟修改版偽功能
+		//***單一平台託播單開啟修改版位功能
 		if(action == 'update' && $("#positiontype").text().startsWith("單一平台")){
 			$("#position").data('tokenize').enable();
 		}
-		
+		//***barker開啟修改版位功能
+		if(action == 'update' && $("#positiontype").text().startsWith("barker頻道")){
+			$("#position").data('tokenize').enable();
+		}
+
 		if(action=="info"||action=="orderInDb"||action=="orderFromApi"){
 			$("button").hide();
 			$("input").prop('disabled', true);

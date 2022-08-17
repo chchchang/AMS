@@ -198,6 +198,7 @@
 <select id="deliverAction" class ="pretty-select">
 <option value="PMS">自動派片系統</option>
 <option value="CAMPS">CAMPS系統</option>
+<option value="POINT">端點Barker系統</option>
 </select>
 
 <?php include('_searchMaterialUI.php'); ?>
@@ -369,6 +370,9 @@ $(document).ready(function(){
 				clickFunctionUrl += "javascritpButtonClick_PMS.js";
 			}else if (deliverAction == "CAMPS"){
 				clickFunctionUrl += "javascritpButtonClick_CAMPS.js";
+			}
+			else if (deliverAction == "POINT"){
+				clickFunctionUrl += "javascritpButtonClick_POINT.js";
 			}
 			
 			$.getScript(clickFunctionUrl).done(function( script, textStatus ) {

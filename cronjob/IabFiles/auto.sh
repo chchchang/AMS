@@ -37,10 +37,10 @@ do
   cat hours/`date -d "yesterday" '+%Y-%m-%d'`_${hour}_orbitLogs.txt >> ${orbitlogFile}
 done
 
-FILESIZE=$(stat -c%s "$orbitlogFile")
-if [ "$FILESIZE" != "0"  ]; then
+#FILESIZE=$(stat -c%s "$orbitlogFile")
+#if [ "$FILESIZE" != "0"  ]; then
 touch allfiledone
-fi
+#fi
 
 fi
 

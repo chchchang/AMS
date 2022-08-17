@@ -4,9 +4,15 @@ require_once '/var/www/html/AMS/tool/MyDB.php';
 //require_once '../../tool/MyDB.php';//dev
 require_once '/var/www/html/AMS/Config.php';
 //require_once '../../Config.php';//dev
+if(isset($argv[1])){
+    $exect = new API($argv[1]);
+    $exect->hadle();
+}
+else{
+    $exect = new API();
+    $exect->hadle();
+}
 
-$exect = new API();
-$exect->hadle();
 
 class API{
     private $mydb;
@@ -62,7 +68,7 @@ class API{
 
         //先取得頻道資料
         foreach($this->positionDataByChannel as $channle_id=>$channle_data){
-            $postvas = http_build_query(array("channel_id"=>$channle_id));
+            $postvas = http_build_query(array("channel_id"=>$channle_id,"search_date"=>$this->searchDate));
             $apiReturn=json_decode($this->getDateFromApi($this->recordApiUrl,$postvas),true);
             if($apiReturn["returnCode"]!=1){
                 $this->dolog("get date Fail: ".$apiReturn["returnMessage"]);
@@ -116,7 +122,7 @@ class API{
         WHERE 
             版位類型.版位名稱 = "barker頻道"
         ';
-        $sql .= ' and channelId參數.版位其他參數預設值 in ("12","15","2","30","42","49","50")';
+        $sql .= ' and channelId參數.版位其他參數預設值 in ("12","15","2","30","42","49","50","6","7","48","20","3","5","21","13","43")';
         //dev
         if(!$positionData = $this->mydb->getResultArray($sql)){
             $this->dolog("getting position data fail.....");

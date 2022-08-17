@@ -1,7 +1,7 @@
 cd /home/ams/cronjob/deleteOutDatedData/
 logFile=log/`date '+%Y-%m-%d'`.log
 echo 刪除過期託播單與素材  >> ${logFile}
-#find /var/www/html/AMS/material/uploadedFile/ -type f -mtime +180 > /var/www/html/AMS/outdatedMaterialList.dat
+find /var/www/html/AMS/material/uploadedFile/ -type f -mtime +180 > /var/www/html/AMS/outdatedMaterialList.dat
 php74 /var/www/html/AMS/deleteOldOrders.php  >> ${logFile}
 echo 刪除CSMS介接檔案  >> ${logFile}
 find /var/www/html/AMS/order/851/ -type f -name "*.xls" -mtime +180 -exec rm -f {} \;

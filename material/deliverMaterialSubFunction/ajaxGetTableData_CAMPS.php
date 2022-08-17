@@ -26,11 +26,11 @@
 	if(!$showAll)
 		$a_params[] =&$sqlparas["fromRowNo"];
 	$result=call_user_func_array(array($my, 'getResultArray'), $a_params);
-	$DG_header=array_merge($DG_header,array('取得結果','派送影片','刪除遠端影片','執行結果'));
+	$DG_header=array_merge($DG_header,array('取得結果','派送影片','刪除遠端影片','上傳到端點barker','執行結果'));
 	$DG_body=array();
 	foreach($result as $row){
 		$DG_body[]=array(array($row['素材識別碼']),array($row['素材名稱']),array($row['素材說明']),array($row['素材原始檔名']),array($row['影片素材秒數']),array($row['CAMPS影片派送時間'])
-		,array($row['CAMPS影片媒體編號']),array('取得結果','button'),array('派送影片','button'),array('刪除遠端影片','button'),array(""));
+		,array($row['CAMPS影片媒體編號']),array('取得結果','button'),array('派送影片','button'),array('刪除遠端影片','button'),array('上傳到端點barker','button'),array(""));
 	}
 	header('Content-Type: application/json');
 	exit(json_encode(array('pageNo'=>$showAll?1:(($sqlparas["fromRowNo"]/PAGE_SIZE)+1),'maxPageNo'=>$showAll?1:ceil($sqlparas["totalRowCount"]/PAGE_SIZE),'allCount'=>$sqlparas["totalRowCount"],
