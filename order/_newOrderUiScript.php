@@ -2,7 +2,7 @@
 <script type="text/javascript" src="../VSM/vsmLinkValueSelector/VodBundleSelector.js"></script>
 <script type="text/javascript" src="../VSM/vsmLinkValueSelector/VodPosterSelector.js"></script>
 <script type="text/javascript" src="../VSM/vsmLinkValueSelector/appSelector.js"></script>
-<script type="text/javascript" src="../tool/HtmlSanitizer.jss"></script>
+<script type="text/javascript" src="../tool/HtmlSanitizer.js"></script>
 <script>
 //********設定
 	if(typeof(positionTypeId)=='undefined')

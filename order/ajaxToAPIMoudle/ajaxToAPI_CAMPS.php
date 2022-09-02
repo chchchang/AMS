@@ -118,6 +118,8 @@
 			];
 			
 			if(!($orderMaterial==null || count($orderMaterial)==0)){
+				$orderMaterial['CAMPS影片媒體編號'] = ($orderMaterial['CAMPS影片媒體編號']=="999")?null:$orderMaterial['CAMPS影片媒體編號'];//999表示送到端點barker，改用NULL送出
+				$logger->error('CAMPS影片媒體編號:'.$orderMaterial['CAMPS影片媒體編號']);
 				if(!$materialApi=connec_to_Api($materialUrl.'?material_id='.$orderMaterial['CAMPS影片媒體編號'],'GET',null)){
 					$logger->error('無法連CAMPS API');
 					exit(json_encode(array("success"=>false,"message"=>'無法連接CAMPS查詢託播單API','id'=>$orderId),JSON_UNESCAPED_UNICODE));	

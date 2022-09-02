@@ -100,6 +100,13 @@ class PutToWatchFolder{
                 $this->mydb->close();
                 return false;
             }
+            $sql = "
+            UPDATE 素材 set CAMPS影片派送時間 = now(),CAMPS影片媒體編號=999 WHERE 素材識別碼 = ?"
+            ;
+            if(!$this->mydb->execute($sql,'i',$material_id)){
+                $this->mydb->close();
+                return false;
+            }
         }
         return true;
     }

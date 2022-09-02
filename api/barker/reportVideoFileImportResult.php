@@ -1,11 +1,13 @@
 <?php 
 	/****
-	取的廣告資訊API
+	*取的廣告資訊API
+	2022 08 19 新增checksum功能
 	***/
 	header("Content-Type:text/html; charset=utf-8");
 	require_once dirname(__FILE__).'/../../tool/MyDB.php';
 	$apiHandle = new ApiHandle();
 	$apiHandle->handle();
+	$rawMaterialFolder = "";
 
 	class ApiHandle {
 		private $returnMessage;
@@ -25,6 +27,7 @@
 			}
 			$logFilePath .="/".date("Y-m-d").".log";
 			$this->logWriter = fopen($logFilePath,"a");
+			$this->rawMaterialFolder = Config::GET_MATERIAL_FOLDER();
 		}
 
 		function __destruct() {
@@ -56,7 +59,21 @@
 			
 			return true;
 		}
-
+		private function checkSum($file_name){
+			if(!isset($_POST["check_sum"]) || $_POST["check_sum"]=="" || $_POST["check_sum"]==null)
+				return true;
+				$this->writeLog("remote check_sum:".$_POST["check_sum"]);
+			$mid = explode("_",$file_name)[0];
+			$tmp = explode(".",$file_name);
+			$mtype = end($tmp);
+			$rawFileName = $mid.".".$mtype;
+			$md5_result=md5_file($this->rawMaterialFolder.$rawFileName);
+			if($md5_result!=$_POST["check_sum"]){
+				$this->writeLog("check_sum dosn't match: remote:".$_POST["check_sum"]." local:".$md5_result);
+				return false;
+			}
+			return true;
+		}
 		/**
 		 * 處理資料
 		 */
@@ -75,6 +92,10 @@
 				"import_result"=>(strtolower($_POST["import_result"])=="true"||$_POST["import_result"]==1)?true:false,
 				"message"=>$_POST["import_message"],
 			);
+			if(!$this->checkSum($file_name)){
+				$data["import_result"] = false;
+				$data["message"] .= "md5值錯誤，檔案異常";
+			}
 			return $data;
 		}
 

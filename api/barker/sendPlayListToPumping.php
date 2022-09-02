@@ -10,6 +10,7 @@
 //require_once '/var/www/html/AMS/Config.php';
 require_once dirname(__FILE__).'/../../Config.php';
 require_once dirname(__FILE__).'/module/SendPlayListToPumping.php';
+require_once dirname(__FILE__).'/module/PutToWatchFolder.php';
 
 
 //exit(json_encode(["seccess"=>true,"message"=>"111\n222111\nsad111\nsae2q111\nadfw46111\n111\n111\n"],JSON_UNESCAPED_UNICODE));//dev

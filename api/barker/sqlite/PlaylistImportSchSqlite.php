@@ -6,7 +6,7 @@ class PointBarkerDB
     {
         $this->db = new SQLite3(dirname(__FILE__).'/pointBaker.db');
         $sql ="
-            CREATE TABLE IF NOT EXISTS  playlistImportSch
+            CREATE TABLE IF NOT EXISTS  barker_playlist_import_sch
             (
             id         TEXT  NOT NULL PRIMARY KEY,
             channel_id INT   NOT NULL,
@@ -30,7 +30,7 @@ class PointBarkerDB
     public function insertSch($channel_id,$date,$hour){
         $id = $this->getId($channel_id,$date,$hour);
         
-        $sql = "  INSERT OR IGNORE INTO playlistImportSch (id,channel_id,date,hour)
+        $sql = "  INSERT OR IGNORE INTO barker_playlist_import_sch (id,channel_id,date,hour)
                 VALUES (:id,:channel_id,:date,:hour);";
         $this->db->exec('BEGIN;');
         $stmt = $this->db->prepare($sql);
@@ -50,7 +50,7 @@ class PointBarkerDB
 
     public function batchInsertSch($channel_ids,$dates,$hours){
 
-        $sql = "  INSERT OR IGNORE INTO playlistImportSch (id,channel_id,date,hour)
+        $sql = "  INSERT OR IGNORE INTO barker_playlist_import_sch (id,channel_id,date,hour)
                 VALUES ";
         $parasMap = array();
         $valuesString = array();
@@ -88,7 +88,7 @@ class PointBarkerDB
     }
 
     public function getAllSch(){
-        $sql = "  SELECT * FROM playlistImportSch WHERE 1 order by date,hour GLOB '[A-Za-z]*' DESC, hour";
+        $sql = "  SELECT * FROM barker_playlist_import_sch WHERE 1 order by date,hour GLOB '[A-Za-z]*' DESC, hour";
         $stmt = $this->db->prepare($sql);
         $result = $stmt->execute();
 
@@ -100,7 +100,7 @@ class PointBarkerDB
     }
 
     public function getFirstSch(){
-        $sql = "  SELECT * FROM playlistImportSch WHERE 1 order by date,hour GLOB '[A-Za-z]*' DESC, hour LIMIT 1";
+        $sql = "  SELECT * FROM barker_playlist_import_sch WHERE 1 order by date,hour GLOB '[A-Za-z]*' DESC, hour LIMIT 1";
         $stmt = $this->db->prepare($sql);
         $result = $stmt->execute();
 
@@ -113,7 +113,7 @@ class PointBarkerDB
 
     public function deleteSch($channel_id,$date,$hour){
         $id = $this->getId($channel_id,$date,$hour);
-        $sql = "DELETE FROM playlistImportSch WHERE id=:id;";
+        $sql = "DELETE FROM barker_playlist_import_sch WHERE id=:id;";
         $stmt = $this->db->prepare($sql);
         $stmt->bindValue(':id', $id, SQLITE3_TEXT);
         if($stmt->execute())
@@ -123,7 +123,7 @@ class PointBarkerDB
     }
 
     public function housKeeping(){
-        $sql = "DELETE FROM playlistImportSch WHERE  date<=:date AND hour<:hour ;";
+        $sql = "DELETE FROM barker_playlist_import_sch WHERE  date<=:date AND hour<:hour ;";
         $stmt = $this->db->prepare($sql);
         $dateHour = explode(date("Y-m-d H")," ");
 

@@ -5,6 +5,8 @@ require_once '/var/www/html/AMS/tool/MyDB.php';
 require_once '/var/www/html/AMS/Config.php';
 //require_once '../../Config.php';//dev
 require_once 'BarkerConfig.php';
+require_once '/var/www/html/AMS/tool/SFTP.php';
+
 if(!isset($argv[1])||!isset($argv[2])||!isset($argv[3]))
 		exit('usage:php log.php <date> <channel_id> <hours>'."\n");
 
@@ -17,8 +19,11 @@ class copyBarkerMaterial{
     private $date;
     private $MaterialHash;//儲存排播表素材和素材原始檔對照表{託播單號=>素材名稱}
     private $rawMaterialFolder;
+    private $remoteMaterialFolder;
     private $channel_id;
     private $hours;
+    private $sftpInfo;
+
     function __construct($date="",$channel_id,$hours="all") {
         $dir = "material";
         if(!is_dir($dir)){
@@ -39,7 +44,8 @@ class copyBarkerMaterial{
         $this->rawMaterialFolder = Config::GET_MATERIAL_FOLDER();
         $this->channel_id = explode(",",$channel_id);
         $this->hours = $hours;
-
+        $this->sftpInfo=BarkerConfig::$sftpInfo;
+        $this->remoteMaterialFolder = BarkerConfig::$remoteMaterialFolder;
 
     }
 
@@ -93,7 +99,7 @@ class copyBarkerMaterial{
                     $rawFileName = $mid.".".$mtype;
                     $this->MaterialHash[$fileset["filename"]] = $rawFileName;
                     if($this->checkLocalMaterial($this->rawMaterialFolder.$rawFileName)){
-                        if($this->checkIfFileSame($this->rawMaterialFolder.$rawFileName, BarkerConfig::$doneMaterialFolder."/".$fileset["filename"])){
+                        /*if($this->checkIfFileSame($this->rawMaterialFolder.$rawFileName, BarkerConfig::$doneMaterialFolder."/".$fileset["filename"])){
                             $this->dolog("複製".$this->rawMaterialFolder.$rawFileName."與".BarkerConfig::$doneMaterialFolder."/".$fileset["filename"]." 檔案相同，不複製");
                         }
                         else{
@@ -102,7 +108,19 @@ class copyBarkerMaterial{
                             }
                             else
                                 $this->dolog("複製".$this->rawMaterialFolder.$rawFileName."到material/".$fileset["filename"]." 失敗");
+                        }*/
+
+                        if($this->checkIfModified($this->rawMaterialFolder.$rawFileName,$this->remoteMaterialFolder."/".$fileset["filename"])){
+                            if(copy($this->rawMaterialFolder.$rawFileName, "material/".$fileset["filename"])){
+                                $this->dolog("複製".$this->rawMaterialFolder.$rawFileName."到material/".$fileset["filename"]." 成功");
+                            }
+                            else
+                                $this->dolog("複製".$this->rawMaterialFolder.$rawFileName."到material/".$fileset["filename"]." 失敗");
                         }
+                        else{
+                            $this->dolog("複製".$this->rawMaterialFolder.$rawFileName."與遠端檔案相同，不複製");
+                        }
+
                     } 
                     else{
                         $this->dolog("$this->rawMaterialFolder.$rawFileName 本地檔案不存在");
@@ -111,7 +129,7 @@ class copyBarkerMaterial{
             }
         }
     }
-
+    //檢查檔案是否和曾經派送過的相同
     function checkIfFileSame($file_a,$file_b){
         if(!file_exists($file_b)){
             return false;
@@ -125,7 +143,7 @@ class copyBarkerMaterial{
             return false;
         }
     }
-
+    //檢查本地檔案是否存在
     private function checkLocalMaterial($filepath){
         if(file_exists($filepath)){
             return true;
@@ -147,6 +165,20 @@ class copyBarkerMaterial{
         }
     }
 
+    //檢查本地檔案是否派送成功
+    private function checkIfModified($originFile,$remoteFile){       
+        $remoteETime = SFTP::getFileModifiedTime($this->sftpInfo['host'],$this->sftpInfo['username'],$this->sftpInfo['password'],$remoteFile);
+        $localETime = filemtime($originFile);
+        if(!$remoteETime){
+            return true;
+        }
+        if($remoteETime<$localETime){
+            return true;
+        }
+        
+        return false;
+        
+    }
     
 }
 

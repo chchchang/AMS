@@ -127,7 +127,9 @@ class ConverCampsPlaylist{
         //查看本地否有以產生的檔案，若沒有，嘗試從PumpingServer下載
         if(!file_exists($this->playlistFileName."uploaded")){
             $remote = str_replace($this->playlistFolder,$this->remotePlaylistFolder,$this->playlistFileName);
-            SFTP::get($this->sftpInfo['host'],$this->sftpInfo['username'],$this->sftpInfo['password'],$this->playlistFileName,$remote);
+            if(SFTP::isFile($this->sftpInfo['host'],$this->sftpInfo['username'],$this->sftpInfo['password'],$this->playlistFileName,$remote))
+                SFTP::get($this->sftpInfo['host'],$this->sftpInfo['username'],$this->sftpInfo['password'],$this->playlistFileName,$remote);
+            
         }
         //比較資料是否需上傳
         if(!$this->compareFiles($this->playlistFileName,$this->playlistFileName."uploaded")){

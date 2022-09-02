@@ -17,7 +17,13 @@ $sftp = new PutToWatchFolder();
 $rawMaterialFolder = Config::GET_MATERIAL_FOLDER(); 
 $sftpInfo=BarkerConfig::$sftpInfo;
 $remoteMaterialFolder = BarkerConfig::$remoteMaterialFolder;
-$mid = $_POST["素材識別碼"];
+if(isset($argv[1])){
+	$mid = $argv[1];
+}
+else{
+	$mid = $_POST["素材識別碼"];
+}
+
 //取的素材原始檔名
 $mydb=new MyDB(true);
 $sql = "select 素材原始檔名 from  素材  where 素材識別碼 = ?";
@@ -39,14 +45,14 @@ $rawFileName = $mid.".".$mtype;
 $remoteFile = $remoteMaterialFolder."/".$fliename;
 if(checkLocalMaterial($rawMaterialFolder.$rawFileName)){
 	if($sftp->uploadedMaterial($rawMaterialFolder.$rawFileName, $remoteFile)){
-		$nameParse = explode('_',$file_name);
+		$nameParse = explode('_',$fliename);
 		$material_id = array_shift($nameParse);
 		$sql = "
 		INSERT INTO barker_material_import_result (material_id,file_name) VALUES (?,?)	
 		ON DUPLICATE KEY
 		UPDATE import_time=now(),import_result=0,message='已上傳，等待barker系統回報',last_updated_time=now()"
 		;
-		$mydb->execute($sql,'is',$material_id,$file_name);
+		$mydb->execute($sql,'is',$material_id,$fliename);
 		$mydb->close();
 		exit(json_encode(["seccess"=>true,"message"=>"上傳到端點barker成功"],JSON_UNESCAPED_UNICODE));
 	}else{

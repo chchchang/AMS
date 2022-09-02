@@ -32,7 +32,7 @@ class PointBarkerDB
     public function insertSch($channel_id,$date,$hour){
         $id = $this->getId($channel_id,$date,$hour);
         
-        $sql = "  INSERT IGNORE INTO playlistImportSch (id,channel_id,date,hour)
+        $sql = "  INSERT IGNORE INTO barker_playlist_import_sch (id,channel_id,date,hour)
                 VALUES (:id,:channel_id,:date,:hour);";
         $this->db->exec('BEGIN;');
         $stmt = $this->db->prepare($sql);
@@ -52,7 +52,7 @@ class PointBarkerDB
 
     public function batchInsertSch($channel_ids,$dates,$hours){
 
-        $sql = "  INSERT IGNORE INTO playlistImportSch (id,channel_id,date,hour)
+        $sql = "  INSERT IGNORE INTO barker_playlist_import_sch (id,channel_id,date,hour)
                 VALUES ";
         $parasMap = array();
         $valuesString = array();
@@ -91,7 +91,7 @@ class PointBarkerDB
     }
 
     public function getAllSch(){
-        $sql = "SELECT * FROM playlistImportSch WHERE 1 order by date,IF(hour LIKE 'all', 1, 2), hour";
+        $sql = "SELECT * FROM barker_playlist_import_sch WHERE 1 order by date,IF(hour LIKE 'all', 1, 2), hour";
         $stmt = $this->db->prepare($sql);
         $stmt->execute();
         $feedback = array();
@@ -102,7 +102,7 @@ class PointBarkerDB
     }
 
     public function getFirstSch(){
-        $sql = "SELECT * FROM playlistImportSch WHERE 1 order by date,IF(hour LIKE 'all', 2, 1), hour LIMIT 1";
+        $sql = "SELECT * FROM barker_playlist_import_sch WHERE 1 order by date,IF(hour LIKE 'all', 1, 2), hour LIMIT 1";
         $stmt = $this->db->prepare($sql);
         $stmt->execute();
         $feedback = array();
@@ -114,7 +114,7 @@ class PointBarkerDB
 
     public function deleteSch($channel_id,$date,$hour){
         $id = $this->getId($channel_id,$date,$hour);
-        $sql = "DELETE FROM playlistImportSch WHERE id=:id;";
+        $sql = "DELETE FROM barker_playlist_import_sch WHERE id=:id;";
         $stmt = $this->db->prepare($sql);
         $stmt->bindValue(':id', $id, PDO::PARAM_STR);
         if($stmt->execute())
@@ -124,7 +124,7 @@ class PointBarkerDB
     }
 
     public function housKeeping(){
-        $sql = "DELETE FROM playlistImportSch WHERE  date<=:date AND hour<:hour ;";
+        $sql = "DELETE FROM barker_playlist_import_sch WHERE  date<=:date AND hour<:hour ;";
         $stmt = $this->db->prepare($sql);
         $dateHour = explode(date("Y-m-d H")," ");
 
@@ -135,18 +135,20 @@ class PointBarkerDB
         else
             return false;
     }
-
+    /**
+     * 已頻道、日期、小時計算出id
+     */
     private function getId($chid,$date,$hour){
         $day = explode("-",$date);
         $day = $day[2];
         return $chid.$day.$hour;
     }
 }
-/*$mydb = new PointBarkerDB();
-$mydb->deleteSch(2,"2022-08-05","all");
-$mydb->insertSch(2,"2022-08-05","22");
-$mydb->insertSch(2,"2022-08-05","05");
-$mydb->insertSch(2,"2022-08-05","00");
-$all = $mydb->getAllSch();
-print_r($all);*/
+//$mydb = new PointBarkerDB();
+//$mydb->deleteSch(2,"2022-08-05","all");
+//$mydb->insertSch(2,"2022-08-05","22");
+//$mydb->insertSch(2,"2022-08-05","05");
+//$mydb->insertSch(2,"2022-08-05","00");
+//$all = $mydb->getMaterialSch();
+//print_r($all);
 ?>

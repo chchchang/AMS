@@ -70,7 +70,12 @@
 			);
 			return $data;
 		}
+		/**
+		 * 檢查MD5是否正確
+		 */
+		private function checkSum($chck){
 
+		}
 		/**
 		 * 輸入資料到DB
 		 */
