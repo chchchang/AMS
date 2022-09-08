@@ -1,9 +1,11 @@
 <?php 
 	/****
-	取的廣告資訊API
+	回報barker播表匯入結果API
+	2022 09 02 新增發送mail告警功能
 	***/
 	header("Content-Type:text/html; charset=utf-8");
 	require_once dirname(__FILE__).'/../../tool/MyDB.php';
+	require_once dirname(__FILE__).'/../../tool/MyMailer.php';
 	$apiHandle = new ApiHandle();
 	$apiHandle->handle();
 
@@ -16,7 +18,6 @@
 				"001"=>"參數錯誤",
 				"999"=>"其他錯誤",
 			);
-
 			$logFilePath = dirname(__FILE__).'/../../'.Config::SECRET_FOLDER."/apiLog/reportPlayListImportResult";
 			if(!is_dir($logFilePath)){
 				if (!mkdir($logFilePath, 0777, true)) {
@@ -111,6 +112,13 @@
 	
 			$my->commit();
 			$my->close();
+			//發出告警信
+			if(!$data["import_result"]){
+				$mailer = new MyMailer();
+				$mailer->sendMail("barker頻道:".$data["channel_id"]." ".$data["file_name"]."排播檔案匯入失敗"
+				,"barker頻道:".$data["channel_id"]." ".$data["file_name"]."排播檔案匯入失敗","chia_chi_chang@cht.com.tw");
+			}
+			
 			return true;
 		}
 	

@@ -5,7 +5,7 @@
 		if($_POST['ajaxAction'] == "getPlayListRecord"){
 			$sql = "SELECT * FROM `barker_playlist_import_result` WHERE (created_time >= DATE_SUB(NOW(),INTERVAL 1 MONTH) || import_time >= DATE_SUB(NOW(),INTERVAL 1 MONTH))";
 			if(isset($_POST["failOnly"])&& $_POST["failOnly"]=="true"){
-				$sql .= " AND (import_result = 0 AND import_time IS NOT NULL)";
+				$sql .= " AND (import_result != 1 || import_result IS NULL)";
 			}
 			$sql .=" order by import_time desc";
 			if(!$stmt=$my->prepare($sql)) {
@@ -45,7 +45,7 @@
 		else if($_POST['ajaxAction'] == "getMaterialRecord"){
 			$sql = "SELECT * FROM `barker_material_import_result` WHERE (created_time >= DATE_SUB(NOW(),INTERVAL 1 MONTH) || import_time >= DATE_SUB(NOW(),INTERVAL 1 MONTH))";
 			if(isset($_POST["failOnly"])&& $_POST["failOnly"]=="true"){
-				$sql .= " AND (import_result = 0 AND import_time IS NOT NULL)";
+				$sql .= " AND (import_result != 1 || import_result IS NULL)";
 			}
 			$sql .=" order by import_time desc";
 			if(!$stmt=$my->prepare($sql)) {

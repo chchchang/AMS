@@ -1,9 +1,11 @@
 <?php 
 	/****
-	取的廣告資訊API
+	回報barker播放失敗API
+	2022 09 02 增加mail告警
 	***/
 	header("Content-Type:text/html; charset=utf-8");
 	require_once dirname(__FILE__).'/../../tool/MyDB.php';
+	require_once dirname(__FILE__).'/../../tool/MyMailer.php';
 	$apiHandle = new ApiHandle();
 	$apiHandle->handle();
 
@@ -70,12 +72,7 @@
 			);
 			return $data;
 		}
-		/**
-		 * 檢查MD5是否正確
-		 */
-		private function checkSum($chck){
-
-		}
+		
 		/**
 		 * 輸入資料到DB
 		 */
@@ -94,6 +91,12 @@
 
 			$my->commit();
 			$my->close();
+			//發出告警信
+			
+			$mailer = new MyMailer();
+			$mailer->sendMail("託播單:".$data["transaction_id"]."於barker頻道:".$data["channel_id"]." ".$data["file_name"]."檔案播放/轉檔失敗"
+			,"barker頻道:".$data["channel_id"]." ".$data["file_name"]."檔案播放/轉檔失敗\n播放時間:".$data["play_time"]."\n託播單識別碼".$data["transaction_id"]."\n失敗原因:".$data["message"]);
+		
 			return true;
 		}
 

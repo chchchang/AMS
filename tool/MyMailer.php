@@ -27,6 +27,7 @@ class MyMailer
 	private $mailConfig;
 	private $apiErrorCode;
 	private $apiErrorMessages;
+	private $defaultAddress;
 	public function __construct($logger=null)
 	{
 		$this->mailConfig=array(
@@ -34,6 +35,12 @@ class MyMailer
 			"stmpPort" => 25,
 			"dafaultSender" => 'chia_chi_chang@cht.com.tw',
 			"footer" => '///*****此郵件為系統自動發送，請勿直接回覆*****///',
+		);
+		$this->defaultAddress=array(
+			"yichenchiu@cht.com.tw",//邱譯瑱	內容處 OP
+			"timweng@cht.com.tw",//翁尚瑋	內容處 OP
+			"yuhsuan@cht.com.tw",//藍于琁	內容處 OP
+			"chia_chi_chang@cht.com.tw"//張家騏 平台處 開發者
 		);
 		if($logger!=null)
 			$this->logger = $logger;
@@ -69,13 +76,12 @@ class MyMailer
 	}
 	/**
 	 *寄送信件
-	 * @param string|array $addresses
 	 * @param string $title
 	 * @param string $msg
-	 * @param boolean $showFooter
+	 *  @param string|array $addresses
 	 * @return boolean Returns TRUE on success or FALSE on failure
 	 */
-	public function sendMail($addresses,$title,$msg,$showFooter = true){
+	public function sendMail($title,$msg,$addresses = []){
 		$this->logger->info('[Sitting title]');
 		//設定郵件標題
 		if($title!=""){
@@ -85,6 +91,9 @@ class MyMailer
 			$this->apiErrorCode="102";
 			$this->logger->error("empty title");
 			return false;
+		}
+		if($addresses==[]){
+			$addresses = $this->defaultAddress;
 		}
 		//檢查收件者地址
 		$this->logger->info('[Checking recipients addresses]');
@@ -108,9 +117,7 @@ class MyMailer
 		
 		//郵件內文
 		$this->logger->info('[Sitting context]');
-		if($showFooter){
-			$msg.="\n\n\n".$this->mailConfig["footer"];
-		}
+		$msg.="\n\n\n".$this->mailConfig["footer"];
 		//$msg = str_replace("\n.", "\n..", $msg);
 		$msg = str_replace("\\n", "\n", $msg);
 		$this->logger->info($msg);

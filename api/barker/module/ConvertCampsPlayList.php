@@ -2,6 +2,7 @@
 //20220530 轉換CAMPS的播放清單道新的barker server
 //20220802 獨立為class
 //20220816 猜分寫檔和上傳動作
+//20220907 新增return資料，不寫檔的function getData
 require_once dirname(__FILE__).'/../../../tool/MyDB.php';
 //require_once '../../tool/MyDB.php';//dev
 require_once dirname(__FILE__).'/../../../Config.php';
@@ -50,17 +51,17 @@ class ConverCampsPlaylist{
     function __construct($logger = null) {
         $this->mydb=new MyDB(true);
         if($logger == null){
-            if(!is_dir("log")){
+            if(!is_dir(dirname(__FILE__)."/../../../".Config::SECRET_FOLDER."/apiLog")){
                 if (!mkdir("log", 0777, true)) {
                     die('Failed to create log directories...');
                 }
             }
-            $this->logWriter = fopen("log/converCampsPlaylist".date('Y-m-d').".log","a");
+            $this->logWriter = fopen(dirname(__FILE__)."/../../../".Config::SECRET_FOLDER."/apiLog/converCampsPlaylist".date('Y-m-d').".log","a");
         }
         else{
             $this->logWriter = $logger;
         }
-        //$this->channelIdApiURL = "http://localhost/AMS/cronjob/convertCampsPlayList/campsChannel.php";//dev
+        //$this->channelIdApiURL = "http://localhost/AMS/cronjob/convertCampsPlayList/testdata_campsChannel.php";//dev
         $this->channelIdApiURL = Config::$CAMPS_API["channel"]."?orbit_only=1";//pro
         //$this->palyListApiURL = "http://localhost/AMS/cronjob/convertCampsPlayList/test.php";//dev
         $this->palyListApiURL = Config::$CAMPS_API["playlist"];//pro
@@ -119,6 +120,30 @@ class ConverCampsPlaylist{
         
 
         return true;
+    }
+    //只回傳資料，不寫檔
+    public function getData($date="",$channel_id="",$hours="all"){
+             
+        if($date=="")
+            $this->date=date("Y-m-d");
+        else
+            $this->date = $date;
+        if($channel_id=="")
+            return false;
+        else
+            $this->channel_id = $channel_id;
+        $this->hours =$hours;
+        $this->dolog("------convert CAMPS play list start-----");
+        $this->dolog("target date:".$this->date." target channel:".$this->channel_id." target hours:".$hours);
+
+        
+      
+        $this->dolog("processing channel:".$this->channel_id);
+        $outputData = $this->getOutputData($this->channel_id);
+        $this->message.="頻道:$this->channel_id 日期:$this->date 時段:$this->hours 播表產生成功。\n";
+        
+
+        return $outputData;
     }
 
     /***上傳檔案到pumping server */

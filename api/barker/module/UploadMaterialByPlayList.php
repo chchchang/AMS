@@ -8,6 +8,7 @@ require_once dirname(__FILE__).'/../../../Config.php';
 require_once dirname(__FILE__).'/BarkerConfig.php';
 require_once dirname(__FILE__).'/../../../tool/SFTP.php';
 require_once dirname(__FILE__).'/PutToWatchFolder.php';
+require_once dirname(__FILE__).'/../../../tool/MyMailer.php';
 
 /*if(!isset($argv[1])||!isset($argv[2])||!isset($argv[3]))
 		exit('usage:php log.php <date> <channel_id> <hours>'."\n");
@@ -128,12 +129,14 @@ class UploadMaterialByPlayList{
         }
         else{
             $file_name = str_replace($this->rawMaterialFolder,"",$filepath);
-            $nameParse = explode('_',$file_name);
+            $nameParse = explode('.',$file_name);
             $material_id = array_shift($nameParse);
+            $mailer = new MyMailer();
+			$mailer->sendMail("barker素材:".$material_id." 檔案匯入失敗","barker素材檔案匯入失敗\n素材識別碼:".$material_id."\n失敗原因:AMS端檔案不存在");
             $sql = "
             INSERT INTO barker_material_import_result (material_id,file_name) VALUES (?,?)	
             ON DUPLICATE KEY
-            UPDATE import_time=now(),import_result=0,message='AMS端檔案不存在',last_updated_time=now()"
+            UPDATE import_time=now(),import_result=null,message='AMS端檔案不存在',last_updated_time=now()"
             ;
             if(!$this->mydb->execute($sql,'is',$material_id,$file_name)){
                 $this->mydb->close();

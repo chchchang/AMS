@@ -72,12 +72,12 @@ function checkLocalMaterial($filepath){
 	}
 	else{
 		$file_name = str_replace($rawMaterialFolder,"",$filepath);
-		$nameParse = explode('_',$file_name);
+		$nameParse = explode('.',$file_name);
 		$material_id = array_shift($nameParse);
 		$sql = "
 		INSERT INTO barker_material_import_result (material_id,file_name) VALUES (?,?)	
 		ON DUPLICATE KEY
-		UPDATE import_time=now(),import_result=0,message='AMS端檔案不存在',last_updated_time=now()"
+		UPDATE import_time=now(),import_result=null,message='AMS端檔案不存在',last_updated_time=now()"
 		;
 		if(!$mydb->execute($sql,'is',$material_id,$file_name)){
 			return false;

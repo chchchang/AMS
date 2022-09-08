@@ -1,10 +1,12 @@
 <?php 
 	/****
-	*取的廣告資訊API
+	*回報abrekr素材派送結果API
 	2022 08 19 新增checksum功能
+	2022 09 20 增加mail告警
 	***/
 	header("Content-Type:text/html; charset=utf-8");
 	require_once dirname(__FILE__).'/../../tool/MyDB.php';
+	require_once dirname(__FILE__).'/../../tool/MyMailer.php';
 	$apiHandle = new ApiHandle();
 	$apiHandle->handle();
 	$rawMaterialFolder = "";
@@ -145,6 +147,13 @@
 
 			$my->commit();
 			$my->close();
+
+			//如果匯入失敗，發出告警信
+			if(!$data["import_result"]){
+				$mailer = new MyMailer();
+				$mailer->sendMail("barker素材:".$data["file_name"]." 檔案匯入失敗","barker素材:".$data["file_name"]." 檔案匯入失敗\n素材識別碼:".$data["material_id"]."\n失敗原因:".$data["message"]);
+			}
+
 			return true;
 		}
 
