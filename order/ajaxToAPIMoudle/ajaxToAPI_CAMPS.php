@@ -24,16 +24,17 @@
 		//取得素材資訊
 		$sql='
 			SELECT
-				影片素材秒數,素材順序,素材名稱,素材原始檔名,CAMPS影片媒體編號,託播單素材.素材識別碼
+				影片素材秒數,素材順序,素材名稱,素材原始檔名,CAMPS影片媒體編號,託播單素材.素材識別碼,產業類型名稱
 			FROM
 				託播單素材
-				LEFT JOIN 素材 ON 素材.素材識別碼=託播單素材.素材識別碼
+				LEFT JOIN 素材 ON 素材.素材識別碼=託播單素材.素材識別碼 JOIN 產業類型 ON (素材.產業類型識別碼 = 產業類型.產業類型識別碼)
 			WHERE
 				託播單素材.託播單識別碼=?
 			ORDER BY
 				託播單素材.素材順序
 		';
-		$orderMaterial=$my->getResultArray($sql,'i',$orderId)[0];
+		$orderMaterial=$my->getResultArray($sql,'i',$orderId);
+		$orderMaterial=array_pop($orderMaterial);
 		//再取得版位類型、版位、託播單其他參數，並依序被取代。
 		$sql='
 			SELECT
@@ -104,9 +105,17 @@
 		
 		//逐版位派送到CAMPS
 		foreach($orderConfig as $pid=>$orderConfigData){
+			//增加產業類型的判斷
+			$ordername = $orderData['託播單名稱'];
+			if($orderMaterial["產業類型名稱"]=="23"){
+				$ordername = "[V]".$ordername;
+			}
+			else if($orderMaterial["產業類型名稱"]=="24"){
+				$ordername = "[頻]".$ordername;
+			}
 			$orderByPost = [
 				"channel_id"=>$orderConfigData['channel_id'],
-				"ad_name"=>$orderData['託播單名稱'],
+				"ad_name"=>$ordername,
 				//"material_run_time"=>$orderMaterial['影片素材秒數'],
 				"hours"=>','.implode(',',$hours).',',
 				"start_time"=>$orderData['廣告期間開始時間'],

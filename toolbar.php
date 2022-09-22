@@ -144,6 +144,7 @@
 		<li id="order/editOrderListByPage.php">修改委刊單</li>
 		<li id="order/searchOrderList.php">查詢委刊單</li>
 		<li id="order/newOrderByPage.php">新增託播單</li>
+		<li id="order/insertOrderBatch.php">大批託播單匯入</li>
 		<li id="order/editOrderByPage.php">修改託播單</li>
 		<li id="order/searchOrder.php">查詢託播單</li>
 		<li id="order/editOrderBatch.php">批次修改託播單</li>

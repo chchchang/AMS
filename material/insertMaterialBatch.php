@@ -10,8 +10,8 @@
 		if($_POST['postAction']=="export"){
 			$data = $_POST['data'];
 			$uid =uniqid();
-			@OutputExcel::outputAll_sheet('export/'.$uid,array("sheet1"=>$data));
-			exit(json_encode(array("success"=>true,"filepath"=>'export/'.$uid.'.xls')));
+			@OutputExcel::outputAll_sheet('../tool/download/'.$uid,array("sheet1"=>$data));
+			exit(json_encode(array("success"=>true,"filepath"=>$uid.'.xls')));
 		}
 	}
 
@@ -39,14 +39,14 @@
 	 }
 	 //將檔案匯出到excel
 	 function exportExcel($data){
-		 $fileName =uniqid();
-		 OutputExcel::outputAll_sheet('export/'.$fileName,array($data));
+		 $fileName =uniqid().".xls";
+		 OutputExcel::outputAll_sheet('../tool/download/'.$fileName,array($data));
 		 $protocol = (!empty($_SERVER['HTTPS']) && $_SERVER['HTTPS'] !== 'off' || $_SERVER['SERVER_PORT'] == 443) ? "https://" : "http://";
-		 $filepath = 'export/'.$fileName.".xls";
+		 $filepath = '../tool/download/'.$fileName;
 		 //exit(json_encode(array('success'=>true,'url'=>$protocol.$_SERVER ['HTTP_HOST'].str_replace("report2.php",'export/'.$fileName.".xls",$_SERVER['PHP_SELF'])),JSON_UNESCAPED_UNICODE));
 		 $exoprtFileLink = $protocol.$_SERVER ['HTTP_HOST'].str_replace("insertMaterialBatch.php",$filepath,$_SERVER['PHP_SELF']);
 		 //echo "<a href='".$exoprtFileLink."'>下載匯入結果檔案</a>\n";
-		 echo "<a href='download.php?path=".$filepath."'>下載匯入結果檔案</a>\n";
+		 echo "<a href='../tool/download/download.php?path=".$fileName."'>下載匯入結果檔案</a>\n";
 	 }
 	 //從excel中讀取資料並匯入
 	 //input:檔案名稱
@@ -370,14 +370,14 @@
 
 <script type="text/javascript">
 	execlData = '<?php echo json_encode($tableData);?>';
-	console.log(execlData);
+	//console.log(execlData);
 	if(execlData!="[]"&&execlData!=""){
 		var obj = JSON.parse(execlData);
 		$("#downloadResult").click(function(){
 			$.post(null,{postAction:"export",data:obj},
 			function(json){
 				if(json["success"])
-					window.location.href = "download.php?path="+GeneralSanitizer.sanitize(json["filepath"]);
+					window.location.href = "../tool/download.php?path="+GeneralSanitizer.sanitize(json["filepath"]);
 			},'json');
 		});
 	}
@@ -387,12 +387,11 @@
 	$("#downloadExample").click(function(){
 		data = [["素材群組識別碼(必填)","素材名稱(必填)","素材說明(選填)","產業類型代碼(選填:預設內廣內容)","素材有效開始日期(選填)","素材有效結束日期(選填)"
 				,"素材類型(必填:文字/圖片/影片)","文字素材內容(文字類型素材才需填入)","影片畫質(hd/sd)","影片秒數","執行結果"]];
-		/*$.post("exportExcleAndDownload.php",{data:data},
-			function(json){	},'json');*/
+		
 			$.post(null,{postAction:"export",data:data},
 			function(json){
 				if(json["success"])
-					window.location.href = "download.php?path="+GeneralSanitizer.sanitize(json["filepath"]);
+					window.location.href = "../tool/download/download.php?path="+GeneralSanitizer.sanitize(json["filepath"]);
 			},'json');
 	});
 </script>
