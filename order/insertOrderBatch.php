@@ -1,4 +1,9 @@
 <?php
+/****
+ * 利用ecxcle匯入託播單資訊
+ * 2022 09 22 若選擇單一平台版位，excle中會加入連結類型的tab供參考
+ * 
+ */
 	include('../tool/auth/authAJAX.php');
 	require_once '../tool/phpExtendFunction.php';
 	if(isset($_POST["action"])){
@@ -23,6 +28,7 @@
 	<link rel='stylesheet' type='text/css' href='../external-stylesheet.css'/>
 	<script src="../tool/GeneralSanitizer.js"></script>
 	<script src="../tool/xlsx.full.min.js"></script>
+	<script src="../WebConfig.js"></script>
 	<link rel="stylesheet" type="text/css" href="<?=$SERVER_SITE.Config::PROJECT_ROOT?>tool/jquery.loadmask.css" />
 <script src="../tool/jquery.loadmask.js"></script>
 	<style type="text/css">
@@ -51,8 +57,9 @@
 <br><button id="submitExcel" class="darkButton">開始匯入</button> <button id="downloadResult">下載執行結果Excel檔案</button>
 </fieldset>
 <script type="text/javascript">
-	let golbal_thead=[];//表單title
-	let	golbal_positionList=[];//版位
+	let global_thead=[];//表單title
+	let	global_positionList=[];//版位
+	let global_linkType=[];//點擊開砌起類型
 	$("#downloadResult,#submitExcel").hide();
 	//版位類型自動完成選項
 	$.post('orderManaging.php',{method:'getPositionTypeSelection'}
@@ -68,6 +75,7 @@
 			$( "#_searchOUI_positiontype" ).combobox({
 					select: function( event, ui ) {
 						_searchOUI_setPosition(this.value);
+						getLinkTypeByPositionType(getPtNameOnUI());
 					}
 			});
 			
@@ -83,21 +91,44 @@
 		,'json'
 	);
 
+	//回傳UI上不含版位編號的版位類型名稱
+	function getPtNameOnUI(){
+		let ptname = $("#_searchOUI_positiontype option:selected").text().split(":");//移除網頁option中冒號「:」前的版位識別碼
+		ptname.shift();
+		return ptname.join(":");
+	}
+
 	//依照選擇的版位類型取得板位資料
 	function _searchOUI_setPosition(pId){
 		$.post( "ajaxToDB_Order.php", { action: "getPositionByPositionType",版位類型識別碼:pId }, 
 			( data )=> {
-				golbal_positionList=[[parseInt(pId),$("#_searchOUI_positiontype option:selected").text()]];
+				//第一行加入版位類型資料
+				global_positionList=[[parseInt(pId),getPtNameOnUI()]];
 				if(data){
-					data.forEach((pdata)=>{golbal_positionList.push([pdata["版位識別碼"],pdata["版位名稱"]]);});
+					data.forEach((pdata)=>{global_positionList.push([pdata["版位識別碼"],pdata["版位名稱"]]);});
 					//利用第一筆版位取得託播單表單資料
 					if(data.length&&data.length!=0)
 						getOrderForm(data[0]["版位識別碼"]);			
 				}
-				golbal_positionList.unshift(["版位識別碼","版位名稱"]);
+				global_positionList.unshift(["版位識別碼","版位名稱"]);
 			}
 			,"json"
 		);
+	}
+
+	//依照版位類型取得點擊開啟類型資料:
+	//目前支援單一平台版位類型
+	function getLinkTypeByPositionType(ptName){
+		ptName = String(ptName);
+		let sheet = [];
+		if(ptName.startsWith("單一平台") || ptName==="barker頻道"){
+			sheet = WebConfig.VSM_LINK.general.map((ele)=>([ele.value,ele.text]));
+			if(WebConfig.VSM_LINK[ptName]){
+				sheet= sheet.concat(WebConfig.VSM_LINK[ptName].map((ele)=>([ele.value,ele.text])));
+			}
+		}
+		sheet.unshift(["連結類型代碼(請填入此值)","連結類型說明"]);
+		global_linkType = sheet;
 	}
 	//取得範例與表單格是資料
 	function getOrderForm(pId){
@@ -108,25 +139,25 @@
 				var yyyy = today.getFullYear();
 				today = yyyy+"-"+mm + '-' + dd;
 				positionPrar = data;
-				golbal_thead = ["版位識別碼(多筆用分號「;」隔開)","委刊單識別碼","託播單名稱","託播單說明","託播單開始時間(時分秒不指定將帶入00:00:00)","託播單結束時間(時分秒不指定將帶入23:59:59)","時段(多筆用分號「;」隔開,留白預設為0~23時段)"
+				global_thead = ["版位識別碼(多筆用分號「;」隔開)","委刊單識別碼","託播單名稱","託播單說明","託播單開始時間(時分秒不指定將帶入00:00:00)","託播單結束時間(時分秒不指定將帶入23:59:59)","時段(多筆用分號「;」隔開,留白預設為0~23時段)"
 							,"預約到期日(不指定將帶入託播單開始時間)","售價"];
 				let tbody = ["<td>"+pId+"</td>","<td>1234</td>","<td>新增託播單名稱</td>","<td></td>","<td>"+today+" 00:00:00</td>","<td>"+today+" 23:59:59</td>","<td>0;1;2;3;4;5;6;7;8;9;10;11;12;13;14;15;16;17;18;19;20;21;22;23</td>"
 							,"<td>"+today+" 00:00:00</td>","<td></td>"];
 				for(let i in data["其他參數設定"]){
-					golbal_thead.push(data["其他參數設定"][i]["版位其他參數顯示名稱"]);
+					global_thead.push(data["其他參數設定"][i]["版位其他參數顯示名稱"]);
 					tbody.push("<td>"+data["其他參數設定"][i]["版位其他參數預設值"]+"</td>");
 				}
 				for(let i in data["版位素材設定"]){
-					golbal_thead.push(data["版位素材設定"][i]["顯示名稱"]+i+":素材識別碼");
-					golbal_thead.push(data["版位素材設定"][i]["顯示名稱"]+i+":可否點擊(1/0)");
-					golbal_thead.push(data["版位素材設定"][i]["顯示名稱"]+i+":點擊開始類型");
-					golbal_thead.push(data["版位素材設定"][i]["顯示名稱"]+i+":點擊開始位址");
+					global_thead.push(data["版位素材設定"][i]["顯示名稱"]+i+":素材識別碼");
+					global_thead.push(data["版位素材設定"][i]["顯示名稱"]+i+":可否點擊(1/0)");
+					global_thead.push(data["版位素材設定"][i]["顯示名稱"]+i+":點擊開始類型");
+					global_thead.push(data["版位素材設定"][i]["顯示名稱"]+i+":點擊開始位址");
 					tbody.push("<td>123456</td>");
 					tbody.push("<td>0</td>");
 					tbody.push("<td></td>");
 					tbody.push("<td></td>");
 				}
-				$("#exampleTable").empty().append("<thead><tr><th>"+golbal_thead.join("</th><th>")+"</th></tr></thead>"+"<tbody><tr>"+tbody.join("")+"</tr></tbody>");
+				$("#exampleTable").empty().append("<thead><tr><th>"+global_thead.join("</th><th>")+"</th></tr></thead>"+"<tbody><tr>"+tbody.join("")+"</tr></tbody>");
 			};
 		getPositionPara(pId,callback);
 			
@@ -152,19 +183,23 @@
 		XLSX.utils.book_append_sheet(workbook, worksheet, "託播單匯入");
 
 		//版位對照表
-		const worksheet2 = XLSX.utils.aoa_to_sheet(golbal_positionList);
+		const worksheet2 = XLSX.utils.aoa_to_sheet(global_positionList);
 		XLSX.utils.book_append_sheet(workbook, worksheet2, "版位識別碼對照表");
 
+		//點擊開啟類型對照表
+		const worksheet3 = XLSX.utils.aoa_to_sheet(global_linkType);
+		XLSX.utils.book_append_sheet(workbook, worksheet3, "點擊開啟類型對照表");
+
 		/* calculate column width */
-		const max_width = golbal_thead.reduce((w, r) => Math.max(w, r.length*2), 10);
-		worksheet["!cols"] = [ { wch: max_width } ];
+		//const max_width = global_thead.reduce((w, r) => Math.max(w, r.length*2), 10);
+		//worksheet["!cols"] = [ { wch: max_width } ];
 
 		/* create an XLSX file and try to save to .xlsx */
 		XLSX.writeFile(workbook, filname);
 	}
 	//下載範例檔案
 	$("#downloadExample").click(function(){		
-		downLoadExcel([golbal_thead],$("#_searchOUI_positiontype option:selected").text()+"託播單.xlsx");
+		downLoadExcel([global_thead],$("#_searchOUI_positiontype option:selected").text()+"託播單.xlsx");
 	});
 	//下載匯入結果檔案
 	$("#downloadResult").click(function(){		
@@ -184,18 +219,28 @@
 		reader.onload = function(e) {
 			var data = e.target.result;
 			/* reader.readAsArrayBuffer(file) -> data will be an ArrayBuffer */
-			//先取得板位資料
+			
 			var workbook = XLSX.read(e.target.result);
-			let positionInfoSheet = workbook.Sheets[workbook.SheetNames[1]];
-			golbal_positionList = XLSX.utils.sheet_to_json(positionInfoSheet, { header: 1});
+			//取得板位對照表資料
+			let positionInfoSheet = workbook.Sheets["版位識別碼對照表"];
+			global_positionList = XLSX.utils.sheet_to_json(positionInfoSheet, { header: 1});
 			let positionSet = new Set();
-			for(let i in golbal_positionList){
+			for(let i in global_positionList){
 				if(i==0)//skip title
 				continue;
-				positionSet.add(golbal_positionList[i][0]);
+				positionSet.add(global_positionList[i][0]);
+			}
+			//取得連結類型資料
+			let linkTypeInfoSheet = workbook.Sheets["點擊開啟類型對照表"];
+			global_linkType = XLSX.utils.sheet_to_json(linkTypeInfoSheet, { header: 1});
+			let linkSet = new Set();
+			for(let i in global_linkType){
+				if(i==0)//skip title
+				continue;
+				linkSet.add(global_linkType[i][0]);
 			}
 			//處裡託播單資訊
-			let orderInfoSheet = workbook.Sheets[workbook.SheetNames[0]];
+			let orderInfoSheet = workbook.Sheets["託播單匯入"];
 			global_orderInfoSheetAoa = XLSX.utils.sheet_to_json(orderInfoSheet, { header: 1});
 			//換算excel日期使用
 			function ExcelDateToJSDate(serial) {
@@ -271,7 +316,7 @@
 						});
 						if(materialObj["可否點擊"] == null)
 							materialObj["可否點擊"]=0;
-						if(materialObj["素材識別碼"]!=null)
+						if(materialObj["素材識別碼"]!=null||materialObj["點擊後開啟位址"]!=null)
 						adOrder['素材'][materialOrder]=materialObj;
 					}
 					//檢查輸入參數
@@ -319,8 +364,16 @@
 						row[index]="版位識別碼錯誤";
 						global_validOrderCheck=false;
 					}
+					//若有連結類型對照表，檢查連結類型
+					else if(linkSet.size!=0){
+						for(let mkey of Object.keys(adOrder["素材"])){
+							if(adOrder['素材'][mkey]["點擊後開啟類型"]!=undefined && !linkSet.has(adOrder['素材'][mkey]["點擊後開啟類型"])){
+								row[index]="點擊後開啟類型不存在";
+								global_validOrderCheck=false;
+							}
+						}
+					}
 					else{
-						
 						let check = orderListMap[orderListId]||checkOrderListExist(orderListId);
 						orderListMap[orderListId]= check;
 						if(!check){
