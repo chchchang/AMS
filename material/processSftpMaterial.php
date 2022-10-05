@@ -12,8 +12,8 @@ class processSftpMaterial {
 
     function __construct()
     {
-        $this->sftpPath = "test\\";
-        //$this->sftpPath = "/sftp/amsmaterial/upload/";
+        //$this->sftpPath = "test\\";
+        $this->sftpPath = "/sftp/amsmaterial/upload/";
         $this->MATERIAL_FOLDER_URL= Config::GET_MATERIAL_FOLDER_URL(dirname(__FILE__).'\\');
     }
 
@@ -44,7 +44,7 @@ class processSftpMaterial {
         
         $newFilePath = $this->MATERIAL_FOLDER_URL.$fileMeta->getAMSFileName();
         $filepath = $this->sftpPath.$fileMeta->getOriginFileName();
-        $this->dolog("copt file from".$filepath." to ". $newFilePath);
+        $this->dolog("copy file from".$filepath." to ". $newFilePath);
         return rename($filepath,$newFilePath);
         //return copy($filepath,$newFilePath);
     }
@@ -62,7 +62,7 @@ class processSftpMaterial {
             $width = $fileSize[0];
             $height = $fileSize[1];
             $sql ="update 素材 set 素材原始檔名 = ?,圖片素材寬到=?,圖片素材高度=? where 素材識別碼 = ?";
-            $my->execute($sql,"siii",$width,$height,$filename,$mid);
+            $my->execute($sql,"siii",$filename,$width,$height,$mid);
         }
         
         else{

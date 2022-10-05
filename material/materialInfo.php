@@ -1,4 +1,6 @@
 <?php
+/***20220923 chia_chi_chang 新增上傳後判讀秒數功能
+ */
 	include('../tool/auth/authAJAX.php');
 	if(isset($_POST['method'])){
 		//檢查使用素材的託播單
@@ -85,6 +87,7 @@
 <script src="../tool/iframeAutoHeight.js"></script>
 <script type="text/javascript" src="../tool/autoCompleteComboBox.js"></script>
 <script type="text/javascript" src="../tool/jquery-plugin/jquery.form.js"></script> 
+<script src="../tool/mediainfo/mediainfo.min.js"></script>
 <link rel='stylesheet' type='text/css' href='<?=$SERVER_SITE.Config::PROJECT_ROOT?>external-stylesheet.css' /> 
 <style type="text/css">
 body{
@@ -521,7 +524,7 @@ function uploadFile(){
 			/*if($.inArray(ext, ['ts','mpg']) == -1) {	
 				alert('檔案類型錯誤!');
 				return 0;
-			}
+			}*/
 			if($("#fileToUpload").val()==''){
 				alert("請選擇素材檔案");
 				return 0;
@@ -637,6 +640,49 @@ function saveToDb(){
 	});
 	
 }
+
+//檢查素材秒數
+const onFileChangeFile = (mediainfo) => {
+	//非影片素材不檢查
+	if(!$("#filmRadio").prop('checked'))
+		return
+
+	const file = document.getElementById('fileToUpload').files[0]
+	if (file) {
+	const getSize = () => file.size
+	const readChunk = (chunkSize, offset) =>
+		new Promise((resolve, reject) => {
+		const reader = new FileReader()
+		reader.onload = (event) => {
+			if (event.target.error) {
+			reject(event.target.error)
+			}
+			resolve(new Uint8Array(event.target.result))
+		}
+		reader.readAsArrayBuffer(file.slice(offset, offset + chunkSize))
+		})
+	mediainfo
+		.analyzeData(getSize, readChunk)
+		.then((result) => {
+			result=JSON.parse(result);
+			let sec = Math.round(result.media.track[0].Duration);
+			console.log(sec);
+			if($("#影片素材秒數").val()!=sec){
+				if(confirm("影片素材秒數欄位("+$("#影片素材秒數").val()+")與上傳檔案資訊("+sec+")不合，是否更新。")){
+					$("#影片素材秒數").val(sec);
+				}
+			}
+			//output.value = result
+		})
+		.catch((error) => {
+			//output.value = `An error occured:\n${error.stack}`
+		})
+	}
+}
+//綁定file input和MediaInfo檢查模組
+MediaInfo({ format: 'JSON' }, (mediainfo) => {
+	document.getElementById('fileToUpload').addEventListener('change', () => onFileChangeFile(mediainfo))
+})
 
 </script>
 </body>
