@@ -122,7 +122,7 @@ class API{
         WHERE 
             版位類型.版位名稱 = "barker頻道"
         ';
-        $sql .= ' and channelId參數.版位其他參數預設值 in ("12","15","2","30","42","49","50","6","7","48","20","3","5","21","13","43","17")';
+        $sql .= ' and channelId參數.版位其他參數預設值 in ("12","15","2","30","42","49","50","6","7","48","20","3","5","21","13","43","17","16")';
         //dev
         if(!$positionData = $this->mydb->getResultArray($sql)){
             $this->dolog("getting position data fail.....");
