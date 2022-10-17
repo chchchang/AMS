@@ -30,24 +30,14 @@
 				 $data = getInsertExcelDataResult($_FILES["file"]["tmp_name"]);
 				 //print_r($data);
 				 $tableData = $data;
-				 //exportExcel($data);
+
  
 			 }
 		  } else {
 				 $headermessage = "沒有選擇檔案";
 		  }
 	 }
-	 //將檔案匯出到excel
-	 function exportExcel($data){
-		 $fileName =uniqid().".xls";
-		 OutputExcel::outputAll_sheet('../tool/download/'.$fileName,array($data));
-		 $protocol = (!empty($_SERVER['HTTPS']) && $_SERVER['HTTPS'] !== 'off' || $_SERVER['SERVER_PORT'] == 443) ? "https://" : "http://";
-		 $filepath = '../tool/download/'.$fileName;
-		 //exit(json_encode(array('success'=>true,'url'=>$protocol.$_SERVER ['HTTP_HOST'].str_replace("report2.php",'export/'.$fileName.".xls",$_SERVER['PHP_SELF'])),JSON_UNESCAPED_UNICODE));
-		 $exoprtFileLink = $protocol.$_SERVER ['HTTP_HOST'].str_replace("insertMaterialBatch.php",$filepath,$_SERVER['PHP_SELF']);
-		 //echo "<a href='".$exoprtFileLink."'>下載匯入結果檔案</a>\n";
-		 echo "<a href='../tool/download/download.php?path=".$fileName."'>下載匯入結果檔案</a>\n";
-	 }
+
 	 //從excel中讀取資料並匯入
 	 //input:檔案名稱
 	 //output:array
@@ -377,7 +367,7 @@
 			$.post(null,{postAction:"export",data:obj},
 			function(json){
 				if(json["success"])
-					window.location.href = "../tool/download.php?path="+GeneralSanitizer.sanitize(json["filepath"]);
+					window.location.href = "../tool/download/download.php?path="+GeneralSanitizer.sanitize(json["filepath"]);
 			},'json');
 		});
 	}
