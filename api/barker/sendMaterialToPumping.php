@@ -50,7 +50,7 @@ if(checkLocalMaterial($rawMaterialFolder.$rawFileName)){
 		$sql = "
 		INSERT INTO barker_material_import_result (material_id,file_name) VALUES (?,?)	
 		ON DUPLICATE KEY
-		UPDATE import_time=now(),import_result=0,message='已上傳，等待barker系統回報',last_updated_time=now()"
+		UPDATE import_time=null,import_result=null,message='已上傳，等待barker系統回報',last_updated_time=now()"
 		;
 		$mydb->execute($sql,'is',$material_id,$fliename);
 		$mydb->close();
@@ -77,7 +77,7 @@ function checkLocalMaterial($filepath){
 		$sql = "
 		INSERT INTO barker_material_import_result (material_id,file_name) VALUES (?,?)	
 		ON DUPLICATE KEY
-		UPDATE import_time=now(),import_result=null,message='AMS端檔案不存在',last_updated_time=now()"
+		UPDATE import_time=now(),import_result=0,message='AMS端檔案不存在',last_updated_time=now()"
 		;
 		if(!$mydb->execute($sql,'is',$material_id,$file_name)){
 			return false;

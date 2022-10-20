@@ -3,6 +3,7 @@
 	*回報abrekr素材派送結果API
 	2022 08 19 新增checksum功能
 	2022 09 20 增加mail告警
+	2022 10 18 回報結果為true才檢查checksum
 	***/
 	header("Content-Type:text/html; charset=utf-8");
 	require_once dirname(__FILE__).'/../../tool/MyDB.php';
@@ -94,7 +95,7 @@
 				"import_result"=>(strtolower($_POST["import_result"])=="true"||$_POST["import_result"]==1)?true:false,
 				"message"=>$_POST["import_message"],
 			);
-			if(!$this->checkSum($file_name)){
+			if($data["import_result"] && !$this->checkSum($file_name)){
 				$data["import_result"] = false;
 				$data["message"] .= "md5值錯誤，檔案異常";
 			}

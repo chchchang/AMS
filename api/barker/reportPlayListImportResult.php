@@ -116,7 +116,7 @@
 			if(!$data["import_result"]){
 				$mailer = new MyMailer();
 				$mailer->sendMail("barker頻道:".$data["channel_id"]." ".$data["file_name"]."排播檔案匯入失敗"
-				,"barker頻道:".$data["channel_id"]." ".$data["file_name"]."排播檔案匯入失敗","chia_chi_chang@cht.com.tw");
+				,"barker頻道:".$data["channel_id"]." ".$data["file_name"]."排播檔案匯入失敗");
 			}
 			
 			return true;
