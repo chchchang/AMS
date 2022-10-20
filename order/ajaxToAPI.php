@@ -1,4 +1,5 @@
 <?php
+	//20221006 將2021奧運廣告版未類型更動為2022世足
 	//20220510 增加素材尚未派送的檢查機制
 	//前置設定
 	include('../tool/auth/authAJAX.php');
@@ -95,7 +96,8 @@
 				require_once 'ajaxToAPIMoudle/ajaxToAPI_VodAds.php';
 				sendOrder_VodAds($_POST["託播單識別碼"]);
 				break;
-			case "奧運外掛專區廣告_2021":
+			//case "奧運外掛專區廣告_2021":
+				case "世足外掛專區廣告_2022"://延用2021奧運廣告外掛
 				require_once 'ajaxToAPIMoudle/ajaxToAPI_Olympic2021.php';
 				sendOrder_olympic($_POST["託播單識別碼"]);
 				break;
@@ -395,7 +397,7 @@
 						}
 					}
 					return array("success"=>true,"message"=>'success');
-				}else if($row['版位類型名稱']=='鑽石版位'||$row['版位類型名稱']=='奧運外掛專區廣告_2021'||$row['版位類型名稱']=='在地專區大BANNER廣告')
+				}else if($row['版位類型名稱']=='鑽石版位'||$row['版位類型名稱']=='世足外掛專區廣告_2022'||$row['版位類型名稱']=='在地專區大BANNER廣告')
 				{
 					//鑽石版位廣告送出時會同時派送素材，不需檢查
 					//奧運外掛圖片不需檢查
@@ -493,7 +495,8 @@
 				require_once 'ajaxToAPIMoudle/ajaxToAPI_VodAds.php';
 				cancelOrder_VodAds($_POST["託播單識別碼"]);
 				break;
-			case "奧運外掛專區廣告_2021":
+			//case "奧運外掛專區廣告_2021":
+			case "世足外掛專區廣告_2022"://延用2021奧運廣告外掛
 				require_once 'ajaxToAPIMoudle/ajaxToAPI_Olympic2021.php';
 				cancelOrder_olympic($_POST["託播單識別碼"]);
 					break;

@@ -1,8 +1,10 @@
 <?php
-	//用於處理鑽石版位託播單，需備/order/ajaxToAPI.php使用，否則無法運作
+	//用於處理運動版位託播單，需備/order/ajaxToAPI.php使用，否則無法運作
+	//2022-10-05 世足沿用此外掛，url中tokyo2020改為fifa2022
 	require_once('../tool/auth/authAJAX.php');
 	require_once('../Config_VSM_Meta.php');
-	define("olympicAPIUrl",Config::GET_API_SERVER_852_OLYMPIC2021().":8080/tokyo2020/api/ad/request");
+	//define("olympicAPIUrl",Config::GET_API_SERVER_852_OLYMPIC2021().":8080/tokyo2020/api/ad/request");
+	define("olympicAPIUrl",Config::GET_API_SERVER_852_OLYMPIC2021().":8080/fifa2022/api/ad/request");//世足將沿用奧運版位，僅更改url參數為即可
 	
 
 	function sendOrder_olympic($orderId){
@@ -56,12 +58,14 @@
 		//新增
 		//先用add插入廣告
 		$bypostOrder["action"] = "add";
+		$logger->info('data to fifa API:'.json_encode($bypostOrder,JSON_UNESCAPED_UNICODE));
 		$postvars = json_encode($bypostOrder,JSON_UNESCAPED_UNICODE);
 		if(!$apiResult=connec_to_Api_json(olympicAPIUrl,'POST',$postvars)){
 			recordResult($rcordaction,0,"無法連接奧運廣告API",null);
 			$logger->error('無法連奧運廣告API:'.olympicAPIUrl);
 			exit(json_encode(array("success"=>false,"message"=>'無法連接奧運廣告API','id'=>$orderId),JSON_UNESCAPED_UNICODE));	
 		}
+		$logger->info('result from fifa API:'.$apiResult);
 		$checkResult = json_decode($apiResult,true);
 		if($checkResult['success']){
 			foreach($checkResult['data'] as $mresult){
