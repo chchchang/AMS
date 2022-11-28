@@ -61,13 +61,16 @@ class processSftpMaterial {
         if($fileSize){
             $width = $fileSize[0];
             $height = $fileSize[1];
-            $sql ="update 素材 set 素材原始檔名 = ?,圖片素材寬到=?,圖片素材高度=? where 素材識別碼 = ?";
-            $my->execute($sql,"siii",$filename,$width,$height,$mid);
+            $sql ="update 素材 set 素材原始檔名 = ?,圖片素材寬度=?,圖片素材高度=?,LAST_UPDATE_TIME=NOW() where 素材識別碼 = ?";
+            if(!$my->execute($sql,"siii",$filename,$width,$height,$mid))
+                $this->dolog("update db fail");
         }
         
         else{
-            $sql ="update 素材 set 素材原始檔名 = ? where 素材識別碼 = ?";
-            $my->execute($sql,"si",$filename,$mid);
+            $sql ="update 素材 set 素材原始檔名 = ?,LAST_UPDATE_TIME=NOW() where 素材識別碼 = ?";
+            if(!$my->execute($sql,"si",$filename,$mid)){
+                $this->dolog("update db fail");
+            }
         }
         $this->dolog("update db. originFileName:".$filename." materialId:". $mid);
     }
