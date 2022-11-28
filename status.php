@@ -19,11 +19,11 @@
 					託播單.預約到期時間>=\''.date('Ymd').'\'
 			';
 			if(!$result=$my->getResultArray($sql)) $result=array();
-			$$reservedOrder=array();
+			$reservedOrder=array();
 			$confirmedOrder=array();
 			foreach($result as $row){			
 				if($row['託播單狀態名稱']==='預約')
-					$$reservedOrder[]=$row;
+					$reservedOrder[]=$row;
 				else
 					$confirmedOrder[]=$row;
 			}
@@ -99,7 +99,7 @@
 			if(!$result=$my->getResultArray($sql)) $result=array();
 			$innerError = $result;
 			header('Content-Type: application/json');
-			exit(json_encode(['預約'=>$$reservedOrder,'確定'=>$confirmedOrder,'素材未到'=>$materialLost,'待處理'=>$processingOrder,'送出失敗'=>$sendFailed,'內部錯誤'=>$innerError]));
+			exit(json_encode(['預約'=>$reservedOrder,'確定'=>$confirmedOrder,'素材未到'=>$materialLost,'待處理'=>$processingOrder,'送出失敗'=>$sendFailed,'內部錯誤'=>$innerError]));
 		}
 	}
 ?>

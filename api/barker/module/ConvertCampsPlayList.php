@@ -92,6 +92,7 @@ class ConverCampsPlaylist{
         curl_setopt($ch, CURLOPT_RETURNTRANSFER, true);
         $result = curl_exec($ch);
         curl_close($ch);
+        $this->dolog("get Data :".$result);
         return $result;
     }
 

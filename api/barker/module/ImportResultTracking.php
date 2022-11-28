@@ -77,7 +77,7 @@ class ImportResultTracking{
                 //print_r($checkResult);
                 if(!$checkResult["import_result"]){
                     //派送失敗
-                    array_push($feedBack,"補查派送結果得知匯入失敗:".$data["file_name"]." ".$checkResult["message"]);
+                    array_push($feedBack,"補查派送結果得知匯入失敗:".$data["file_name"]." ".$checkResult["import_message"]);
                 }
             }
         }
@@ -89,7 +89,6 @@ class ImportResultTracking{
      * 查詢超時未取得結果的播表
      */
     public function findUnprocessedPlayList(){
-        //捲出未取得派送結果的素材
         $sql = "
         select * from barker_playlist_import_result where import_result IS NULL AND (last_updated_time BETWEEN  DATE_SUB(NOW(), INTERVAL '1' DAY) AND DATE_SUB(NOW(), INTERVAL '1' HOUR) OR created_time BETWEEN  DATE_SUB(NOW(), INTERVAL '1' DAY) AND DATE_SUB(NOW(), INTERVAL '1' HOUR))
         ";
@@ -101,7 +100,6 @@ class ImportResultTracking{
      * 查詢超時未取得結果的素材
      */
     public function findUnprocessedMaterial(){
-        //捲出未取得派送結果的素材
         $sql = "
         select * from barker_material_import_result where import_result IS NULL AND (last_updated_time BETWEEN  DATE_SUB(NOW(), INTERVAL '1' DAY) AND DATE_SUB(NOW(), INTERVAL '1' HOUR) OR created_time BETWEEN  DATE_SUB(NOW(), INTERVAL '1' DAY) AND DATE_SUB(NOW(), INTERVAL '1' HOUR))
         ";
