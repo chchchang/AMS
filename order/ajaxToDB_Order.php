@@ -623,7 +623,7 @@
 					}*/
 					$area = m_get_area($pN);
 					//查詢不可變動參數用的sql
-					$nonChangeConfigSql = "SELECT 託播單其他參數值,託播單其他參數順序 FROM 託播單其他參數 WHERE 託播單識別碼 = ?";
+					//$nonChangeConfigSql = "SELECT 託播單其他參數值,託播單其他參數順序 FROM 託播單其他參數 WHERE 託播單識別碼 = ?";
 					//*****修改同託播單CSMS群組且同區域，但不為凍結狀態的託播單
 					$sql = "SELECT 託播單識別碼,版位.版位識別碼,託播單狀態識別碼 
 						FROM 託播單, 版位 

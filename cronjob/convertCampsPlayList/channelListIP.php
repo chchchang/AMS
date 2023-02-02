@@ -1,5 +1,5 @@
 <?php
-/*2022/06/07 最測是用的channelList.txt 插入 IP位置使用,channelList.txt來源為CAMPS的barker/channel?orbitonly查詢API
+/*2022/06/07 測式用的channelList.txt 插入 IP位置使用,channelList.txt來源為CAMPS的barker/channel?orbitonly查詢API
  */
 
 $exect = new insertIpToChannelList();

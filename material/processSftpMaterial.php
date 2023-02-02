@@ -45,7 +45,7 @@ class processSftpMaterial {
         $newFilePath = $this->MATERIAL_FOLDER_URL.$fileMeta->getAMSFileName();
         $filepath = $this->sftpPath.$fileMeta->getOriginFileName();
         $this->dolog("copy file from".$filepath." to ". $newFilePath);
-        return rename($filepath,$newFilePath);
+        return rename($filepath,$newFilePath) && chmod($newFilePath, 0777);
         //return copy($filepath,$newFilePath);
     }
 

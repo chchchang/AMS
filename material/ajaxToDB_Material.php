@@ -357,8 +357,12 @@
 		$logger->info('使用者識別碼:'.$_SESSION['AMS']['使用者識別碼'].'新增素材(識別碼:'.$stmt->insert_id.')');
 		echo urldecode(json_encode($feedback));
 		
-		if(isset($_POST['新素材檔案上傳']))
-			rename($tempDir.'/'.hash('ripemd160',iconv('UTF-8', 'UCS-4', $_POST["素材原始檔名"])).'.'.end($explodeFileName),MATERIAL_FOLDER_URL.$stmt->insert_id.".".$explodeFileName[count($explodeFileName)-1]);
+		if(isset($_POST['新素材檔案上傳'])){
+			$old = $tempDir.'/'.hash('ripemd160',iconv('UTF-8', 'UCS-4', $_POST["素材原始檔名"])).'.'.end($explodeFileName);
+			$new = MATERIAL_FOLDER_URL.$stmt->insert_id.".".$explodeFileName[count($explodeFileName)-1];
+			rename($old,$new);
+			chmod($new, 0777);
+		}
 	}
 	
 	//取得產業類型
@@ -756,10 +760,14 @@
 		);
 		$logger->info('使用者識別碼:'.$_SESSION['AMS']['使用者識別碼'].'修改素材(識別碼:'.$_POST['素材識別碼'].')');
 		if(isset($_POST['新素材檔案上傳'])){
-			if($_POST['新素材檔案上傳']=='copy')
-				copy($tempfile,MATERIAL_FOLDER_URL.intval($_POST['素材識別碼']).".".$explodeFileName[count($explodeFileName)-1]);
-			else
-				rename($tempfile,MATERIAL_FOLDER_URL.intval($_POST['素材識別碼']).".".$explodeFileName[count($explodeFileName)-1]);
+			$filename = MATERIAL_FOLDER_URL.intval($_POST['素材識別碼']).".".$explodeFileName[count($explodeFileName)-1];
+			if($_POST['新素材檔案上傳']=='copy'){
+				copy($tempfile,$filename);
+			}
+			else{
+				rename($tempfile,$filename);
+			}
+			chmod($filename, 0777);
 		}
 		$my->commit();
 		$my->close();

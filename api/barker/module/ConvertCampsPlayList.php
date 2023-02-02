@@ -10,7 +10,7 @@ require_once dirname(__FILE__).'/../../../Config.php';
 require_once dirname(__FILE__).'/BarkerConfig.php';
 require_once dirname(__FILE__).'/../../../tool/SFTP.php';
 require_once dirname(__FILE__).'/PutToWatchFolder.php';
-/*$date=date("Y-m-d");
+$date=date("Y-m-d");
 $channel_ids = "";
 $hours="all";
 if(!isset($argc)){
@@ -32,7 +32,7 @@ else{
 
 
 $exect = new converCampsPlaylist();
-$exect->hadle($date,$channel_id,$hours);*/
+print_r($exect->getData($date,$channel_ids,$hours));
 
 class ConverCampsPlaylist{
     private $mydb;
@@ -41,12 +41,15 @@ class ConverCampsPlaylist{
     private $date;
     private $transHash;//儲存CAMPS編號和託播單號的對照表{<CAMPS編號>=><託播單單號>}
     private $filenameHash;//儲存託播單號和素材名稱的對照表{託播單號=>素材名稱}
+    private $playlistHash;//儲存播表內容(playlistid=>[playlistrecord])
     private $channel_id;
     private $hours;
     private $sftpInfo;
     private $playlistFolder;
     public $message;
     public $playlistFileName;
+    public $remotePlaylistFolder;
+    public $channelFromDbList=[3];
 
     function __construct($logger = null) {
         $this->mydb=new MyDB(true);
@@ -61,8 +64,7 @@ class ConverCampsPlaylist{
         else{
             $this->logWriter = $logger;
         }
-        //$this->channelIdApiURL = "http://localhost/AMS/cronjob/convertCampsPlayList/testdata_campsChannel.php";//dev
-        $this->channelIdApiURL = Config::$CAMPS_API["channel"]."?orbit_only=1";//pro
+
         //$this->palyListApiURL = "http://localhost/AMS/cronjob/convertCampsPlayList/test.php";//dev
         $this->palyListApiURL = Config::$CAMPS_API["playlist"];//pro
         $this->message ="";
@@ -107,7 +109,7 @@ class ConverCampsPlaylist{
         else
             $this->channel_id = $channel_id;
         $this->hours =$hours;
-        $this->dolog("------convert CAMPS play list start-----");
+        $this->dolog("------convert play list start-----");
         $this->dolog("target date:".$this->date." target channel:".$this->channel_id." target hours:".$hours);
 
         
@@ -134,7 +136,7 @@ class ConverCampsPlaylist{
         else
             $this->channel_id = $channel_id;
         $this->hours =$hours;
-        $this->dolog("------convert CAMPS play list start-----");
+        $this->dolog("------convert play list start-----");
         $this->dolog("target date:".$this->date." target channel:".$this->channel_id." target hours:".$hours);
 
         
@@ -179,6 +181,12 @@ class ConverCampsPlaylist{
      * 依照channel_id查詢Playlist資料後回傳
      */
     private function getOutputData(){
+        if(in_array($this->channel_id,$this->channelFromDbList))
+            return $this->getPlaylistFromDb();
+        //return $this->getPlaylistFormCamps();
+    }
+
+    private function getPlaylistFormCamps(){
         //先利用API取得CAMPS playlist資料
         $url = $this->palyListApiURL."?channel_id=".$this->channel_id."&&date=".$this->date;
         if($this->hours!="all")
@@ -204,14 +212,7 @@ class ConverCampsPlaylist{
                     $this->transHash[$trans] = $orderId;
                 }
                 //託播單號反查素材名稱
-                $materialName = "";
-                if(isset($this->filenameHash[$orderId])){
-                    $materialName = $this->filenameHash[$orderId];
-                }
-                else{
-                    $materialName = $this->getFileNameByOrderId($orderId);
-                    $this->filenameHash[$orderId] = $materialName;
-                }
+                $materialName = $this->getMaterialNameByOrderId($orderId);
                 $this->dolog("CAMPSID: ".$trans." filename: ".$materialName." transactionid: ".$orderId);
                 $transSet = array("filename"=>$materialName,"transactionid"=>$orderId);
                 array_push($playlist,$transSet);
@@ -222,9 +223,60 @@ class ConverCampsPlaylist{
             $temp["hour"] = $hour;
             $temp["playlist"] = $playlist;
             array_push($output,$temp);
-        }
-        
+        }   
         return $output;
+    }
+
+    public function getMaterialNameByOrderId($orderId){
+        $materialName = "";
+        if(isset($this->filenameHash[$orderId])){
+            $materialName = $this->filenameHash[$orderId];
+        }
+        else{
+            $materialName = $this->getFileNameByOrderId($orderId);
+            $this->filenameHash[$orderId] = $materialName;
+        }
+        return $materialName;
+    }
+
+    public function getPlaylistFromDb()
+    {
+        $sql = "select * from barker_playlist_schedule where channel_id = ? and date = ?"; 
+        $types  = "is";
+        $paras = [$this->channel_id,$this->date];
+        if($this->hours!=="all"){
+            $types  .="s" ;
+            array_push($paras,str_pad($this->hours,2,"0",STR_PAD_LEFT));
+        }
+        $res = [];
+        $playlists = $this->mydb->getResultArray($sql,$types,...$paras);
+        if($playlists != null){
+            foreach($playlists as $playlist){
+                $temp = array();
+                $temp["channel_id"] = $this->channel_id;
+                $temp["date"] = $this->date;
+                $temp["hour"] = $playlist["hour"];
+                $pid  =$playlist["playlist_id"];
+                if(!isset($this->playlistHash[$pid])){
+                    $this->playlistHash[$pid] = $this->getPlayListRecord($pid);
+                }
+                $temp["playlist"] =  $this->playlistHash[$pid];
+                array_push($res,$temp);
+            }
+        } 
+        return $res;
+    }
+
+    public function getPlayListRecord($playlistId){
+        $sql = "select 	transaction_id  from barker_playlist_record where playlist_id = ? order by offset"; 
+        $records = $this->mydb->getResultArray($sql,"i",$playlistId);
+        $res = [];
+        foreach($records as $record){
+            $materialName = $this->getMaterialNameByOrderId($record["transaction_id"]);
+            $transSet = array("filename"=>$materialName,"transactionid"=>$record["transaction_id"]);
+            array_push($res,$transSet);
+        }
+        return $res;
     }
 
     private function getOrderIdByTrasanctionId($trasanction){
