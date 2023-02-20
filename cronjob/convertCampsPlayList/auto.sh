@@ -11,5 +11,6 @@ done
 #php74 putToWatchFolder.php
 
 #處理log
-find log/ -type f -name "*.log" -mtime +180 -exec rm {} \;
+find log/ -type f -name "*.log" -mtime +90 -exec rm {} \;
+find log/ -type f -name "*.log" -mtime +90 -exec rm {} \;
 

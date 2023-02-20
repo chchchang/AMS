@@ -3,6 +3,7 @@
 //20220802 獨立為class
 //20220816 猜分寫檔和上傳動作
 //20220907 新增return資料，不寫檔的function getData
+//20230220 正式取代CAMPS功能，輸出資料給端點barker
 require_once dirname(__FILE__).'/../../../tool/MyDB.php';
 //require_once '../../tool/MyDB.php';//dev
 require_once dirname(__FILE__).'/../../../Config.php';
@@ -10,7 +11,7 @@ require_once dirname(__FILE__).'/../../../Config.php';
 require_once dirname(__FILE__).'/BarkerConfig.php';
 require_once dirname(__FILE__).'/../../../tool/SFTP.php';
 require_once dirname(__FILE__).'/PutToWatchFolder.php';
-$date=date("Y-m-d");
+/*$date=date("Y-m-d");
 $channel_ids = "";
 $hours="all";
 if(!isset($argc)){
@@ -29,10 +30,8 @@ else{
     echo "parameters: date: $date ,channel ids: $channel_ids \n";
 }
 
-
-
 $exect = new converCampsPlaylist();
-print_r($exect->getData($date,$channel_ids,$hours));
+print_r($exect->getData($date,$channel_ids,$hours));*/
 
 class ConverCampsPlaylist{
     private $mydb;
@@ -49,7 +48,23 @@ class ConverCampsPlaylist{
     public $message;
     public $playlistFileName;
     public $remotePlaylistFolder;
-    public $channelFromDbList=[3];
+    public $channelFromDbList=[
+    13 // 18+專區
+    ,14 // 東森專案
+    ,18 //綜合
+    ,30 // 霹靂
+    ,36 // APUJAN
+    ,40 // 學習
+    ,43 // 測試BK
+    ,49 // 864_SD
+    ,50 // 864_HD
+    ,6 //動漫
+    ,7 //兒童館
+    ,12 //遊戲城
+    ,16 //WBC
+    ,17 //單次計費
+    ,48 //中職專區
+    ];
 
     function __construct($logger = null) {
         $this->mydb=new MyDB(true);
@@ -181,9 +196,10 @@ class ConverCampsPlaylist{
      * 依照channel_id查詢Playlist資料後回傳
      */
     private function getOutputData(){
-        if(in_array($this->channel_id,$this->channelFromDbList))
+        /*if(in_array($this->channel_id,$this->channelFromDbList))
             return $this->getPlaylistFromDb();
-        //return $this->getPlaylistFormCamps();
+        return $this->getPlaylistFormCamps();*/
+        return $this->getPlaylistFromDb();
     }
 
     private function getPlaylistFormCamps(){
@@ -245,6 +261,7 @@ class ConverCampsPlaylist{
         $types  = "is";
         $paras = [$this->channel_id,$this->date];
         if($this->hours!=="all"){
+            $sql .= " and hour = ?";
             $types  .="s" ;
             array_push($paras,str_pad($this->hours,2,"0",STR_PAD_LEFT));
         }

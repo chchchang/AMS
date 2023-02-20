@@ -39,7 +39,7 @@ class PutToWatchFolder{
      
         //$this->chdir($this->doneMaterialFolder);
         //$this->chdir($this->donePlaylistFolder);
-        $this->chdir($this->materialFolder);
+        //$this->chdir($this->materialFolder);
         $this->chdir($this->playlistFolder);
         
 
