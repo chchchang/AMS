@@ -118,10 +118,12 @@
 			return (self::TEST_MOD)? $API_SERVER_852_TESTING : $API_SERVER_852;
 		}
 
-		//2021奧運廣告API
-		public static function GET_API_SERVER_852_OLYMPIC2021(){
-			$API_SERVER_852 = 'http://172.17.156.10';
-			$API_SERVER_852_TESTING = 'http://172.17.156.15';
+		//運動賽事API
+		public static function GET_API_SERVER_852_SPORTEVENT(){
+			//$sportEvent = "fifa2022";
+			$sportEvent = "wbc2023";
+			$API_SERVER_852 = "http://172.17.156.10:8080/$sportEvent/api/ad/request";
+			$API_SERVER_852_TESTING = "http://172.17.156.15:8080/$sportEvent/api/ad/request";
 			return (self::TEST_MOD)? $API_SERVER_852_TESTING : $API_SERVER_852;
 		}
 
