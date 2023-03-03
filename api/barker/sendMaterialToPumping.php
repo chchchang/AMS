@@ -5,8 +5,7 @@
  * 因資安因素考量，才將排程conjob與API分開為兩個檔案，放置於不同環境。
  * 
 */
-//require_once '/var/www/html/AMS/tool/MyDB.php';
-require_once dirname(__FILE__).'/../../tool/MyDB.php';
+/*require_once dirname(__FILE__).'/../../tool/MyDB.php';
 //require_once '/var/www/html/AMS/Config.php';
 require_once dirname(__FILE__).'/../../Config.php';
 require_once dirname(__FILE__).'/module/UploadMaterialByPlayList.php';
@@ -75,7 +74,7 @@ function checkLocalMaterial($filepath){
 		$nameParse = explode('.',$file_name);
 		$material_id = array_shift($nameParse);
 		$sql = "
-		INSERT INTO barker_material_import_result (material_id,file_name) VALUES (?,?)	
+		INSERT INTO barker_material_import_result (material_id,file_name,import_time,import_result) VALUES (?,?,now(),0)
 		ON DUPLICATE KEY
 		UPDATE import_time=now(),import_result=0,message='AMS端檔案不存在',last_updated_time=now()"
 		;
@@ -84,10 +83,19 @@ function checkLocalMaterial($filepath){
 		}
 		return false;
 	}
+}*/
+require_once "./module/SendMaterialToPumping.php";
+$sender = new SendMaterialToPumping();
+if(isset($argv[1])){
+	$mid = $argv[1];
 }
-
-
-
+else{
+	$mid = $_POST["素材識別碼"];
+}
+if(!$sender->uploadByMaterialId($mid)){
+	exit(json_encode(["seccess"=>false,"message"=>$sender->message],JSON_UNESCAPED_UNICODE));
+}
+exit(json_encode(["seccess"=>true,"message"=>"上傳到端點barker成功"],JSON_UNESCAPED_UNICODE));
 
 ?>
  

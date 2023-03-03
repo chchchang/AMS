@@ -9,6 +9,7 @@ require_once dirname(__FILE__).'/BarkerConfig.php';
 require_once dirname(__FILE__).'/../../../tool/SFTP.php';
 require_once dirname(__FILE__).'/PutToWatchFolder.php';
 require_once dirname(__FILE__).'/../../../tool/MyMailer.php';
+require_once dirname(__FILE__).'/../module/SendMaterialToPumping.php';
 
 /*if(!isset($argv[1])||!isset($argv[2])||!isset($argv[3]))
 		exit('usage:php log.php <date> <channel_id> <hours>'."\n");
@@ -27,7 +28,7 @@ class UploadMaterialByPlayList{
     private $hours;
     private $sftpInfo;
     public $message;
-
+    private $materialSender;
     function __construct($logger = null) {
         if($logger == null){
             if(!is_dir("log")){
@@ -40,7 +41,7 @@ class UploadMaterialByPlayList{
         else{
             $this->logWriter = $logger;
         }
-        
+        $this->materialSender = new SendMaterialToPumping($this->logWriter);
         $this->mydb=new MyDB(true);
         $this->rawMaterialFolder = Config::GET_MATERIAL_FOLDER();
    
@@ -91,12 +92,13 @@ class UploadMaterialByPlayList{
                     continue;
                 else{
                     $mid = explode("_",$fileset["filename"])[0];
+                    
                     $tmp = explode(".",$fileset["filename"]);
                     $mtype = end($tmp);
                     $rawFileName = $mid.".".$mtype;
                     $remoteFile = $this->remoteMaterialFolder."/".$fileset["filename"];
                     $this->MaterialHash[$fileset["filename"]] = $rawFileName;
-                    if($this->checkLocalMaterial($this->rawMaterialFolder.$rawFileName)){
+                    /*if($this->checkLocalMaterial($this->rawMaterialFolder.$rawFileName)){
                         if($this->checkIfModified($this->rawMaterialFolder.$rawFileName, $remoteFile)){
                             if($sftp->uploadedMaterial($this->rawMaterialFolder.$rawFileName, $remoteFile)){
                                 $this->dolog("$remoteFile 上傳成功");
@@ -116,6 +118,18 @@ class UploadMaterialByPlayList{
                     else{
                         $this->dolog("$this->rawMaterialFolder.$rawFileName 本地檔案不存在");
                         $this->message.=$fileset["filename"]."本地檔案不存在\n";
+                    }*/
+                    if($this->checkIfModified($this->rawMaterialFolder.$rawFileName, $remoteFile)){
+                        if($this->materialSender->uploadByMaterialId($mid)){
+                            $this->message.=$fileset["filename"]."上傳失敗:".$this->materialSender->message."\n";
+                        }
+                        else{
+                            $this->message.=$fileset["filename"]."上傳成功\n";
+                        }
+                    }
+                    else{
+                        $this->dolog("複製".$this->rawMaterialFolder.$rawFileName."與遠端檔案相同，不複製");
+                        $this->message.=$fileset["filename"]."與遠端檔案相同，不需複製\n";
                     }
                 }
             }
@@ -134,7 +148,7 @@ class UploadMaterialByPlayList{
             $mailer = new MyMailer();
 			$mailer->sendMail("barker素材:".$material_id." 檔案匯入失敗","barker素材檔案匯入失敗\n素材識別碼:".$material_id."\n失敗原因:AMS端檔案不存在");
             $sql = "
-            INSERT INTO barker_material_import_result (material_id,file_name) VALUES (?,?)	
+            INSERT INTO barker_material_import_result (material_id,file_name,import_time,import_result) VALUES (?,?,now(),0)	
             ON DUPLICATE KEY
             UPDATE import_time=now(),import_result=0,message='AMS端檔案不存在',last_updated_time=now()"
             ;

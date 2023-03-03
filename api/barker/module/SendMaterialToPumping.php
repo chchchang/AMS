@@ -67,7 +67,7 @@ class SendMaterialToPumping{
         $mtype = end($tmp);
         $rawFileName = $mid.".".$mtype;
         $remoteFile = $this->remoteMaterialFolder."/".$fliename;
-        if(checkLocalMaterial($this->rawMaterialFolder.$rawFileName)){
+        if($this->checkLocalMaterial($this->rawMaterialFolder.$rawFileName)){
             if($sftp->uploadedMaterial($this->rawMaterialFolder.$rawFileName, $remoteFile)){
                 $nameParse = explode('_',$fliename);
                 $material_id = array_shift($nameParse);
@@ -106,7 +106,7 @@ class SendMaterialToPumping{
             $mailer = new MyMailer();
 			$mailer->sendMail("barker素材:".$material_id." 檔案匯入失敗","barker素材檔案匯入失敗\n素材識別碼:".$material_id."\n失敗原因:AMS端檔案不存在");
             $sql = "
-            INSERT INTO barker_material_import_result (material_id,file_name) VALUES (?,?)	
+            INSERT INTO barker_material_import_result (material_id,file_name,import_time,import_result) VALUES (?,?,now(),0)	
             ON DUPLICATE KEY
             UPDATE import_time=now(),import_result=0,message='AMS端檔案不存在',last_updated_time=now()"
             ;
@@ -115,8 +115,7 @@ class SendMaterialToPumping{
             }
             return false;
         }
-    }
-    
+    }    
 }
 
 
