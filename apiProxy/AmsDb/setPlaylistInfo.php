@@ -12,7 +12,7 @@
 	if(isset($_POST["replace"])){
 		$postvar = $_POST["replace"];
 		if(!validatePlaylistSchColumn($postvar["channel_id"],$postvar["date"],$postvar["hour"]))
-			exit(json_encode(array("success"=>false,"Error"=>"參數不正確"),JSON_UNESCAPED_UNICODE));
+			exit(json_encode(array("success"=>false,"message"=>"參數不正確"),JSON_UNESCAPED_UNICODE));
 		$PlayListRepository->begin_transaction();
 		foreach($postvar["overlapHour"] as $id => $h){
 			$postvar["overlapHour"][$id]=str_pad($h, 2, '0', STR_PAD_LEFT);
@@ -23,29 +23,24 @@
 		
 		$newPlayListId = $PlayListRepository->insertPlaylist($postvar["overlapStartTime"],$postvar["overlapEndTime"],$hours,$cids);
 		if(!$newPlayListId){
-			$PlayListRepository->rollback();
-			exit(json_encode(array("success"=>false,"Error"=>"insert playlist to db fail"),JSON_UNESCAPED_UNICODE));
+			setMessageAndExit(false,"insert playlist to db fail");
 		}
 		//新增playlistTemplate
 		if(!$PlayListRepository->setPlaylistTemplate($newPlayListId,$postvar["playlistTemplate"])){
-			$PlayListRepository->rollback();
-			exit(json_encode(array("success"=>false,"Message"=>"設定播表樣板失敗"),JSON_UNESCAPED_UNICODE));
+			setMessageAndExit(false,"設定播表樣板失敗");
 		}
 		//新增playlistRecord
 		if(!$PlayListRepository->setPlaylistRecord($newPlayListId,$postvar["playlistRecord"])){
-			$PlayListRepository->rollback();
-			exit(json_encode(array("success"=>false,"Message"=>"設定實際播表失敗"),JSON_UNESCAPED_UNICODE));
+			setMessageAndExit(false,"設定實際播表失敗");
 		}
 
 		//新增playlist schedule
 		$records = array(array("channel_id"=>$postvar["channel_id"],"date"=>$postvar["date"],"hour"=>$postvar["hour"],"playlist_id"=>$newPlayListId));
 		if(!$PlayListRepository->setPlaylistSchedule($records)){
-			$PlayListRepository->rollback();
-			exit(json_encode(array("success"=>false,"Message"=>"insert playlist schedule to db fail"),JSON_UNESCAPED_UNICODE));
+			setMessageAndExit(false,"單一時段播表設定成功");
 		}
 	
-		$PlayListRepository->commit();
-		exit(json_encode(array("success"=>true,"Message"=>"單一時段播表設定成功"),JSON_UNESCAPED_UNICODE));
+		setMessageAndExit(true,"單一時段播表設定成功");
 	}
 	else if(isset($_POST["edit"])){
 		$postvar = $_POST["edit"];
@@ -55,29 +50,65 @@
 		}
 		//檢查走期是否可蓋
 		if(!$PlayListRepository->checkIfAnyPlayListNotInclude($postvar))
-			exit(json_encode(array("success"=>false,"Message"=>"修改後走期無法涵蓋當前播表"),JSON_UNESCAPED_UNICODE));
+			exit(json_encode(array("success"=>false,"message"=>"修改後走期無法涵蓋當前播表"),JSON_UNESCAPED_UNICODE));
 		//更新
 		$hours = implode(",",$postvar["overlapHour"]);
 		$cids = implode(",",$postvar["overlapChannelId"]);
 		
 		if(!$PlayListRepository->updatePlaylist($postvar["overlapStartTime"],$postvar["overlapEndTime"],$hours,$cids,$postvar["playlist_id"])){
-			$PlayListRepository->rollback();
-			exit(json_encode(array("success"=>false,"Message"=>"insert playlist to db fail"),JSON_UNESCAPED_UNICODE));
+			setMessageAndExit(false,"insert playlist to db fail");
 		}
 		
 		//新增playlistTemplate
 		if(!$PlayListRepository->setPlaylistTemplate($postvar["playlist_id"],$postvar["playlistTemplate"])){
-			$PlayListRepository->rollback();
-			exit(json_encode(array("success"=>false,"Message"=>"設定播表樣板失敗"),JSON_UNESCAPED_UNICODE));
+			setMessageAndExit(false,"設定播表樣板失敗");
 		}
 		//新增playlistRecord
 		if(!$PlayListRepository->setPlaylistRecord($postvar["playlist_id"],$postvar["playlistRecord"])){
-			$PlayListRepository->rollback();
-			exit(json_encode(array("success"=>false,"Message"=>"設定實際播表失敗"),JSON_UNESCAPED_UNICODE));
+			setMessageAndExit(false,"設定實際播表失敗");
+		}
+		
+		setMessageAndExit(true,"播表更新成功，且使用相同播表的時段也已同步更新");
+	}
+	else if(isset($_POST["splitPlaylist"])){
+		$postvar = $_POST["splitPlaylist"];
+		$playlistId = $postvar[0]["playlist_id"];
+		$PlayListRepository->begin_transaction();
+		//先取的資訊
+		$playlistInfo =[];
+		if(!$playlistInfo =$PlayListRepository->getFullPlaylistInfo($playlistId)){
+			setMessageAndExit(false,"取得播表資訊失敗");
+		}
+		
+		
+		//先新增palylist		
+		$newPlayListId = $PlayListRepository->insertPlaylist(
+			$playlistInfo["basic"]["overlap_start_time"],
+			$playlistInfo["basic"]["overlap_end_time"],
+			$playlistInfo["basic"]["overlap_hours"],
+			$playlistInfo["basic"]["overlap_channel_id"]
+		);
+		if(!$newPlayListId){
+			setMessageAndExit(false,"設定播表基本資料失敗");
+		}
+		//新增playlistTemplate
+		if(!$PlayListRepository->setPlaylistTemplate($newPlayListId,$playlistInfo["template"])){
+			setMessageAndExit(false,"設定播表樣板失敗");
+		}
+		//新增playlistRecord
+		if(!$PlayListRepository->setPlaylistRecord($newPlayListId,$playlistInfo["record"])){
+			setMessageAndExit(false,"設定實際播表失敗");
 		}
 
-		$PlayListRepository->commit();
-		exit(json_encode(array("success"=>true,"Message"=>"播表更新成功，且使用相同播表的時段也已同步更新"),JSON_UNESCAPED_UNICODE));
+		//新增playlist schedule
+		foreach($postvar as $i=>$record){
+			$postvar[$i]["playlist_id"] = $newPlayListId;
+		}
+		if(!$PlayListRepository->setPlaylistSchedule($postvar)){
+			setMessageAndExit(false,"播表播出時間設定失敗");
+		}
+		setMessageAndExit(true,"播表分離成功");
+		
 	}
 	else if(isset($_POST["setSchedule"])){
 		$records = $_POST["setSchedule"];
@@ -86,6 +117,7 @@
 		foreach($records as $id=>$record){
 			if(!isset($playlistHash[$record["playlist_id"]])){
 				$result = $PlayListRepository->getPlaylistDataByID($record["playlist_id"]);
+				print_r($record);
 				$playlistHash[$record["playlist_id"]] = $result;
 				$playlistHash[$record["playlist_id"]]["overlap_hours"] = explode(",",$playlistHash[$record["playlist_id"]]["overlap_hours"]);
 				$playlistHash[$record["playlist_id"]]["overlap_channel_id"] = explode(",",$playlistHash[$record["playlist_id"]]["overlap_channel_id"]);
@@ -94,40 +126,31 @@
 			}
 			$playlistProp=$playlistHash[$record["playlist_id"]];
 			if($record["date"]<$playlistProp["overlap_start_time"] || $record["date"]>$playlistProp["overlap_end_time"] ){
-				exit(json_encode(array("false"=>false,"Message"=>"複製失敗，請確認播表託播單的走期"),JSON_UNESCAPED_UNICODE));
+				exit(json_encode(array("false"=>false,"message"=>"複製失敗，請確認播表託播單的走期"),JSON_UNESCAPED_UNICODE));
 			}
 			if(!in_array($record["channel_id"],$playlistProp["overlap_channel_id"])){
-				exit(json_encode(array("false"=>false,"Message"=>"複製失敗，請確認播表託播單的投放頻道"),JSON_UNESCAPED_UNICODE));
+				exit(json_encode(array("false"=>false,"message"=>"複製失敗，請確認播表託播單的投放頻道"),JSON_UNESCAPED_UNICODE));
 			}
 			
 		}
 
 		$PlayListRepository->begin_transaction();
 		if(!$PlayListRepository->setPlaylistSchedule($records)){
-			$PlayListRepository->rollback();
-			exit(json_encode(array("success"=>false,"Message"=>"insert playlist schedule to db fail"),JSON_UNESCAPED_UNICODE));
+			setMessageAndExit(false,"insert playlist schedule to db fail");
 		}
-	
-		$PlayListRepository->commit();
-		exit(json_encode(array("success"=>true,"Message"=>"播表複製成功"),JSON_UNESCAPED_UNICODE));
+		setMessageAndExit(true,"播表複製成功");
 	}
 	else if(isset($_POST["cloneWholeDaySchedule"])){
 		$postvar = $_POST["cloneWholeDaySchedule"];
 		$playlistHash=[];
-		$my->begin_transaction();
+		$PlayListRepository->begin_transaction();
 		//選出出當日的播表
 		$parameter = array();
-		$sql = "select * from barker_playlist_schedule where channel_id =? AND date = ? ";
-		$playlistSchedule = $my->getResultArray($sql,"is",$postvar["source"]["channelId"],$postvar["source"]["date"]);
+		$playlistSchedule = $PlayListRepository->getPlaylistSechdule(["channel_id"=>$postvar["source"]["channelId"],"date"=>$postvar["source"]["date"]]);
+		if(!$playlistSchedule)
+			exit(json_encode(array("false"=>false,"message"=>"要複製時取的播表資訊失敗"),JSON_UNESCAPED_UNICODE));
 		$playlistHash=[];
-		$sql = "insert into barker_playlist_schedule (channel_id,date,hour,playlist_id) VALUES ";
-		$parameter = [];
-		$valuesTemplate = "(?,?,?,?)";
-		$valuesStringArray=[];
-		$typeStirngTemplate = "issi";
-		$typeStirng = "";
-		$parameter[]=&$sql;
-		$parameter[]=&$typeStirng;
+		$cloneSchedule=[];
 		foreach($playlistSchedule as $id=>$schRecord){
 			if(!isset($playlistHash[$schRecord["playlist_id"]])){
 				//取得playlist資料並記錄到hash
@@ -143,34 +166,51 @@
 				if(!validatePlaylistSchColumn($target["channelId"],$target["date"],$schRecord["hour"]))
 					continue;
 				if($target["date"]<$playlistProp["overlap_start_time"] || $target["date"]>$playlistProp["overlap_end_time"]){
-					$my->rollback();
-					exit(json_encode(array("false"=>false,"Message"=>"複製失敗，請確認播表託播單的走期"),JSON_UNESCAPED_UNICODE));
+					setMessageAndExit(false,"複製失敗，請確認播表託播單的走期");
 				}
 				if(!in_array($target["channelId"],$playlistProp["overlap_channel_id"])){
-					$my->rollback();
-					exit(json_encode(array("false"=>false,"Message"=>"複製失敗，請確認播表託播單的投放頻道"),JSON_UNESCAPED_UNICODE));
+					setMessageAndExit(false,"複製失敗，請確認播表託播單的投放頻道");
 				}
-				array_push($valuesStringArray,$valuesTemplate);
-				$typeStirng .= $typeStirngTemplate;
-				$parameter[]=$target["channelId"];
-				$parameter[]=$target["date"];
-				$parameter[]=$schRecord["hour"];
-				$parameter[]=$schRecord["playlist_id"];
+				$cloneSchedule[]=array(
+					"channel_id" =>$target["channelId"],
+					"date" =>$target["date"],
+					"hour" =>$schRecord["hour"],
+					"playlist_id" =>$schRecord["playlist_id"],
+				);
 			}
 		}
-		$sql .=implode(",",$valuesStringArray)." ON DUPLICATE KEY UPDATE playlist_id=values(playlist_id),last_update_time=NOW()";
-		
-		$result = $my->execute(...$parameter);
-		if(!$result){
-			$my->rollback();
-			exit(json_encode(array("success"=>false,"Message"=>"insert whole day playlist schedule to db fail"),JSON_UNESCAPED_UNICODE));
+		if(!$PlayListRepository->setPlaylistSchedule($cloneSchedule)){
+			setMessageAndExit(false,"整日播表複製失敗");
+		};
+		setMessageAndExit(true,"整日播表複製成功");
+	}
+	else if(isset($_POST["replaceTransaction"])){
+		require_once("module/ReplaceOrderInPlaylist.php");
+		$postvar = $_POST["replaceTransaction"];
+		$replacer = new ReplaceOrderInPlaylist();
+    	if(!$replacer->replaceOrderInPlaylist(
+				$postvar["dateRange"],
+				isset($postvar["hour"])?$postvar["hour"]:[],
+				isset($postvar["channel"])?$postvar["channel"]:[],
+				$postvar["originalTransactionId"],
+				$postvar["newTransactionId"],
+				$postvar["replaceOffset"],
+				$postvar["replaceInterval"])
+		){
+			
+			setMessageAndExit(false,$replacer->getExecuteMessage());
 		}
-		
-		$my->commit();
-		exit(json_encode(array("success"=>true,"Message"=>"整日播表複製成功"),JSON_UNESCAPED_UNICODE));
+		setMessageAndExit(true,$replacer->getExecuteMessage());
 	}
 	
-	
+	function setMessageAndExit($success,$message){
+		global $PlayListRepository;
+		if(!$success)
+			$PlayListRepository->rollback();
+		else
+		$PlayListRepository->commit();
+		exit(json_encode(array("success"=>$success,"message"=>$message),JSON_UNESCAPED_UNICODE));
+	}
 	/**
 	*比較playtemplate和一小時播表是否相同
 	*如果一小時播表只是不斷重複template的順序則視為相同

@@ -1,6 +1,5 @@
 <?php
 require_once dirname(__FILE__)."/../../../tool/MyDB.php";
-//print_r(GetPlayListInRange::getPlayListInRange());
 /***
  * 將playlist資料轉化為cue表型態
  * [channel_id,data,hour,playlist]

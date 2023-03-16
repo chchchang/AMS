@@ -1,6 +1,6 @@
 <?php
 	//用於處理Vod插廣告託播單，需備/order/ajaxToAPI.php使用，否則無法運作
-	ini_set('display_errors','1');
+	//ini_set('display_errors','1');
 error_reporting(E_ALL);
 	define("VodAdsAPIUrl",Config::GET_API_SERVER_852_VOD_AD()."/mod/ads/api/vod/");
 	

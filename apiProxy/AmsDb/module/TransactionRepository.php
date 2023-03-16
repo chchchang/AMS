@@ -29,7 +29,11 @@ class TransactionRepository
     public  function getTransactionChannelInfo($transactionId) {
         $sql = "SELECT 版位其他參數預設值 as channelId FROM  託播單投放版位 JOIN 版位其他參數 ON 託播單投放版位.版位識別碼 = 版位其他參數.版位識別碼  AND 版位其他參數名稱='channel_id'
         WHERE 託播單識別碼 = ?";
-        $result = array_values($this->mydb->getResultArray($sql,"i",$transactionId));
+        $result = [];
+        $channels = array_values($this->mydb->getResultArray($sql,"i",$transactionId));
+        foreach($channels as $ch){
+            array_push($result,$ch["channelId"]);
+        }
         return $result;
     }
 }

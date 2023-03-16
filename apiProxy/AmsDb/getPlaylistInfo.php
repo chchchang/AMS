@@ -3,11 +3,13 @@
 	*對barkerCue資料表操作
 	**/
 	require_once dirname(__FILE__)."/../../tool/MyDB.php";
+	require_once dirname(__FILE__)."/module/PlayListRepository.php";
 	//$_POST[]:searchChannelPlaylistSch :設定開始/結束時間以及頻道取的所有合格的playlist id
 	//$_POST[]:getPlaylistInfo :取的playlist的資料，含託播單與素材秒數等
 	//$_POST[]:delete :刪除資料
 
 	$my=new MyDB(true);
+	$playListRepository = new PlayListRepository();
 	if(isset($_POST["searchChannelPlaylistSch"])){
 		$post = $_POST["searchChannelPlaylistSch"];
 		$sql = "SELECT * FROM barker_playlist_schedule WHERE channel_id  = ? AND date BETWEEN ? AND ?";
@@ -67,9 +69,8 @@
 		$result = $my->getResultArray($sql,$types,...$paras);
 		exit(json_encode($result,JSON_UNESCAPED_UNICODE));
 	}
-	else if(isset($_POST["getPlayListInRange"])){
-		require_once("./module/GetPlayListInRange.php");
-		$result = GetPlayListInRange::getPlayListInRange($_POST["getPlayListInRange"],$my);
+	else if(isset($_POST["getPlayListScheduleInRange"])){
+		$result = $playListRepository->getPlayListScheduleInRange($_POST["getPlayListScheduleInRange"]);
 		exit(json_encode($result,JSON_UNESCAPED_UNICODE));
 	}
 	
