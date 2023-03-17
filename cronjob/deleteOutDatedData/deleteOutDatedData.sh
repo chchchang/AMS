@@ -18,6 +18,9 @@ find /var/www/html/AMS/0b7d6e5a265d20715443e19a1f7609c6/log/ -type f -name "AMS.
 echo 刪除曝光數檔案  >> ${logFile}
 find /var/www/html/AMS/predict/export/ -type f -name "*.xls" -mtime +180 -exec rm -f {} \;
 
+echo 刪除barker播表資料  >> ${logFile}
+php74 barkerPlaylistHouseKeepings.php  >> ${logFile}
+
 echo 完成  >> ${logFile}
 
 #處理log
