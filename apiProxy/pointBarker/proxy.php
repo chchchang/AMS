@@ -1,4 +1,7 @@
 <?php
+	/**2023 03 16
+	 * 若是呼叫getChannelList API 增加showOffLine參數判斷是否要顯示以下線的頻道，預設為不顯示
+	*/
 	require_once("Config.php");
 	
 	if(!isset($_POST["apiName"])){
@@ -24,7 +27,20 @@
 	$output = curl_exec($ch);
 	curl_close($ch);
 	
-	echo $output;
+	
+	if($_POST["apiName"]=="getChannelList" && (!isset($_POST["showOffLine"]) || !$_POST["showOffLine"])){
+		$data = json_decode($output,true);
+		$return = array();
+		$return["channels"]=[];
+		foreach($data["channels"] as $id=>$row){
+			if($row["online"])
+				array_push($return["channels"],$row);
+		}
+		exit(json_encode($return,JSON_UNESCAPED_UNICODE));
+	}
+	else{
+		echo $output;
+	}
 	
 	
 ?>
