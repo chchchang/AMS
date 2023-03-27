@@ -87,6 +87,7 @@ class API{
                         $stt = explode(' ',$playRecord['start_time']);
                         $ett = explode(' ',$playRecord['end_time']);
                         //fromat of file_name: 49616_PV-22法網-PV2_SD-H264_MPEG1L2(286M).mpg  where 49616 is media_id
+                        $playRecord['file_name'] = str_replace(",","，",$playRecord['file_name']);
                         $minfo = explode('\\',$playRecord['file_name']);
                         $mnameinfo = explode("_",$minfo[count($minfo)-1]);
                         $mediaId = $mnameinfo[0];
