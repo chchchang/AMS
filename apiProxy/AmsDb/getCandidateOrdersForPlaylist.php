@@ -23,9 +23,9 @@
 	}
 
 	if(isset($_POST["searchTerm"])){
-		$typeStr.="s";
-		array_push($whereStrs,"託播單名稱 LIKE ? ");
-		array_push($paras,"%".$_POST["searchTerm"]."%");
+		$typeStr.="si";
+		array_push($whereStrs,"(託播單名稱 LIKE ? OR 託播單.託播單識別碼 = ?)");
+		array_push($paras,"%".$_POST["searchTerm"]."%",$_POST["searchTerm"]);
 	}
 	if(isset($_POST["searchDate"])){
 		$typeStr.="s";

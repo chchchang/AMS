@@ -1,7 +1,7 @@
 <?php
 	require_once dirname(__FILE__)."/../../tool/MyDB.php";
 	require_once dirname(__FILE__).'/../../Config.php';
-	require_once dirname(__FILE__).'/../../AMS/api/barker/module/ConvertCampsPlayList.php';
+	require_once dirname(__FILE__).'/../../api/barker/module/ConvertCampsPlayList.php';
 	$my=new MyDB(true);
 	if(isset($_POST['ajaxAction'])){
 		if($_POST['ajaxAction'] == "getPlayListRecord"){

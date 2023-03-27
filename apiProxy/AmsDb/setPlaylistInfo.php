@@ -117,7 +117,6 @@
 		foreach($records as $id=>$record){
 			if(!isset($playlistHash[$record["playlist_id"]])){
 				$result = $PlayListRepository->getPlaylistDataByID($record["playlist_id"]);
-				print_r($record);
 				$playlistHash[$record["playlist_id"]] = $result;
 				$playlistHash[$record["playlist_id"]]["overlap_hours"] = explode(",",$playlistHash[$record["playlist_id"]]["overlap_hours"]);
 				$playlistHash[$record["playlist_id"]]["overlap_channel_id"] = explode(",",$playlistHash[$record["playlist_id"]]["overlap_channel_id"]);
@@ -190,8 +189,8 @@
 		$replacer = new ReplaceOrderInPlaylist();
     	if(!$replacer->replaceOrderInPlaylist(
 				$postvar["dateRange"],
-				isset($postvar["hour"])?$postvar["hour"]:[],
 				isset($postvar["channel"])?$postvar["channel"]:[],
+				isset($postvar["hour"])?$postvar["hour"]:[],
 				$postvar["originalTransactionId"],
 				$postvar["newTransactionId"],
 				$postvar["replaceOffset"],

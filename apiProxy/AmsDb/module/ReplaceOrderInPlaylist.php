@@ -39,9 +39,15 @@ class ReplaceOrderInPlaylist
     public  function replaceOrderInPlaylist($dateRange,$channel,$hour,$originalTransactionId,$newTransactionId,$offset=0,$interval=0) {
         $playlistSchedule=$this->playListRepository->getPlayListScheduleInRange(["dateRange"=>$dateRange,"channel"=>$channel,"hour"=>$hour]);
 		$repalceOrderData = $this->transactionRepository->getTransactionBasicInfo($newTransactionId);
+        if(count($playlistSchedule)==0){
+            $this->setExecuteMessage(false,"沒有符合條件的播表可取代");
+            return false;
+        }
         //檢查走期
-        if($repalceOrderData["廣告期間開始時間"]>$dateRange[0]||$repalceOrderData["廣告期間結束時間"]<$dateRange[1]){
-            $this->setExecuteMessage(false,"用來取代的託播單走其無法後蓋取代日期範圍");
+        $startDateTime = explode(" ",$repalceOrderData["廣告期間開始時間"]);
+        $endDateTime = explode(" ",$repalceOrderData["廣告期間結束時間"]);
+        if($startDateTime[0]>$dateRange[0]||$endDateTime[0]<$dateRange[1]){
+            $this->setExecuteMessage(false,"用來取代的託播單走期無法覆蓋取代日期範圍");
             return false;
         }
         //檢查頻道是否可涵蓋
@@ -62,6 +68,7 @@ class ReplaceOrderInPlaylist
             $playlistInfo[$pid]["action"] =null;
             
             //取代託播單資料
+            $originalTransactionIdCount=0;
             foreach($playlistInfo[$pid]["record"] as $j=>$template){
                 if($template["transaction_id"]==$originalTransactionId){
                     //有出現要取代的託播單，將這筆資料標記為要拆單
@@ -73,10 +80,11 @@ class ReplaceOrderInPlaylist
                         $playlistInfo[$pid]["record"][$j]["transaction_id"]=$newTransactionId;
                     }
                     else{
-                        if($j>=$offset && ($j-$offset)%($interval+1)==0){
+                        if($originalTransactionIdCount>=$offset && ($originalTransactionIdCount-$offset)%($interval+1)==0){
                             $playlistInfo[$pid]["record"][$j]["transaction_id"]=$newTransactionId;
                         }
                     }
+                    $originalTransactionIdCount++;
                 }
                 //為了有設定開始取代位置或區間取代的條件，增加repeat_times資料給播表樣版使用
                 $playlistInfo[$pid]["record"][$j]["repeat_times"]=1;

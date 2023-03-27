@@ -141,9 +141,10 @@ class PlayListRepository
                 $this->transactionSecondsHash[$tid]=array_pop($minfo)["影片素材秒數"];
             }
             $secondsCount+=$this->transactionSecondsHash[$tid];
+            $i++;
         }
         if($triggerUpdate){
-            if(!$this->setPlaylistRecord($playlist_id,$records)){
+            if(!$this->setPlaylistRecord($playlist_id,$playlistRecord)){
                 return false;   
             }
         }
