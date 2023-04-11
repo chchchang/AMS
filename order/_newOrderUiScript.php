@@ -3,6 +3,7 @@
 <script type="text/javascript" src="../VSM/vsmLinkValueSelector/VodPosterSelector.js"></script>
 <script type="text/javascript" src="../VSM/vsmLinkValueSelector/appSelector.js"></script>
 <script type="text/javascript" src="../tool/HtmlSanitizer.js"></script>
+<script src="../WebConfig.js"></script>
 <script>
 //********設定
 	if(typeof(positionTypeId)=='undefined')
@@ -379,32 +380,21 @@
 						var ptn = $("#positiontype").text();
 						if(ptn.startsWith('單一平台')){
 							$('<td/>').append(
-							$('<select order='+i+' id="點擊後開啟類型'+i+'" class="linkType VSM"/>')
-								.append($('<option value="">NONE</option>'))
-								.append($('<option value="internal">internal</option>'))
-								.append($('<option value="external">external</option>'))
-								.append($('<option value="app">app</option>'))
-								.append($('<option value="Vod">Vod</option>'))
-								.append($('<option value="VODPoster">VODPoster</option>'))
-								.append($('<option value="Channel">Channel</option>'))
+								$('<select order='+i+' id="點擊後開啟類型'+i+'" class="linkType VSM"/>')
 								.change(function(){
 									materialObj[$(this).attr('order')]['點擊後開啟類型'] = $(this).val();
-								}).val('NONE')
+								})
 							).appendTo($tr)
 							
-							switch(ptn){
-								case "單一平台EPG":
-									$tr.find("#點擊後開啟類型"+i)
-									.append($('<option value="coverImageIdV">SEPG直向覆蓋圖片</option>'))
-									.append($('<option value="coverImageIdH">SEPG橫向覆蓋圖片</option>'));
-									console.log($("#點擊後開啟類型"+i).val());
-								break;
-								
-								case "單一平台advertising_page":
-								case "單一平台banner":
-									$tr.find("#點擊後開啟類型"+i)
-									.append($('<option value="netflixPage">NETFLIX</option>'))
-								break;
+							WebConfig.VSM_LINK.general.forEach(ele => {
+								$tr.find("#點擊後開啟類型"+i).append('<option value="'+ele["value"]+'">'+ele["text"]+'</option>');
+							});
+							$tr.find("#點擊後開啟類型"+i).val('NONE');
+							
+							if(WebConfig.VSM_LINK[ptn]){
+								WebConfig.VSM_LINK[ptn].forEach((ele)=>{
+									$tr.find("#點擊後開啟類型"+i).append('<option value="'+ele["value"]+'">'+ele["text"]+'</option>');
+								});
 							}
 						}
 						else{

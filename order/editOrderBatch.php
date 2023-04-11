@@ -183,6 +183,7 @@
 <script src="../tool/jquery-ui1.2/jquery-ui.js"></script>
 <script src="../tool/jquery-ui1.2/jquery-ui-timepicker-addon.js" type="text/javascript"></script>
 <script src="../tool/jquery-ui1.2/jquery-ui-sliderAccess.js" type="text/javascript"></script>
+<script src="../WebConfig.js"></script>
 <script type="text/javascript" src="../tool/ajax/ajaxToDB.js"></script> 
 <script type="text/javascript" src="../tool/autoCompleteComboBox.js"></script>
 <script src="../tool/iframeAutoHeight.js" type="text/javascript"></script>
@@ -746,30 +747,19 @@
 						}
 						else if(json.版位類型名稱.startsWith('單一平台')){
 							$('<select order='+i+' id="點擊後開啟類型'+i+'" class="linkType VSM"/>')
-							.append($('<option value="">NONE</option>'))
-							.append($('<option value="internal">internal</option>'))
-							.append($('<option value="external">external</option>'))
-							.append($('<option value="app">app</option>'))
-							.append($('<option value="Vod">Vod</option>'))
-							.append($('<option value="VODPoster">VODPoster</option>'))
-							.append($('<option value="Channel">Channel</option>'))
 							.appendTo($tr).change(function(){
 								materialObj[$(this).attr('order')]['點擊後開啟類型'] = $(this).val();
-							}).val('NONE')
-							switch(json.版位類型名稱){
-								case "單一平台EPG":
-									$("#點擊後開啟類型"+i)
-									.append($('<option value="coverImageIdV">SEPG直向覆蓋圖片</option>'))
-									.append($('<option value="coverImageIdH">SEPG橫向覆蓋圖片</option>'))
-								break;
-								
-								case "單一平台advertising_page":
-								case "單一平台banner":
-									$("#點擊後開啟類型"+i)
-									.append($('<option value="netflixPage">NETFLIX</option>'))
-								break;
-							}
+							})
+							WebConfig.VSM_LINK.general.forEach(ele => {
+								$tr.find("#點擊後開啟類型"+i).append('<option value="'+ele["value"]+'">'+ele["text"]+'</option>');
+							});
+							$tr.find("#點擊後開啟類型"+i).val('NONE');
 							
+							if(WebConfig.VSM_LINK[json.版位類型名稱]){
+								WebConfig.VSM_LINK[json.版位類型名稱].forEach((ele)=>{
+									$tr.find("#點擊後開啟類型"+i).append('<option value="'+ele["value"]+'">'+ele["text"]+'</option>');
+								});
+							}							
 						}
 						else{
 							$('<select order='+i+' id="點擊後開啟類型'+i+'" class="linkType"/>')
