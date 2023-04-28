@@ -1,4 +1,5 @@
 ; $('document').ready(function(){
+		$("li").css("margin","2px")
 		$("li:has(ul)").css("list-style-image","url(tool/pic/list_plus.gif)")
 		.children().hide();
 		
@@ -23,7 +24,6 @@
 		$("li:not(:has(ul))").css({
 			"cursor":"default",
 			"list-style-image":"url(tool/pic/list.png)",
-			"list-style-position": "inside",
 			"border-left": "solid",
 			"border-left-color": "#AAAAAA",
 		});
@@ -33,7 +33,6 @@
 			
 			$("li:not(:has(ul))").css({
 				"list-style-image":"url(tool/pic/list.png)",
-				"list-style-position": "inside",
 				"border-left-color": "#AAAAAA",
 			});
 			
