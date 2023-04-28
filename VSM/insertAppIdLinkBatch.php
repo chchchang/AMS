@@ -1,7 +1,6 @@
 <?php
 /****
- * 利用ecxcle匯入託播單資訊
- * 2022 09 22 若選擇單一平台版位，excle中會加入連結類型的tab供參考
+ * 利用ecxcle匯入單一平台APP跳轉連結資訊
  * 
  */
 	include('../tool/auth/authAJAX.php');
@@ -74,7 +73,8 @@
 	</fieldset>
 </div>
 <script type="text/javascript">
-	const extappInterlinkApi = "http://localhost/testing/testing.php";///*****test */
+	//const extappInterlinkApi = "http://localhost/testing/testing.php";///*****test */
+	const extappInterlinkApi = WebConfig.SET_EXTAPP_LINK_FOR_AMS;
 	new Vue({
 		el:"#vueApp",
 		data:{
@@ -82,6 +82,7 @@
 			importResult:[],
 			parameterCheckPass:false,
 			ajaxPostInfo:[],
+			deleteAppidSet: new Set(),
 			exampleRows:[
 				{
 					appid:"test",
@@ -120,6 +121,7 @@
 					let importDataArray = [];
 					let parametersCheck = true
 					appIdInfoSheetAoa[0].push("執行結果");
+					this.deleteAppidSet.clear();
 					for(let i in appIdInfoSheetAoa){
 						if(i == 0)//第一行是title 跳過
 							continue;
@@ -133,24 +135,24 @@
 	
 						let importData = {
 							"appid":row[0],
-							"啟用時間":(row[1]==undefined)?null:formatDate(row[1]),//將區分多筆的;改為系統使用的,
-							"停止時間":formatDate(row[2]),
-							"針對用戶群組":row[3],
-							"排除用戶群組":row[4],
-							"app開啟參數":row[5],//若結束時間為00:00:00 置換為當天結束
-							"連結類型":row[6],
-							"連結內容":row[7],
-							"返回外部app":(row[8]==undefined)?null:row[8],
-							'rowId':i
+							"startTime":(row[1]==undefined)?null:formatDate(row[1]),//將區分多筆的;改為系統使用的,
+							"endTime":formatDate(row[2]),
+							"packages":row[3],
+							"excludePackages":row[4],
+							"para":row[5],
+							"linkType":row[6],
+							"linkValue":row[7],
+							"ExtLink":(row[8]==undefined)?null:row[8]
 						};
-						row[9]="";		
+						row[9]="";	
+						this.deleteAppidSet.add(importData["appid"]);	
 						//檢查必填資訊
-						if(importData["停止時間"]==undefined ||importData["appid"]==undefined||importData["連結類型"]==undefined||importData["連結內容"]==undefined){
+						if(importData["startTime"]==undefined ||importData["appid"]==undefined){
 							row[9]="必要資訊未輸入";
 							parametersCheck = false;
 						}
 						//檢查走期
-						else if(importData["啟用時間"]!=null&& importData["啟用時間"]>importData["停止時間"] ){
+						else if(importData["startTime"]!=null&& importData["startTime"]>importData["endTime"] ){
 							row[9]="走期設定錯誤";
 							parametersCheck = false;
 						}
@@ -169,27 +171,50 @@
 				}
 				else{
 					$("#submitExcel").attr('disabled', true).mask();
-					//儲存
-					Promise.all(
-						this.ajaxPostInfo.map(
-							(postInfo,i)=>(new Promise((promise_reslove,promise_reject)=>{
+					const asyncUpdate = async()=>{
+						//先刪除
+						let deletePromise = await new Promise((promise_reslove,promise_reject)=>{
 								$.post(extappInterlinkApi,
 									{
-										"action":"batchInsert",
-										"data":postInfo,
+										"action":"deleteExtLinkByAppidBatch",
+										"appids":Array.from(this.deleteAppidSet),
 									},
 									(data)=>{
-										this.importResult[i+1][this.importResult[i].length-1]=data["message"];
-										promise_reslove();
+										if(data.success)
+											promise_reslove();
+										else{
+											alert(data.message);
+											promise_reject(data.message);
+										}
 									}
 									,'json'
 								);
-							}))
+							});
+						//再儲存
+						let savePromises = await Promise.all(
+							this.ajaxPostInfo.map(
+								(postInfo,i)=>(new Promise((promise_reslove,promise_reject)=>{
+									$.post(extappInterlinkApi,
+										{
+											"action":"updateOrInsertExtLink",
+											"data":postInfo,
+										},
+										(data)=>{
+											this.importResult[i+1][this.importResult[i].length-1]=data["message"];
+											promise_reslove();
+										}
+										,'json'
+									);
+								}))
+							)
 						)
-					).then(()=>{
+					}
+					asyncUpdate().then(()=>{
 						//所有託播單新增完成
 						alert("匯入完成，請查看匯入結果欄位");
 						this.importResult = [...this.importResult];
+						$("#submitExcel").unmask();
+					}).catch(response => {
 						$("#submitExcel").unmask();
 					});
 				}

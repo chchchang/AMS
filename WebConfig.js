@@ -1,4 +1,5 @@
 class WebConfig{
+	static VSM_IP = "http://172.17.155.120/";
 	static VSM_LINK= {
 		general:[
 			{value:"NONE",text:"NONE"},
@@ -8,6 +9,7 @@ class WebConfig{
 			{value:"Vod",text:"Vod"},
 			{value:"VODPoster",text:"VODPoster"},
 			{value:"Channel",text:"Channel"},
+			{value:"appid",text:"appid連結跳轉"},
 		],
 		單一平台EPG:[
 			{value:"coverImageIdV",text:"SEPG直向覆蓋圖片"},
@@ -20,4 +22,6 @@ class WebConfig{
 			{value:"netflixPage",text:"NETFLIX"}
 		],	
 	}
+	static SET_EXTAPP_LINK_FOR_AMS = WebConfig.VSM_IP+"api/ams/setExtappInterLink.php";
+	static GET_EXTAPP_LINK_FOR_AMS = WebConfig.VSM_IP+"api/ams/getExtappInterLink.php";
 }
