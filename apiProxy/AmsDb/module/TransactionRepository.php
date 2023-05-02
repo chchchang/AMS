@@ -19,7 +19,7 @@ class TransactionRepository
     }
 
     public  function getTransactionMaterialInfo($transactionId) {
-        $sql = "SELECT * FROM  素材  WHERE 素材識別碼 in (
+        $sql = "SELECT 素材.*,產業類型說明 FROM  素材 JOIN 產業類型 ON 素材.產業類型識別碼 = 產業類型.產業類型識別碼  WHERE 素材識別碼 in (
             SELECT 素材識別碼 FROM 託播單素材 WHERE 託播單識別碼 = ?
         ) ORDER by 影片畫質識別碼";
         $result = array_values($this->mydb->getResultArray($sql,"i",$transactionId));

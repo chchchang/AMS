@@ -121,11 +121,11 @@
 			}
 
 			$hadler = new ConverCampsPlaylist();
-			/*$result = $hadler->getData($date,$channel_id,$hours);
-			exit(json_encode($result,JSON_UNESCAPED_UNICODE));*/
+			$result = $hadler->getData($date,$channel_id,$hours);
+			exit(json_encode($result,JSON_UNESCAPED_UNICODE));
 			
-			$testfile = file_get_contents('testPlayList.txt');
-			exit($testfile);//dev
+			//$testfile = file_get_contents('testPlayList.txt');
+			//exit($testfile);//dev
 
 		}
 		else if($_POST['ajaxAction'] == "getMaterialImportStatus"){
