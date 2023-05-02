@@ -1,8 +1,9 @@
 <?php
 require_once dirname(__FILE__)."/../../../tool/MyDB.php";
 require_once dirname(__FILE__)."/TransactionRepository.php";
-//$test = new PlayListRepository();
-//print_r($test->caculateOverlapPeriod(16));
+/*$test = new PlayListRepository();
+print_r("test");
+print_r($test->getPlaylistRecord(["transaction_id"=>47402]));*/
 /***
  */
 class PlayListRepository
@@ -287,9 +288,26 @@ class PlayListRepository
      /**
      * 取的playlistRecord資訊
      */
-    public function getPlaylistRecord($playlistId){
-        $sql="select * from barker_playlist_record where playlist_id =? order by offset";
-		$result = $this->mydb->getResultArray($sql,"i",$playlistId);
+    public function getPlaylistRecord($searchPara=[]){
+        $sql="select * from barker_playlist_record";
+        $where = [];
+        $typeString ="";
+        $parameter=array();
+        $orderBy = "order by playlist_id,offset";
+
+        if(isset($searchPara["playlist_id"])){
+            array_push($where,"playlist_id =?");
+            $typeString .="i";
+            array_push($parameter,$searchPara["playlist_id"]);
+        }
+        if(isset($searchPara["transaction_id"])){
+            array_push($where,"transaction_id =?");
+            $typeString .="i";
+            array_push($parameter,$searchPara["transaction_id"]);
+        }
+
+        $sql =  $sql." WHERE ".implode(" AND ",$where)." ".$orderBy;
+		$result = $this->mydb->getResultArray($sql,$typeString,...$parameter);
 		if(!$result){
 			return false;
 		}
@@ -307,7 +325,7 @@ class PlayListRepository
         if(!$playlistInfo["template"] =$this->getPlaylistTemplate($playlistId)){
             return false;
         }
-        if(!$playlistInfo["record"] =$this->getPlaylistRecord($playlistId)){
+        if(!$playlistInfo["record"] =$this->getPlaylistRecord(["palylist_id"=>$playlistId])){
             return false;
         }
         return $playlistInfo;
@@ -351,15 +369,37 @@ class PlayListRepository
         $where = array();
         $typeString="";
         $parameter=array();
-        if(isset($searchTerm["channel_id"])){
-            $where[]="channel_id=?";
-            $typeString.="i";
-            $parameter[]=$searchTerm["channel_id"];
+        $chlist=isset($searchTerm["channel_id"])?is_array($searchTerm["channel_id"])?$searchTerm["channel_id"]:[$searchTerm["channel_id"]]:[];
+        $datelist=isset($searchTerm["date"])?is_array($searchTerm["date"])?$searchTerm["date"]:[$searchTerm["date"]]:[];
+        $hourlist=isset($searchTerm["hour"])?is_array($searchTerm["hour"])?$searchTerm["hour"]:[$searchTerm["hour"]]:[];
+        $chNum = count($chlist);
+        $dateNum = count($datelist);
+        $hourNum = count($hourlist);
+        if($dateNum>0){
+            $where[]="date in (".str_repeat("?,",$dateNum-1)."?".")";
+            $typeString.=str_repeat("s",$dateNum);
+            array_push($parameter,...$datelist);
         }
-        if(isset($searchTerm["date"])){
-            $where[]="date=?";
-            $typeString.="s";
-            $parameter[]=$searchTerm["date"];
+        if($chNum>0){
+            $where[]="channel_id in (".str_repeat("?,",$chNum-1)."?".")";
+            $typeString.=str_repeat("i",$chNum);
+            array_push($parameter,...$chlist);
+        }
+        if($hourNum>0){
+            $where[]="hour in (".str_repeat("?,",$hourNum-1)."?".")";
+            $typeString.=str_repeat("s",$hourNum);
+            array_push($parameter,...$hourlist);
+        }
+        if(isset($searchTerm["dateRange"])){
+            $where[]="date between ? and ?";
+            $typeString.="ss";
+            array_push($parameter,...$searchTerm["dateRange"]);
+        }
+
+        if(isset($searchTerm["playlist_id"])){
+            $where[]="playlist_id=?";
+            $typeString.="i";
+            $parameter[]=$searchTerm["playlist_id"];
         }
 
         $sql .= implode(" AND ",$where);
@@ -368,52 +408,6 @@ class PlayListRepository
 			return false;
 		}
 		return $result;
-    }
-    /**
-     * 回傳範圍內的playist schedule資料，
-     * selector=[
-     *  channel=>[1,2,3...], (optional)
-     *  date=>yyyy-mm-dd, (optional)
-     *  hour=>[00,01,02...], (optional)
-     *  dateRange=>[<startDate>,<endDate>] (optional)
-     * ]
-     */
-    public function getPlayListScheduleInRange($selector) {
-        $chlist=isset($selector["channel"])?$selector["channel"]:[];
-        $datelist=isset($selector["date"])?$selector["date"]:[];
-        $hourlist=isset($selector["hour"])?$selector["hour"]:[];
-        $chNum = count($chlist);
-        $dateNum = count($datelist);
-        $hourNum = count($hourlist);
-        if($chNum == 0 && $dateNum==0 && $hourNum==0 &&!isset($selector["dateRange"])&&count($selector["dateRange"])<2){
-            return ;
-        }
-        $sql = "select * from barker_playlist_schedule where ";
-        $subsql = array();
-        $types = "";
-        $paras = [];
-        if($dateNum>0){
-            $subsql[]="date in (".str_repeat("?,",$dateNum-1)."?".")";
-            $types.=str_repeat("s",$dateNum);
-            array_push($paras,...$datelist);
-        }
-        if($chNum>0){
-            $subsql[]="channel_id in (".str_repeat("?,",$chNum-1)."?".")";
-            $types.=str_repeat("i",$chNum);
-            array_push($paras,...$chlist);
-        }
-        if($hourNum>0){
-            $subsql[]="hour in (".str_repeat("?,",$hourNum-1)."?".")";
-            $types.=str_repeat("s",$hourNum);
-            array_push($paras,...$hourlist);
-        }
-        if(isset($selector["dateRange"])){
-            $subsql[]="date between ? and ?";
-            $types.="ss";
-            array_push($paras,...$selector["dateRange"]);
-        }
-        $sql.=implode(" and ",$subsql);
-        return $this->mydb->getResultArray($sql,$types,...$paras);
     }
 
     /**

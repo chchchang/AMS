@@ -4,19 +4,27 @@
 	**/
 	require_once dirname(__FILE__)."/../../tool/MyDB.php";
 	require_once dirname(__FILE__)."/module/PlayListRepository.php";
+	require_once dirname(__FILE__)."/module/TransactionRepository.php";
 	//$_POST[]:searchChannelPlaylistSch :設定開始/結束時間以及頻道取的所有合格的playlist id
 	//$_POST[]:getPlaylistInfo :取的playlist的資料，含託播單與素材秒數等
 	//$_POST[]:delete :刪除資料
 
 	$my=new MyDB(true);
-	$playListRepository = new PlayListRepository();
+	$playListRepository = new PlayListRepository($my);
+	$transactionRepository = new TransactionRepository($my);
 	if(isset($_POST["searchChannelPlaylistSch"])){
 		$post = $_POST["searchChannelPlaylistSch"];
 		$sql = "SELECT * FROM barker_playlist_schedule WHERE channel_id  = ? AND date BETWEEN ? AND ?";
 		$types = "iss";
 		$paras = array($post["channel_id"],$post["startDate"],$post["endDate"]);
-		
 		$result = $my->getResultArray($sql,$types,...$paras);
+		$palylistMemo = [];
+		foreach($result as $i=>$row){
+			if(!isset($palylistMemo[$row["playlist_id"]])){
+				$palylistMemo[$row["playlist_id"]] = $playListRepository->getPlaylistDataByID($row["playlist_id"]);
+			}
+			$result[$i]["palylistInfo"]=$palylistMemo[$row["playlist_id"]];
+		}
 		exit(json_encode($result,JSON_UNESCAPED_UNICODE));
 	}
 	else if(isset($_POST["getPlaylistInfo"])){
@@ -69,8 +77,37 @@
 		$result = $my->getResultArray($sql,$types,...$paras);
 		exit(json_encode($result,JSON_UNESCAPED_UNICODE));
 	}
-	else if(isset($_POST["getPlayListScheduleInRange"])){
-		$result = $playListRepository->getPlayListScheduleInRange($_POST["getPlayListScheduleInRange"]);
+	else if(isset($_POST["getPlaylistSechdule"])){
+		$result = $playListRepository->getPlaylistSechdule($_POST["getPlaylistSechdule"]);
+		exit(json_encode($result,JSON_UNESCAPED_UNICODE));
+	}
+	else if(isset($_POST["searchTransactionPlayRecords"])){
+		$potvar = $_POST["searchTransactionPlayRecords"];
+		//取的託播單播放時間
+		$transactionMaterialInfo = $transactionRepository->getTransactionMaterialInfo($potvar["transaction_id"]);
+		$materialSeconds=$transactionMaterialInfo[0]["影片素材秒數"];
+		//依照palyList_record的palylist_id查看在palylist_schedule中被那些頻道時段使用
+		
+		$playlistScheduleHash=[];
+		$recordsWithTransation=[];
+		//先取得範圍內的播表
+		$schedules = $playListRepository->getPlaylistSechdule(["dateRange"=>$potvar["dateRange"]]);
+		foreach($schedules as $id=>$schedule){
+			if(!isset($playlistScheduleHash[$schedule["playlist_id"]])){
+				$records = $playListRepository->getPlaylistRecord(["transaction_id"=>$potvar["transaction_id"],"playlist_id"=>$schedule["playlist_id"]]);
+				$playlistScheduleHash[$schedule["playlist_id"]] = $records;
+			}
+			if(is_array($playlistScheduleHash[$schedule["playlist_id"]]))
+			foreach($playlistScheduleHash[$schedule["playlist_id"]] as $j=>$recordhash)
+				$recordsWithTransation[]= [
+					"channel_id"=>$schedule["channel_id"],
+					"date"=>$schedule["date"],
+					"hour"=>$schedule["hour"],
+					"start_seconds"=>$recordhash["start_seconds"],
+					"end_seconds"=>$recordhash["start_seconds"]+$materialSeconds
+				];
+		}
+		$result = ["success"=>true,"records"=>$recordsWithTransation];
 		exit(json_encode($result,JSON_UNESCAPED_UNICODE));
 	}
 	
@@ -91,7 +128,9 @@
 			$return["影片素材秒數"]=$materialData["影片素材秒數"];
 			$return["素材識別碼"]=$materialData["素材識別碼"];
 			$return["CAMPS影片媒體編號"]=$materialData["CAMPS影片媒體編號"];
-			$return["產業類型說明"]=$materialData["上層產業類型說明"]=="內廣"?$materialData["產業類型說明"]:"外廣";
+			$return["產業類型顯示名稱"]=$materialData["上層產業類型說明"]=="內廣"?$materialData["產業類型說明"]:"外廣";
+			$return["產業類型說明"]=$materialData["產業類型說明"];
+			$return["上層產業類型說明"]=$materialData["上層產業類型說明"];
 		}
 		$sql= "SELECT 版位其他參數預設值 as channel_id
 		FROM

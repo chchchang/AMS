@@ -37,7 +37,7 @@ class ReplaceOrderInPlaylist
     }
 
     public  function replaceOrderInPlaylist($dateRange,$channel,$hour,$originalTransactionId,$newTransactionId,$offset=0,$interval=0) {
-        $playlistSchedule=$this->playListRepository->getPlayListScheduleInRange(["dateRange"=>$dateRange,"channel"=>$channel,"hour"=>$hour]);
+        $playlistSchedule=$this->playListRepository->getPlaylistSechdule(["dateRange"=>$dateRange,"channel_id"=>$channel,"hour"=>$hour]);
 		$repalceOrderData = $this->transactionRepository->getTransactionBasicInfo($newTransactionId);
         if(count($playlistSchedule)==0){
             $this->setExecuteMessage(false,"沒有符合條件的播表可取代");
