@@ -60,7 +60,9 @@
 			$dbdata[$id]["影片素材秒數"]=$materialData["影片素材秒數"];
 			$dbdata[$id]["素材識別碼"]=$materialData["素材識別碼"];
 			$dbdata[$id]["CAMPS影片媒體編號"]=$materialData["CAMPS影片媒體編號"];
-			$dbdata[$id]["產業類型說明"]=$materialData["上層產業類型說明"]=="內廣"?$materialData["產業類型說明"]:"外廣";
+			$dbdata[$id]["產業類型顯示名稱"]=$materialData["上層產業類型說明"]=="內廣"?$materialData["產業類型說明"]:"外廣";
+			$dbdata[$id]["產業類型說明"]=$materialData["產業類型說明"];
+			$dbdata[$id]["上層產業類型說明"]=$materialData["上層產業類型說明"];
 		}
 		
 		$sql= "SELECT 版位其他參數預設值 as channel_id
