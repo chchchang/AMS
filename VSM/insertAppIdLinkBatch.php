@@ -73,8 +73,8 @@
 	</fieldset>
 </div>
 <script type="text/javascript">
-	//const extappInterlinkApi = "http://localhost/testing/testing.php";///*****test */
-	const extappInterlinkApi = WebConfig.SET_EXTAPP_LINK_FOR_AMS;
+	const extappInterlinkApi = "http://localhost/testing/testing.php";///*****test */
+	//const extappInterlinkApi = WebConfig.SET_EXTAPP_LINK_FOR_AMS;
 	new Vue({
 		el:"#vueApp",
 		data:{
@@ -114,8 +114,8 @@
 					let orderInfoSheet = workbook.Sheets["app連結跳轉設定"];
 					let appIdInfoSheetAoa = XLSX.utils.sheet_to_json(orderInfoSheet, { header: 1});
 					//換算excel日期使用
-					function ExcelDateToJSDate(serial) {
-						return new Date((serial - (25567 + 1))*86400*1000-32*3600000 );
+					function ExcelDateToJSDate(serial,endOfDay=false) {
+						return new Date((serial - (25567 + 1))*86400*1000-32*3600000+(endOfDay?60000*60*24-1:0) );
 					}
 					//"appid","啟用時間","停止時間","針對用戶群組","排除用戶群組","app開啟參數","連結類型","連結內容","返回外部app"
 					let importDataArray = [];
@@ -131,7 +131,7 @@
 							continue;
 						//日期換算
 						row[1]=ExcelDateToJSDate(row[1])//啟用時間
-						row[2]=ExcelDateToJSDate(row[2])//停止時間
+						row[2]=ExcelDateToJSDate(row[2],true)//停止時間
 	
 						let importData = {
 							"appid":row[0],
