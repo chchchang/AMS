@@ -1,6 +1,7 @@
 <?php
 	include('../tool/auth/authAJAX.php');
 	include('ajax_checkOrder.php');
+	require_once dirname(__FILE__)."/../apiProxy/AmsDb/module/PlayListRepository.php";
 	$CSMSPTNAME = array('首頁banner','專區banner','頻道short EPG banner','專區vod');
 	if ( isset($_POST['query']) && $_POST['query'] != '' )
 		do_query();
@@ -560,7 +561,7 @@
 	function save_changes(){
 		require_once("../tool/phpExtendFunction.php");
 		global $logger, $my;
-		$Error;		
+		$Error;
 		//****檢查訂單是否可加入		
 		$checkOrders=array();
 		if(isset($_POST['orders'])){
@@ -571,8 +572,9 @@
 			$edits= json_decode($_POST['edits'],true);
 			if(isset($edits['edit'])){
 				//*****若有修改現有訂單，將同託播單群組與託播單CSMS群組的訂單一並加入修改
-				$editTemp = array();
-				foreach($edits["edit"] as $edit){
+				//***CSMS已下架 本段落已註解
+				/*$editTemp = array();
+				foreach($edits["edit"] as $editIndex => $edit){
 					//取得修改託播單的基本資料
 					$sql = "SELECT 託播單CSMS群組識別碼,廣告可被播出小時時段,版位類型.版位名稱 AS 版位類型名稱 ,託播單狀態識別碼,版位.版位名稱
 					FROM 託播單,版位,版位 版位類型
@@ -597,33 +599,9 @@
 					$ptN = $row['版位類型名稱'];
 					$pN = $row['版位名稱'];
 					$state = $row['託播單狀態識別碼'];
-					//取得不可變動其他參數資料
-					/*$sql = 'SELECT 版位其他參數順序
-					FROM 託播單,版位,版位 版位類型,版位其他參數
-					WHERE 託播單.託播單識別碼 = ?
-					AND 版位.版位識別碼 = 託播單.版位識別碼
-					AND 版位.上層版位識別碼 = 版位類型.版位識別碼
-					AND 版位類型.版位識別碼 = 版位其他參數.版位識別碼
-					AND (版位其他參數型態識別碼 = 4 OR 版位其他參數名稱 = "bannerTransactionId1" OR 版位其他參數名稱 = "preTransaction")';
-					if(!$stmt=$my->prepare($sql)) {
-						exit(json_encode(array("success"=>false,"message"=>'無法準備statement，請聯絡系統管理員！'),JSON_UNESCAPED_UNICODE));
-					}
-					if(!$stmt->bind_param('i',$edit["託播單識別碼"])){
-						exit(json_encode(array("success"=>false,"message"=>'無法繫結資料，請聯絡系統管理員！'),JSON_UNESCAPED_UNICODE));
-					}
-					if(!$stmt->execute()) {
-						exit(json_encode(array("success"=>false,"message"=>'無法執行statement，請聯絡系統管理員！'),JSON_UNESCAPED_UNICODE));
-					}
-					if(!$res=$stmt->get_result()){
-						exit(json_encode(array("success"=>false,"message"=>'無法取得結果集，請聯絡系統管理員！'),JSON_UNESCAPED_UNICODE));
-					}
-					$nonChangeConfig =[];
-					while($row = $res->fetch_assoc()){
-						$nonChangeConfig[]=$row['版位其他參數順序'];
-					}*/
+					
 					$area = m_get_area($pN);
-					//查詢不可變動參數用的sql
-					//$nonChangeConfigSql = "SELECT 託播單其他參數值,託播單其他參數順序 FROM 託播單其他參數 WHERE 託播單識別碼 = ?";
+			
 					//*****修改同託播單CSMS群組且同區域，但不為凍結狀態的託播單
 					$sql = "SELECT 託播單識別碼,版位.版位識別碼,託播單狀態識別碼 
 						FROM 託播單, 版位 
@@ -637,19 +615,11 @@
 						$index = sizeof($editTemp)-1;
 						$editTemp[$index]['託播單識別碼'] = $ne['託播單識別碼'];
 						$editTemp[$index]['版位識別碼'] = $ne['版位識別碼'];
-						
-						/*$configs = $my->getResultArray($nonChangeConfigSql,'i',$ne['託播單識別碼']);
-						if(isset($configs))
-						if(!(isset($_POST['synEdit'])&&$_POST['synEdit']))
-						foreach($configs as $config){
-							if(in_array($config['託播單其他參數順序'],$nonChangeConfig))
-								$editTemp[$index]['其他參數'][$config['託播單其他參數順序']]=$config['託播單其他參數值'];
-						}*/
 					}
 				}
 				
 				$edits["edit"] = array_merge($edits["edit"], $editTemp);
-				$checkOrders=array_merge($checkOrders,$edits["edit"]);
+				$checkOrders=array_merge($checkOrders,$edits["edit"]);*/
 			}
 			if(isset($edits['delete'])){
 				foreach($edits['delete'] as $delete){
@@ -933,7 +903,7 @@
 					goto exitWithError;
 				}
 
-			//新增素材
+				//新增素材
 				if(isset($edit['素材']))
 				foreach($edit['素材'] as $mOrder=>$mOrderMaterial){
 					if($mOrderMaterial['素材識別碼']!=null &&$mOrderMaterial['素材識別碼']!=''){
@@ -1055,7 +1025,8 @@
 						}
 					}
 				//end of 檢查多版位投放
-				
+				//20230504 增加barker播表重疊走期計算
+				fix_barker_playlist_overlap_peroid($edit["託播單識別碼"]);
 				array_push($editIds,$edit["託播單識別碼"]);
 			}
 			//刪除現有訂單
@@ -2092,7 +2063,21 @@
 		else
 			exit(json_encode($defaultPercentage));
 	}
-	
+	//2023 05 04新增若是barker的託播單，
+	function fix_barker_playlist_overlap_peroid($orderId){
+		global $my;
+		$PlayListRepository = new PlayListRepository($my);
+		if(!$plaslistIds = $PlayListRepository->getDistinctPlaylistIdByTransactionId($orderId)){
+			return false;
+		}
+		foreach($plaslistIds as $row){
+			//更新barker播表的重疊時間。
+			if(!$PlayListRepository->caculateOverlapPeriod($row["playlist_id"],true))
+				return false;
+		}
+		return true;
+	}
+
 	$my->close();
 	exit();
 ?>
