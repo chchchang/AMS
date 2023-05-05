@@ -10,7 +10,7 @@
 
 	$my=new MyDB(true);
 	$PlayListRepository = new PlayListRepository($my);
-	setMessageAndExit(true,"設定實際播表失敗","warning");//test
+	//setMessageAndExit(true,"設定實際播表失敗","warning");//test
 	if(isset($_POST["replace"])){
 		$postvar = $_POST["replace"];
 		if(!validatePlaylistSchColumn($postvar["channel_id"],$postvar["date"],$postvar["hour"]))

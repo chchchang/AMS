@@ -463,6 +463,18 @@ class PlayListRepository
         return array_values($result);
     }
 
+    /**
+    * 查詢所有有使用特定託播單號的palylist_id
+    */
+    public function getDistinctPlaylistIdByTransactionId($transactionId){
+        $sql="select distinct playlist_id from barker_playlist_template where transaction_id =?";
+		$result = $this->mydb->getResultArray($sql,"i",$transactionId);
+		if(!$result){
+			return false;
+		}
+		return $result;
+    }
+
 }
 
 ?>

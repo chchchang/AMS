@@ -3,7 +3,7 @@
 	//$_POST["託播單識別碼"] = 47345;//dev
 	$my=new MyDB(true);
 	$sql= "SELECT 託播單.託播單識別碼,託播單名稱,廣告期間開始時間,廣告期間結束時間,廣告可被播出小時時段";
-	$whereStrs = [];
+	$whereStrs = ["託播單狀態識別碼=2"];//只選擇則送出的託播單
 	$typeStr = "";
 	$paras = [];
 	if(isset($_POST["版位識別碼"])){
