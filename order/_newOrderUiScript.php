@@ -260,7 +260,7 @@
 									}
 								}
 							});
-							$('#allTimeBtn,#noTimeBtn').click(function(){
+							$('.hoursCombinationBtn').click(function(){
 								m_sepgConnect($('#前置連動').val());
 							});
 							//連動託播單設定
@@ -337,7 +337,7 @@
 					//if($('#連動廣告1').length!=0 ||$('#連動廣告2').length!=0||$('#連動廣告3').length!=0 ||$('#連動廣告4').length!=0){
 					if($('.連動廣告')){
 						//時段全選按鈕
-						$('#allTimeBtn,#noTimeBtn').click(function(){
+						$('.hoursCombinationBtn').click(function(){
 							m_setConnectOrder(getObjectForSetConnectOrder());
 						});
 						//連動託播單設定
@@ -732,19 +732,21 @@
 		$("#selectOrder,#closeSelection").hide();
 		$('#mainFram').show();
 	});
-	
-	//時段全選按鈕
-	$('#allTimeBtn').click(function(){
-		$('input[name="hours"]').each(function() {
-			$(this).prop("checked", true);
-		});
-	});
-	//時段全不選按鈕
-	$('#noTimeBtn').click(function(){
-		$('input[name="hours"]').each(function() {
-			$(this).prop("checked", false);
-		});
-	});
+	//從設定檔讀取時段設定按鈕
+	Object.keys(WebConfig.HOURS_COMBINATION).forEach(
+		(type)=>{
+			$("#playTimeCombinations").append("<button id = 'hours"+type+"' class = 'darkButton hoursCombinationBtn'>"+type+"</button>");
+			$("#hours"+type).click(()=>{
+				$('input[name="hours"]').each((id,ele)=>{
+					if(WebConfig.HOURS_COMBINATION[type].includes(id))
+						$(ele).prop("checked", true);
+					else
+						$(ele).prop("checked", false);
+				});
+			});
+			
+		}
+	);
 	
 	//還原輸入的資料/資料庫中的資料
 	function clearInput(){

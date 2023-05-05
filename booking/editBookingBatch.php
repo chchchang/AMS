@@ -193,6 +193,7 @@
 <script type="text/javascript" src="../order/newOrder_851.js?<?=time()?>"></script>
 <script src="../tool/HtmlSanitizer.js"></script>
 <script src="../tool/GeneralSanitizer.js"></script>
+<script src="../WebConfig.js"></script>
 <link rel='stylesheet' type='text/css' href='<?=$SERVER_SITE.Config::PROJECT_ROOT?>external-stylesheet.css'/>
 <style type="text/css">
   	.Center{
@@ -246,7 +247,7 @@
 	<table width = '100%' class='styledTable2'>
 		<tr><th><input type="checkbox" name="updateCheckBox" id="StartDateCB"></th><th>託播單開始期間*:</th><td><input id = "StartDate" type="text" value = "" width='30' ></td></tr>
 		<tr><th><input type="checkbox" name="updateCheckBox" id="EndDateCB"></th><th>託播單結束期間*:</th><td><input id = "EndDate" type="text" value = "" width='30'></td></tr>
-		<tr><th><input type="checkbox" name="updateCheckBox" id="hoursCB"></th><th>託播單時段*:</th><td><button id = 'allTimeBtn' class = 'darkButton'>全選</button> <button id = 'noTimeBtn' class = 'darkButton'>全不選</button>
+		<tr><th><input type="checkbox" name="updateCheckBox" id="hoursCB"></th><th>託播單時段*:</th><td><div  id = "playTimeCombinations"></div>
 			<table border ="0" id = "playTime">
 			<thead><tr><th>0</th><th>1</th><th>2</th><th>3</th><th>4</th><th>5</th><th>6</th><th>7</th><th>8</th><th>9</th>
 			<th>10</th><th>11</th><th>12</th><th>13</th><th>14</th><th>15</th><th>16</th><th>17</th><th>18</th><th>19</th>
@@ -511,18 +512,21 @@
 		$('#mainFram').show();
 	});
 	
-	//時段全選按鈕
-	$('#allTimeBtn').click(function(){
-		$('input[name="hours"]').each(function() {
-			$(this).prop("checked", true);
-		});
-	});
-	//時段全不選按鈕
-	$('#noTimeBtn').click(function(){
-		$('input[name="hours"]').each(function() {
-			$(this).prop("checked", false);
-		});
-	});
+	//從設定檔讀取時段設定按鈕
+	Object.keys(WebConfig.HOURS_COMBINATION).forEach(
+		(type)=>{
+			$("#playTimeCombinations").append("<button id = 'hours"+type+"' class = 'darkButton hoursCombinationBtn'>"+type+"</button>");
+			$("#hours"+type).click(()=>{
+				$('input[name="hours"]').each((id,ele)=>{
+					if(WebConfig.HOURS_COMBINATION[type].includes(id))
+						$(ele).prop("checked", true);
+					else
+						$(ele).prop("checked", false);
+				});
+			});
+			
+		}
+	);
 	//欄位全選按鈕
 	$('#allAttBtn').click(function(){
 		$('input[name="updateCheckBox"]').each(function() {
@@ -613,7 +617,7 @@
 									}
 								}
 							});
-							$('#allTimeBtn,#noTimeBtn').click(function(){
+							$('.hoursCombinationBtn').click(function(){
 								m_setSEPGConnection($('#前置連動').val());
 							});
 							//連動託播單設定
@@ -689,7 +693,7 @@
 					if($('#連動廣告1').length!=0 ||$('#連動廣告2').length!=0||$('#連動廣告3').length!=0 ||$('#連動廣告4').length!=0){
 						m_setConnectionOrder(getObjectForSetConnectOrder());
 						//時段全選按鈕
-						$('#allTimeBtn,#noTimeBtn').click(function(){
+						$('.hoursCombinationBtn').click(function(){
 							m_setConnectionOrder(getObjectForSetConnectOrder());
 						});
 						$( "input[name='hours'],#StartDateCB,#EndDateCB,#hoursCB" ).change(function() {

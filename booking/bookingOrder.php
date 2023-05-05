@@ -44,6 +44,7 @@
 <script type="text/javascript" src="../tool/jquery-plugin/jquery.tokenize.js"></script>
 <script type="text/javascript" src="../order/newOrder_852.js?<?=time()?>"></script>
 <script type="text/javascript" src="../order/newOrder_851.js?<?=time()?>"></script>
+<script src="../WebConfig.js"></script>
 <script src="../tool/jquery.loadmask.js"></script>
 <link rel="stylesheet" type="text/css" href="<?=$SERVER_SITE.Config::PROJECT_ROOT?>tool/jquery.loadmask.css" />
 <link rel="stylesheet" type="text/css" href="<?=$SERVER_SITE.Config::PROJECT_ROOT?>tool/jquery-plugin/jquery.tokenize.css" />
@@ -108,7 +109,7 @@
 		</table>
 		</td>
 	</tr>
-	<tr id = "playTimeOption"><th>託播單時段*:</th><td><button id = 'allTimeBtn' class = 'darkButton'>全選</button> <button id = 'noTimeBtn' class = 'darkButton'>全不選</button>
+	<tr><th>託播單時段*:</th><td><div  id = "playTimeCombinations"></div>
 			<table border ="0" id = "playTime">
 			<thead><tr><th>0</th><th>1</th><th>2</th><th>3</th><th>4</th><th>5</th><th>6</th><th>7</th><th>8</th><th>9</th>
 			<th>10</th><th>11</th><th>12</th><th>13</th><th>14</th><th>15</th><th>16</th><th>17</th><th>18</th><th>19</th>

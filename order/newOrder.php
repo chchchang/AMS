@@ -553,7 +553,8 @@
 			</table>
 			</td>
 		</tr>
-		<tr id = "playTimeOption"><th>託播單時段*:</th><td><button id = 'allTimeBtn' class = 'darkButton'>全選</button> <button id = 'noTimeBtn' class = 'darkButton'>全不選</button>
+		<tr><th>託播單時段*:</th><td>
+			<div id = "playTimeCombinations"></div>
 			<table border ="0" id = "playTime">
 			<thead><tr><th>0</th><th>1</th><th>2</th><th>3</th><th>4</th><th>5</th><th>6</th><th>7</th><th>8</th><th>9</th>
 			<th>10</th><th>11</th><th>12</th><th>13</th><th>14</th><th>15</th><th>16</th><th>17</th><th>18</th><th>19</th>

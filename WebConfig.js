@@ -24,4 +24,11 @@ class WebConfig{
 	}
 	static SET_EXTAPP_LINK_FOR_AMS = WebConfig.VSM_IP+"api/ams/setExtappInterLink.php";
 	static GET_EXTAPP_LINK_FOR_AMS = WebConfig.VSM_IP+"api/ams/getExtappInterLink.php";
+	static HOURS_COMBINATION={
+		全日:[0,1,2,3,4,5,6,7,8,9,10,11,12,13,14,15,16,17,18,19,20,21,22,23],
+		全空:[],
+		上半日:[0,1,2,3,4,5,6,7,8,9,10,11],
+		下半日:[12,13,14,15,16,17,18,19,20,21,22,23],
+		酒類:[0,1,2,3,4,5,21,22,23],
+	}
 }
