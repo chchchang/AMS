@@ -82,13 +82,14 @@
 			$materialType = end($fileNamePatterns);
 			$materialName = 'ad/_____AMS_'.$orderMaterial['素材識別碼'].'.'.$materialType;
 			$material_link_value = "";
+			
 			foreach($orderConfig as $pid=>$orderConfigData){
 				if($orderMaterial['點擊後開啟類型'] == "netflixPage"){
-					if($material_link_value == ""){
+					if($orderMaterial['點擊後開啟位址']  == ""){
 						$orderMaterial['點擊後開啟位址'] = "com.netflix.ninja:/http://www.netflix.com/browse?iid=".$orderConfigData["specific_iid"];
 					}
 					else
-						$orderMaterial['點擊後開啟位址'] = "com.netflix.ninja:/http://www.netflix.com/watch/".$material_link_value."?iid=".$orderConfigData["specific_iid"];
+						$orderMaterial['點擊後開啟位址'] = "com.netflix.ninja:/http://www.netflix.com/watch/".$orderMaterial['點擊後開啟位址'] ."?iid=".$orderConfigData["specific_iid"];
 					$orderMaterial['點擊後開啟類型'] = "app";
 				}
 				$bypostOrder[] = [
@@ -191,6 +192,7 @@
 				$material_link = "";
 				$material_link_value = "";
 				foreach($orderMaterials as $orderMaterial){
+					
 					if($orderMaterial["影片畫質識別碼"] == 2){
 						//$Materials["url"]= $orderConfigData['url'].$orderMaterial['影片媒體編號'].'_f';
 						$Materials["url"] = getEdgeWareUrl($orderConfigData['url'],$orderMaterial['影片媒體編號']);
@@ -263,6 +265,7 @@
 				$materialTypeFocus = end($explodedNameFocus);
 				$focusMaterialName = 'ad/_____AMS_'.$orderMaterialFocus['素材識別碼'].'.'.$materialTypeFocus;
 			}
+			
 			$action ='sendEPGOrder';
 			precancelOrder_VSM($action,$orderId);
 			foreach($orderConfig as $pid=>$orderConfigData){
@@ -323,6 +326,7 @@
 					託播單素材.素材順序
 			';
 			$orderMaterial=$my->getResultArray($sql,'i',$orderId)[0];
+		
 			foreach($orderConfig as $pid=>$orderConfigData){
 				$bypostOrder[] = [
 					"transaction_id"=>$orderData["託播單識別碼"],
@@ -435,6 +439,7 @@
 				$material_link = "";
 				$material_link_value = "";
 				foreach($orderMaterial as $om){
+					
 					if($om["素材類型識別碼"]==1){
 						$Materials["content"] = $om["文字素材內容"];
 						
@@ -539,6 +544,7 @@
 			$fileNamePatterns= explode('.',$orderMaterial['素材原始檔名']);
 			$materialType = end($fileNamePatterns);
 			$materialName = 'ad/_____AMS_'.$orderMaterial['素材識別碼'].'.'.$materialType;
+			
 			$material_link_value = "";
 			foreach($orderConfig as $pid=>$orderConfigData){
 				$bypostOrder[] = [
