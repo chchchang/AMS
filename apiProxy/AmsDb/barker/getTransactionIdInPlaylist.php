@@ -5,10 +5,8 @@
 	require_once dirname(__FILE__)."/../../../tool/MyDB.php";
 	require_once dirname(__FILE__)."/../module/PlayListRepository.php";
 	require_once dirname(__FILE__)."/../module/TransactionRepository.php";
-	$dateRange = ["2023-04-27","2023-05-27"];
-	$channel = ["2"];
-	//$dateRange = $_POST["dateRange"];
-	//$channel = $_POST["channel"];
+	$dateRange = $_POST["dateRange"];
+	$channel = $_POST["channel"];
 
 	$my=new MyDB(true);
 	$playListRepository = new PlayListRepository($my);

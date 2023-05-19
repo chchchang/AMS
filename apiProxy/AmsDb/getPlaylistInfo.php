@@ -48,22 +48,24 @@
 		exit(json_encode($result,JSON_UNESCAPED_UNICODE));
 	}
 	else if(isset($_POST["getPlaylistTemplateInfo"])){
-		$sql = "SELECT 託播單名稱,託播單識別碼,repeat_times,廣告期間開始時間,廣告期間結束時間,廣告可被播出小時時段
-		FROM
-			barker_playlist_template
-			JOIN 託播單 ON 託播單識別碼 = transaction_id  
-		WHERE 	playlist_id = ? ORDER BY offset";
-		$types = "i";
-		$paras = array($_POST["getPlaylistTemplateInfo"]["playlist_id"]);
-		$result = $my->getResultArray($sql,$types,...$paras);
 		$orderDataHash = array();
-		foreach($result as $id=>$data){
-			if(!isset($orderDataHash[$data["託播單識別碼"]])){
-				$orderDataHash[$data["託播單識別碼"]]=getOrderData($data["託播單識別碼"]);
+		$orderBasicInfoHash = array();
+		$result = $playListRepository->getPlaylistTemplate($_POST["getPlaylistTemplateInfo"]["playlist_id"]);
+		foreach($result as $id=>$record){
+			if($record["transaction_id"] == "-1"){
+				continue;
 			}
-			foreach($orderDataHash[$data["託播單識別碼"]] as $key=>$value)
+			if(!isset($orderDataHash[$record["transaction_id"]])){
+				$orderDataHash[$record["transaction_id"]] = getOrderData($record["transaction_id"]);
+				$orderBasicInfoHash[$record["transaction_id"]] = $transactionRepository->getTransactionBasicInfo($record["transaction_id"]);
+			}
+			$result[$id]["託播單名稱"]=$orderBasicInfoHash[$record["transaction_id"]]["託播單名稱"];
+			$result[$id]["託播單識別碼"]=$orderBasicInfoHash[$record["transaction_id"]]["託播單識別碼"];
+			$result[$id]["廣告期間開始時間"]=$orderBasicInfoHash[$record["transaction_id"]]["廣告期間開始時間"];
+			$result[$id]["廣告期間結束時間"]=$orderBasicInfoHash[$record["transaction_id"]]["廣告期間結束時間"];
+			$result[$id]["廣告可被播出小時時段"]=$orderBasicInfoHash[$record["transaction_id"]]["廣告可被播出小時時段"];
+			foreach($orderDataHash[$record["transaction_id"]] as $key=>$value)
 				$result[$id][$key]=$value;
-
 		}
 		exit(json_encode($result,JSON_UNESCAPED_UNICODE));
 	}

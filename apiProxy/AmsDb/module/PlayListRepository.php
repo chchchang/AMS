@@ -40,7 +40,8 @@ class PlayListRepository
     依照playlist template計算重複的走期、頻道、時段並可選擇是否更新
      */
     public function caculateOverlapPeriod($playlist_id,$triggerUpdate=false) {
-        $sql = "SELECT distinct transaction_id FROM `barker_playlist_template` WHERE `playlist_id`=? ";
+        //transaction_id=-1為排播用的標籤，需跳過
+        $sql = "SELECT distinct transaction_id FROM `barker_playlist_template` WHERE `playlist_id`=? AND transaction_id != -1 ";
         $tids = array_values($this->mydb->getResultArray($sql,"i",$playlist_id));
         $overlapDateStart = "";
         $overlapDateEnd = "";
@@ -76,7 +77,8 @@ class PlayListRepository
      依照playlist template產生playlist record
      */
     public function genPlaylistRecord($playlist_id,$triggerUpdate=false){
-        $sql = "SELECT * FROM `barker_playlist_template` WHERE `playlist_id`=? order by offset";
+        //transaction_id=-1為排播用的標籤，需跳過
+        $sql = "SELECT * FROM `barker_playlist_template` WHERE `playlist_id`=? AND transaction_id != -1 order by offset";
         $records = array_values($this->mydb->getResultArray($sql,"i",$playlist_id));
         $secondsCount = 0;
         $playlistRecord = array();
@@ -86,8 +88,9 @@ class PlayListRepository
         $deleteCount = 0;
         while($secondsCount<3600 && $deleteCount<$n){
             $i %= $n;
+            //repeat_times==-1 =>重複播放次數已達標可跳過
             if($records[$i++]["repeat_times"]==-1)
-            continue;
+                continue;
             array_push($playlistRecord,array(
                 "playlist_id"=>$records[$i]["playlist_id"],
                 "transaction_id"=>$records[$i]["transaction_id"],
@@ -467,7 +470,7 @@ class PlayListRepository
     * 查詢所有有使用特定託播單號的palylist_id
     */
     public function getDistinctPlaylistIdByTransactionId($transactionId){
-        $sql="select distinct playlist_id from barker_playlist_template where transaction_id =?";
+        $sql="select distinct playlist_id from barker_playlist_template where transaction_id =? ";
 		$result = $this->mydb->getResultArray($sql,"i",$transactionId);
 		if(!$result){
 			return false;
