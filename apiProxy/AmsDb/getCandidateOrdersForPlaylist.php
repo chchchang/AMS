@@ -43,6 +43,12 @@
 		array_push($whereStrs,"(廣告可被播出小時時段 = ? OR 廣告可被播出小時時段 LIKE ? OR 廣告可被播出小時時段 LIKE ? OR 廣告可被播出小時時段 LIKE ?)");
 		array_push($paras,$_POST["hour"],"%,".$_POST["hour"].",%","%,".$_POST["hour"],$_POST["hour"].",%");
 	}
+	if(isset($_POST["託播單識別碼"])){
+		$typeStr.="i";
+		array_push($whereStrs,"託播單識別碼=?");
+		array_push($paras,$_POST["託播單識別碼"]);
+	}
+
 	$sql .= " WHERE ".implode(" AND ",$whereStrs);
 	$dbdata = $my->getResultArray($sql,$typeStr,...$paras);
 	foreach($dbdata as $id=>$data){

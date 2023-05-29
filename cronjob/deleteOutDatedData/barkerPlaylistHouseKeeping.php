@@ -32,4 +32,9 @@ if(!$mydb->execute($sql))
 else
     echo "delete barker_playlist success\n";
 
+    $sql = "DELETE FROM barker_order_cue WHERE barker_order_cue.date < DATE_SUB(NOW(), INTERVAL $dataKeepMonths MONTH)";
+if(!$mydb->execute($sql))
+    echo "delete barker_playlist fail\n";
+else
+    echo "delete barker_playlist success\n";
 ?>
