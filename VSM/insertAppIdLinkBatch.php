@@ -21,7 +21,7 @@
 	<link rel='stylesheet' type='text/css' href='../external-stylesheet.css'/>
 	<script src="../tool/GeneralSanitizer.js"></script>
 	<script src="../tool/xlsx.full.min.js"></script>
-	<script src="../WebConfig.js"></script>
+	<script src="../WebConfig.js?v=1"></script>
 	<link rel="stylesheet" type="text/css" href="<?=$SERVER_SITE.Config::PROJECT_ROOT?>tool/jquery.loadmask.css" />
 <script src="../tool/jquery.loadmask.js"></script>
 	<style type="text/css">
@@ -73,8 +73,8 @@
 	</fieldset>
 </div>
 <script type="text/javascript">
-	const extappInterlinkApi = "http://localhost/testing/testing.php";///*****test */
-	//const extappInterlinkApi = WebConfig.SET_EXTAPP_LINK_FOR_AMS;
+	//const extappInterlinkApi = "http://localhost/testing/testing.php";///*****test */
+	const extappInterlinkApi = WebConfig.SET_EXTAPP_LINK_FOR_AMS;
 	new Vue({
 		el:"#vueApp",
 		data:{
@@ -142,20 +142,21 @@
 							"para":row[5],
 							"linkType":row[6],
 							"linkValue":row[7],
-							"ExtLink":(row[8]==undefined)?null:row[8]
+							"ExtLink":(row[8]==undefined)?0:row[8]
 						};
 						row[9]="";	
 						this.deleteAppidSet.add(importData["appid"]);	
 						//檢查必填資訊
 						if(importData["startTime"]==undefined ||importData["appid"]==undefined){
-							row[9]="必要資訊未輸入";
+							row[9]+="走期資訊未填入。";
 							parametersCheck = false;
 						}
 						//檢查走期
 						else if(importData["startTime"]!=null&& importData["startTime"]>importData["endTime"] ){
-							row[9]="走期設定錯誤";
+							row[9]+="走期設定錯誤。";
 							parametersCheck = false;
 						}
+						
 						
 						importDataArray.push(importData);
 					}
@@ -174,8 +175,9 @@
 					const asyncUpdate = async()=>{
 						//先刪除
 						let deletePromise = await new Promise((promise_reslove,promise_reject)=>{
-								$.post(extappInterlinkApi,
+								$.post("../apiProxy/VSM/vsmApiRedirect.php",
 									{
+										"redirectUrl":extappInterlinkApi,
 										"action":"deleteExtLinkByAppidBatch",
 										"appids":Array.from(this.deleteAppidSet),
 									},
@@ -194,8 +196,9 @@
 						let savePromises = await Promise.all(
 							this.ajaxPostInfo.map(
 								(postInfo,i)=>(new Promise((promise_reslove,promise_reject)=>{
-									$.post(extappInterlinkApi,
+									$.post("../apiProxy/VSM/vsmApiRedirect.php",
 										{
+											"redirectUrl":extappInterlinkApi,
 											"action":"updateOrInsertExtLink",
 											"data":postInfo,
 										},

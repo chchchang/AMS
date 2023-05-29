@@ -22,8 +22,7 @@ class WebConfig{
 			{value:"netflixPage",text:"NETFLIX"}
 		],	
 	}
-	static SET_EXTAPP_LINK_FOR_AMS = WebConfig.VSM_IP+"api/ams/setExtappInterLink.php";
-	static GET_EXTAPP_LINK_FOR_AMS = WebConfig.VSM_IP+"api/ams/getExtappInterLink.php";
+	static SET_EXTAPP_LINK_FOR_AMS = WebConfig.VSM_IP+"api/ams/extappInterLink/setExtappInterLink.php";
 	static HOURS_COMBINATION={
 		全日:[0,1,2,3,4,5,6,7,8,9,10,11,12,13,14,15,16,17,18,19,20,21,22,23],
 		全空:[],
