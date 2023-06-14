@@ -1,9 +1,11 @@
 <?php
 require_once dirname(__FILE__)."/../../../tool/MyDB.php";
 require_once dirname(__FILE__)."/TransactionRepository.php";
-/*$test = new PlayListRepository();
-print_r("test");
-print_r($test->getPlaylistRecord(["transaction_id"=>47402]));*/
+$test = new PlayListRepository();
+//print_r("test");
+//print_r($test->genPlaylistRecord(158,true));
+//$test->begin_transaction();
+//print_r($test->fixPlaylistSeconds(157));
 /***
  */
 class PlayListRepository
@@ -56,6 +58,8 @@ class PlayListRepository
             $overlapCh = $overlapCh==null?$tinfo["channelId"]:array_intersect($overlapCh,$tinfo["channelId"]);
         }
         $overlapHour = $this->fixLeadingZero($overlapHour);
+
+        //若有設定要更新資料，update db
         if($triggerUpdate){
             $sql = "update barker_playlist set overlap_start_time=?,overlap_end_time=?,overlap_hours=?,overlap_channel_id=? WHERE playlist_id =?";
 		    $result = $this->mydb->execute($sql,"ssssi",$overlapDateStart,$overlapDateEnd,implode(",",$overlapHour),implode(",",$overlapCh),$playlist_id);
@@ -68,7 +72,7 @@ class PlayListRepository
             "overlapDateStart"=>$overlapDateStart,
             "overlapDateEnd"=>$overlapDateEnd,
             "overlapHour"=>$overlapHour,
-            "overlapChannelId"=>$overlapCh
+            "overlapChannelId"=>$overlapCh,
         ];
     }
 
@@ -91,18 +95,20 @@ class PlayListRepository
             //repeat_times==-1 =>重複播放次數已達標可跳過
             if($records[$i++]["repeat_times"]==-1)
                 continue;
-            array_push($playlistRecord,array(
-                "playlist_id"=>$records[$i]["playlist_id"],
-                "transaction_id"=>$records[$i]["transaction_id"],
-                "offset"=>$offset++,
-                "start_seconds"=>$secondsCount,
-            ));
             $tid = $records[$i]["transaction_id"];
             if(!isset($this->transactionSecondsHash[$tid])){
                 $minfo = $this->TransactionRepository->getTransactionMaterialInfo($tid);
                 $this->transactionSecondsHash[$tid]=array_pop($minfo)["影片素材秒數"];
             }
-            $secondsCount+=$this->transactionSecondsHash[$tid];
+            $endSeconds=$secondsCount+$this->transactionSecondsHash[$tid];
+            array_push($playlistRecord,array(
+                "playlist_id"=>$records[$i]["playlist_id"],
+                "transaction_id"=>$records[$i]["transaction_id"],
+                "offset"=>$offset++,
+                "start_seconds"=>$secondsCount,
+                "end_seconds"=>$endSeconds,
+            ));
+            $secondsCount=$endSeconds;
             if($records[$i++]["repeat_times"]!=0){
                 if($records[$i++]["repeat_times"]==1){
                     $records[$i++]["repeat_times"]=-1;
@@ -114,7 +120,7 @@ class PlayListRepository
         }
         
         if($triggerUpdate){
-            if(!$this->setPlaylistRecord($playlist_id,$records))
+            if(!$this->setPlaylistRecord($playlist_id,$playlistRecord))
                 return false;
         }
         return $playlistRecord;
@@ -123,7 +129,8 @@ class PlayListRepository
     /***
     重新計算playlistRecord的開始秒數，並補滿到3600秒(超過秒數的影片將被移除)
      */
-    public function fixPlaylistRecordSeconds($playlist_id,$triggerUpdate=false){
+    public function fixPlaylistSeconds($playlist_id,$triggerUpdate=true){
+        //修正playlist_records
         $sql = "SELECT * FROM `barker_playlist_record` WHERE `playlist_id`=? order by offset";
         $records = array_values($this->mydb->getResultArray($sql,"i",$playlist_id));
         $secondsCount = 0;
@@ -131,20 +138,22 @@ class PlayListRepository
         $offset = 0;
         $i=0;
         $n = count($records);
-        while($secondsCount<3600){
+        while($n!=0 && $secondsCount<3600){
             $i %= $n;
-            array_push($playlistRecord,array(
-                "playlist_id"=>$records[$i]["playlist_id"],
-                "transaction_id"=>$records[$i]["transaction_id"],
-                "offset"=>$offset++,
-                "start_seconds"=>$secondsCount,
-            ));
             $tid = $records[$i]["transaction_id"];
             if(!isset($this->transactionSecondsHash[$tid])){
                 $minfo = $this->TransactionRepository->getTransactionMaterialInfo($tid);
                 $this->transactionSecondsHash[$tid]=array_pop($minfo)["影片素材秒數"];
             }
-            $secondsCount+=$this->transactionSecondsHash[$tid];
+            $endSeconds = $secondsCount+$this->transactionSecondsHash[$tid];
+            array_push($playlistRecord,array(
+                "playlist_id"=>$records[$i]["playlist_id"],
+                "transaction_id"=>$records[$i]["transaction_id"],
+                "offset"=>$offset++,
+                "start_seconds"=>$secondsCount,
+                "end_seconds"=>$endSeconds
+            ));
+            $secondsCount=$endSeconds;
             $i++;
         }
         if($triggerUpdate){
@@ -152,7 +161,32 @@ class PlayListRepository
                 return false;   
             }
         }
-        return $playlistRecord;
+        //修正playlist_template
+        $sql = "SELECT * FROM `barker_playlist_template` WHERE `playlist_id`=? order by offset";
+        $playlistTemplate = array_values($this->mydb->getResultArray($sql,"i",$playlist_id));
+        $secondsCount = 0;
+        $offset = 0;
+        foreach($playlistTemplate as $i=>$template){
+            //廣告單號為-1為標記點，不須處理
+            if($template["transaction_id"] == -1)
+                continue;
+            
+            $tid = $template["transaction_id"];
+            if(!isset($this->transactionSecondsHash[$tid])){
+                $minfo = $this->TransactionRepository->getTransactionMaterialInfo($tid);
+                $this->transactionSecondsHash[$tid]=array_pop($minfo)["影片素材秒數"];
+            }
+            $playlistTemplate[$i]["start_seconds"] = $secondsCount;
+            $playlistTemplate[$i]["end_seconds"] = $secondsCount+$this->transactionSecondsHash[$tid];
+            $secondsCount=$playlistTemplate[$i]["end_seconds"];
+        }      
+        
+        if($triggerUpdate){
+            if(!$this->setPlaylistTemplate($playlist_id,$playlistTemplate)){
+                return false;   
+            }
+        }
+        return ["template"=>$playlistTemplate,"records"=>$playlistRecord];
     }
     
 
@@ -186,7 +220,7 @@ class PlayListRepository
     /**
 	*設定palylist record，會先刪除現有的資料再重新匯入
 	**/
-	public function setPlaylistRecord($playlist_id,$record){
+	public function setPlaylistRecord($playlist_id,$records){
 		//先刪除現有palylist
 		$sql = "delete from barker_playlist_record WHERE playlist_id =? ";
 		$result = $this->mydb->execute($sql,"i",$playlist_id);
@@ -194,21 +228,22 @@ class PlayListRepository
 			return false;
 		}
 		//新增playlist record
-		$valuesTemplate = "(?,?,?,?)";
+		$valuesTemplate = "(?,?,?,?,?)";
 		$valuesStringArray = array();
-		$sql = "insert into barker_playlist_record (playlist_id,transaction_id,offset,start_seconds) VALUES ";
-		$typeStirngTemplate="iiii";
+		$sql = "insert into barker_playlist_record (playlist_id,transaction_id,offset,start_seconds,end_seconds) VALUES ";
+		$typeStirngTemplate="iiiii";
 		$parameter = array();
 		$typeStirng="";
 		$parameter[]=&$sql;
 		$parameter[]=&$typeStirng;
-		foreach($record as $id=>$record){
+		foreach($records as $id=>$record){
 			$valuesStringArray[]=$valuesTemplate;
 			$typeStirng.=$typeStirngTemplate;
 			$parameter[]=$playlist_id;
 			$parameter[]=$record["transaction_id"];
 			$parameter[]=$id;
 			$parameter[]=$record["start_seconds"];
+            $parameter[]=$record["end_seconds"];
 		}
 		$sql.= implode(",",$valuesStringArray);
 		$result=call_user_func_array(array($this->mydb,"execute"),$parameter);
@@ -229,10 +264,10 @@ class PlayListRepository
 			return false;
 		}
 		//新增playlist template
-		$valuesTemplate = "(?,?,?,?)";
+		$valuesTemplate = "(?,?,?,?,?,?)";
 		$valuesStringArray = array();
-		$sql = "insert into barker_playlist_template (playlist_id,transaction_id,offset,repeat_times) VALUES ";
-		$typeStirngTemplate="iiii";
+		$sql = "insert into barker_playlist_template (playlist_id,transaction_id,offset,repeat_times,start_seconds,end_seconds) VALUES ";
+		$typeStirngTemplate="iiiiii";
 		$parameter = array();
 		$typeStirng="";
 		$parameter[]=&$sql;
@@ -244,6 +279,8 @@ class PlayListRepository
 			$parameter[]=$record["transaction_id"];
 			$parameter[]=$id;
 			$parameter[]=$record["repeat_times"];
+            $parameter[]=$record["start_seconds"];
+            $parameter[]=$record["end_seconds"];
 		}
 		$sql.= implode(",",$valuesStringArray);
 		$result=call_user_func_array(array($this->mydb,"execute"),$parameter);
@@ -476,6 +513,30 @@ class PlayListRepository
 			return false;
 		}
 		return $result;
+    }
+
+    /**
+    * 取的最後一筆record結束的秒數
+    */
+    public function getLastRecordEndSeconds($playlist_id){
+        $sql="select MAX(end_seconds) as max from barker_playlist_record where playlist_id =? ";
+		$result = $this->mydb->getResultArray($sql,"i",$playlist_id);
+		if(!$result){
+			return false;
+		}
+		return $result[0]["max"];
+    }
+
+    /**
+    * 取的最後一筆template開始的秒數
+    */
+    public function getLastTemplateStartSeconds($playlist_id){
+        $sql="select MAX(start_seconds) as max from barker_playlist_template where playlist_id =? ";
+		$result = $this->mydb->getResultArray($sql,"i",$playlist_id);
+		if(!$result){
+			return false;
+		}
+		return $result[0]["max"];
     }
 
 }

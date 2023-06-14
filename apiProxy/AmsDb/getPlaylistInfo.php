@@ -22,6 +22,8 @@
 		foreach($result as $i=>$row){
 			if(!isset($palylistMemo[$row["playlist_id"]])){
 				$palylistMemo[$row["playlist_id"]] = $playListRepository->getPlaylistDataByID($row["playlist_id"]);
+				$palylistMemo[$row["playlist_id"]]["lastRecordEndSeconds"]=$playListRepository->getLastRecordEndSeconds($row["playlist_id"]);
+				$palylistMemo[$row["playlist_id"]]["lastTemplateStartSeconds"]=$playListRepository->getLastTemplateStartSeconds($row["playlist_id"]);
 			}
 			$result[$i]["palylistInfo"]=$palylistMemo[$row["playlist_id"]];
 		}

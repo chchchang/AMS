@@ -140,7 +140,7 @@ class ReplaceOrderInPlaylist
                 return false;
             }
             //修正playlistRecord秒數
-            if(!$this->playListRepository->fixPlaylistRecordSeconds($newPlayListId,true)){
+            if(!$this->playListRepository->fixPlaylistSeconds($newPlayListId,true)){
                 $this->setExecuteMessage(false,"計算實際播表秒數失敗");
                 return false;
             }

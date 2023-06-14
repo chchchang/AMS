@@ -41,6 +41,11 @@
 		if(!$PlayListRepository->setPlaylistSchedule($records)){
 			setMessageAndExit(false,"單一時段播表設定失敗");
 		}
+
+		//更新重疊走期等資訊
+		if(!$PlayListRepository->caculateOverlapPeriod($newPlayListId,true)){
+			setMessageAndExit(false,"計算重疊走期資訊失敗");
+		}
 	
 		setMessageAndExit(true,"單一時段播表設定成功");
 	}
@@ -72,6 +77,12 @@
 		if(!$PlayListRepository->setPlaylistRecord($postvar["playlist_id"],$postvar["playlistRecord"])){
 			setMessageAndExit(false,"設定實際播表失敗");
 		}
+
+		//更新重疊走期等資訊
+		if(!$PlayListRepository->caculateOverlapPeriod($postvar["playlist_id"],true)){
+			setMessageAndExit(false,"計算重疊走期資訊失敗");
+		}
+		
 		
 		setMessageAndExit(true,"播表更新成功，且使用相同播表的時段也已同步更新。",$warningMessage);
 	}
