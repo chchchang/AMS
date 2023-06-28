@@ -14,6 +14,27 @@
 		$typeStr = 'i';
 		array_push($paras,$_POST["版位識別碼"]);
 	}
+	else if(isset($_POST["channel_id"])){
+		$positionSql="SELECT P.版位識別碼
+			FROM 版位 P
+				JOIN 版位 版位類型 ON P.上層版位識別碼 = 版位類型.版位識別碼 AND 版位類型.版位名稱 = 'barker頻道'
+				JOIN 版位其他參數 ON P.版位識別碼 = 版位其他參數.版位識別碼 AND 版位其他參數名稱 = 'channel_id'
+			WHERE 版位其他參數預設值 = ?
+		";
+		$positionData = $my->getResultArray($positionSql,"i",$_POST["channel_id"]);
+		
+		if(is_array($positionData)&&isset($positionData[0]["版位識別碼"])){
+			$sql.="
+				FROM
+				託播單 JOIN 託播單投放版位 ON 託播單.託播單識別碼 = 託播單投放版位.託播單識別碼 AND 託播單投放版位.版位識別碼 = ? AND 託播單投放版位.ENABLE = 1
+			";
+			$typeStr = 'i';
+			array_push($paras,$positionData[0]["版位識別碼"]);
+		}
+		else{
+			exit(json_encode([],JSON_UNESCAPED_UNICODE));
+		}
+	}
 	else{
 		$sql.="
 			FROM

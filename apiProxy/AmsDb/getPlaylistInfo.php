@@ -18,14 +18,16 @@
 		$types = "iss";
 		$paras = array($post["channel_id"],$post["startDate"],$post["endDate"]);
 		$result = $my->getResultArray($sql,$types,...$paras);
-		$palylistMemo = [];
+		$playlistMemo = [];
 		foreach($result as $i=>$row){
-			if(!isset($palylistMemo[$row["playlist_id"]])){
-				$palylistMemo[$row["playlist_id"]] = $playListRepository->getPlaylistDataByID($row["playlist_id"]);
-				$palylistMemo[$row["playlist_id"]]["lastRecordEndSeconds"]=$playListRepository->getLastRecordEndSeconds($row["playlist_id"]);
-				$palylistMemo[$row["playlist_id"]]["lastTemplateStartSeconds"]=$playListRepository->getLastTemplateStartSeconds($row["playlist_id"]);
+			if(!isset($playlistMemo[$row["playlist_id"]])){
+				$lastTemplateStartAndEndSeconds =$playListRepository->getLastTemplateStartAndEndSeconds($row["playlist_id"]);
+				$playlistMemo[$row["playlist_id"]] = $playListRepository->getPlaylistDataByID($row["playlist_id"]);
+				$playlistMemo[$row["playlist_id"]]["lastRecordEndSeconds"]=$playListRepository->getLastRecordEndSeconds($row["playlist_id"]);
+				$playlistMemo[$row["playlist_id"]]["lastTemplateStartSeconds"]=$lastTemplateStartAndEndSeconds["start_seconds"];
+				$playlistMemo[$row["playlist_id"]]["lastTemplateEndSeconds"]=$lastTemplateStartAndEndSeconds["end_seconds"];
 			}
-			$result[$i]["palylistInfo"]=$palylistMemo[$row["playlist_id"]];
+			$result[$i]["playlistInfo"]=$playlistMemo[$row["playlist_id"]];
 		}
 		exit(json_encode($result,JSON_UNESCAPED_UNICODE));
 	}
@@ -90,7 +92,7 @@
 		//取的託播單播放時間
 		$transactionMaterialInfo = $transactionRepository->getTransactionMaterialInfo($potvar["transaction_id"]);
 		$materialSeconds=$transactionMaterialInfo[0]["影片素材秒數"];
-		//依照palyList_record的palylist_id查看在palylist_schedule中被那些頻道時段使用
+		//依照playList_record的playlist_id查看在playlist_schedule中被那些頻道時段使用
 		
 		$playlistScheduleHash=[];
 		$recordsWithTransation=[];

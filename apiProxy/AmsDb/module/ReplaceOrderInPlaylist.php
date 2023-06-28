@@ -112,7 +112,7 @@ class ReplaceOrderInPlaylist
             }
                 
             //拆單playlist資料
-            //先新增palylist
+            //先新增playlist
             $newPlayListId = $this->playListRepository->insertPlaylist(
                 $pInfo["basic"]["overlap_start_time"],
                 $pInfo["basic"]["overlap_end_time"],
@@ -146,7 +146,7 @@ class ReplaceOrderInPlaylist
             }
             $playlistIdMap[$pInfo["basic"]["playlist_id"]]=$newPlayListId;
         }
-        $playlistSchedule = $this->replacePalylistIdInSchedule($playlistIdMap,$playlistSchedule);
+        $playlistSchedule = $this->replaceplaylistIdInSchedule($playlistIdMap,$playlistSchedule);
         if(!$this->playListRepository->setPlaylistSchedule($playlistSchedule)){
             $this->setExecuteMessage(false,"更新播表排程失敗");
             return false;
@@ -173,9 +173,9 @@ class ReplaceOrderInPlaylist
     }
 
     /**
-     * 把palylistSechdule中的palyslist 更新成拆單後的playlist
+     * 把playlistSechdule中的playslist 更新成拆單後的playlist
      */
-    private function replacePalylistIdInSchedule($playlistIdMap,$playlistSchedule){
+    private function replaceplaylistIdInSchedule($playlistIdMap,$playlistSchedule){
         foreach($playlistSchedule as $i=>$sch){
             if(isset($playlistIdMap[$sch["playlist_id"]]))
                 $playlistSchedule[$i]["playlist_id"] = $playlistIdMap[$sch["playlist_id"]];

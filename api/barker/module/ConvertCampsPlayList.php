@@ -36,7 +36,7 @@ print_r($exect->getData($date,$channel_ids,$hours));*/
 class ConverCampsPlaylist{
     private $mydb;
     private $logWriter;
-    private $palyListApiURL;
+    private $playListApiURL;
     private $date;
     private $transHash;//儲存CAMPS編號和託播單號的對照表{<CAMPS編號>=><託播單單號>}
     private $filenameHash;//儲存託播單號和素材名稱的對照表{託播單號=>素材名稱}
@@ -80,8 +80,8 @@ class ConverCampsPlaylist{
             $this->logWriter = $logger;
         }
 
-        //$this->palyListApiURL = "http://localhost/AMS/cronjob/convertCampsPlayList/test.php";//dev
-        $this->palyListApiURL = Config::$CAMPS_API["playlist"];//pro
+        //$this->playListApiURL = "http://localhost/AMS/cronjob/convertCampsPlayList/test.php";//dev
+        $this->playListApiURL = Config::$CAMPS_API["playlist"];//pro
         $this->message ="";
         $this->sftpInfo=BarkerConfig::$sftpInfo;
         $this->remotePlaylistFolder = BarkerConfig::$remotePlaylistFolder;
@@ -204,7 +204,7 @@ class ConverCampsPlaylist{
 
     private function getPlaylistFormCamps(){
         //先利用API取得CAMPS playlist資料
-        $url = $this->palyListApiURL."?channel_id=".$this->channel_id."&&date=".$this->date;
+        $url = $this->playListApiURL."?channel_id=".$this->channel_id."&&date=".$this->date;
         if($this->hours!="all")
             $url .= "&&hour=$this->hours";
 

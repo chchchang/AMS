@@ -1,23 +1,19 @@
 <?php
-	/**
-	*對barkerCue資料表操作
-	**/
 	require_once dirname(__FILE__)."/../../../tool/MyDB.php";
 	require_once dirname(__FILE__)."/../module/PlayListRepository.php";
 	require_once dirname(__FILE__)."/../module/TransactionRepository.php";
 	$dateRange = $_POST["dateRange"];
 	$channel = $_POST["channel"];
-
 	$my=new MyDB(true);
 	$playListRepository = new PlayListRepository($my);
 	$transactionRepository = new TransactionRepository($my);
 	$searchTerm = ["dateRange"=>$dateRange,"channel"=>$channel];
-	$palylistIds = $playListRepository->getDistinctPlayListIDInRange($searchTerm);
+	$playlistIds = $playListRepository->getDistinctPlayListIDInRange($searchTerm);
 	
 	$return = [];
 	$playListMemo = [];
 	$transactionMemo = [];
-	foreach($palylistIds as $pid){
+	foreach($playlistIds as $pid){
 		if(isset($playListMemo[$pid]))
 			continue;
 		$transactions = $playListRepository->getPlaylistRecord(["playlist_id"=>$pid]);
@@ -39,6 +35,5 @@
 			$transactionMemo[$tid] = true;
 		}
 	}
-	
-	echo json_encode($return,JSON_UNESCAPED_UNICODE);
+	exit(json_encode($return,JSON_UNESCAPED_UNICODE));
 ?>

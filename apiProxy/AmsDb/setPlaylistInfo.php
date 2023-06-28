@@ -19,7 +19,7 @@
 		foreach($postvar["overlapHour"] as $id => $h){
 			$postvar["overlapHour"][$id]=str_pad($h, 2, '0', STR_PAD_LEFT);
 		}
-		//先新增palylist
+		//先新增playlist
 		$hours = implode(",",$postvar["overlapHour"]);
 		$cids = implode(",",$postvar["overlapChannelId"]);
 		
@@ -97,7 +97,7 @@
 		}
 		
 		
-		//先新增palylist		
+		//先新增playlist		
 		$newPlayListId = $PlayListRepository->insertPlaylist(
 			$playlistInfo["basic"]["overlap_start_time"],
 			$playlistInfo["basic"]["overlap_end_time"],
@@ -233,7 +233,7 @@
 	*比較playtemplate和一小時播表是否相同
 	*如果一小時播表只是不斷重複template的順序則視為相同
 	**/
-	function compareTemplateWithPalylist($template,$playlist){
+	function compareTemplateWithPlaylist($template,$playlist){
 		$n = count($template);
 		foreach($playlist as $id=>$record){
 			if($record["transaction_id"]!=$template[$id%$n]["transaction_id"])

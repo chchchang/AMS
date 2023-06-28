@@ -218,10 +218,10 @@ class PlayListRepository
     }
 
     /**
-	*設定palylist record，會先刪除現有的資料再重新匯入
+	*設定playlist record，會先刪除現有的資料再重新匯入
 	**/
 	public function setPlaylistRecord($playlist_id,$records){
-		//先刪除現有palylist
+		//先刪除現有playlist
 		$sql = "delete from barker_playlist_record WHERE playlist_id =? ";
 		$result = $this->mydb->execute($sql,"i",$playlist_id);
 		if(!$result){
@@ -254,10 +254,10 @@ class PlayListRepository
 	}
 	
 	/**
-	*設定palylist template，會先刪除現有的資料再重新匯入
+	*設定playlist template，會先刪除現有的資料再重新匯入
 	**/
 	public function setPlaylistTemplate($playlist_id,$template){
-		//先刪除現有palylist
+		//先刪除現有playlist
 		$sql = "delete from barker_playlist_template WHERE playlist_id =? ";
 		$result = $this->mydb->execute($sql,"i",$playlist_id);
 		if(!$result){
@@ -304,7 +304,7 @@ class PlayListRepository
 		return $result[0]["count"]==0;
 	}
 	/**
-	*取得palylist資訊
+	*取得playlist資訊
 	*/
 	public function getPlaylistDataByID($playlistId){
 		$sql="select * from barker_playlist where playlist_id =?";
@@ -365,7 +365,7 @@ class PlayListRepository
         if(!$playlistInfo["template"] =$this->getPlaylistTemplate($playlistId)){
             return false;
         }
-        if(!$playlistInfo["record"] =$this->getPlaylistRecord(["palylist_id"=>$playlistId])){
+        if(!$playlistInfo["record"] =$this->getPlaylistRecord(["playlist_id"=>$playlistId])){
             return false;
         }
         return $playlistInfo;
@@ -504,7 +504,7 @@ class PlayListRepository
     }
 
     /**
-    * 查詢所有有使用特定託播單號的palylist_id
+    * 查詢所有有使用特定託播單號的playlist_id
     */
     public function getDistinctPlaylistIdByTransactionId($transactionId){
         $sql="select distinct playlist_id from barker_playlist_template where transaction_id =? ";
@@ -530,14 +530,15 @@ class PlayListRepository
     /**
     * 取的最後一筆template開始的秒數
     */
-    public function getLastTemplateStartSeconds($playlist_id){
-        $sql="select MAX(start_seconds) as max from barker_playlist_template where playlist_id =? ";
+    public function getLastTemplateStartAndEndSeconds($playlist_id){
+        $sql="select MAX(start_seconds) as smax,MAX(end_seconds) as emax from barker_playlist_template where playlist_id =? ";
 		$result = $this->mydb->getResultArray($sql,"i",$playlist_id);
 		if(!$result){
 			return false;
 		}
-		return $result[0]["max"];
+		return ["start_seconds"=>$result[0]["smax"],"end_seconds"=>$result[0]["emax"]];
     }
+
 
 }
 

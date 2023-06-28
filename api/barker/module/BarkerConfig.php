@@ -21,7 +21,7 @@ class BarkerConfig{
     //public static $remotePlaylistFolder = "barkertest/JSON";//pro
 
     public static $doneMaterialFolder = "material_done";
-    public static $donePlaylistFolder = "palylist_data_done";
+    public static $donePlaylistFolder = "playlist_data_done";
 
 }
 ?>
