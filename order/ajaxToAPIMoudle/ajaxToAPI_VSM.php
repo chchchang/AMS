@@ -162,10 +162,7 @@
 			
 			$action = 'sendOrder';
 			precancelOrder_VSM($action,$orderId);
-			if(sendOrder_VSM_batch($action,$bypostOrder,$orderId))
-				changeOrderSate('送出',array($orderId));
-			else
-				exit(json_encode(array("success"=>false,"message"=>'託播單送出失敗 ','id'=>$orderId),JSON_UNESCAPED_UNICODE));
+			sendToVsm($action,$bypostOrder,$orderId);
 		}
 		
 		if($ptn == '單一平台barker_vod'){
@@ -234,10 +231,7 @@
 			}
 			$action = 'sendOrder';
 			precancelOrder_VSM($action,$orderId);
-			if(sendOrder_VSM_batch($action,$bypostOrder,$orderId))
-				changeOrderSate('送出',array($orderId));
-			else
-				exit(json_encode(array("success"=>false,"message"=>'託播單送出失敗 ','id'=>$orderId),JSON_UNESCAPED_UNICODE));
+			sendToVsm($action,$bypostOrder,$orderId);
 		}
 		
 		if($ptn == '單一平台EPG'){
@@ -290,22 +284,25 @@
 					]
 				];
 				if(count($bypostOrder)>=20){
-					if(!sendOrder_VSM_batch("insertAdTargetRelationOnly",$bypostOrder,$orderId,"S")){
-						exit(json_encode(array("success"=>false,"message"=>'託播單送出失敗 ','id'=>$orderId),JSON_UNESCAPED_UNICODE));
+					try{
+						sendOrder_VSM_batch("insertAdTargetRelationOnly",$bypostOrder,$orderId,"S");
+						sendOrder_VSM_batch($action,$bypostOrder,$orderId);
+						changeOrderSate('送出',array($orderId));
+					}catch(Exception $e){
+						exit(json_encode(array("success"=>false,"message"=>'託播單送出失敗:'.$e->getMessage(),'id'=>$orderId),JSON_UNESCAPED_UNICODE));
 					}
-					if(!sendOrder_VSM_batch($action,$bypostOrder,$orderId)){
-						exit(json_encode(array("success"=>false,"message"=>'託播單送出失敗 ','id'=>$orderId),JSON_UNESCAPED_UNICODE));
-					}
+
 					$bypostOrder = [];
 				}
 			}
 			
 			if(count($bypostOrder)!=0){
-				if(!sendOrder_VSM_batch("insertAdTargetRelationOnly",$bypostOrder,$orderId,"S")){
-					exit(json_encode(array("success"=>false,"message"=>'託播單送出失敗 ','id'=>$orderId),JSON_UNESCAPED_UNICODE));
-				}
-				if(!sendOrder_VSM_batch($action,$bypostOrder,$orderId)){
-					exit(json_encode(array("success"=>false,"message"=>'託播單送出失敗 ','id'=>$orderId),JSON_UNESCAPED_UNICODE));
+				try{
+					sendOrder_VSM_batch("insertAdTargetRelationOnly",$bypostOrder,$orderId,"S");
+					sendOrder_VSM_batch($action,$bypostOrder,$orderId);
+					changeOrderSate('送出',array($orderId));
+				}catch(Exception $e){
+					exit(json_encode(array("success"=>false,"message"=>'託播單送出失敗:'.$e->getMessage(),'id'=>$orderId),JSON_UNESCAPED_UNICODE));
 				}
 			}
 			changeOrderSate('送出',array($orderId));
@@ -351,10 +348,7 @@
 			}
 			$action ='sendOrder';
 			precancelOrder_VSM($action,$orderId);
-			if(sendOrder_VSM_batch($action,$bypostOrder,$orderId))
-				changeOrderSate('送出',array($orderId));
-			else
-				exit(json_encode(array("success"=>false,"message"=>'託播單送出失敗 ','id'=>$orderId),JSON_UNESCAPED_UNICODE));
+			sendToVsm($action,$bypostOrder,$orderId);
 		}
 		if($ptn == '單一平台background_banner'){
 			//取得素材資訊
@@ -407,10 +401,7 @@
 			}
 			$action = 'sendOrder';
 			precancelOrder_VSM($action,$orderId);
-			if(sendOrder_VSM_batch($action,$bypostOrder,$orderId))
-				changeOrderSate('送出',array($orderId));
-			else
-				exit(json_encode(array("success"=>false,"message"=>'託播單送出失敗 ','id'=>$orderId),JSON_UNESCAPED_UNICODE));
+			sendToVsm($action,$bypostOrder,$orderId);
 		}
 
 		if($ptn == '單一平台advertising_page'){
@@ -521,10 +512,7 @@
 			
 			$action ='sendOrder';
 			precancelOrder_VSM($action,$orderId);
-			if(sendOrder_VSM_batch($action,$bypostOrder,$orderId))
-				changeOrderSate('送出',array($orderId));
-			else
-				exit(json_encode(array("success"=>false,"message"=>'託播單送出失敗 ','id'=>$orderId),JSON_UNESCAPED_UNICODE));
+			sendToVsm($action,$bypostOrder,$orderId);
 		}
 		//20201110 漂浮廣告
 		if($ptn == '單一平台floating_banner'){
@@ -570,14 +558,18 @@
 			}			
 			$action = 'sendOrder';
 			precancelOrder_VSM($action,$orderId);
-			if(sendOrder_VSM_batch($action,$bypostOrder,$orderId))
-				changeOrderSate('送出',array($orderId));
-			else
-				exit(json_encode(array("success"=>false,"message"=>'託播單送出失敗 ','id'=>$orderId),JSON_UNESCAPED_UNICODE));
+			sendToVsm($action,$bypostOrder,$orderId);
 		}
-		
-		
 	
+	}
+
+	function sendToVsm($action,$bypostOrder,$orderId){
+		try{
+			sendOrder_VSM_batch($action,$bypostOrder,$orderId);
+		}catch(Exception $e){
+			exit(json_encode(array("success"=>false,"message"=>'託播單送出失敗:'.$e->getMessage(),'id'=>$orderId),JSON_UNESCAPED_UNICODE));
+		}
+		changeOrderSate('送出',array($orderId));
 	}
 
 	function precancelOrder_VSM($action,$orderId){
@@ -605,10 +597,13 @@
 		}
 		$checkResult = json_decode($apiResult,true);
 		$logger->info('message:'.$checkResult["message"]);
+
 		if($checkResult['success'])
 			return true;
-		else
-			return false;
+		
+		throw new Exception($checkResult["message"]);
+
+		return false;		
 	}
 	
 	function cancelOrder_VSM($orderId){
@@ -672,7 +667,7 @@
 			return false;
 		}
 		curl_close($ch);
-		$logger->error('apiResult:'.$apiResult);
+		$logger->info('apiResult:'.$apiResult);
 		return $apiResult;
 	}
 	
