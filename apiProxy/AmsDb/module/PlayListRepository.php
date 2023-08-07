@@ -178,6 +178,7 @@ class PlayListRepository
             }
             $playlistTemplate[$i]["start_seconds"] = $secondsCount;
             $playlistTemplate[$i]["end_seconds"] = $secondsCount+$this->transactionSecondsHash[$tid];
+            $playlistTemplate[$i]["offset"] = $offset++;
             $secondsCount=$playlistTemplate[$i]["end_seconds"];
         }      
         
@@ -217,6 +218,94 @@ class PlayListRepository
         return true;
     }
 
+    public function replacePlaylistScheduleByPlaylistId($oldPalylistId,$newPlaylistId,$message = null){
+        $sql = "SELECT * FROM barker_playlist_scheduel WHERE playlist_id = ?";
+        $affectedRows = $this->mydb->getResultArray($sql,"i",$oldPalylistId);
+		if(!$affectedRows){
+			throw new RuntimeException("查詢播表歷史紀錄失敗");
+		}
+
+        $sql = "UPDATE barker_playlist_scheduel SET playlist_id = ? WHERE playlist_id = ?";
+        $result = $this->mydb->getResultArray($sql,"ii",$newPlaylistId,$oldPalylistId);
+        if(!$result){
+			throw new RuntimeException("更新播表排程失敗");
+		}
+        
+        forEach($affectedRows as $id => $row){
+            $affectedRows[$id]["playlist_id"]  = $newPlaylistId;
+        }
+        try{
+            $this->setPlaylistScheduleHistory($affectedRows,$message);
+        }
+        catch(Exception $e){
+            throw $e;
+        }
+        return true;
+    }
+
+    /**
+     * 設定playlistSchedule變動紀錄
+     * @param array $historys[
+     *   array [channel_id,playlist_id,date,hour]
+     * ]
+     * @param string $message
+     * @throws RuntimeException
+     * @return boolean
+     */
+    public function setPlaylistScheduleHistory($historys,$message = null){
+        $sql = "INSERT INTO barker_playlist_schedule_history (`channel_id`, `date`, `hour`, `playlist_id`, `message`) VAULES ";
+        $typeStringTemplate = "issis";
+        $typeString = "";
+        $columValues = [];
+        foreach($historys as $row){
+            $typeString .= $typeStringTemplate;
+            $tmp = [
+                "channel_id" => null,
+                "date" => null, 
+                "hour" => null, 
+                "playlist_id" => null
+            ];
+            array_push($columValues, $row["channel_id"], $row["date"], $row["hour"], $row["playlist_id"], $message);
+            if($row["channel_id"]==null || $row["date"]==null || $row["hour"]==null || $row["playlist_id"]==null)
+                throw new Exception("必要參數未指定");
+        }
+
+        $result = $this->mydb->execute($sql,$typeString,...$columValues);
+		if(!$result){
+			throw new Exception("新增播表排程紀錄失敗");
+		}
+        return true;
+    }
+
+    /**
+     * 查詢Playlist歷史紀錄
+     * @param array $searchOpt[channel_id, date, hour, playlist_id, message]
+     * @throws RuntimeException
+     * @return array $historys[
+     *  array [id,channel_id,playlist_id,date,hour,message,	created_time]
+     * ]
+     */
+    public function getPlaylistScheduleHistory($searchOpt){
+        $defaultOpt = [
+            "channel_id" => null, 
+            "date" => null, 
+            "hour" => null, 
+            //"playlist_id" => null, 
+            //"message" => null
+        ];
+        $opt = array_merge($defaultOpt, $searchOpt);
+        if($opt["channel_id"]==null && $opt["date"]==null && $opt["hour"]==null){
+            throw new RuntimeException("請指定要查詢的頻道/日期/時段");
+        }
+
+        $sql = "SELECT * FROM barker_playlist_schedule_history WHERE channel_id = ? AND date = ? AND hour = ?";
+        $result = $this->mydb->getResultArray($sql,"ssss",$opt['channel_id'],$opt['date'],$opt['hour']);
+		if(!$result){
+			throw new RuntimeException("查詢播表歷史紀錄失敗");
+		}
+        return $result;
+    }
+
     /**
 	*設定playlist record，會先刪除現有的資料再重新匯入
 	**/
@@ -236,12 +325,15 @@ class PlayListRepository
 		$typeStirng="";
 		$parameter[]=&$sql;
 		$parameter[]=&$typeStirng;
+        $offset = 0;
 		foreach($records as $id=>$record){
+            if($record == null)
+                continue;
 			$valuesStringArray[]=$valuesTemplate;
 			$typeStirng.=$typeStirngTemplate;
 			$parameter[]=$playlist_id;
 			$parameter[]=$record["transaction_id"];
-			$parameter[]=$id;
+			$parameter[]=$offset++;
 			$parameter[]=$record["start_seconds"];
             $parameter[]=$record["end_seconds"];
 		}
@@ -272,12 +364,15 @@ class PlayListRepository
 		$typeStirng="";
 		$parameter[]=&$sql;
 		$parameter[]=&$typeStirng;
+        $offset = 0;
 		foreach($template as $id=>$record){
+            if($record === null)
+                continue;
 			$valuesStringArray[]=$valuesTemplate;
 			$typeStirng.=$typeStirngTemplate;
 			$parameter[]=$playlist_id;
 			$parameter[]=$record["transaction_id"];
-			$parameter[]=$id;
+			$parameter[]=$offset++;
 			$parameter[]=$record["repeat_times"];
             $parameter[]=$record["start_seconds"];
             $parameter[]=$record["end_seconds"];
@@ -303,6 +398,7 @@ class PlayListRepository
 		}
 		return $result[0]["count"]==0;
 	}
+
 	/**
 	*取得playlist資訊
 	*/
@@ -314,6 +410,7 @@ class PlayListRepository
 		}
 		return $result[0];
 	}
+
     /**
      * 取的playlistTemplate資訊
      */
@@ -325,6 +422,7 @@ class PlayListRepository
 		}
 		return $result;
     }
+
      /**
      * 取的playlistRecord資訊
      */
@@ -353,6 +451,7 @@ class PlayListRepository
 		}
 		return $result;
     }
+
     /**
      * 取的完整playlist資訊，
      * 包含playlist基本資訊、playlistTemplat、playlistRecord
@@ -370,7 +469,8 @@ class PlayListRepository
         }
         return $playlistInfo;
     }
-    public function setPlaylistSchedule($records){
+
+    public function setPlaylistSchedule($records,$message=null){
         //設定playlist schedule
 		$parameter = array();
 		$sql = "insert into barker_playlist_schedule (channel_id,date,hour,playlist_id) VALUES ";
@@ -394,6 +494,12 @@ class PlayListRepository
 		if(!$result){
 			return false;
 		}
+
+        try{
+            $this->setPlaylistScheduleHistory($records,$message);
+        }catch(Exception $e){
+            throw $e;
+        }
         return true;
     }
     /** 

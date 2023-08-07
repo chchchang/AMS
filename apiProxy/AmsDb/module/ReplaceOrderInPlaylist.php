@@ -37,25 +37,29 @@ class ReplaceOrderInPlaylist
     }
 
     public  function replaceOrderInPlaylist($dateRange,$channel,$hour,$originalTransactionId,$newTransactionId,$offset=0,$interval=0) {
-        $playlistSchedule=$this->playListRepository->getPlaylistSechdule(["dateRange"=>$dateRange,"channel_id"=>$channel,"hour"=>$hour]);
-		$repalceOrderData = $this->transactionRepository->getTransactionBasicInfo($newTransactionId);
+        $playlistSchedule=$this->playListRepository->getPlaylistSechdule(["dateRange"=>$dateRange,"channel_id"=>$channel,"hour"=>$hour]);        
         if(count($playlistSchedule)==0){
             $this->setExecuteMessage(false,"沒有符合條件的播表可取代");
             return false;
         }
-        //檢查走期
-        $startDateTime = explode(" ",$repalceOrderData["廣告期間開始時間"]);
-        $endDateTime = explode(" ",$repalceOrderData["廣告期間結束時間"]);
-        if($startDateTime[0]>$dateRange[0]||$endDateTime[0]<$dateRange[1]){
-            $this->setExecuteMessage(false,"用來取代的託播單走期無法覆蓋取代日期範圍");
-            return false;
+        if($newTransactionId != "" || $newTransactionId != null)
+        {
+            $repalceOrderData = $this->transactionRepository->getTransactionBasicInfo($newTransactionId);
+            //檢查走期
+            $startDateTime = explode(" ",$repalceOrderData["廣告期間開始時間"]);
+            $endDateTime = explode(" ",$repalceOrderData["廣告期間結束時間"]);
+            if($startDateTime[0]>$dateRange[0]||$endDateTime[0]<$dateRange[1]){
+                $this->setExecuteMessage(false,"用來取代的託播單走期無法覆蓋取代日期範圍");
+                return false;
+            }
+            //檢查頻道是否可涵蓋
+            if(!$this->checkIfChannelValid($newTransactionId,$playlistSchedule)){
+                $this->setExecuteMessage(false,"用來取代的託播單無法涵蓋所選頻道");
+                return false;
+            }    
+            
         }
-        //檢查頻道是否可涵蓋
-        if(!$this->checkIfChannelValid($newTransactionId,$playlistSchedule)){
-            $this->setExecuteMessage(false,"用來取代的託播單無法涵蓋所選頻道");
-            return false;
-        }
-
+       
 		$playlistInfo =[];
 		foreach($playlistSchedule as $i=>$psch){
             //取的playlist完整資訊
@@ -70,36 +74,37 @@ class ReplaceOrderInPlaylist
             //取代託播單資料
             $originalTransactionIdCount=0;
             foreach($playlistInfo[$pid]["record"] as $j=>$template){
-                if($template["transaction_id"]==$originalTransactionId){
+                if($template["transaction_id"] == $originalTransactionId){
                     //有出現要取代的託播單，將這筆資料標記為要拆單
-                    if($playlistInfo[$pid]["action"] ==null){
+                    if($playlistInfo[$pid]["action"] == null){
                         $playlistInfo[$pid]["action"] ="split";
                     }
 
-                    if($offset==0&&$interval==0){
-                        $playlistInfo[$pid]["record"][$j]["transaction_id"]=$newTransactionId;
+                    if($offset==0 && $interval==0){
+                        $this->replaceOrUnsetTransaction($playlistInfo[$pid]["record"][$j],$newTransactionId);
                     }
                     else{
                         if($originalTransactionIdCount>=$offset && ($originalTransactionIdCount-$offset)%($interval+1)==0){
-                            $playlistInfo[$pid]["record"][$j]["transaction_id"]=$newTransactionId;
+                            $this->replaceOrUnsetTransaction($playlistInfo[$pid]["record"][$j],$newTransactionId);
                         }
                     }
                     $originalTransactionIdCount++;
                 }
                 //為了有設定開始取代位置或區間取代的條件，增加repeat_times資料給播表樣版使用
-                $playlistInfo[$pid]["record"][$j]["repeat_times"]=1;
+                if($newTransactionId != null && $newTransactionId != "")
+                    $playlistInfo[$pid]["record"][$j]["repeat_times"]=1;
             }
             if($offset==0&&$interval==0){
                 //如果沒有設定開始取代位置和開始取代區間，直接取代排播樣版中的託播單即可
                 foreach($playlistInfo[$pid]["template"] as $j=>$template){
                     if($template["transaction_id"]==$originalTransactionId){
-                        $playlistInfo[$pid]["template"][$j]["transaction_id"]=$newTransactionId;
+                        $this->replaceOrUnsetTransaction($playlistInfo[$pid]["template"][$j],$newTransactionId);
                     }
                 }
             }
             else{
                 //有設定開始取代位置和開始取代區間，將用實際播表取代排播樣版
-                $playlistInfo[$pid]["template"]=$playlistInfo[$pid]["record"];
+                $playlistInfo[$pid]["template"] = $playlistInfo[$pid]["record"];
             }
 		}
         //開始取代並更新資料庫
@@ -133,17 +138,18 @@ class ReplaceOrderInPlaylist
                 $this->setExecuteMessage(false,"設定實際播表失敗");
                 return false;
             }
+            //修正playlistRecord秒數
+            if(!$this->playListRepository->fixPlaylistSeconds($newPlayListId,true)){
+                $this->setExecuteMessage(false,"計算實際播表秒數失敗");
+                return false;
+            }
             //更新重疊走期/頻道/時段資訊
             $overlap=$this->playListRepository->caculateOverlapPeriod($newPlayListId,true);
             if(!$overlap){
                 $this->setExecuteMessage(false,"更新重複走期/頻道/時段資訊失敗");
                 return false;
             }
-            //修正playlistRecord秒數
-            if(!$this->playListRepository->fixPlaylistSeconds($newPlayListId,true)){
-                $this->setExecuteMessage(false,"計算實際播表秒數失敗");
-                return false;
-            }
+
             $playlistIdMap[$pInfo["basic"]["playlist_id"]]=$newPlayListId;
         }
         $playlistSchedule = $this->replaceplaylistIdInSchedule($playlistIdMap,$playlistSchedule);
@@ -155,6 +161,14 @@ class ReplaceOrderInPlaylist
         return true;
     }
 
+    private function replaceOrUnsetTransaction(&$origin,$newTransactionId){
+        if($newTransactionId == null || $newTransactionId == ""){
+            $origin = null;
+        }
+        else{
+            $origin["transaction_id"] = $newTransactionId;
+        }
+    }
     /***
      * 檢查要用以取代的託播單是否完整包含要取代的頻道
      */
@@ -187,8 +201,9 @@ class ReplaceOrderInPlaylist
         $this->message = $message;
         if(!$success)
             $this->playListRepository->rollback();
-        else
+        else{
             $this->playListRepository->commit();
+        }
         //exit(json_encode(array("success"=>false,"message"=>$message),JSON_UNESCAPED_UNICODE));
     }
 }
