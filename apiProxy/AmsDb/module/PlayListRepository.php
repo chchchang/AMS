@@ -51,11 +51,11 @@ class PlayListRepository
         $overlapCh = null;
         foreach($tids as $tidrow){
             $tinfo = $this->getTransactionInfo($tidrow["transaction_id"]);
-            $overlapDateStart = $overlapDateStart==""?$tinfo["廣告期間開始時間"]:max($overlapDateStart,$tinfo["廣告期間開始時間"]);
-            $overlapDateEnd = $overlapDateEnd==""?$tinfo["廣告期間結束時間"]:min($overlapDateEnd,$tinfo["廣告期間結束時間"]);
+            $overlapDateStart = $overlapDateStart===""?$tinfo["廣告期間開始時間"]:max($overlapDateStart,$tinfo["廣告期間開始時間"]);
+            $overlapDateEnd = $overlapDateEnd===""?$tinfo["廣告期間結束時間"]:min($overlapDateEnd,$tinfo["廣告期間結束時間"]);
             $hours =  explode(",",$tinfo["廣告可被播出小時時段"]);
-            $overlapHour =$overlapHour==null?$hours:array_intersect($hours,$overlapHour);
-            $overlapCh = $overlapCh==null?$tinfo["channelId"]:array_intersect($overlapCh,$tinfo["channelId"]);
+            $overlapHour =$overlapHour===null?$hours:array_intersect($hours,$overlapHour);
+            $overlapCh = $overlapCh===null?$tinfo["channelId"]:array_intersect($overlapCh,$tinfo["channelId"]);
         }
         $overlapHour = $this->fixLeadingZero($overlapHour);
 
