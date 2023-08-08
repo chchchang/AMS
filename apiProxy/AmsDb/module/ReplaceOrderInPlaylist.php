@@ -153,10 +153,13 @@ class ReplaceOrderInPlaylist
             $playlistIdMap[$pInfo["basic"]["playlist_id"]]=$newPlayListId;
         }
         $playlistSchedule = $this->replaceplaylistIdInSchedule($playlistIdMap,$playlistSchedule);
-        if(!$this->playListRepository->setPlaylistSchedule($playlistSchedule)){
+        try{
+            $this->playListRepository->setPlaylistSchedule($playlistSchedule,isset($_POST["commitMessage"])?$_POST["commitMessage"]:"廣告抽單");
+        }catch(Exception $e){
             $this->setExecuteMessage(false,"更新播表排程失敗");
             return false;
         }
+
         $this->setExecuteMessage(true,"更新播表排程置換成功");
         return true;
     }

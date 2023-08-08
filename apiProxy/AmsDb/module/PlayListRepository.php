@@ -75,7 +75,6 @@ class PlayListRepository
             "overlapChannelId"=>$overlapCh,
         ];
     }
-
     
     /***
      依照playlist template產生playlist record
@@ -218,15 +217,15 @@ class PlayListRepository
         return true;
     }
 
-    public function replacePlaylistScheduleByPlaylistId($oldPalylistId,$newPlaylistId,$message = null){
-        $sql = "SELECT * FROM barker_playlist_scheduel WHERE playlist_id = ?";
+    public function replacePlaylistScheduleByPlaylistId($oldPalylistId,$newPlaylistId,$commitMessage = null){
+        $sql = "SELECT * FROM barker_playlist_schedule WHERE playlist_id = ?";
         $affectedRows = $this->mydb->getResultArray($sql,"i",$oldPalylistId);
 		if(!$affectedRows){
 			throw new RuntimeException("查詢播表歷史紀錄失敗");
 		}
 
-        $sql = "UPDATE barker_playlist_scheduel SET playlist_id = ? WHERE playlist_id = ?";
-        $result = $this->mydb->getResultArray($sql,"ii",$newPlaylistId,$oldPalylistId);
+        $sql = "UPDATE barker_playlist_schedule SET playlist_id = ? WHERE playlist_id = ?";
+        $result = $this->mydb->execute($sql,"ii",$newPlaylistId,$oldPalylistId);
         if(!$result){
 			throw new RuntimeException("更新播表排程失敗");
 		}
@@ -235,7 +234,7 @@ class PlayListRepository
             $affectedRows[$id]["playlist_id"]  = $newPlaylistId;
         }
         try{
-            $this->setPlaylistScheduleHistory($affectedRows,$message);
+            $this->setPlaylistScheduleHistory($affectedRows,$commitMessage);
         }
         catch(Exception $e){
             throw $e;
@@ -248,16 +247,19 @@ class PlayListRepository
      * @param array $historys[
      *   array [channel_id,playlist_id,date,hour]
      * ]
-     * @param string $message
+     * @param string $commitMessage
      * @throws RuntimeException
      * @return boolean
      */
-    public function setPlaylistScheduleHistory($historys,$message = null){
-        $sql = "INSERT INTO barker_playlist_schedule_history (`channel_id`, `date`, `hour`, `playlist_id`, `message`) VAULES ";
+    public function setPlaylistScheduleHistory($historys,$commitMessage = null){
+        $sql = "INSERT INTO barker_playlist_schedule_history (`channel_id`, `date`, `hour`, `playlist_id`, `message`) VALUES ";
+        $valuesStringArray = [];
+        $valuesStringTempalte = "(?,?,?,?,?)";
         $typeStringTemplate = "issis";
         $typeString = "";
         $columValues = [];
         foreach($historys as $row){
+            $valuesStringArray[]=$valuesStringTempalte;
             $typeString .= $typeStringTemplate;
             $tmp = [
                 "channel_id" => null,
@@ -265,11 +267,12 @@ class PlayListRepository
                 "hour" => null, 
                 "playlist_id" => null
             ];
-            array_push($columValues, $row["channel_id"], $row["date"], $row["hour"], $row["playlist_id"], $message);
-            if($row["channel_id"]==null || $row["date"]==null || $row["hour"]==null || $row["playlist_id"]==null)
+            $value = array_merge($tmp,$row);
+            if($value["channel_id"]==null || $value["date"]==null || $value["hour"]==null || $value["playlist_id"]==null)
                 throw new Exception("必要參數未指定");
+            array_push($columValues, $value["channel_id"], $value["date"], $value["hour"], $value["playlist_id"], $commitMessage);
         }
-
+        $sql.= implode(",",$valuesStringArray);
         $result = $this->mydb->execute($sql,$typeString,...$columValues);
 		if(!$result){
 			throw new Exception("新增播表排程紀錄失敗");
@@ -470,7 +473,7 @@ class PlayListRepository
         return $playlistInfo;
     }
 
-    public function setPlaylistSchedule($records,$message=null){
+    public function setPlaylistSchedule($records,$commitMessage=null){
         //設定playlist schedule
 		$parameter = array();
 		$sql = "insert into barker_playlist_schedule (channel_id,date,hour,playlist_id) VALUES ";
@@ -492,11 +495,11 @@ class PlayListRepository
 		$sql.=" ON DUPLICATE KEY UPDATE playlist_id=values(playlist_id),last_update_time=NOW()";
 		$result = $this->mydb->execute(...$parameter);
 		if(!$result){
-			return false;
+			throw new RuntimeException("新增播表失敗");
 		}
 
         try{
-            $this->setPlaylistScheduleHistory($records,$message);
+            $this->setPlaylistScheduleHistory($records,$commitMessage);
         }catch(Exception $e){
             throw $e;
         }

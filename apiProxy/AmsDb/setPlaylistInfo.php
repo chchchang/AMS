@@ -38,9 +38,11 @@
 
 		//新增playlist schedule
 		$records = array(array("channel_id"=>$postvar["channel_id"],"date"=>$postvar["date"],"hour"=>$postvar["hour"],"playlist_id"=>$newPlayListId));
-		if(!$PlayListRepository->setPlaylistSchedule($records)){
-			setMessageAndExit(false,"單一時段播表設定失敗");
-		}
+		try{
+            $PlayListRepository->setPlaylistSchedule($records,isset($_POST["commitMessage"])?$_POST["commitMessage"]:"單時段播表更新");
+        }catch(Exception $e){
+            setMessageAndExit(false,$e->getMessage());
+        }
 
 		//更新重疊走期等資訊
 		if(!$PlayListRepository->caculateOverlapPeriod($newPlayListId,true)){
@@ -64,25 +66,29 @@
 		//更新
 		$hours = implode(",",$postvar["overlapHour"]);
 		$cids = implode(",",$postvar["overlapChannelId"]);
-		
-		if(!$PlayListRepository->updatePlaylist($postvar["overlapStartTime"],$postvar["overlapEndTime"],$hours,$cids,$postvar["playlist_id"])){
-			setMessageAndExit(false,"insert playlist to db fail");
-		}
-		
-		//新增playlistTemplate
-		if(!$PlayListRepository->setPlaylistTemplate($postvar["playlist_id"],$postvar["playlistTemplate"])){
-			setMessageAndExit(false,"設定播表樣板失敗");
-		}
-		//新增playlistRecord
-		if(!$PlayListRepository->setPlaylistRecord($postvar["playlist_id"],$postvar["playlistRecord"])){
-			setMessageAndExit(false,"設定實際播表失敗");
-		}
 
-		//更新重疊走期等資訊
-		if(!$PlayListRepository->caculateOverlapPeriod($postvar["playlist_id"],true)){
-			setMessageAndExit(false,"計算重疊走期資訊失敗");
+		try {
+			//先取得新的playlistId再取代舊得playlist
+			$newPlayListId = $PlayListRepository->insertPlaylist($postvar["overlapStartTime"],$postvar["overlapEndTime"],$hours,$cids);
+			
+			//新增playlistTemplate
+			if(!$PlayListRepository->setPlaylistTemplate($newPlayListId,$postvar["playlistTemplate"])){
+				setMessageAndExit(false,"設定播表樣板失敗");
+			}
+			//新增playlistRecord
+			if(!$PlayListRepository->setPlaylistRecord($newPlayListId,$postvar["playlistRecord"])){
+				setMessageAndExit(false,"設定實際播表失敗");
+			}
+			if(!$PlayListRepository->replacePlaylistScheduleByPlaylistId($postvar["playlist_id"],$newPlayListId,isset($_POST["commitMessage"])?$_POST["commitMessage"]:"全域播表更新")){
+				setMessageAndExit(false,"設定播表樣板失敗");
+			}
+			//更新重疊走期等資訊
+			if(!$PlayListRepository->caculateOverlapPeriod($newPlayListId,true)){
+				setMessageAndExit(false,"計算重疊走期資訊失敗");
+			}
+		}catch(Exception $e){
+			setMessageAndExit(false,$e->getMessage());
 		}
-		
 		
 		setMessageAndExit(true,"播表更新成功，且使用相同播表的時段也已同步更新。",$warningMessage);
 	}
@@ -120,9 +126,11 @@
 		foreach($postvar as $i=>$record){
 			$postvar[$i]["playlist_id"] = $newPlayListId;
 		}
-		if(!$PlayListRepository->setPlaylistSchedule($postvar)){
-			setMessageAndExit(false,"播表播出時間設定失敗");
-		}
+		try{
+            $PlayListRepository->setPlaylistSchedule($postvar,isset($_POST["commitMessage"])?$_POST["commitMessage"]:"拆分使用同播表的時段");
+        }catch(Exception $e){
+            setMessageAndExit(false,$e->getMessage());
+        }
 		setMessageAndExit(true,"播表分離成功");
 		
 	}
@@ -151,9 +159,11 @@
 		}
 
 		$PlayListRepository->begin_transaction();
-		if(!$PlayListRepository->setPlaylistSchedule($records)){
-			setMessageAndExit(false,"insert playlist schedule to db fail");
-		}
+		try{
+            $PlayListRepository->setPlaylistSchedule($records,$_POST["commitMessage"]?$_POST["commitMessage"]:"設定播表");
+        }catch(Exception $e){
+            setMessageAndExit(false,$e->getMessage());
+        }
 		setMessageAndExit(true,"播表複製成功",$warningMessage,$warningMessage);
 	}
 	else if(isset($_POST["cloneWholeDaySchedule"])){
@@ -197,9 +207,12 @@
 				);
 			}
 		}
-		if(!$PlayListRepository->setPlaylistSchedule($cloneSchedule)){
-			setMessageAndExit(false,"整日播表複製失敗");
-		};
+	
+		try{
+            $PlayListRepository->setPlaylistSchedule($cloneSchedule,isset($_POST["commitMessage"])?$_POST["commitMessage"]:"複製整日播表");
+        }catch(Exception $e){
+            setMessageAndExit(false,$e->getMessage());
+        }
 		setMessageAndExit(true,"整日播表複製成功",$warningMessage);
 	}
 	else if(isset($_POST["replaceTransaction"])){
