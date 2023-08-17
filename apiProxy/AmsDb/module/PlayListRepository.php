@@ -302,7 +302,7 @@ class PlayListRepository
         }
 
         $sql = "SELECT * FROM barker_playlist_schedule_history WHERE channel_id = ? AND date = ? AND hour = ?";
-        $result = $this->mydb->getResultArray($sql,"ssss",$opt['channel_id'],$opt['date'],$opt['hour']);
+        $result = $this->mydb->getResultArray($sql,"iss",$opt['channel_id'],$opt['date'],$opt['hour']);
 		if(!$result){
 			throw new RuntimeException("查詢播表歷史紀錄失敗");
 		}

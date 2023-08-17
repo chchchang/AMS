@@ -10,7 +10,7 @@
 	//$_POST[]:delete :刪除資料
 
 	$my=new MyDB(true);
-	$playListRepository = new PlayListRepository($my);
+	$playListRepository = new \PlayListRepository($my);
 	$transactionRepository = new TransactionRepository($my);
 	if(isset($_POST["searchChannelPlaylistSch"])){
 		$post = $_POST["searchChannelPlaylistSch"];
@@ -116,6 +116,11 @@
 		$result = ["success"=>true,"records"=>$recordsWithTransation];
 		exit(json_encode($result,JSON_UNESCAPED_UNICODE));
 	}
+	else if(isset($_POST["getPlaylistScheduleHistory"])){
+		$_POST["getPlaylistScheduleHistory"];
+		$result = getPlaylistScheduleHistory($playListRepository,$_POST["getPlaylistScheduleHistory"]);
+		exit(json_encode($result,JSON_UNESCAPED_UNICODE));
+	}
 	
 	function getOrderData($transaction_id){
 		global $my;
@@ -150,5 +155,15 @@
 			array_push($return["channel_id"],$channelData["channel_id"]);
 		}
 		return $return;
+	}
+
+	function getPlaylistScheduleHistory($playListRepository,$postvar){
+		try{
+			$searchOtp = [ "channel_id" => $postvar["channel_id"], "date" => $postvar["date"], "hour" => $postvar["hour"] ];
+			return $playListRepository->getPlaylistScheduleHistory( $searchOtp );
+		}
+		catch(Exception $e){
+			setMessageAndExit(false,$e->getMessage());
+		}
 	}
 ?>
