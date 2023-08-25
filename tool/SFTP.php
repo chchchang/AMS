@@ -33,15 +33,18 @@
 				(new MyLogger())->info('無法上傳檔案('.$remote.')到FTP server('.$host.')，嘗試建立資料夾('.$path.')');	
 				if($sftp->mkdir($path,true)){
 					if(!$sftp->put($remote, $local, NET_SFTP_LOCAL_FILE)){
-						(new MyLogger())->error('無法上傳檔案('.$remote.')到FTP server('.$host.')');	
+						(new MyLogger())->error('無法上傳檔案('.$remote.')到FTP server('.$host.')');
+						$sftp->disconnect();
 						return false;
 					}
 				}
 				else{
 					(new MyLogger())->error('無法上傳檔案('.$remote.')到FTP server('.$host.')');
+					$sftp->disconnect();
 					return false;
 				}
 			}
+			$sftp->disconnect();
 			return true;
 		}
 		
@@ -63,10 +66,14 @@
 			if(!$sftp=self::connect($host,$username,$password))
 				return false;
 			$result=$sftp->stat($remote);
-			if(($result!==false)&&(count($result)>=1)&&($result['size']>0))
+			if(($result!==false)&&(count($result)>=1)&&($result['size']>0)){
+				$sftp->disconnect();
 				return true;
-			else
+			}
+			else{
+				$sftp->disconnect();
 				return false;
+			}
 		}
 		
 		public static function isAllFile($servers,$remote){
@@ -82,8 +89,10 @@
 			
 			if(!$sftp->get($remote, $local)){
 				(new MyLogger())->error('無法下載FTP server('.$remote.')檔案到('.$local.')。');
+				$sftp->disconnect();
 				return false;
 			}
+			$sftp->disconnect();
 			return true;
 		}
 		
@@ -92,8 +101,10 @@
 				return false;
 			if(!$sftp->delete($remote)){
 				(new MyLogger())->error('無法刪除SFTP server('.$remote.')檔案。');
+				$sftp->disconnect();
 				return false;
 			}
+			$sftp->disconnect();
 			return true;
 		}
 		
@@ -102,8 +113,10 @@
 				return false;
 			if (!$sftp->rename($old_file,$new_file)) {
 				(new MyLogger())->error("更改檔名(".$new_file.")失敗！");
+				$sftp->disconnect();
 				return false;
 			}
+			$sftp->disconnect();
 			return true;
 		}
 		
@@ -117,6 +130,7 @@
 				
 			if(!$sftp->put($processingName, $local, NET_SFTP_LOCAL_FILE)){
 				(new MyLogger())->error('無法上傳檔案('.$processingName.')到SFTP server('.$host.')');
+				$sftp->disconnect();
 				return false;
 			}
 			//先嘗試刪除要更更改的檔名
@@ -125,10 +139,13 @@
 				(new MyLogger())->error("更改檔名($remote)失敗！");
 				if(!$sftp->delete($processingName)){
 					(new MyLogger())->error('無法刪除SFTP server('.$processingName.')檔案。');
+					$sftp->disconnect();
 					return false;
 				}
+				$sftp->disconnect();
 				return false;
 			}
+			$sftp->disconnect();
 			return true;
 		}
 		
@@ -136,7 +153,9 @@
 		public static function getFileModifiedTime($host,$username,$password,$remote){
 			if(!$sftp=self::connect($host,$username,$password))
 				return false;
-			return $sftp->filemtime($remote);
+			$filemtime = $sftp->filemtime($remote);
+			$sftp->disconnect();
+			return $filemtime;
 		}
 	}
 ?>

@@ -1,9 +1,13 @@
 <?php
 date_default_timezone_set("Asia/Taipei");
-require_once '/var/www/html/AMS/tool/MyDB.php';
+$htmlpath ="/var/www/html/AMS/";//pro
+require_once $htmlpath.'tool/MyDB.php';
 //require_once '../../tool/MyDB.php';//dev
-require_once '/var/www/html/AMS/Config.php';
+require_once $htmlpath.'Config.php';
 //require_once '../../Config.php';//dev
+require_once($htmlpath."apiProxy/pointBarker/Utils/ApiConnector.php");
+use AMS\apiProxy\pointBarker\Utilis\ApiConnector;
+
 if(isset($argv[1])){
     $exect = new API($argv[1]);
     $exect->hadle();
@@ -114,6 +118,7 @@ class API{
     private function getPositionData(){
         //取得版位資料
         $this->dolog("getting position data from db");
+        $chids = $this->getChannelData();
 		$sql='	SELECT  版位.版位名稱,channelId參數.版位其他參數預設值 AS channel_id, playoutId參數.版位其他參數預設值 AS playout_id, serCode參數.版位其他參數預設值 AS serCode,版位.版位識別碼
         FROM 版位 
             JOIN 版位 版位類型 ON 版位.上層版位識別碼 = 版位類型.版位識別碼
@@ -123,8 +128,9 @@ class API{
         WHERE 
             版位類型.版位名稱 = "barker頻道"
         ';
-        $sql .= ' and channelId參數.版位其他參數預設值 in ("12","15","2","30","42","49","50","6","7","48","20","3","5","21","13","43","17","16","14","18","36","47","40","1")';
-        //dev
+        //$sql .= ' and channelId參數.版位其他參數預設值 in ("12","15","2","30","42","49","50","6","7","48","20","3","5","21","13","43","17","16","14","18","36","47","40","1")';
+        $sql .= ' and channelId參數.版位其他參數預設值 in ('.implode(",",$chids).')';
+
         if(!$positionData = $this->mydb->getResultArray($sql)){
             $this->dolog("getting position data fail.....");
         }
@@ -134,6 +140,20 @@ class API{
                 $this->positionDataByChannel[$data['channel_id']]=$data;
             }
         }
+    }
+
+    private function getChannelData(){
+        $ApiConnector = new ApiConnector();
+        $url = $ApiConnector->getApiUrlByApiName("getChannelList");
+        $output = $ApiConnector->getDataFromApi($url);
+        $data = json_decode($output,true);
+        $channels = $ApiConnector->filterOfflineChannel($data);
+        $channels = $channels["channels"];
+        $ids = [];
+        foreach($channels as $chdata){
+            array_push($ids,$chdata["channel_id"]);
+        }
+        return $ids;
     }
     
 

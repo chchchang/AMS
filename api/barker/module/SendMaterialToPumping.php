@@ -51,7 +51,7 @@ class SendMaterialToPumping{
 
     public function uploadByMaterialId($mid){
         $sftp = new PutToWatchFolder();
-        $mid = $_POST["素材識別碼"];
+    
         //取的素材原始檔名
         $sql = "select 素材原始檔名 from  素材  where 素材識別碼 = ?";
         $data = $this->mydb->getResultArray($sql,'i',$mid);

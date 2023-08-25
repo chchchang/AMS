@@ -6,50 +6,60 @@
  * 
 */
 $htmlpath ="/var/www/html/AMS/";//pro
-require_once $htmlpath.'Config.php';
+//require_once $htmlpath.'Config.php';
 require_once $htmlpath.'api/barker/module/SendPlayListToPumping.php';
+require_once($htmlpath."apiProxy/pointBarker/Utils/ApiConnector.php");
 
+use AMS\apiProxy\pointBarker\Utilis\ApiConnector;
 
+$logWriter = getLogger();
+$hadler = new SendPlayListToPumping($logWriter);
 
+$date = isset($argv[1])?$argv[1]:date("Y-m-d");
+$hours = isset($argv[2])?$argv[2]:"all";
+$channelData = [];
 
-if(isset($argv[1])){
-	$date = $argv[1];
-}
-if(isset($argv[2])){
-	$channel_id = $argv[2];
+if(isset($argv[3])){
+	$channel_id = $argv[3];
+	array_push($channelData,array("channel_id"=>$channel_id));
 }
 else{
-	exit("請指定頻道");
-}
-if(isset($argv[3])){
-	$hours = $argv[3];
+	$channelData = getChannelData();	
 }
 
-$logFilePath = dirname(__FILE__)."/log/apiLog/sendPlayListToPumping";
-if(!is_dir($logFilePath)){
-	if (!mkdir($logFilePath, 0777, true)) {
-		die('Failed to create log directories...');
+foreach($channelData as $i=>$chdata){
+	$result = $hadler->handle($date,$chdata["channel_id"],$hours);
+	echo $hadler->message."\n";
+	sleep(3);
+	//....todo 此處sleep避免因為過平凡連練導致尚傳失敗 修改sftp tool後拔除sleep
+	//echo $date." ".$chdata["channel_id"]." ".$hours."\n";
+}
+
+
+
+
+function getLogger(){
+	$logFilePath = dirname(__FILE__)."/log/apiLog/sendPlayListToPumping";
+	if(!is_dir($logFilePath)){
+		if (!mkdir($logFilePath, 0777, true)) {
+			die('Failed to create log directories...');
+		}
 	}
+	$logFilePath .="/".date("Y-m-d").".log";
+	$logWriter = fopen($logFilePath,"a");
+	return $logWriter;
 }
-$logFilePath .="/".date("Y-m-d").".log";
-$logWriter = fopen($logFilePath,"a");
-$hadler = new SendPlayListToPumping($logWriter);
-$result = $hadler->handle($date,$channel_id,$hours);
-exit($hadler->message);
-/*$converCampsPlaylist = new ConverCampsPlaylist($logWriter);
-if(!$converCampsPlaylist->hadle($date,$channel_id,$hours))
-	exit("排播表產生失敗");
 
-echo $converCampsPlaylist->message;
+function getChannelData(){
+	$ApiConnector = new ApiConnector();
+	$url = $ApiConnector->getApiUrlByApiName("getChannelList");
+	$output = $ApiConnector->getDataFromApi($url);
+	$data = json_decode($output,true);
+	$channels = $ApiConnector->filterOfflineChannel($data);
+	return $channels["channels"];
+}
 
-$UploadMaterialByPlayList = new UploadMaterialByPlayList($logWriter);
-if(!$UploadMaterialByPlayList->hadle($date,$channel_id,$hours))
-	exit("素材上傳失敗");
 
-echo $UploadMaterialByPlayList->message;
-
-if(!$converCampsPlaylist->uploadToPumping())
-	exit("排播表上傳失敗");*/
 
 ?>
  

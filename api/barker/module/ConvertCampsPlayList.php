@@ -48,23 +48,6 @@ class ConverCampsPlaylist{
     public $message;
     public $playlistFileName;
     public $remotePlaylistFolder;
-    public $channelFromDbList=[
-    13 // 18+專區
-    ,14 // 東森專案
-    ,18 //綜合
-    ,30 // 霹靂
-    ,36 // APUJAN
-    ,40 // 學習
-    ,43 // 測試BK
-    ,49 // 864_SD
-    ,50 // 864_HD
-    ,6 //動漫
-    ,7 //兒童館
-    ,12 //遊戲城
-    ,16 //WBC
-    ,17 //單次計費
-    ,48 //中職專區
-    ];
 
     function __construct($logger = null) {
         $this->mydb=new MyDB(true);
@@ -196,9 +179,6 @@ class ConverCampsPlaylist{
      * 依照channel_id查詢Playlist資料後回傳
      */
     private function getOutputData(){
-        /*if(in_array($this->channel_id,$this->channelFromDbList))
-            return $this->getPlaylistFromDb();
-        return $this->getPlaylistFormCamps();*/
         return $this->getPlaylistFromDb();
     }
 

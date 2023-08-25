@@ -1,5 +1,5 @@
 <?php
-	//namespace AMS\apiProxy\pointBarker;
+	namespace AMS\apiProxy\pointBarker;
 	class Config
 	{
 		public static $BarkerApi = [
