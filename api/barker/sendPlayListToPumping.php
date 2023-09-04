@@ -8,9 +8,9 @@
 */
 
 //require_once '/var/www/html/AMS/Config.php';
-require_once dirname(__FILE__).'/../../Config.php';
-require_once dirname(__FILE__).'/module/SendPlayListToPumping.php';
-require_once dirname(__FILE__).'/module/PutToWatchFolder.php';
+require_once __DIR__.'/../../Config.php';
+require_once __DIR__.'/module/SendPlayListToPumping.php';
+require_once __DIR__.'/module/PutToWatchFolder.php';
 
 
 //exit(json_encode(["seccess"=>true,"message"=>"111\n222111\nsad111\nsae2q111\nadfw46111\n111\n111\n"],JSON_UNESCAPED_UNICODE));//dev
@@ -28,7 +28,7 @@ if(isset($_POST["hours"])){
 	$hours = $_POST["hours"];
 }
 
-$logFilePath = dirname(__FILE__).'/../../'.Config::SECRET_FOLDER."/apiLog/sendPlayListToPumping";
+$logFilePath = __DIR__.'/../../'.Config::SECRET_FOLDER."/apiLog/sendPlayListToPumping";
 if(!is_dir($logFilePath)){
 	if (!mkdir($logFilePath, 0777, true)) {
 		die('Failed to create log directories...');

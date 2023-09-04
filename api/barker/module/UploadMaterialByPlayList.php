@@ -98,27 +98,7 @@ class UploadMaterialByPlayList{
                     $rawFileName = $mid.".".$mtype;
                     $remoteFile = $this->remoteMaterialFolder."/".$fileset["filename"];
                     $this->MaterialHash[$fileset["filename"]] = $rawFileName;
-                    /*if($this->checkLocalMaterial($this->rawMaterialFolder.$rawFileName)){
-                        if($this->checkIfModified($this->rawMaterialFolder.$rawFileName, $remoteFile)){
-                            if($sftp->uploadedMaterial($this->rawMaterialFolder.$rawFileName, $remoteFile)){
-                                $this->dolog("$remoteFile 上傳成功");
-                                $this->message.=$fileset["filename"]."上傳成功\n";
-                            }
-                            else{
-                                $this->dolog("$remoteFile 上傳失敗");
-                                $this->message.=$fileset["filename"]."上傳失敗\n";
-                            }
-                        }
-                        else{
-                            $this->dolog("複製".$this->rawMaterialFolder.$rawFileName."與遠端檔案相同，不複製");
-                            $this->message.=$fileset["filename"]."與遠端檔案相同，不需複製\n";
-                        }
 
-                    } 
-                    else{
-                        $this->dolog("$this->rawMaterialFolder.$rawFileName 本地檔案不存在");
-                        $this->message.=$fileset["filename"]."本地檔案不存在\n";
-                    }*/
                     if($this->checkIfModified($this->rawMaterialFolder.$rawFileName, $remoteFile)){
                         if($this->materialSender->uploadByMaterialId($mid)){
                             $this->message.=$fileset["filename"]."上傳失敗:".$this->materialSender->message."\n";
@@ -136,29 +116,6 @@ class UploadMaterialByPlayList{
         }
     }
 
-    //檢查本地檔案是否存在
-    private function checkLocalMaterial($filepath){
-        if(file_exists($filepath)){
-            return true;
-        }
-        else{
-            $file_name = str_replace($this->rawMaterialFolder,"",$filepath);
-            $nameParse = explode('.',$file_name);
-            $material_id = array_shift($nameParse);
-            $mailer = new MyMailer();
-			$mailer->sendMail("barker素材:".$material_id." 檔案匯入失敗","barker素材檔案匯入失敗\n素材識別碼:".$material_id."\n失敗原因:AMS端檔案不存在");
-            $sql = "
-            INSERT INTO barker_material_import_result (material_id,file_name,import_time,import_result) VALUES (?,?,now(),0)	
-            ON DUPLICATE KEY
-            UPDATE import_time=now(),import_result=0,message='AMS端檔案不存在',last_updated_time=now()"
-            ;
-            if(!$this->mydb->execute($sql,'is',$material_id,$file_name)){
-                $this->mydb->close();
-                return false;
-            }
-            return false;
-        }
-    }
 
     //檢查遠端檔案是否須重派送
     private function checkIfModified($originFile,$remoteFile){       

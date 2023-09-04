@@ -1,14 +1,14 @@
 <?php
 //2022 08 17 chia_chi_chang單獨上傳單一影片檔案到端點barker的模組
-require_once dirname(__FILE__).'/../../../tool/MyDB.php';
+require_once __DIR__.'/../../../tool/MyDB.php';
 //require_once '../../tool/MyDB.php';//dev
-require_once dirname(__FILE__).'/../../../Config.php';
+require_once __DIR__.'/../../../Config.php';
 //require_once '../../Config.php';//dev
-require_once dirname(__FILE__).'/BarkerConfig.php';
-require_once dirname(__FILE__).'/../../../tool/SFTP.php';
-require_once dirname(__FILE__).'/PutToWatchFolder.php';
-require_once dirname(__FILE__).'/../../../tool/MyMailer.php';
-
+require_once __DIR__.'/BarkerConfig.php';
+require_once __DIR__.'/../../../tool/SFTP.php';
+require_once __DIR__.'/PutToWatchFolder.php';
+require_once __DIR__.'/../../../tool/MyMailer.php';
+require_once __DIR__.'/../../../apiProxy/AmsDb/module/MaterialRepository.php';
 
 class SendMaterialToPumping{
     private $mydb;
@@ -103,8 +103,10 @@ class SendMaterialToPumping{
             $file_name = str_replace($this->rawMaterialFolder,"",$filepath);
             $nameParse = explode('.',$file_name);
             $material_id = array_shift($nameParse);
+            $materialRepo = new MaterialRepository();
+			$mInfo = $materialRepo->getMaterialInfo($material_id);
             $mailer = new MyMailer();
-			$mailer->sendMail("barker素材:".$material_id." 檔案匯入失敗","barker素材檔案匯入失敗\n素材識別碼:".$material_id."\n失敗原因:AMS端檔案不存在");
+			$mailer->sendMail("barker素材:".$material_id." 檔案匯入失敗","barker素材檔案匯入失敗\n素材識別碼:".$material_id." 素材名稱:".$mInfo["素材名稱"]."\n失敗原因:AMS端檔案不存在");
             $sql = "
             INSERT INTO barker_material_import_result (material_id,file_name,import_time,import_result) VALUES (?,?,now(),0)	
             ON DUPLICATE KEY

@@ -4,8 +4,9 @@
 	2022 09 02 增加mail告警
 	***/
 	header("Content-Type:text/html; charset=utf-8");
-	require_once dirname(__FILE__).'/../../tool/MyDB.php';
-	require_once dirname(__FILE__).'/../../tool/MyMailer.php';
+	require_once __DIR__.'/../../tool/MyDB.php';
+	require_once __DIR__.'/../../tool/MyMailer.php';
+	require_once __DIR__.'/../../apiProxy/AmsDb/module/TransactionRepository.php';
 	$apiHandle = new ApiHandle();
 	$apiHandle->handle();
 
@@ -19,7 +20,7 @@
 				"999"=>"其他錯誤",
 			);
 
-			$logFilePath = dirname(__FILE__).'/../../'.Config::SECRET_FOLDER."/apiLog/reportVideoPlayFail";
+			$logFilePath = __DIR__.'/../../'.Config::SECRET_FOLDER."/apiLog/reportVideoPlayFail";
 			if(!is_dir($logFilePath)){
 				if (!mkdir($logFilePath, 0777, true)) {
 					die('Failed to create log directories...');
@@ -92,10 +93,11 @@
 			$my->commit();
 			$my->close();
 			//發出告警信
-			
+			$transactionRepo = new TransactionRepository();
+			$transactionInfo = $transactionRepo->getTransactionBasicInfo($data["transaction_id"]);
 			$mailer = new MyMailer();
 			$mailer->sendMail("託播單:".$data["transaction_id"]."於barker頻道:".$data["channel_id"]." ".$data["file_name"]."檔案播放/轉檔失敗"
-			,"barker頻道:".$data["channel_id"]." ".$data["file_name"]."檔案播放/轉檔失敗\n播放時間:".$data["play_time"]."\n託播單識別碼".$data["transaction_id"]."\n失敗原因:".$data["message"]);
+			,"barker頻道:".$data["channel_id"]." ".$data["file_name"]."檔案播放/轉檔失敗\n播放時間:".$data["play_time"]."\n託播單識別碼:".$data["transaction_id"]." 託播單名稱:".$transactionInfo["託播單名稱"]."\n失敗原因:".$data["message"]);
 		
 			return true;
 		}

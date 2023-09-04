@@ -6,15 +6,16 @@
 	2022 10 18 回報結果為true才檢查checksum
 	***/
 	header("Content-Type:text/html; charset=utf-8");
-	require_once dirname(__FILE__).'/../../tool/MyDB.php';
-	require_once dirname(__FILE__).'/../../tool/MyMailer.php';
+	require_once __DIR__.'/../../tool/MyDB.php';
+	require_once __DIR__.'/../../tool/MyMailer.php';
+	require_once __DIR__.'/../../apiProxy/AmsDb/module/MaterialRepository.php';
 	$apiHandle = new ApiHandle();
 	$apiHandle->handle();
-	$rawMaterialFolder = "";
 
 	class ApiHandle {
 		private $returnMessage;
 		private $logWriter;
+		private $rawMaterialFolder = "";
 		public function __construct(){
 			$this->returnMessage = array(
 				"1"=>"",
@@ -22,7 +23,7 @@
 				"999"=>"其他錯誤",
 			);
 
-			$logFilePath = dirname(__FILE__).'/../../'.Config::SECRET_FOLDER."/apiLog/reportVideoFileImportResult";
+			$logFilePath = __DIR__.'/../../'.Config::SECRET_FOLDER."/apiLog/reportVideoFileImportResult";
 			if(!is_dir($logFilePath)){
 				if (!mkdir($logFilePath, 0777, true)) {
 					die('Failed to create log directories...');
@@ -151,8 +152,10 @@
 
 			//如果匯入失敗，發出告警信
 			if(!$data["import_result"]){
+				$materialRepo = new MaterialRepository();
+				$mInfo = $materialRepo->getMaterialInfo($data["material_id"]);
 				$mailer = new MyMailer();
-				$mailer->sendMail("barker素材:".$data["file_name"]." 檔案匯入失敗","barker素材:".$data["file_name"]." 檔案匯入失敗\n素材識別碼:".$data["material_id"]."\n失敗原因:".$data["message"]);
+				$mailer->sendMail("barker素材:".$data["file_name"]." 檔案匯入失敗","barker素材:".$data["file_name"]." 檔案匯入失敗\n素材識別碼:".$data["material_id"]." 素材名稱:".$mInfo["素材名稱"]."\n失敗原因:".$data["message"]);
 			}
 
 			return true;
