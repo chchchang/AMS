@@ -163,7 +163,7 @@
 			return $playListRepository->getPlaylistScheduleHistory( $searchOtp );
 		}
 		catch(Exception $e){
-			setMessageAndExit(false,$e->getMessage());
+			exit(json_encode([]));
 		}
 	}
 ?>
