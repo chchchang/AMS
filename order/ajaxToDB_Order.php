@@ -691,10 +691,10 @@
 		$insertIds=array();
 		if(isset($_POST['orders'])){
 			//$orders = json_decode($_POST['orders'],true); 於排程檢察時已執行果此步驟
-			$CSMSGroup=[];
+			//$CSMSGroup=[];
 			foreach($orders as $order){		
 				//檢查是否要建立CSMS群組
-				if(isset($order["託播單CSMS群組識別碼"])){
+				/*if(isset($order["託播單CSMS群組識別碼"])){
 					if(!array_key_exists($order["託播單CSMS群組識別碼"],$CSMSGroup)){
 						//建立新群組
 						$sql="INSERT INTO 託播單CSMS群組 (CREATED_PEOPLE) VALUES(?)";
@@ -716,7 +716,7 @@
 					}
 					$CSMSGroupId=$CSMSGroup[$order["託播單CSMS群組識別碼"]];
 				}
-				else
+				else*/
 					$CSMSGroupId=NULL;
 				
 				if(!isset($order["廣告可被播出小時時段"]))
@@ -752,47 +752,16 @@
 				}
 				$newId = $stmt->insert_id;
 				
-				//新增素材
-				if(isset($order['素材']))
-				foreach($order['素材'] as $mOrder=>$mOrderMaterial){
-					if($mOrderMaterial['素材識別碼']!=null &&$mOrderMaterial['素材識別碼']!=''){
-						$mOrderMaterial["點擊後開啟類型"]=($mOrderMaterial["點擊後開啟類型"]=="")?null:$mOrderMaterial["點擊後開啟類型"];
-						$mOrderMaterial["點擊後開啟位址"]=($mOrderMaterial["點擊後開啟位址"]=="")?null:$mOrderMaterial["點擊後開啟位址"];
-						$sql="INSERT INTO 託播單素材 (託播單識別碼,素材順序,素材識別碼,可否點擊,點擊後開啟類型,點擊後開啟位址,CREATED_PEOPLE)
-						VALUES (?,?,?,?,?,?,?)";
-						if(!$stmt=$my->prepare($sql)) {
-							$Error=json_encode(array("dbError"=>'無法準備statement，請聯絡系統管理員！'),JSON_UNESCAPED_UNICODE);
-							goto exitWithError;
-						}
-						if(!$stmt->bind_param('iiiissi', $newId,$mOrder,$mOrderMaterial['素材識別碼'],$mOrderMaterial['可否點擊'],$mOrderMaterial["點擊後開啟類型"]
-												,$mOrderMaterial["點擊後開啟位址"],$_SESSION['AMS']['使用者識別碼'])) {
-							$Error=json_encode(array("dbError"=>'無法繫結資料，請聯絡系統管理員！'),JSON_UNESCAPED_UNICODE);
-							goto exitWithError;
-						}
-						if(!$stmt->execute()) {
-							$Error=json_encode(array("dbError"=>'無法執行statement，請聯絡系統管理員！'),JSON_UNESCAPED_UNICODE);
-							goto exitWithError;
-						}
+				try{
+					if(isset($order['素材'])){
+						check_material_paras($order["素材"]);
+						insertOrderMaterial($newId, $order["素材"]);
 					}
-				}
-				
-				//新增其他參數
-				if(isset($order['其他參數']))
-				foreach($order['其他參數'] as $cOrder=>$orderConfig){
-						$sql="INSERT INTO 託播單其他參數 (託播單識別碼,託播單其他參數順序,託播單其他參數值,CREATED_PEOPLE)
-						VALUES (?,?,?,?)";
-						if(!$stmt=$my->prepare($sql)) {
-							$Error=json_encode(array("dbError"=>'無法準備statement，請聯絡系統管理員！'),JSON_UNESCAPED_UNICODE);
-							goto exitWithError;
-						}
-						if(!$stmt->bind_param('iisi', $newId,$cOrder,$orderConfig,$_SESSION['AMS']['使用者識別碼'])) {
-							$Error=json_encode(array("dbError"=>'無法繫結資料，請聯絡系統管理員！'),JSON_UNESCAPED_UNICODE);
-							goto exitWithError;
-						}
-						if(!$stmt->execute()) {
-							$Error=json_encode(array("dbError"=>'無法執行statement，請聯絡系統管理員！'),JSON_UNESCAPED_UNICODE);
-							goto exitWithError;
-						}
+					if(isset($order['其他參數']))
+						insertOrderOtherConfig($newId, $order['其他參數']);
+				}catch(Exception $e){
+					$Error=json_encode(array("dbError"=>$e->getMessage()),JSON_UNESCAPED_UNICODE);
+					goto exitWithError;
 				}
 				
 				//若有多個版位，新增託播單投放版位資料庫
@@ -876,154 +845,98 @@
 					goto exitWithError;
 				}
 				
-				//刪除素材
-				$sql="DELETE FROM 託播單素材 WHERE 託播單識別碼 = ?";
-				if(!$stmt=$my->prepare($sql)) {
-					$Error=(json_encode(array("dbError"=>'無法準備statement，請聯絡系統管理員！'),JSON_UNESCAPED_UNICODE));
-				}
-				if(!$stmt->bind_param('i',$edit["託播單識別碼"])) {
-					$Error=(json_encode(array("dbError"=>'無法繫結資料，請聯絡系統管理員！'),JSON_UNESCAPED_UNICODE));
-					goto exitWithError;
-				}
-				if(!$stmt->execute()) {
-					$Error=(json_encode(array("dbError"=>'無法執行statement，請聯絡系統管理員！'),JSON_UNESCAPED_UNICODE));
-					goto exitWithError;
-				}
-				//刪除其他參數
-				$sql="DELETE FROM 託播單其他參數 WHERE 託播單識別碼 = ?";
-				if(!$stmt=$my->prepare($sql)) {
-					$Error=(json_encode(array("dbError"=>'無法準備statement，請聯絡系統管理員！'),JSON_UNESCAPED_UNICODE));
-				}
-				if(!$stmt->bind_param('i',$edit["託播單識別碼"])) {
-					$Error=(json_encode(array("dbError"=>'無法繫結資料，請聯絡系統管理員！'),JSON_UNESCAPED_UNICODE));
-					goto exitWithError;
-				}
-				if(!$stmt->execute()) {
-					$Error=(json_encode(array("dbError"=>'無法執行statement，請聯絡系統管理員！'),JSON_UNESCAPED_UNICODE));
-					goto exitWithError;
-				}
-
-				//新增素材
-				if(isset($edit['素材']))
-				foreach($edit['素材'] as $mOrder=>$mOrderMaterial){
-					if($mOrderMaterial['素材識別碼']!=null &&$mOrderMaterial['素材識別碼']!=''){
-						$mOrderMaterial["點擊後開啟類型"]=($mOrderMaterial["點擊後開啟類型"]=="")?null:$mOrderMaterial["點擊後開啟類型"];
-						$mOrderMaterial["點擊後開啟位址"]=($mOrderMaterial["點擊後開啟位址"]=="")?null:$mOrderMaterial["點擊後開啟位址"];
-						$sql="INSERT INTO 託播單素材 (託播單識別碼,素材順序,素材識別碼,可否點擊,點擊後開啟類型,點擊後開啟位址,CREATED_PEOPLE)
-						VALUES (?,?,?,?,?,?,?)";
-						if(!$stmt=$my->prepare($sql)) {
-							$Error=json_encode(array("dbError"=>'無法準備statement，請聯絡系統管理員！'),JSON_UNESCAPED_UNICODE);
-							goto exitWithError;
-						}
-						if(!$stmt->bind_param('iiiissi', $edit["託播單識別碼"],$mOrder,$mOrderMaterial['素材識別碼'],$mOrderMaterial['可否點擊'],$mOrderMaterial["點擊後開啟類型"]
-												,$mOrderMaterial["點擊後開啟位址"],$_SESSION['AMS']['使用者識別碼'])) {
-							$Error=json_encode(array("dbError"=>'無法繫結資料，請聯絡系統管理員！'),JSON_UNESCAPED_UNICODE);
-							goto exitWithError;
-						}
-						if(!$stmt->execute()) {
-							$Error=json_encode(array("dbError"=>'無法執行statement，請聯絡系統管理員！'),JSON_UNESCAPED_UNICODE);
-							goto exitWithError;
-						}
+				try{
+					deleteOrderMaterial($edit["託播單識別碼"]);
+					deleteOrderOtherConfig($edit["託播單識別碼"]);
+					if(isset($edit['素材'])){
+						check_material_paras($edit["素材"]);
+						insertOrderMaterial($edit["託播單識別碼"], $edit["素材"]);
 					}
-				}
-				
-				//新增其他參數
-				if(isset($edit['其他參數']))
-				foreach($edit['其他參數'] as $cOrder=>$orderConfig){
-						$sql="INSERT INTO 託播單其他參數 (託播單識別碼,託播單其他參數順序,託播單其他參數值,CREATED_PEOPLE)
-						VALUES (?,?,?,?)";
-						if(!$stmt=$my->prepare($sql)) {
-							$Error=json_encode(array("dbError"=>'無法準備statement，請聯絡系統管理員！'),JSON_UNESCAPED_UNICODE);
-							goto exitWithError;
-						}
-						if(!$stmt->bind_param('iisi',$edit["託播單識別碼"],$cOrder,$orderConfig,$_SESSION['AMS']['使用者識別碼'])) {
-							$Error=json_encode(array("dbError"=>'無法繫結資料，請聯絡系統管理員！'),JSON_UNESCAPED_UNICODE);
-							goto exitWithError;
-						}
-						if(!$stmt->execute()) {
-							$Error=json_encode(array("dbError"=>'無法執行statement，請聯絡系統管理員！'),JSON_UNESCAPED_UNICODE);
-							goto exitWithError;
-						}
+					if(isset($edit['其他參數']))
+						insertOrderOtherConfig($edit["託播單識別碼"], $edit['其他參數']);
+				}catch(Exception $e){
+					$Error=json_encode(array("dbError"=>$e->getMessage()),JSON_UNESCAPED_UNICODE);
+					goto exitWithError;
 				}
 				
 				//檢查多版位投放
-					$sql = 'SELECT * FROM 託播單投放版位 WHERE 託播單識別碼 = ?';
-					if(!$stmt=$my->prepare($sql)) {
-						$Error=(json_encode(array("dbError"=>'無法準備statement，請聯絡系統管理員！'),JSON_UNESCAPED_UNICODE));
-						goto exitWithError;
-					}
-					if(!$stmt->bind_param('i',$edit["託播單識別碼"])) {
-						$Error=(json_encode(array("dbError"=>'無法繫結資料，請聯絡系統管理員！'),JSON_UNESCAPED_UNICODE));
-						goto exitWithError;
-					}
-					if(!$stmt->execute()) {
-						$Error=(json_encode(array("dbError"=>'無法執行statement，請聯絡系統管理員！'),JSON_UNESCAPED_UNICODE));
-						goto exitWithError;
-					}
-					if(!$res=$stmt->get_result()){
-						$Error=(json_encode(array("dbError"=>'無法取得結果集，請聯絡系統管理員！'),JSON_UNESCAPED_UNICODE));
-						goto exitWithError;
-					}
-					
-					//依照版位識別碼整理投放版位，並將ENBLE預設設為0
-					$positionsRecort=[];
-					$positionTemplate=[];//新增新版位時使用的模板
-					while($row = $res->fetch_assoc()){
-						$row['ENABLE']=0;
-						$positionsRecort[$row['版位識別碼']]=$row;
-						if(count($positionTemplate)==0)
-						$positionTemplate=$row;
-					}
-					
-					//逐一比較版位，若有新的版位則新增，若有移出的版位則disable
-					//已存在的版位不可變動投放次數
-					foreach($orderPositions as $pid){
-						if(isset($positionsRecort[$pid])){
-							//版位存在,標記為啟動
-							$positionsRecort[$pid]['ENABLE']=1;
-						}
-						else{
-							//版位不存在，直接新增
-							$positionsRecort[$pid]=$positionTemplate;
-							$positionsRecort[$pid]['ENABLE']=1;
-							$positionsRecort[$pid]['版位識別碼']=$pid;
-							$positionsRecort[$pid]['版位投放次數']=0;
-							$sql="INSERT INTO 託播單投放版位 (託播單識別碼,版位識別碼,版位投放上限,版位投放次數,LAST_UPDATE_TIME,LAST_UPDATE_PEOPLE)
-							VALUES (?,?,?,?,CURRENT_TIMESTAMP,?)";
-							if(!$stmt=$my->prepare($sql)) {
-								$Error=json_encode(array("dbError"=>'無法準備statement，請聯絡系統管理員！'),JSON_UNESCAPED_UNICODE);
-								goto exitWithError;
-							}
-							if(!$stmt->bind_param('iiiii',$edit["託播單識別碼"],$pid,$positionTemplate['版位投放上限'],$positionsRecort[$pid]['版位投放次數'],$_SESSION['AMS']['使用者識別碼'])) {
-								$Error=json_encode(array("dbError"=>'無法繫結資料，請聯絡系統管理員！'),JSON_UNESCAPED_UNICODE);
-								goto exitWithError;
-							}
-							if(!$stmt->execute()) {
-								$Error=json_encode(array("dbError"=>'無法執行statement，請聯絡系統管理員！'),JSON_UNESCAPED_UNICODE);
-								goto exitWithError;
-							}
-						}
-					}
+				$sql = 'SELECT * FROM 託播單投放版位 WHERE 託播單識別碼 = ?';
+				if(!$stmt=$my->prepare($sql)) {
+					$Error=(json_encode(array("dbError"=>'無法準備statement，請聯絡系統管理員！'),JSON_UNESCAPED_UNICODE));
+					goto exitWithError;
+				}
+				if(!$stmt->bind_param('i',$edit["託播單識別碼"])) {
+					$Error=(json_encode(array("dbError"=>'無法繫結資料，請聯絡系統管理員！'),JSON_UNESCAPED_UNICODE));
+					goto exitWithError;
+				}
+				if(!$stmt->execute()) {
+					$Error=(json_encode(array("dbError"=>'無法執行statement，請聯絡系統管理員！'),JSON_UNESCAPED_UNICODE));
+					goto exitWithError;
+				}
+				if(!$res=$stmt->get_result()){
+					$Error=(json_encode(array("dbError"=>'無法取得結果集，請聯絡系統管理員！'),JSON_UNESCAPED_UNICODE));
+					goto exitWithError;
+				}
 				
-					//依照比較結果更新版位啟動狀態
-					foreach($positionsRecort as $pid=> $positionsRecortData){
-						$sql="UPDATE 託播單投放版位 SET 版位投放上限=?,ENABLE=?,LAST_UPDATE_PEOPLE=?,LAST_UPDATE_TIME=CURRENT_TIMESTAMP WHERE 託播單識別碼=? AND 版位識別碼=?";
+				//依照版位識別碼整理投放版位，並將ENBLE預設設為0
+				$positionsRecort=[];
+				$positionTemplate=[];//新增新版位時使用的模板
+				while($row = $res->fetch_assoc()){
+					$row['ENABLE']=0;
+					$positionsRecort[$row['版位識別碼']]=$row;
+					if(count($positionTemplate)==0)
+					$positionTemplate=$row;
+				}
+				
+				//逐一比較版位，若有新的版位則新增，若有移出的版位則disable
+				//已存在的版位不可變動投放次數
+				foreach($orderPositions as $pid){
+					if(isset($positionsRecort[$pid])){
+						//版位存在,標記為啟動
+						$positionsRecort[$pid]['ENABLE']=1;
+					}
+					else{
+						//版位不存在，直接新增
+						$positionsRecort[$pid]=$positionTemplate;
+						$positionsRecort[$pid]['ENABLE']=1;
+						$positionsRecort[$pid]['版位識別碼']=$pid;
+						$positionsRecort[$pid]['版位投放次數']=0;
+						$sql="INSERT INTO 託播單投放版位 (託播單識別碼,版位識別碼,版位投放上限,版位投放次數,LAST_UPDATE_TIME,LAST_UPDATE_PEOPLE)
+						VALUES (?,?,?,?,CURRENT_TIMESTAMP,?)";
 						if(!$stmt=$my->prepare($sql)) {
-							$logger->error('無法準備statement，錯誤代碼('.$my->errno.')、錯誤訊息('.$my->error.')。');
-							exit(json_encode(array("dbError"=>'無法準備statement，請聯絡系統管理員！'),JSON_UNESCAPED_UNICODE));
+							$Error=json_encode(array("dbError"=>'無法準備statement，請聯絡系統管理員！'),JSON_UNESCAPED_UNICODE);
+							goto exitWithError;
 						}
-						
-						if(!$stmt->bind_param('iiiii',$positionsRecort[$pid]['版位投放上限'],$positionsRecort[$pid]["ENABLE"]
-												,$_SESSION['AMS']['使用者識別碼'],$positionsRecort[$pid]["託播單識別碼"],$pid)) {
-							$logger->error('無法繫結資料，錯誤代碼('.$stmt->errno.')、錯誤訊息('.$stmt->error.')。');
-							exit(json_encode(array("dbError"=>'無法繫結資料，請聯絡系統管理員！'),JSON_UNESCAPED_UNICODE));
+						if(!$stmt->bind_param('iiiii',$edit["託播單識別碼"],$pid,$positionTemplate['版位投放上限'],$positionsRecort[$pid]['版位投放次數'],$_SESSION['AMS']['使用者識別碼'])) {
+							$Error=json_encode(array("dbError"=>'無法繫結資料，請聯絡系統管理員！'),JSON_UNESCAPED_UNICODE);
+							goto exitWithError;
 						}
-						
 						if(!$stmt->execute()) {
-							$logger->error('無法執行statement，錯誤代碼('.$stmt->errno.')、錯誤訊息('.$stmt->error.')。');
-							exit(json_encode(array("dbError"=>'無法執行statement，請聯絡系統管理員！'),JSON_UNESCAPED_UNICODE));
+							$Error=json_encode(array("dbError"=>'無法執行statement，請聯絡系統管理員！'),JSON_UNESCAPED_UNICODE);
+							goto exitWithError;
 						}
 					}
+				}
+			
+				//依照比較結果更新版位啟動狀態
+				foreach($positionsRecort as $pid=> $positionsRecortData){
+					$sql="UPDATE 託播單投放版位 SET 版位投放上限=?,ENABLE=?,LAST_UPDATE_PEOPLE=?,LAST_UPDATE_TIME=CURRENT_TIMESTAMP WHERE 託播單識別碼=? AND 版位識別碼=?";
+					if(!$stmt=$my->prepare($sql)) {
+						$logger->error('無法準備statement，錯誤代碼('.$my->errno.')、錯誤訊息('.$my->error.')。');
+						exit(json_encode(array("dbError"=>'無法準備statement，請聯絡系統管理員！'),JSON_UNESCAPED_UNICODE));
+					}
+					
+					if(!$stmt->bind_param('iiiii',$positionsRecort[$pid]['版位投放上限'],$positionsRecort[$pid]["ENABLE"]
+											,$_SESSION['AMS']['使用者識別碼'],$positionsRecort[$pid]["託播單識別碼"],$pid)) {
+						$logger->error('無法繫結資料，錯誤代碼('.$stmt->errno.')、錯誤訊息('.$stmt->error.')。');
+						exit(json_encode(array("dbError"=>'無法繫結資料，請聯絡系統管理員！'),JSON_UNESCAPED_UNICODE));
+					}
+					
+					if(!$stmt->execute()) {
+						$logger->error('無法執行statement，錯誤代碼('.$stmt->errno.')、錯誤訊息('.$stmt->error.')。');
+						exit(json_encode(array("dbError"=>'無法執行statement，請聯絡系統管理員！'),JSON_UNESCAPED_UNICODE));
+					}
+				}
 				//end of 檢查多版位投放
 				//20230504 增加barker播表重疊走期計算
 				fix_barker_playlist_overlap_peroid($edit["託播單識別碼"]);
@@ -1032,52 +945,14 @@
 			//刪除現有訂單
 			if(isset($edits["delete"]))
 			foreach($edits["delete"]as $delete){
-				//刪除託播單
-				$sql="DELETE FROM 託播單 WHERE 託播單識別碼=?";
-				if(!$stmt=$my->prepare($sql)) {
-					$Error=(json_encode(array("dbError"=>'無法準備statement，請聯絡系統管理員！'),JSON_UNESCAPED_UNICODE));
+				try{
+					deleteOrderInfo($delete);
+					deleteOrderMaterial($delete);
+					deleteOrderOtherConfig($delete);
+					deletOrderPosition($delete);
 				}
-				if(!$stmt->bind_param('i', $delete)) {
-					$Error=(json_encode(array("dbError"=>'無法繫結資料，請聯絡系統管理員！'),JSON_UNESCAPED_UNICODE));
-				}
-				if(!$stmt->execute()) {
-					$Error=(json_encode(array("dbError"=>'無法執行statement，請聯絡系統管理員！'),JSON_UNESCAPED_UNICODE));
-					goto exitWithError;
-				}
-				//刪除素材
-				$sql="DELETE FROM 託播單素材 WHERE 託播單識別碼=?";
-				if(!$stmt=$my->prepare($sql)) {
-					$Error=(json_encode(array("dbError"=>'無法準備statement，請聯絡系統管理員！'),JSON_UNESCAPED_UNICODE));
-				}
-				if(!$stmt->bind_param('i', $delete)) {
-					$Error=(json_encode(array("dbError"=>'無法繫結資料，請聯絡系統管理員！'),JSON_UNESCAPED_UNICODE));
-				}
-				if(!$stmt->execute()) {
-					$Error=(json_encode(array("dbError"=>'無法執行statement，請聯絡系統管理員！'),JSON_UNESCAPED_UNICODE));
-					goto exitWithError;
-				}
-				//刪除其他參數
-				$sql="DELETE FROM 託播單其他參數 WHERE 託播單識別碼=?";
-				if(!$stmt=$my->prepare($sql)) {
-					$Error=(json_encode(array("dbError"=>'無法準備statement，請聯絡系統管理員！'),JSON_UNESCAPED_UNICODE));
-				}
-				if(!$stmt->bind_param('i', $delete)) {
-					$Error=(json_encode(array("dbError"=>'無法繫結資料，請聯絡系統管理員！'),JSON_UNESCAPED_UNICODE));
-				}
-				if(!$stmt->execute()) {
-					$Error=(json_encode(array("dbError"=>'無法執行statement，請聯絡系統管理員！'),JSON_UNESCAPED_UNICODE));
-					goto exitWithError;
-				}
-				//刪除投放版位
-				$sql="DELETE FROM 託播單投放版位 WHERE 託播單識別碼=?";
-				if(!$stmt=$my->prepare($sql)) {
-					$Error=(json_encode(array("dbError"=>'無法準備statement，請聯絡系統管理員！'),JSON_UNESCAPED_UNICODE));
-				}
-				if(!$stmt->bind_param('i', $delete)) {
-					$Error=(json_encode(array("dbError"=>'無法繫結資料，請聯絡系統管理員！'),JSON_UNESCAPED_UNICODE));
-				}
-				if(!$stmt->execute()) {
-					$Error=(json_encode(array("dbError"=>'無法執行statement，請聯絡系統管理員！'),JSON_UNESCAPED_UNICODE));
+				catch(Exception $e){
+					$Error=json_encode(array("dbError"=>$e->getMessage()),JSON_UNESCAPED_UNICODE);
 					goto exitWithError;
 				}
 				array_push($deleteIds,$delete);
@@ -2078,6 +1953,82 @@
 		return true;
 	}
 
+	function check_material_paras($paras){
+		global $my;
+		foreach($paras as $mid=>$mconfig){
+			if($mconfig["點擊後開啟類型"] === "appid"){
+				if (preg_match('/[\t\n\r]/', $mconfig["點擊後開啟位址"])) {
+					throw new Exception('字串包含特殊的空白字符（tab、換行等）。');
+				}
+			}
+		}
+
+		return true;
+	}
+
+	function insertOrderMaterial($orderId,$orderMaterials){
+		global $my;
+		foreach($orderMaterials as $mOrder=>$mOrderMaterial){
+			if($mOrderMaterial['素材識別碼']!=null &&$mOrderMaterial['素材識別碼']!=''){
+				$mOrderMaterial["點擊後開啟類型"]=($mOrderMaterial["點擊後開啟類型"]=="")?null:$mOrderMaterial["點擊後開啟類型"];
+				$mOrderMaterial["點擊後開啟位址"]=($mOrderMaterial["點擊後開啟位址"]=="")?null:$mOrderMaterial["點擊後開啟位址"];
+				$sql="INSERT INTO 託播單素材 (託播單識別碼,素材順序,素材識別碼,可否點擊,點擊後開啟類型,點擊後開啟位址,CREATED_PEOPLE)
+				VALUES (?,?,?,?,?,?,?)";
+				if(!$my->execute($sql,'iiiissi', $orderId,$mOrder,$mOrderMaterial['素材識別碼'],$mOrderMaterial['可否點擊'],$mOrderMaterial["點擊後開啟類型"]
+				,$mOrderMaterial["點擊後開啟位址"],$_SESSION['AMS']['使用者識別碼'])){
+					throw new Exception('無法新增託播單素材，請聯絡系統管理員！');
+				}
+			}
+		}
+		return true;
+	}
+
+	function insertOrderOtherConfig($orderId,$otherConfig){
+		global $my;
+		foreach($otherConfig as $cOrder=>$orderConfig){
+			$sql="INSERT INTO 託播單其他參數 (託播單識別碼,託播單其他參數順序,託播單其他參數值,CREATED_PEOPLE)
+			VALUES (?,?,?,?)";
+			if(!$my->execute($sql,'iisi',$orderId,$cOrder,$orderConfig,$_SESSION['AMS']['使用者識別碼'])){
+					throw new Exception('無法新增託播單投放版位，請聯絡系統管理員！');
+			}
+		}
+	}
+
+	function deleteOrderInfo($orderId){
+		global $my;
+		$sql="DELETE FROM 託播單素材 WHERE 託播單識別碼=?";
+		if(!$my->execute($sql,'i',$orderId)){
+			throw new Exception('無法刪除託播單素材，請聯絡系統管理員！');
+		}
+		return true;
+	}
+
+	function deleteOrderMaterial($orderId){
+		global $my;
+		$sql="DELETE FROM 託播單素材 WHERE 託播單識別碼=?";
+		if(!$my->execute($sql,'i',$orderId)){
+			throw new Exception('無法刪除託播單素材，請聯絡系統管理員！');
+		}
+		return true;
+	}
+
+	function deleteOrderOtherConfig($orderId){
+		global $my;
+		$sql="DELETE FROM 託播單其他參數 WHERE 託播單識別碼=?";
+		if(!$my->execute($sql,'i',$orderId)){
+			throw new Exception('無法刪除託播單其他參數，請聯絡系統管理員！');
+		}
+		return true;
+	}
+
+	function deletOrderPosition($orderId){
+		global $my;
+		$sql="DELETE FROM 託播單投放版位 WHERE 託播單識別碼=?";
+		if(!$my->execute($sql,'i',$orderId)){
+			throw new Exception('無法刪除託播單投放版位，請聯絡系統管理員！');
+		}
+		return true;
+	}
 	$my->close();
 	exit();
 ?>
