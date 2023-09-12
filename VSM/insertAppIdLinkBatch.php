@@ -156,6 +156,13 @@
 							row[9]+="走期設定錯誤。";
 							parametersCheck = false;
 						}
+						for(let key of Object.keys(importData)){
+							if(this.hasSpecialWhitespace(importData[key])){
+								row[9]+=key+"有特殊空白字元";
+								parametersCheck = false;
+							}
+						}
+						
 						
 						
 						importDataArray.push(importData);
@@ -165,6 +172,11 @@
 					this.ajaxPostInfo = importDataArray;
 				};
 				reader.readAsArrayBuffer(file);
+			},
+			hasSpecialWhitespace(inputString) {
+    			// 使用正則表達式來檢查特殊空白字符
+    			var regex = /[\t\n\r]/;
+    			return regex.test(inputString);
 			},
 			handleSubmitClick(e){
 				if(!this.parameterCheckPass){
