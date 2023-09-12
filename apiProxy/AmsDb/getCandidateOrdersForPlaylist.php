@@ -70,7 +70,7 @@
 		array_push($paras,$_POST["託播單識別碼"]);
 	}
 
-	$sql .= " WHERE ".implode(" AND ",$whereStrs)." ORDER BY 託播單.託播單識別碼";
+	$sql .= " WHERE ".implode(" AND ",$whereStrs)." ORDER BY 廣告期間開始時間 ASC, 託播單.託播單識別碼 ASC";
 	$dbdata = $my->getResultArray($sql,$typeStr,...$paras);
 	foreach($dbdata as $id=>$data){
 		$sql= "SELECT 素材.影片素材秒數,素材.素材識別碼,CAMPS影片媒體編號,產業類型.產業類型說明 AS 產業類型說明,上層產業.產業類型說明 AS 上層產業類型說明
