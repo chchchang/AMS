@@ -244,7 +244,23 @@
 			global_orderInfoSheetAoa = XLSX.utils.sheet_to_json(orderInfoSheet, { header: 1});
 			//換算excel日期使用
 			function ExcelDateToJSDate(serial) {
-				return new Date((serial - (25567 + 1))*86400*1000-32*3600000 );
+				//return new Date((serial - (25567 + 1 ))*86400*1000-32*3600000 );
+				var utc_days  = Math.floor(serial - 25569);
+				var utc_value = utc_days * 86400;                                        
+				var date_info = new Date(utc_value * 1000);
+
+				var fractional_day = serial - Math.floor(serial) + 0.0000001;
+
+				var total_seconds = Math.floor(86400 * fractional_day);
+
+				var seconds = total_seconds % 60;
+
+				total_seconds -= seconds;
+
+				var hours = Math.floor(total_seconds / (60 * 60));
+				var minutes = Math.floor(total_seconds / 60) % 60;
+
+				return new Date(date_info.getFullYear(), date_info.getMonth(), date_info.getDate(), hours, minutes, seconds);
 			}
 			function padTo2Digits(num) {
 				return num.toString().padStart(2, '0');
@@ -284,6 +300,7 @@
 					//日期換算
 					row[4]=ExcelDateToJSDate(row[4])//廣告開始
 					row[5]=ExcelDateToJSDate(row[5])//廣告結束
+					console.log(row[4],row[5]);
 					row[7]=(row[7]==undefined)?row[4]:ExcelDateToJSDate(row[7])//預約日期
 					let adOrder = {
 						"版位類型識別碼":pId,
