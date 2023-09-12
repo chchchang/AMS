@@ -481,13 +481,27 @@ function readImage(file) {
 //檔案上傳，若為圖片則自動取得寬高
 $("#fileToUpload").change(function (e) {
     if(this.disabled) return alert('不支援上傳檔案!');
+
+	if(containsInvalidBig5Characters($("#fileToUpload").val().split('\\').pop())){
+		if(!confirm('檔案名稱內涵Big5無法顯示的字元!'))
+			return ;
+	}
+
     var F = this.files;
     if(F && F[0])
 		for(var i=0; i<F.length; i++)
-			if($("input[name='fileRadio']:checked").val()=='圖片'){
+			if($("#picRadio").prop("checked")){
 				readImage( F[i] );
 			}
 });
+
+
+function containsInvalidBig5Characters(inputString) {
+    // 定義 Big5 編碼範圍的正則表達式
+    var regex = /[^\x00-\x7F\u4E00-\u9FFF\uFE00-\uFEFF]/;
+    // 使用正則表達式測試字串
+    return regex.test(inputString);
+}
 
 //是否強制更新圖片寬高
 $("#素材原始檔名CB,input[name='fileRadio']").change(function (e) {

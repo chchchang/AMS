@@ -360,13 +360,6 @@ function refresh(){
 			$('#圖片素材高度').val(data["圖片素材高度"]);
 			$("#fileToUpload").prop('accept', "image/gif,image/jpeg,image/png,image/jpg").val('');
 			$('#mtypeMessage').text('(接受gif/jpeg/png/jpg檔案)').show();
-			$("#fileToUpload").change(function (e) {
-				if(this.disabled) return alert('File upload not supported!');
-				var F = this.files;
-				if(F && F[0])
-					for(var i=0; i<F.length; i++)
-						readImage( F[i] );
-			});
 			break;
 		case 3:
 			$(".picInput,.textInput").val('');
@@ -422,6 +415,37 @@ function refresh(){
 	}
 	,'json'
 	);
+}
+
+$("#fileToUpload").change(function (e) {
+	clearFilePorpertyInput();
+
+    if(this.disabled){
+		alert('File upload not supported!');
+		return ;
+	} 
+
+	if(containsInvalidBig5Characters($("#fileToUpload").val().split('\\').pop())){
+		if(!confirm('檔案名稱內涵Big5無法顯示的字元!'))
+			return ;
+	}
+    var F = this.files;
+    if(F && F[0])
+		for(var i=0; i<F.length; i++)
+			if($("#picRadio").prop("checked"))
+				readImage( F[i] );
+});
+
+function clearFilePorpertyInput(){
+	$('#picM input,#filmM input').val("");
+}
+
+
+function containsInvalidBig5Characters(inputString) {
+    // 定義 Big5 編碼範圍的正則表達式
+    var regex = /[^\x00-\x7F\u4E00-\u9FFF\uFE00-\uFEFF]/;
+    // 使用正則表達式測試字串
+    return regex.test(inputString);
 }
 
 //自動判斷圖片高度

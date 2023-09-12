@@ -136,11 +136,11 @@ $('#selectCurrentMaterial').click(
 
 //清除素材按鈕
 $('#clearFile').click(function(){
+	$('#fileToUpload').val('');
 	clearFilePorpertyInput();
 });
 
 function clearFilePorpertyInput(){
-	$('#fileToUpload').val('');
 	$('#picM input,#filmM input').val("");
 }
 
@@ -445,7 +445,7 @@ $("#fileToUpload").change(function (e) {
 	} 
 
 	if(containsInvalidBig5Characters($("#fileToUpload").val().split('\\').pop())){
-		if(!confirm('檔案內涵Big5無法顯示的字元!'))
+		if(!confirm('檔案名稱內涵Big5無法顯示的字元!'))
 			return ;
 	}
     var F = this.files;
