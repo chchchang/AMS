@@ -276,7 +276,6 @@
 
 	//顯示板位示意圖
 	function setPositionInfoPic(){
-		console.log($( "#position option:selected" ).val()+"  "+$( "#positiontype option:selected" ).val());
 		$.post("../position/ajaxPositionInfoPic.php",{"action":"getInfoPic","版位識別碼":$( "#position option:selected" ).val(),"版位類型識別碼":$( "#positiontype option:selected" ).val()}
 			,function(data){
 				if(data["success"]){

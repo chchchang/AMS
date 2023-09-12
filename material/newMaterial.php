@@ -51,18 +51,20 @@ button{
 			<tr><th>產業類型*:</th><td><select id="產業類型" ></select></td></tr>
 			<tr><th>素材有效期間:</th><td><input id = "StartDate" type="text" value = "" size="15" >~<input id = "EndDate" type="text" value = "" size="15" ></td></tr>
 			<tr><th><label>素材類型*:</label></th><td>
-			<p id = "textM"><input  type="radio" name="materailRadio" value="文字" id = 'textRadio'>文字: 文字素材內容
-				<blockquote><textarea id = "文字素材內容" rows="4" cols="20" class="textInput" style="width:400px"></textarea></blockquote></p>
-			<p id = "picM"><input  type="radio" name="materailRadio" value="圖片" id = 'picRadio'>圖片: 圖片素材寬度 <input id = "圖片素材寬度" type="number" value = "" style="width:60px" class="picInput" >，圖片素材高度 <input id = "圖片素材高度" type="number" value = "" style="width:60px" class="picInput" ></p>
-			<p id = "filmM"><input  type="radio" name="materailRadio" value="影片" id = 'filmRadio'>影片: 影片素材秒數 <input id = "影片素材秒數" type="number" value = "" style="width:60px" class="filmInput"  ><br>
-				<blockquote>
-				<table>
-				<tr><td>影片畫質:</td><td><select id="影片畫質" class="filmInput"></select></td></tr>
-				<tr><td>影片媒體編號:</td><td><input id = "影片媒體編號" type="text" value = "" style="width:100px" class="filmInput" readonly></td></tr>
-				<tr><td>影片媒體編號北:</td><td><input id = "影片媒體編號北" type="text" value = "" style="width:100px" class="filmInput" readonly></td></tr>
-				<tr><td>影片媒體編號南:</td><td><input id = "影片媒體編號南" type="text" value = "" style="width:100px" class="filmInput" readonly></td></tr>
-				</table>
-				</blockquote>
+			<form>
+				<input  type="radio" name="materailRadio" value="文字" id = 'textRadio'>文字: 文字素材內容
+					<blockquote><textarea id = "文字素材內容" rows="4" cols="20" class="textInput" style="width:400px"></textarea></blockquote><br>
+				<input  type="radio" name="materailRadio" value="圖片" id = 'picRadio'>圖片: 圖片素材寬度 <input id = "圖片素材寬度" type="number" value = "" style="width:60px" class="picInput" >，圖片素材高度 <input id = "圖片素材高度" type="number" value = "" style="width:60px" class="picInput" ><br>
+				<input  type="radio" name="materailRadio" value="影片" id = 'filmRadio'>影片: 影片素材秒數 <input id = "影片素材秒數" type="number" value = "" style="width:60px" class="filmInput"  ><br>
+					<blockquote>
+						<table>
+						<tr><td>影片畫質:</td><td><select id="影片畫質" class="filmInput"></select></td></tr>
+						<tr><td>影片媒體編號:</td><td><input id = "影片媒體編號" type="text" value = "" style="width:100px" class="filmInput" readonly></td></tr>
+						<tr><td>影片媒體編號北:</td><td><input id = "影片媒體編號北" type="text" value = "" style="width:100px" class="filmInput" readonly></td></tr>
+						<tr><td>影片媒體編號南:</td><td><input id = "影片媒體編號南" type="text" value = "" style="width:100px" class="filmInput" readonly></td></tr>
+						</table>
+					</blockquote>
+			</form>
 			<p>
 			</td></tr>
 			<tr><th>上傳的素材檔案:</th><td><form action="ajaxUploadingFile.php" method="post" enctype="multipart/form-data" id="uploadFileForm">
@@ -134,9 +136,13 @@ $('#selectCurrentMaterial').click(
 
 //清除素材按鈕
 $('#clearFile').click(function(){
-	$('#fileToUpload').val('');
-	$("#圖片素材寬度,#圖片素材高度").val("");
+	clearFilePorpertyInput();
 });
+
+function clearFilePorpertyInput(){
+	$('#fileToUpload').val('');
+	$('#picM input,#filmM input').val("");
+}
 
 //設訂素材群組資料
 $( "#MaterialGroup" ).combobox({
@@ -209,7 +215,7 @@ function setSelectedMaterial(id){
 		switch(data["素材類型識別碼"]){
 		case 1:
 			$("#textRadio").prop('checked', true);
-			$(".picInput,.filmInput").val('');;
+			$(".picInput,.filmInput").val('');
 			$('#文字素材內容').val(data["文字素材內容"]);
 			$('#mtypeMessage').hide();
 			break;
@@ -218,15 +224,6 @@ function setSelectedMaterial(id){
 			$("#picRadio").prop('checked', true);
 			$('#圖片素材寬度').val(data["圖片素材寬度"]);
 			$('#圖片素材高度').val(data["圖片素材高度"]);
-			$("#fileToUpload").prop('accept', "image/gif,image/jpeg,image/png,image/jpg").val('');
-			$('#mtypeMessage').text('(接受gif/jpeg/png/jpg檔案)').show();
-			$("#fileToUpload").change(function (e) {
-				if(this.disabled) return alert('File upload not supported!');
-				var F = this.files;
-				if(F && F[0])
-					for(var i=0; i<F.length; i++)
-						readImage( F[i] );
-			});
 			break;
 		case 3:
 			$(".picInput,.textInput").val('');
@@ -237,7 +234,7 @@ function setSelectedMaterial(id){
 			//$('#影片媒體編號北').val(data["影片媒體編號北"]);
 			//$('#影片媒體編號南').val(data["影片媒體編號南"]);
 			$("#fileToUpload").prop('accept', "*").val('');
-			$('#mtypeMessage').text('').show();
+			$('#mtypeMessage').text('').hide();
 			break;
 		default:
 				break;
@@ -400,9 +397,10 @@ function setUiByMaterialType(val){
 			break;
 		case 3:
 			$("#fileToUpload,#uploadFileBtn").prop('disabled', false);
-			$("#fileToUpload").prop('accept', "").val('');
+			$("#fileToUpload").prop('accept', "*").val('');
 			$(".picInput,.textInput").prop('disabled', true).val('');
 			$(".filmInput").removeAttr("disabled");
+			$('#mtypeMessage').text('').show();
 			//$('#mtypeMessage').text('(接受ts/mpg檔案)').show();
 			break;
 		default:
@@ -437,15 +435,32 @@ function readImage(file) {
     };
 
 }
+
 $("#fileToUpload").change(function (e) {
-    if(this.disabled) return alert('File upload not supported!');
-	
+	clearFilePorpertyInput();
+
+    if(this.disabled){
+		alert('File upload not supported!');
+		return ;
+	} 
+
+	if(containsInvalidBig5Characters($("#fileToUpload").val().split('\\').pop())){
+		if(!confirm('檔案內涵Big5無法顯示的字元!'))
+			return ;
+	}
     var F = this.files;
     if(F && F[0])
 		for(var i=0; i<F.length; i++)
 			if($("input[name='materailRadio']:checked").val()=='圖片')
 				readImage( F[i] );
 });
+
+function containsInvalidBig5Characters(inputString) {
+    // 定義 Big5 編碼範圍的正則表達式
+    var regex = /[^\x00-\x7F\u4E00-\u9FFF\uFE00-\uFEFF]/;
+    // 使用正則表達式測試字串
+    return regex.test(inputString);
+}
 
 function clearVal(){
 	$("input:not(:radio)").val("");
@@ -570,12 +585,12 @@ function uploadFile(){
 			if(tempIndex == -1) {	
 				alert('檔案類型錯誤!');
 				return 0;
-			}
+			}*/
 			var headerTypes = ['video/vnd.dlna.mpeg-tts','video/mpeg'];
 			if(headerTypes[tempIndex]!= headerType) {	
 				alert('檔案header定義類型錯誤!'+headerTypes[tempIndex]+' : '+headerType);
 				return 0;
-			}*/
+			}
 			break;
 	}
 	
@@ -883,7 +898,6 @@ const onFileChangeFile = (mediainfo) => {
 		.then((result) => {
 			result=JSON.parse(result);
 			let sec = Math.round(result.media.track[0].Duration);
-			console.log(sec);
 			if($("#影片素材秒數").val()!=sec){
 				if(confirm("影片素材秒數欄位("+$("#影片素材秒數").val()+")與上傳檔案資訊("+sec+")不合，是否更新。")){
 					$("#影片素材秒數").val(sec);
