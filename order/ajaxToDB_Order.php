@@ -1996,9 +1996,9 @@
 
 	function deleteOrderInfo($orderId){
 		global $my;
-		$sql="DELETE FROM 託播單素材 WHERE 託播單識別碼=?";
+		$sql="DELETE FROM 託播單 WHERE 託播單識別碼=?";
 		if(!$my->execute($sql,'i',$orderId)){
-			throw new Exception('無法刪除託播單素材，請聯絡系統管理員！');
+			throw new Exception('無法刪除託播單，請聯絡系統管理員！');
 		}
 		return true;
 	}
