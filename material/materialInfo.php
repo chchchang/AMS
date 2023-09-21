@@ -418,7 +418,6 @@ function refresh(){
 }
 
 $("#fileToUpload").change(function (e) {
-	clearFilePorpertyInput();
 
     if(this.disabled){
 		alert('File upload not supported!');
@@ -426,8 +425,10 @@ $("#fileToUpload").change(function (e) {
 	} 
 
 	if(containsInvalidBig5Characters($("#fileToUpload").val().split('\\').pop())){
-		if(!confirm('檔案名稱內涵Big5無法顯示的字元!'))
+		if(!confirm('檔案名稱內涵Big5無法顯示的字元!是否要設定?')){
+			clearFilePorpertyInput();
 			return ;
+		}
 	}
     var F = this.files;
     if(F && F[0])
@@ -437,7 +438,7 @@ $("#fileToUpload").change(function (e) {
 });
 
 function clearFilePorpertyInput(){
-	$('#picM input,#filmM input').val("");
+	$(".textInput,.filmInput,.picInput").val("");
 }
 
 

@@ -59,9 +59,9 @@
 				<tr><th><input type = 'checkbox' id='素材有效開始期間CB' name="updateCheckBox"></input></th><th>素材有效開始時間:</th><td><input id = "StartDate" type="text" value = "" size="15" ></td></tr>
 				<tr><th><input type = 'checkbox' id='素材有效結束期間CB' name="updateCheckBox"></input></th><th>素材有效結束時間:</th><td><input id = "EndDate" type="text" value = "" size="15" ></td></tr>
 				<tr><th><input type = 'checkbox' id='素材類型設定CB' name="updateCheckBox"></input></th><th><label>素材類型設定:</label></th><td>
-				<p class = "textM"><input id ="textRadio"  type="radio" name="materailRadio" value="文字">文字: 文字素材內容</p><p><blockquote class = "textM"><textarea id = "文字素材內容" rows="4" cols="20" class="textInput" style="width:400px"></textarea></blockquote></p>
-				<p class = "picM"><input id="picRadio" type="radio" name="materailRadio" value="圖片">圖片: 圖片素材寬度 <input id = "圖片素材寬度" type="number" value = "" style="width:60px" class="picInput">，圖片素材高度 <input id = "圖片素材高度" type="number" value = "" style="width:60px" class="picInput"></p>
-				<p class = "filmM"><input id ="filmRadio" type="radio" name="materailRadio" value="影片">影片: 影片素材秒數 <input id = "影片素材秒數" type="number" value = "" style="width:60px" class="filmInput" ><br>
+				<input id ="textRadio"  type="radio" name="materailRadio" value="文字">文字: 文字素材內容<blockquote><textarea id = "文字素材內容" rows="4" cols="20" class="textInput" style="width:400px"></textarea></blockquote>
+				<input id="picRadio" type="radio" name="materailRadio" value="圖片">圖片: 圖片素材寬度 <input id = "圖片素材寬度" type="number" value = "" style="width:60px" class="picInput">，圖片素材高度 <input id = "圖片素材高度" type="number" value = "" style="width:60px" class="picInput">
+				<input id ="filmRadio" type="radio" name="materailRadio" value="影片">影片: 影片素材秒數 <input id = "影片素材秒數" type="number" value = "" style="width:60px" class="filmInput" ><br>
 				</td></tr>
 				<tr class="fileM"><th><input type = 'checkbox' id='素材原始檔名CB' name="updateCheckBox"></input></th><th>上傳的素材檔案:</th>
 				<td><input id="fPicRadio" type="radio" name="fileRadio" value="圖片" checked>圖片<input type="radio" name="fileRadio" value="影片">影片
@@ -140,9 +140,12 @@
 	//清除素材按鈕
 	$('#clearFile').click(function(){
 		$('#fileToUpload').val('');
-		$("#圖片素材寬度,#圖片素材高度").val("");
 	});
 	
+
+	function clearFilePorpertyInput(){
+		$(".textInput,.filmInput,.picInput").val("");
+	}
 	
 	
 	var ajaxtodbPath = "ajaxToDB_Material.php";
@@ -483,8 +486,10 @@ $("#fileToUpload").change(function (e) {
     if(this.disabled) return alert('不支援上傳檔案!');
 
 	if(containsInvalidBig5Characters($("#fileToUpload").val().split('\\').pop())){
-		if(!confirm('檔案名稱內涵Big5無法顯示的字元!'))
+		if(!confirm('檔案名稱內涵Big5無法顯示的字元!是否要設定?')){
+			clearFilePorpertyInput();
 			return ;
+		}
 	}
 
     var F = this.files;
@@ -521,6 +526,7 @@ function clearVal(){
 	$(":checkbox").prop('checked',false);
 	$("#fPicRadio").prop('checked',true);
 };
+
 
 $( "#saveBtn" ).click(function(event) {
 	if(selectedMaterial.length==0){
