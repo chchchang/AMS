@@ -146,7 +146,7 @@
 </li>
 <li>訂單管理
 	<ul>
-		<li id="order/orderList_v2/orderListManagement.php">新版委刊單管理</li>
+		<!--<li id="order/orderList_v2/orderListManagement.php">新版委刊單管理</li>-->
 		<li id="order/orderManaging.php">訂單管理</li>
 		<li id="order/newOrderListByPage.php">新增委刊單</li>
 		<li id="order/editOrderListByPage.php">修改委刊單</li>
@@ -171,10 +171,6 @@
 		<li id="material/editMaterial.php">修改素材</li>
 		<li id="material/editMaterialBatch.php">批次修改素材</li>
 		<li id="material/searchMaterial.php">查詢素材</li>
-		<!--<li id="material/deliverMaterial.php">派送素材(圖片)</li>
-		<li id="material/deliverMaterial_VSM.php">單一平台派送素材(圖片)</li>
-		<li id="material/deliverMaterialCF.php">派送素材(影片)</li>
-		<li id="material/deliverMaterialCF_CAMPS.php">CAMPS派送素材</li>-->
 		<li id="material/deliverMaterialV2.php">派送素材2.0</li>
 	</ul>
 </li>

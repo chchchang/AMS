@@ -1,4 +1,6 @@
 <script src="../tool/GeneralSanitizer.js"></script>
+<script src="../tool/HtmlSanitizer.js"></script>
+<script src="../tool/vue/vue.min.js"></script>
 <script type="text/javascript">
 	//匯出excel表格
 	function exportExcel(){
@@ -63,10 +65,10 @@
 		//更新版位類型參數選擇
 		$("#psch_sortByProperty").empty();
 		$("#psch_sortByProperty").append('<option value=-1>無</option>');
-		$.post( "../position/positionSchedule.php", { method: "取得託播單用參數",版位類型識別碼:pId }, 
+		/*$.post( "../position/positionSchedule.php", { method: "取得託播單用參數",版位類型識別碼:pId }, 
 			function( data ) {
 				for(i in  data){
-					$("#psch_sortByProperty").append(GeneralSanitizer.sanitize('<option value="'+HtmlSanitizer.SanitizeHtml(data[i]["版位其他參數順序"])+'">'+HtmlSanitizer.SanitizeHtml(data[i]["版位其他參數顯示名稱"])+'</option>'));
+					$("#psch_sortByProperty").append('<option value="'+HtmlSanitizer.SanitizeHtml(data[i]["版位其他參數順序"]?data[i]["版位其他參數順序"]:"")+'">'+HtmlSanitizer.SanitizeHtml(data[i]["版位其他參數顯示名稱"]?data[i]["版位其他參數顯示名稱"]:"")+'</option>');
 				}
 				//取得cookie紀錄的最常選用參數
 				$.post( "../position/positionScheduleAjax.php", { action: "取得常用參數",版位類型識別碼:pId }, 
@@ -77,7 +79,7 @@
 				);
 			}
 			,"json"
-		);
+		);*/
 	}
 	//設定日期選擇器
 	$( "#startDatePicker" )
@@ -103,108 +105,25 @@
 				$( "#startDatePicker" ).datepicker( "option", "maxDate", selectedDate );
 			}
 	});
-	$('input[name="showAreaCheckBox"],input[name="showDefaultCheckBox"]').click(function(){
-		getPositionSchedule();
-	});
 	
 	$('#coloringMethod').change(function(){
 		colorOrderSch();
 	});
-	//**********method
+	
 	//取得排程表
 	var  getdataUrl ='../position/positionScheduleAjax.php';
-	function getPositionSchedule(){
-		//取得版位類型名稱
-		var ptn =  $('#psch_positiontype option:selected').text().split(':');
-		ptn.splice(0,1);
-		ptn = ptn.join(':');
-		//若是CSMS版位類型，開啟顯示區域選項
-		if($.inArray(ptn,CSMSPTN)!=-1){
-			$('#showArea').show();
-			/*if(ptn == '頻道short EPG banner')
-				$('#showDefault').show();
-			else{
-				$('#showDefault').hide();
-				$('input[name="showDefaultCheckBox"]').each(
-					function(){
-						$(this).prop('checked',false);
-					}
-				);
-			}*/
-		}
-		//若是單一平台EPG版位，顯示預設廣告過濾選項
-		/*else if(ptn == '單一平台EPG'){
-			$('#showDefault').show();
-		}*/
-		//不是CSMS版位類型，清空顯示區域選項
-		else{
-			$('#showArea,#showDefault').hide();
-			$('input[name="showAreaCheckBox"],input[name="showDefaultCheckBox"]').each(
-				function(){
-					$(this).prop('checked',false);
-				}
-			);
-		}
-		//檢查日期是否合格
-		std = $('#startDatePicker').val();
-		edd = $('#endDatePicker').val();
-		if(std == '' || edd == ''){
-			alert('請選擇日期');
-			return 0;
-		}
-		if(std>edd){
-			alert('開始日期必須不大於結束日期');
-			return 0;
-		}
-		
-		//取的資料
-		$('#schDiv').mask('資料產生中...');
-		//post用參數
-		var bypost = {
-		action:'版位排程'
-		,'版位類型識別碼':$('#psch_positiontype').val()
-		,'版位識別碼':$('#psch_position').val()
-		,'開始日期':$('#startDatePicker').val()
-		,'結束日期':$('#endDatePicker').val()
-		,'顯示模式':$('input[name=displayType]:checked').val()
-		,'排序條件':$("#psch_sortByProperty").val()
-		,'排序條件名稱':$('#psch_sortByProperty option:selected').text()
-		,'排程顯示方式':$("#psch_sortFormat").val()
-		};
-		if(typeof(getBookingSch)!='undefined' && getBookingSch)
-			bypost['待確認排程'] = true;
-		//增加顯示版位區域用參數
-		$('input[name="showAreaCheckBox"]:checked').each(function(){
-			if(typeof(bypost['顯示區域'])=='undefined')
-				bypost['顯示區域']=[];
-			bypost['顯示區域'].push($(this).val());
-		});
-		//過濾預設廣告用參數
-		/*$('input[name="showDefaultCheckBox"]:checked').each(function(){
-			bypost['預設廣告過濾']=$(this).val();
-		});*/
-		$.post(getdataUrl,bypost,
-			function(data){
-				//清空資料表
-				$('#pschedule').remove();
-				//增加資料
-				$('#schDiv').append(GeneralSanitizer.sanitize(data.table)).css({"max-height": ($(window).height()-100)+"px"});
-				$('.orderSch').css("cursor","pointer").click(
-					function(e){
-						$("#dialog_iframe").attr("src",'../order/orderInfo.php?name='+$(this).attr('orderId')).css({"width":"100%","height":"100%"});
-						$("#dialog_iframe").css({"width":"100%","height":"100%"}); 
-						dialog=$( "#dialog_form" ).dialog({height:$(window).height()*0.9, width:$(window).width()*0.7, title:"託播單資料"});
-						dialog.dialog( "open" );
-					}
-				);
-				$('#pschedule').tableHeadFixer({"left" : 1});
-				colorOrderSch();
-				$('#schDiv').unmask();
+	
+	function setJqueryActionOnTable(){
+		$('.orderSch').css("cursor","pointer").click(
+			function(e){
+				$("#dialog_iframe").attr("src",'../order/orderInfo.php?name='+$(this).attr('orderId')).css({"width":"100%","height":"100%"});
+				$("#dialog_iframe").css({"width":"100%","height":"100%"}); 
+				dialog=$( "#dialog_form" ).dialog({height:$(window).height()*0.9, width:$(window).width()*0.7, title:"託播單資料"});
+				dialog.dialog( "open" );
 			}
-		,'json'
 		);
 	}
-	
+
 	//將資料表上色
 	function colorOrderSch(){
 		var usedValue =[];
@@ -233,5 +152,109 @@
 			var bgcolor = colorsCodeforTimeTable[index%colorsCodeforTimeTable.length]
 			$(this).attr('bgcolor',bgcolor);
 		});
-	}	
+	}
+
+	var playListVueTable =new Vue({
+		el: '#vueApp',
+		data: {
+			showFlag:false,
+			yearMonthRow:{},
+			dateRow:[],
+			dayRow:[],
+			orderRows:[]
+		},
+		methods: {
+        	getPositionSche(){
+				let uiStartDate = new Date($("#startDatePicker").val());
+				let uiEndDate = new Date($("#endDatePicker").val());
+				let rowsRelateWithDate = this.getRowsRelateWihtDate(uiStartDate,uiEndDate);
+				this.yearMonthRow = rowsRelateWithDate.yearMonthRow;
+				this.dateRow = rowsRelateWithDate.dateRow;
+				this.dayRow = rowsRelateWithDate.dayRow;
+				this.getPositionScheduleDataFromAjax();
+			},
+
+			getRowsRelateWihtDate(startDate,endDate){
+				let rowsRelateWithDate=
+				{
+					yearMonthRow:{},
+					dateRow:[],
+					dayRow:[]
+				};
+				if (isNaN(startDate) || isNaN(endDate)) {
+   					 return rowsRelateWithDate; 
+  				}
+
+				let currentDate = startDate;
+				while (currentDate <= endDate) {
+					const date = new Date(currentDate);
+					rowsRelateWithDate.dayRow.push(this.getDayOfWeek(date));
+
+					let dateStr = date.toISOString().split('T')[0];
+					rowsRelateWithDate.dateRow.push(dateStr);
+
+					let yM =dateStr.substring(0,7)
+					if(rowsRelateWithDate.yearMonthRow[yM] === undefined){
+						rowsRelateWithDate.yearMonthRow[yM] = { colspan:0 };
+					}
+					rowsRelateWithDate.yearMonthRow[yM].colspan++;
+
+					currentDate.setDate(currentDate.getDate() + 1); // 增加一天
+				}
+				return rowsRelateWithDate; 
+			},
+
+			getDayOfWeek(date) {
+				const daysOfWeek = ['日', '一', '二', '三', '四', '五', '六'];
+				return daysOfWeek[date.getDay()];
+			},
+
+			getPositionScheduleDataFromAjax(){
+				var bypost = {
+				action:'版位排程2.0'
+				,'版位類型識別碼':$('#psch_positiontype').val()
+				,'版位識別碼':$('#psch_position').val()
+				,'開始日期':$('#startDatePicker').val()
+				,'結束日期':$('#endDatePicker').val()
+				,'顯示模式':$('input[name=displayType]:checked').val()
+				,'排序條件':$("#psch_sortByProperty").val()
+				,'排序條件名稱':$('#psch_sortByProperty option:selected').text()
+				,'排程顯示方式':$("#psch_sortFormat").val()
+				};
+
+				//增加顯示版位區域用參數
+				$('input[name="showAreaCheckBox"]:checked').each(function(){
+					if(typeof(bypost['顯示區域'])=='undefined')
+						bypost['顯示區域']=[];
+					bypost['顯示區域'].push($(this).val());
+				});
+
+				let updateOrderRows = (data)=>{
+						if(data.positionOrdersRow === undefined){
+							this.orderRows = [];
+						}
+						else{
+							this.orderRows = data.positionOrdersRow;
+						}
+					}
+				
+				$.post(getdataUrl,bypost,
+					updateOrderRows
+				,'json'
+				);
+			},
+
+			getCustomHtmlAttribute(attrObject) {
+				const customAttribute = {};
+				for (const key in attrObject) {
+					customAttribute[key] = attrObject[key];
+        		}
+				return customAttribute;
+			}
+		},
+		updated(){
+			setJqueryActionOnTable();
+			colorOrderSch()
+		}
+	})
 </script>

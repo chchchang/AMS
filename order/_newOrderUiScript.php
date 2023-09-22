@@ -220,9 +220,9 @@
 						var paraName = config['版位其他參數名稱'];
 						if(paraName.startsWith('bannerTransactionId')){
 							var connectIndex = paraName.replace('bannerTransactionId','');										
-							var $連動 = $('<select  id="連動廣告'+connectIndex+'"  multiple="multiple"  class ="tokenize configValue 連動廣告" order='+i+' />');
+							var $連動 = $('<select  id="連動廣告'+HtmlSanitizer.SanitizeHtml(connectIndex)+'"  multiple="multiple"  class ="tokenize configValue 連動廣告" order='+HtmlSanitizer.SanitizeHtml(i)+' />');
 							$inputtd.append($連動);
-							$('#連動廣告'+connectIndex).tokenize({
+							$('#連動廣告'+HtmlSanitizer.SanitizeHtml(connectIndex)).tokenize({
 									placeholder:"輸入CSMS群組識別碼或關鍵字選擇可連動的託播單"
 									,displayDropdownOnFocus:true
 									,newElements:false,

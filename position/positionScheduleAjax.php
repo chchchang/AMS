@@ -7,11 +7,14 @@ if(isset($_POST['action'])){
 	}
 	else if($_POST['action'] == "取得常用參數")
 		getPositionScheduleCookie();
+	else if($_POST['action'] == '版位排程2.0'){
+		getPositionNoHtml();
+	}
 }
-//取得版位排程資訊
-function getPositionSchedule(){
+
+function getPositionNoHtml(){
 	global $my;
-	$bgcolor=['#EEEEEE','#FFFFFF'];
+	$bgcolor=['#EEEEEE','#ECF5FF'];
 	if(isset($_POST['版位類型識別碼']))
 		$positionType=($_POST['版位類型識別碼']=='')?'%':$_POST['版位類型識別碼'];
 	else
@@ -202,114 +205,118 @@ function getPositionSchedule(){
 			$postionOrders[$row['版位名稱']."<br>".$_POST['排序條件名稱']."=".$row['託播單其他參數值']][] = $row;
 	}
 	//產生排程表結構
-	//產生日期
+	//產生託播單資料
 	$sdate=date_create($_POST["開始日期"]);
 	$edate=date_create($_POST["結束日期"]);
 	$diff=date_diff($sdate,$edate)->format("%a");
-	$YearMonth = array();
-	$temp='<tr><th style="min-width:150px;max-height:42px">年月</th><th rowspan = 2 colspan=4></th>';
-	$temp2='<tr><th>日</th>';
-	$temp3='<tr><th>星期</th><th>no</th><th>託播單識別碼</th><th>託播單名稱</th><th>狀態</th>';
-	for($i =0;$i<=$diff;$i++){
-		$date = strtotime($_POST["開始日期"]. ' + '.$i.' days');
-		$ym=date('Y-m', $date);
-		$d=date('d', $date);
-		$w=date('w', $date);
-		@$YearMonth[$ym]++;
-		$temp2.='<th style="min-width:18px; max-width:18px" >'.$d.'</th>';
-		switch($w){
-			case 0 :
-				$temp3.='<th><font color="red">日</font></th>';
-				break;
-			case 1 :
-				$temp3.='<th>一</th>';
-				break;
-			case 2 :
-				$temp3.='<th>二</th>';
-				break;
-			case 3 :
-				$temp3.='<th>三</th>';
-				break;
-			case 4 :
-				$temp3.='<th>四</th>';
-				break;
-			case 5 :
-				$temp3.='<th>五</th>';
-				break;
-			case 6 :
-				$temp3.='<th color="red"><font color="red">六</font></th>';
-				break;
-		};
-	}
-	foreach($YearMonth as $YM=>$num){
-		$temp.='<th colspan = "'.$num.'">'.$YM.'</th>';
-	}
-	$scheduleHtml='<thead>'.$temp.'</tr>'.$temp2.'</tr>'.$temp3.'</tr></thead><tbody>';
-	//產生託播單資料
 	$positionCount = 0;
+	$positionOrdersRow = [];
 	foreach($postionOrders as $position => $orders){
 		//印出有託播單資訊的row
-		if($_POST['顯示模式'] == 'all' || $_POST['顯示模式'] == 'withOrder'){
+		if($_POST['顯示模式'] == 'all' || $_POST['顯示模式'] == 'withOrder'){			
 			if(count($orders)>0){
-			$scheduleHtml.='<tr><td rowspan="'.count($orders).'" bgcolor="'.$bgcolor[$positionCount%count($bgcolor)].'">'.$position.'</td>';
-			$first = true;
-			$orderNum = 0;
-			foreach($orders as $order){
-				$orderStatusName = $orderStatus[$order["託播單狀態識別碼"]];
-				
-				if(!$first)
-					$scheduleHtml.='<tr>';
-				$scheduleHtml.='<td bgcolor="'.$bgcolor[$positionCount%count($bgcolor)].'">'.(++$orderNum).'</td>';
-				$scheduleHtml.='<td bgcolor="'.$bgcolor[$positionCount%count($bgcolor)].'">'.$order['託播單識別碼'].'</td>';
-				$scheduleHtml.='<td bgcolor="'.$bgcolor[$positionCount%count($bgcolor)].'">'.$order['託播單名稱'].'</td>';
-				$scheduleHtml.='<td bgcolor="'.$bgcolor[$positionCount%count($bgcolor)].'">'.$orderStatusName.'</td>';
-				$std = explode(' ',$order['廣告期間開始時間'])[0];
-				$edd = explode(' ',$order['廣告期間結束時間'])[0];
-				if($order['素材識別碼'] == null)
-					$order['素材識別碼']=0;
-				$colspanFlag = false;
-				$colspanNum = 0;
-				$order['託播單其他參數值'] = $order['託播單其他參數值']==null?"&nbsp;":$order['託播單其他參數值'];
-				for($i =0;$i<=$diff;$i++){
-					$date = date('Y-m-d',strtotime($_POST["開始日期"]. ' + '.$i.' days'));
-					if($std<=$date && $edd>=$date){
-						$colspanNum ++;
-						$colspanFlag = true;
+				$newRow = [];
+				array_push($newRow,["text"=>$position,"attr"=>[
+					"rowspan"=>count($orders),
+					"bgcolor"=>$bgcolor[$positionCount%count($bgcolor)]]]);
+				$first = true;
+				$orderNum = 0;
+				foreach($orders as $order){
+					if(!$first)
+						$newRow = [];
+
+					$orderStatusName = $orderStatus[$order["託播單狀態識別碼"]];
+					array_push($newRow,["text"=>(++$orderNum),"attr"=>["bgcolor"=>$bgcolor[$positionCount%count($bgcolor)]]]);
+					array_push($newRow,["text"=>$order['託播單識別碼'],"attr"=>["bgcolor"=>$bgcolor[$positionCount%count($bgcolor)]]]);
+					array_push($newRow,["text"=>$order['託播單名稱'],"attr"=>["bgcolor"=>$bgcolor[$positionCount%count($bgcolor)]]]);;
+					array_push($newRow,["text"=>$orderStatusName,"attr"=>["bgcolor"=>$bgcolor[$positionCount%count($bgcolor)]]]);
+					$std = explode(' ',$order['廣告期間開始時間'])[0];
+					$edd = explode(' ',$order['廣告期間結束時間'])[0];
+					if($order['素材識別碼'] == null)
+						$order['素材識別碼']=0;
+					$colspanFlag = false;
+					$colspanNum = 0;
+					$order['託播單其他參數值'] = $order['託播單其他參數值']==null?" ":$order['託播單其他參數值'];
+					for($i =0;$i<=$diff;$i++){
+						$date = date('Y-m-d',strtotime($_POST["開始日期"]. ' + '.$i.' days'));
+						if($std<=$date && $edd>=$date){
+							$colspanNum ++;
+							$colspanFlag = true;
+						}
+						else if($colspanFlag){
+							array_push($newRow,[
+									"text"=>$order['託播單其他參數值'],
+									"attr"=>[
+										"class"=>"orderSch",
+										"orderId"=>$order['託播單識別碼'],
+										"委刊單識別碼"=>$order['委刊單識別碼'],
+										"素材識別碼"=>$order['素材識別碼'],
+										"版位識別碼"=>$order['版位識別碼'],
+										"colspan"=>$colspanNum,
+										"title"=>$order['託播單識別碼'].":".$order['託播單名稱'],
+									]
+								]
+							);
+							$colspanFlag = false;
+							$colspanNum = 0;
+							array_push($newRow,["text"=>" ","attr"=>["bgcolor"=>$bgcolor[$positionCount%count($bgcolor)]]]);
+						}
+						else{
+							array_push($newRow,["text"=>" ","attr"=>["bgcolor"=>$bgcolor[$positionCount%count($bgcolor)]]]);
+						}
 					}
-					else if($colspanFlag){
-						$scheduleHtml.='<td class="orderSch" orderId ='.$order['託播單識別碼'].' 委刊單識別碼 ='.$order['委刊單識別碼'].' 素材識別碼 ='.$order['素材識別碼'].' 版位識別碼 ='.$order['版位識別碼']
-						.' colspan ="'.$colspanNum.'" title ="'.$order['託播單識別碼'].":".$order['託播單名稱'].'">'.$order['託播單其他參數值'].'</td>';
-						$colspanFlag = false;
-						$colspanNum = 0;
-						$scheduleHtml.='<td bgcolor="'.$bgcolor[$positionCount%count($bgcolor)].'">&nbsp;</td>';
+					if($colspanFlag){
+						array_push($newRow,[
+								"text"=>$order['託播單其他參數值'],
+								"attr"=>[
+									"class"=>"orderSch",
+									"orderId"=>$order['託播單識別碼'],
+									"委刊單識別碼"=>$order['委刊單識別碼'],
+									"素材識別碼"=>$order['素材識別碼'],
+									"版位識別碼"=>$order['版位識別碼'],
+									"colspan"=>$colspanNum,
+									"title"=>$order['託播單識別碼'].":".$order['託播單名稱'],
+								]
+							]
+						);
 					}
-					else
-						$scheduleHtml.='<td bgcolor="'.$bgcolor[$positionCount%count($bgcolor)].'">&nbsp;</td>';
+					$first = false;
+					array_push($positionOrdersRow,$newRow);
 				}
-				if($colspanFlag){
-					$scheduleHtml.='<td class="orderSch" orderId ='.$order['託播單識別碼'].' 委刊單識別碼 ='.$order['委刊單識別碼'].' 素材識別碼 ='.$order['素材識別碼'].' 版位識別碼 ='.$order['版位識別碼']
-					.' colspan ="'.$colspanNum.'" title ="'.$order['託播單識別碼'].":".$order['託播單名稱'].'">'.$order['託播單其他參數值'].'</td>';
-				}
-				$scheduleHtml.='</tr>';
-				$first = false;
-			}
-			$positionCount++;
+				$positionCount++;
 			}
 		}
 		if($_POST['顯示模式'] == 'all' || $_POST['顯示模式'] == 'withoutOder'){
 			if(count($orders)==0){
-				$scheduleHtml.='<tr><th>'.$position.'</th>';
+				$newRow = [];
+				array_push(
+					$newRow,
+					[
+						"text"=>$position,
+						"attr"=>[]
+					]
+				);
 				for($i =0;$i<=$diff;$i++){
-					$scheduleHtml.='<td bgcolor="'.$bgcolor[$positionCount%count($bgcolor)].'">&nbsp;</td>';
+					array_push(
+						$newRow,
+						[
+							"text"=>"",
+							"attr"=>[
+								"bgcolor"=>$bgcolor[$positionCount%count($bgcolor)]
+							]
+						]
+					);
 				}
-				$scheduleHtml.='</tr>';
+				array_push($positionOrdersRow,$newRow);
 				$positionCount++;
 			}
 		}
 	}
-	$scheduleHtml.='</tbody>';
-	$scheduleHtml='<table id="pschedule" class = "styledTable2" cellpadding="0" cellspacing="0">'.$scheduleHtml.'</table>';
-	exit(json_encode(array('table'=>$scheduleHtml,'postionOrders'=>$postionOrders),JSON_UNESCAPED_UNICODE));
+	exit(json_encode(array('positionOrdersRow'=>$positionOrdersRow,'postionOrders'=>$postionOrders),JSON_UNESCAPED_UNICODE));
+}
+//取得版位排程資訊
+function getPositionSchedule(){
+	exit("版位排程2.0");
 }
 
 //紀錄常用參數cookie
