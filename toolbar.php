@@ -103,7 +103,7 @@
 		</ul>
 	</li>
 	<li>單一平台<ul>
-		<li id="other/vsmBGManagement.php">單一平台黃金版位管理</li>
+		<!--<li id="other/vsmBGManagement.php">單一平台黃金版位管理</li>-->
 		<li id="VSM/setVSMPosition.php">更新VSM版位</li>
 		<li id="other/updateOrderPara.php">VOD插廣告/單一平台廣告參數更新</li>
 		<li id="other/vastUrlManagement.php">聯播網廣告來源管理</li>
@@ -158,7 +158,7 @@
 		<li id="order/editOrderBatch.php">批次修改託播單</li>
 		<li id="order/checkOrderBatch.php">批次確定/取消確定託播單</li>
 		<li id="order/orderManaging_adowner.php">廣告主個人訂單管理</li>
-		<li id="order/csmsGroupManaging.php">SEPG託播單CSMS群組管理</li>
+		<!--<li id="order/csmsGroupManaging.php">SEPG託播單CSMS群組管理</li>-->
 	</ul>
 </li>
 <li>素材管理
