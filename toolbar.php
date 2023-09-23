@@ -68,7 +68,7 @@
 		<li id="predict/category.php">編輯廣告分類</li>
 	</ul>
 </li>
-<li>廣告銷售前預約
+<!--<li>廣告銷售前預約
 	<ul>
 		<li id="booking/bookingOrder.php">新增廣告銷售前預約託播單</li>
 		<li id="booking/editBooking.php">修改廣告銷售前預約託播單</li>
@@ -78,7 +78,7 @@
 		<li id="booking/commitBooking.php">確認廣告銷售前預約託播單</li>
 		<li id="booking/bookingSchedule.php">銷售前預約託播單排程表</li>
 	</ul>
-</li>
+</li>-->
 
 <li>各投放系統客制化功能
 	<ul>

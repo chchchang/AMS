@@ -205,7 +205,7 @@
 														m_currentPage++;
 														//總頁數為-1，動態增加頁數
 														if(m_totalPage == -1){
-															if( $("#"+appendElementId+">.pageInfo>select option[value="+m_currentPage+"]").length == 0){
+															if( $("#"+appendElementId+">.pageInfo>select option[value="+HtmlSanitizer.SanitizeHtml(m_currentPage)+"]").length == 0){
 																$("#"+appendElementId+">.pageInfo>select").append($("<option></option>").attr("value",m_currentPage).text(m_currentPage));
 															}
 															$("#"+appendElementId+">.pageInfo>select").val(m_currentPage);
@@ -228,7 +228,7 @@
 		/**設定欄位是否可排序**/
 		this.set_sortable = function(headerNames,enable){
 			for(var i in headerNames){
-				var header = $("#"+appendElementId+">.ChDataGrid >thead > tr >th:contains("+headerNames[i]+")");
+				var header = $("#"+appendElementId+">.ChDataGrid >thead > tr >th:contains("+HtmlSanitizer.SanitizeHtml(headerNames[i])+")");
 				if(enable)
 					header.addClass("sortable");
 				else
@@ -264,7 +264,7 @@
 		/**設定欄位排序狀態**/
 		this.set_sort_state = function(headerName,state){
 			//依照header排序狀態改變顯示標誌
-			var header = $("#"+appendElementId+">.ChDataGrid >thead > tr >th:contains("+headerName+")");
+			var header = $("#"+appendElementId+">.ChDataGrid >thead > tr >th:contains("+HtmlSanitizer.SanitizeHtml(headerName)+")");
 			header.removeClass("inSort").removeClass("deSort");
 			switch(state){
 				case "increase":

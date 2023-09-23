@@ -8,7 +8,8 @@
 	include('../tool/sameOriginXfsBlock.php');
 ?>
 <script type="text/javascript" src="../tool/jquery-3.4.1.min.js"></script>
-<script type="text/javascript" src="../tool/ajax/ajaxToDB.js"></script> 
+<script type="text/javascript" src="../tool/ajax/ajaxToDB.js"></script>
+<script src="../tool/HtmlSanitizer.js"></script>
 <script type="text/javascript" src="../tool/datagrid/CDataGrid.js"></script>
 <script type="text/javascript" src="../tool/jquery-plugin/jquery.placeholder.min.js"></script>
 <script src="../tool/jquery-ui1.2/jquery-ui.js"></script>
@@ -17,7 +18,6 @@
 <script src="../tool/jquery-ui1.2/jquery-ui-sliderAccess.js" type="text/javascript"></script>
 <script type="text/javascript" src="../tool/autoCompleteComboBox.js"></script>
 <script type="text/javascript" src="../tool/jquery-plugin/jquery.form.js"></script>
-<script src="../tool/HtmlSanitizer.js"></script>
 <link rel="stylesheet" href="<?=$SERVER_SITE.Config::PROJECT_ROOT?>tool/jquery-ui1.2/jquery-ui.css"></link>
 <link rel='stylesheet' type='text/css' href='<?=$SERVER_SITE.Config::PROJECT_ROOT?>external-stylesheet.css' />
 <style type="text/css">

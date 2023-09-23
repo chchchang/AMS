@@ -24,7 +24,7 @@
 			exit(json_encode(array("success"=>false,"message"=>'無法連接VSMAPI'),JSON_UNESCAPED_UNICODE));	
 		}
 		$PTDatas = json_decode($apiResult,true);
-		print_r($PTDatas);
+		//print_r($PTDatas);
 		foreach($PTDatas as $PTData){
 			//建立版位類型並取得識別碼
 			$ptid = createPT($PTData);
@@ -35,7 +35,7 @@
 			if(!$apiResult=connec_to_Api($apiUrl,'POST',$postvars)){
 				exit(json_encode(array("success"=>false,"message"=>'無法連接VSMAPI'),JSON_UNESCAPED_UNICODE));	
 			}
-			echo($apiResult);
+			//echo($apiResult);
 			$pDatas = json_decode($apiResult,true);
 			//$pDatas = getVSMPosition($PTData['mat_type_id']);
 			//建立版位
@@ -362,7 +362,7 @@
 		$sql='SELECT 版位識別碼 FROM 版位 WHERE 版位名稱 = ?';
 		$result =$my->getResultArray($sql,'s',$ptn);
 		if(count($result)>0){
-			echo '已建立過版位'.'<br>';
+			echo '已建立過版位'.$ptn.'<br>';
 			$pid = $result[0]['版位識別碼'];
 		}
 		else{
@@ -377,7 +377,8 @@
 			}
 			
 			$pid = $stmt->insert_id;
-			echo '版位建立完成，ID'.$pid.'<br>';
+			echo '版位建立完成，ID'.$pid.' ';
+			echo '版位名稱'.$ptn.'<br>';
 		}
 		//建立版位類型其他參數
 		$sql='DELETE FROM 版位其他參數 WHERE 版位識別碼=? AND 版位其他參數順序 IN (1,2,3)';
@@ -429,8 +430,13 @@
 		if(count($result)>0){
 			echo '已建立過版位'.$result[0]['版位識別碼'].'<br>';
 			$pid = $result[0]['版位識別碼'];
-			/*$sql = "UPDATE 版位 SET 版位名稱 = ? WHERE 版位識別碼 = ?";
-				$result =$my->getResultArray($sql,'si',$ptn,$pid);*/
+			$sql = "UPDATE 版位 SET 版位名稱 = ? WHERE 版位識別碼 = ?";
+			if(!$my->execute($sql,'si',$ptn,$pid)){
+				echo '修改EPG版位名稱失敗'.$ptn.'<br>';
+			}
+			else{
+				echo 'EPG版位名稱'.$ptn.'<br>';
+			}
 		}
 		else{
 			//建立版位類型資料
@@ -444,7 +450,8 @@
 			}
 			
 			$pid = $stmt->insert_id;
-			echo '版位建立完成，ID'.$pid.'<br>';
+			echo '版位建立完成，ID'.$pid.' ';
+			echo 'EPG版位名稱'.$ptn.'<br>';
 		}
 		//建立版位類型其他參數
 		$sql='DELETE FROM 版位其他參數 WHERE 版位識別碼=?';

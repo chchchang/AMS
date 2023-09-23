@@ -458,7 +458,8 @@ $("#fileToUpload").change(function (e) {
 
 function containsInvalidBig5Characters(inputString) {
     // 定義 Big5 編碼範圍的正則表達式
-    var regex = /[^\x00-\x7F\u4E00-\u9FFF\uFE00-\uFEFF]/;
+    //var regex = /[^\x00-\x7F\u4E00-\u9FFF\uFE00-\uFEFF]/;
+	var regex = /[\uE000-\uF848]/;
     // 使用正則表達式測試字串
     return regex.test(inputString);
 }

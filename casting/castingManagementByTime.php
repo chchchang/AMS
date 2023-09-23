@@ -130,6 +130,7 @@ td.ui-datepicker-current-day a {border: 2px #E63F00 solid !important;}
 <link rel="stylesheet" href="<?=$SERVER_SITE.Config::PROJECT_ROOT?>tool/jquery-ui1.2/jquery-ui.css">
 <script src="../tool/timetable/TimeTable.js?<?=time()?>"></script>
 <script type="text/javascript" src="../tool/autoCompleteComboBox.js"></script>
+<script src="../tool/HtmlSanitizer.js"></script>
 <script type="text/javascript" src="../tool/datagrid/CDataGrid.js"></script>
 <script src="../tool/jquery.loadmask.js"></script>
 <link rel="stylesheet" type="text/css" href="<?=$SERVER_SITE.Config::PROJECT_ROOT?>tool/jquery.loadmask.css" />

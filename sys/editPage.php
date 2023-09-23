@@ -85,6 +85,7 @@
 	?>
 	<link rel='stylesheet' type='text/css' href='<?=$SERVER_SITE.Config::PROJECT_ROOT?>external-stylesheet.css' />
 	<script src='../tool/jquery-3.4.1.min.js'></script>
+	<script src="../tool/HtmlSanitizer.js"></script>
 	<script src='../tool/datagrid/CDataGrid.js'></script>
 	<script>
 		$(document).ready(function() {

@@ -249,6 +249,7 @@ if(isset($_POST['postAction'])){
 	<link rel="stylesheet" href="../../tool/jquery-ui1.2/jquery-ui.css">
 	<script src="../../tool/jquery-ui1.2/jquery-ui.min.js"></script>
 	<script type="text/javascript" src="../../tool/timetable/TimeTable.js?<?=time()?>"></script>
+	<script src="../tool/HtmlSanitizer.js"></script>
 	<script type="text/javascript" src="../../tool/datagrid/CDataGrid.js"></script>
 	<script src="../../tool/jquery.loadmask.js"></script>
 	<link rel="stylesheet" type="text/css" href="../../tool/jquery.loadmask.css" />

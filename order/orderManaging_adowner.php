@@ -122,6 +122,7 @@
 <script type="text/javascript" src="../tool/timetable/TimeTable.js?<?=time()?>"></script>
 <script type="text/javascript" src="../tool/datagrid/BlockDataGrid.js"></script>
 <script type="text/javascript" src="../tool/ajax/ajaxToDB.js"></script> 
+<script src="../tool/HtmlSanitizer.js"></script>
 <script type="text/javascript" src="../tool/datagrid/CDataGrid.js"></script>
 <script type="text/javascript" src="../tool/autoCompleteComboBox.js"></script>
 <link rel='stylesheet' type='text/css' href='<?=$SERVER_SITE.Config::PROJECT_ROOT?>external-stylesheet.css'/>

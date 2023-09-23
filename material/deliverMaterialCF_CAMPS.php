@@ -296,11 +296,11 @@
 <link rel="stylesheet" type="text/css" href="<?=$SERVER_SITE.Config::PROJECT_ROOT?>tool/jquery.loadmask.css" />
 <script src="../tool/jquery-3.4.1.min.js"></script>
 <script src="../tool/jquery.loadmask.js"></script>
+<script src="../tool/HtmlSanitizer.js"></script>
 <script src="../tool/datagrid/CDataGrid.js"></script>
 <script src="../tool/jquery-ui1.2/jquery-ui.js"></script>
 <script type="text/javascript" src="../tool/autoCompleteComboBox.js"></script>
 <script type="text/javascript" src="../tool/jquery-plugin/jquery.placeholder.min.js"></script>
-<script src="../tool/HtmlSanitizer.js"></script>
 <body>
 <?php include('_searchMaterialUI.php'); ?>
 <input type="checkbox" id="僅顯示尚未派送項目">僅顯示未派送項目 <input type="checkbox" id="僅顯示未取得媒體編號項目">僅顯示未取得媒體編號項目 &nbsp;

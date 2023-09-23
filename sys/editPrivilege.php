@@ -193,6 +193,7 @@
 	include('../tool/sameOriginXfsBlock.php');
 	?>
 	<script src='../tool/jquery-3.4.1.min.js'></script>
+	<script src="../tool/HtmlSanitizer.js"></script>
 	<script src='../tool/datagrid/CDataGrid.js'></script>
 	<link rel='stylesheet' type='text/css' href='<?=$SERVER_SITE.Config::PROJECT_ROOT?>external-stylesheet.css' />
 	<script type="text/javascript" src="../tool/jquery-plugin/jquery.placeholder.min.js"></script>
