@@ -321,7 +321,7 @@
 		}
 		
 		$data[]=array(
-			'bakadschdTransactionId'=>$order['託播單CSMS群組識別碼'],
+			'bakadschdTransactionId'=>$order['託播單識別碼'],
 			'sdVodcntTitle'=>$SDVideo,
 			'hdVodcntTitle'=>$HDVideo,
 			'sdChtnIapId' => $sd['影片媒體編號北'],
