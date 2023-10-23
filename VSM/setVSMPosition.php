@@ -421,17 +421,18 @@
 	function createEPGP($ptid,$PTData){
 		global $my,$logger;
 		$ptn = $PTData['channel_number'].'_'.$PTData['title'];
-		/*$sql='SELECT 版位.版位識別碼 FROM 版位 LEFT JOIN 版位其他參數 ON 版位.版位識別碼 = 版位其他參數.版位識別碼 
+		$pinfo = $PTData['contract_start']."~".$PTData['contract_end'];
+		$sql='SELECT 版位.版位識別碼 FROM 版位 LEFT JOIN 版位其他參數 ON 版位.版位識別碼 = 版位其他參數.版位識別碼 
 			WHERE 版位其他參數.版位其他參數名稱 = "content_id" AND 版位其他參數預設值 LIKE ?';
-		$result =$my->getResultArray($sql,'s',$PTData['content_id']);*/
-		$sql='SELECT 版位.版位識別碼 FROM 版位 WHERE 版位名稱 LIKE ? AND 上層版位識別碼 = ? and DISABLE_TIME IS NULL AND DELETED_TIME IS NULL';
-		$result =$my->getResultArray($sql,'si',$PTData['channel_number'].'\_%',$ptid);
+		$result =$my->getResultArray($sql,'s',$PTData['content_id']);
+		/*$sql='SELECT 版位.版位識別碼 FROM 版位 WHERE 版位名稱 LIKE ? AND 上層版位識別碼 = ? and DISABLE_TIME IS NULL AND DELETED_TIME IS NULL';
+		$result =$my->getResultArray($sql,'si',$PTData['channel_number'].'\_%',$ptid);*/
 		echo '建立版位'.$ptn.'<br>';
 		if(count($result)>0){
 			echo '已建立過版位'.$result[0]['版位識別碼'].'<br>';
 			$pid = $result[0]['版位識別碼'];
-			$sql = "UPDATE 版位 SET 版位名稱 = ? WHERE 版位識別碼 = ?";
-			if(!$my->execute($sql,'si',$ptn,$pid)){
+			$sql = "UPDATE 版位 SET 版位名稱 = ?, 版位說明 = ? WHERE 版位識別碼 = ?";
+			if(!$my->execute($sql,'ssi',$ptn,$pinfo,$pid)){
 				echo '修改EPG版位名稱失敗'.$ptn.'<br>';
 			}
 			else{
@@ -440,8 +441,12 @@
 		}
 		else{
 			//建立版位類型資料
-			$sql='INSERT INTO 版位 (版位名稱,上層版位識別碼,CREATED_PEOPLE) VALUES ("'.$ptn.'",'.$ptid.',1)';
+			$sql='INSERT INTO 版位 (版位名稱,版位說明,上層版位識別碼,CREATED_PEOPLE) VALUES (?,?,1)';
 			if(!$stmt=$my->prepare($sql)) {
+				exit('錯誤代碼('.$my->errno.')、錯誤訊息('.$my->error.')。');
+			}
+
+			if(!$stmt->bind_param('ssi',$ptn,$pinfo,$ptid)) {
 				exit('錯誤代碼('.$my->errno.')、錯誤訊息('.$my->error.')。');
 			}
 			
