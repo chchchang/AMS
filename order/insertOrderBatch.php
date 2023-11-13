@@ -28,6 +28,7 @@
 	<link rel='stylesheet' type='text/css' href='../external-stylesheet.css'/>
 	<script src="../tool/GeneralSanitizer.js"></script>
 	<script src="../tool/xlsx.full.min.js"></script>
+	<script src="../tool/vue/vue.min.js"></script>
 	<script src="../WebConfig.js"></script>
 	<link rel="stylesheet" type="text/css" href="<?=$SERVER_SITE.Config::PROJECT_ROOT?>tool/jquery.loadmask.css" />
 <script src="../tool/jquery.loadmask.js"></script>
@@ -46,20 +47,49 @@
 版位類型:<select id="_searchOUI_positiontype"></select> <button id="downloadExample">下載空白Excel範例檔案</button><br>
 表單內容範例:
 <br>
-<table id="exampleTable" class="styledTable" style="color:blue;">
-</table>
+<div id="exampleTableVue">
+	<table  class="styledTable" style="color:blue;">
+		<thead>
+			<tr>
+				<th v-for="headName in thead">{{headName}}</th>
+			</tr>
+		</thead>
+		<tbody>
+			<tr>
+				<td v-for="td in tbody">{{td}}</td>
+			</tr>
+		</tbody>
+	</table>
+</div>
+
 <br>
 <input type="file" name="excleFileDom" id="excleFileDom" />
 </fieldset>
 <fieldset>
 <legend>匯入/檢查結果</legend>
 <div id="resultBlock"></div>
+<div id="resultTableVue">
+	<table class="styledTable">
+		<thead>
+			<tr  v-for="(row, index) in rows" :key="index">
+				<th  v-if="index === 0" v-for="(td, tdId) in row" :key="tdId">{{td}}</th>
+			</tr>
+		</thead>
+		<tbody>
+			<tr  v-for="(row, index) in rows" :key="index" v-if="index > 0">
+				<td v-for="(td, tdId) in row" :key="tdId">{{td}}</td>
+			</tr>
+		</tbody>
+	</table>
+</div>
+
 <br><button id="submitExcel" class="darkButton">開始匯入</button> <button id="downloadResult">下載執行結果Excel檔案</button>
 </fieldset>
 <script type="text/javascript">
 	let global_thead=[];//表單title
 	let	global_positionList=[];//版位
 	let global_linkType=[];//點擊開砌起類型
+
 	$("#downloadResult,#submitExcel").hide();
 	//版位類型自動完成選項
 	$.post('orderManaging.php',{method:'getPositionTypeSelection'}
@@ -141,26 +171,35 @@
 				positionPrar = data;
 				global_thead = ["版位識別碼(多筆用分號「;」隔開)","委刊單識別碼","託播單名稱","託播單說明","託播單開始時間(時分秒不指定將帶入00:00:00)","託播單結束時間(時分秒不指定將帶入23:59:59)","時段(多筆用分號「;」隔開,留白預設為0~23時段)"
 							,"預約到期日(不指定將帶入託播單開始時間)","售價"];
-				let tbody = ["<td>"+pId+"</td>","<td>1234</td>","<td>新增託播單名稱</td>","<td></td>","<td>"+today+" 00:00:00</td>","<td>"+today+" 23:59:59</td>","<td>0;1;2;3;4;5;6;7;8;9;10;11;12;13;14;15;16;17;18;19;20;21;22;23</td>"
-							,"<td>"+today+" 00:00:00</td>","<td></td>"];
+				let tbodyForVue = [
+					pId,
+					"1234",
+					"新增託播單名稱",
+					"",
+					today+" 00:00:00",
+					today+" 23:59:59",
+					"0;1;2;3;4;5;6;7;8;9;10;11;12;13;14;15;16;17;18;19;20;21;22;23",
+					today+" 00:00:00",
+					""];
 				for(let i in data["其他參數設定"]){
 					global_thead.push(data["其他參數設定"][i]["版位其他參數顯示名稱"]);
-					tbody.push("<td>"+data["其他參數設定"][i]["版位其他參數預設值"]+"</td>");
+					tbodyForVue.push(data["其他參數設定"][i]["版位其他參數預設值"]);
 				}
 				for(let i in data["版位素材設定"]){
 					global_thead.push(data["版位素材設定"][i]["顯示名稱"]+i+":素材識別碼");
 					global_thead.push(data["版位素材設定"][i]["顯示名稱"]+i+":可否點擊(1/0)");
 					global_thead.push(data["版位素材設定"][i]["顯示名稱"]+i+":點擊開始類型");
 					global_thead.push(data["版位素材設定"][i]["顯示名稱"]+i+":點擊開始位址");
-					tbody.push("<td>123456</td>");
-					tbody.push("<td>0</td>");
-					tbody.push("<td></td>");
-					tbody.push("<td></td>");
+					tbodyForVue.push("123456");
+					tbodyForVue.push("0");
+					tbodyForVue.push("");
+					tbodyForVue.push("");
 				}
-				$("#exampleTable").empty().append("<thead><tr><th>"+global_thead.join("</th><th>")+"</th></tr></thead>"+"<tbody><tr>"+tbody.join("")+"</tr></tbody>");
+				
+				exampleTableVue.thead = global_thead;
+				exampleTableVue.tbody = tbodyForVue;
 			};
 		getPositionPara(pId,callback);
-			
 	}
 
 	//利用ajax取得版位資料，ajax完成後執行clallbac function
@@ -292,7 +331,7 @@
 						"託播單說明":row[3],
 						"廣告期間開始時間":formatDate(row[4]),
 						"廣告期間結束時間":formatDate(row[5]).replace("00:00:00","23:59:59"),//若結束時間為00:00:00 置換為當天結束
-						"廣告可被播出小時時段":(row[6]===undefined)?"0,1,2,3,4,5,6,7,8,9,10,11,12,13,14,15,16,17,18,19,20,21,22,23":String(row[6]).replaceAll(";",","),//將區分多筆的;改為系統使用的,
+						"廣告可被播出小時時段":getHoursStringFromExcelData(row[6]),
 						"預約到期時間":formatDate(row[7]),
 						"售價":(row[8]==undefined)?null:row[8],
 						'其他參數':{},
@@ -388,19 +427,37 @@
 					}
 					global_adOrders[orderListId].push(adOrder);
 				}
-				$("#resultBlock").empty().append(XLSX.utils.sheet_to_html(XLSX.utils.aoa_to_sheet(global_orderInfoSheetAoa)));
-				$( "#resultBlock table" ).addClass( "styledTable" );
-			};
+				resultTableVue.originalData = [...global_orderInfoSheetAoa];
 
-			let checkFunction
+			};
 			getPositionPara(pId,callback);
 		};
 		reader.readAsArrayBuffer(file);
 	}
 	excleFileDom.addEventListener("change", handleFile, false);
 
+	let getHoursStringFromExcelData =(excelHoursData)=>{
+		if(!excelHoursData && excelHoursData !== ""){
+			return "0,1,2,3,4,5,6,7,8,9,10,11,12,13,14,15,16,17,18,19,20,21,22,23";
+		}
+		//將"0;1~5;7"分割為[0,1~5,7]
+		let hourSections= String(excelHoursData).split(";");
+		let hoursSet = new Set();
+		for(section of hourSections){
+			//處理1~5這類的連續時段表示方式
+			let preiod = section.split("~");
+			hoursSet.add(+preiod[0]);
+			if(preiod.length > 1 ){
+				for(let i = +preiod[0] + 1; i <= +preiod[1]; i++){
+					hoursSet.add(i);
+					hoursSet.add(+i);
+				}
+			}
+		}
+		return Array.from(hoursSet).join(",");
+	}
 	//匯入excel資料
-	$("#submitExcel").click(function(){
+	$("#submitExcel").click(()=>{
 		if(!global_validOrderCheck){
 			alert("匯入檔案設定有誤，請修正後再匯入。");
 		}
@@ -437,12 +494,132 @@
 			).then(()=>{
 				//所有託播單新增完成
 				alert("匯入完成，請查看匯入結果欄位");
-				$("#resultBlock").empty().append(XLSX.utils.sheet_to_html(XLSX.utils.aoa_to_sheet(global_orderInfoSheetAoa)));
-				$( "#resultBlock table" ).addClass( "styledTable" );
-				$("#submitExcel").unmask();
+				resultTableVue.originalData = global_orderInfoSheetAoa;
+				$("#submitExcel").attr('disabled', false).unmask();
 			});
 		}
 	});
+
+	let exampleTableVue = new Vue({
+		el: '#exampleTableVue',
+    	data:{
+			thead : [],
+			tbody : []
+	  }
+    });
+
+	let resultTableVue = new Vue({
+		el: '#resultTableVue',
+    	data:{
+			originalData :[],
+			rows : [],
+			positionNameCache : new Map(),
+			positionNameWatingForAjaxData : {},
+			orderlistNameCache : new Map(),
+			orderlistNameWatingForAjaxData : {},
+
+		},
+		methods:{
+			getTdVaule(rowId,colId) {
+				let value = this.originalData[rowId][colId];
+				if (value instanceof Date) {
+					const year = value.getFullYear();
+					const month = String(value.getMonth() + 1).padStart(2, '0');
+					const day = String(value.getDate()).padStart(2, '0');
+					const hours = String(value.getHours()).padStart(2, '0');
+					const minutes = String(value.getMinutes()).padStart(2, '0');
+					const seconds = String(value.getSeconds()).padStart(2, '0');
+					return `${year}-${month}-${day} ${hours}:${minutes}:${seconds}`;
+				}
+				else if( colId === 0 ){
+					return this.getPositionName(value,rowId,colId);
+				}
+				else if( colId === 1 ){
+					return this.getOrderlistName(value,rowId,colId);
+				}
+				else {
+					return value;
+				}
+			},
+			getPositionName(positionId,rowId,colId){
+				if(this.positionNameCache.has(positionId)){
+					return this.positionNameCache.get(positionId);
+				}
+
+				if(!this.positionNameWatingForAjaxData[positionId]){
+					this.positionNameWatingForAjaxData[positionId] = [];
+					this.getPositionNameFromAjax(positionId);
+				}
+				this.positionNameWatingForAjaxData[positionId].push([rowId,colId]);
+				
+				return "Loading..."
+			},
+			getPositionNameFromAjax(positionId){
+				$.post('../position/positionTypeForm.php',{method:'版位資料',id:positionId},
+					(data)=>{
+						let positionInfo = data[0];
+						this.positionNameCache.set(positionId,positionInfo["版位識別碼"]+":"+positionInfo["版位名稱"]);
+						this.rerenderPositionNameUsingDataFromAjax(positionInfo["版位識別碼"]);
+					}		
+					,'json'
+				);
+			},
+			rerenderPositionNameUsingDataFromAjax(positionId){
+				for(let [row,col] of this.positionNameWatingForAjaxData[positionId]){
+					this.rows[row][col] = this.positionNameCache.get(positionId);
+				}
+				this.$forceUpdate();
+			},
+			getOrderlistName(orderlistId,rowId,colId){
+				if(this.orderlistNameCache.has(orderlistId)){
+					return this.orderlistNameCache.get(orderlistId);
+				}
+
+				if(!this.orderlistNameWatingForAjaxData[orderlistId]){
+					this.orderlistNameWatingForAjaxData[orderlistId] = [];
+					this.getOrderlistNameFromAjax(orderlistId);
+				}
+				this.orderlistNameWatingForAjaxData[orderlistId].push([rowId,colId]);
+				
+				return "Loading..."
+			},
+			getOrderlistNameFromAjax(orderlistId){
+				$.post('ajaxToDB_Order.php',{action:'顯示委刊單資料',委刊單識別碼:orderlistId},
+					(data)=>{
+						this.orderlistNameCache.set(orderlistId,data["委刊單識別碼"]+":"+data["委刊單名稱"]);
+						this.rerenderOrderlistNameUsingDataFromAjax(data["委刊單識別碼"]);
+					}		
+					,'json'
+				);
+			},
+			rerenderOrderlistNameUsingDataFromAjax(orderlistId){
+				for(let [row,col] of this.orderlistNameWatingForAjaxData[orderlistId]){
+					this.rows[row][col] = this.orderlistNameCache.get(orderlistId);
+				}
+				this.$forceUpdate();
+			},
+		},
+		watch:{
+			originalData: function(){
+				console.log("original data changed");
+				let rowNum = this.originalData.length;
+				let colNUm = this.originalData[0].length;
+				this.rows = Array.from({length:rowNum},()=>(new Array(colNUm)));
+
+				for(let i = 0; i<rowNum; i++){
+					for(let j = 0; j<colNUm; j++){
+						if(i == 0)//header
+							this.rows[i][j] = this.originalData[i][j];
+						else{
+							this.rows[i][j] = this.getTdVaule(i,j);
+						}
+					}
+				}
+				this.$forceUpdate();
+
+			}
+		}
+    });
 </script>
 </body>
 </html>
