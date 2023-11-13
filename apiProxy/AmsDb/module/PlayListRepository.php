@@ -359,10 +359,10 @@ class PlayListRepository
 			return false;
 		}
 		//新增playlist template
-		$valuesTemplate = "(?,?,?,?,?,?)";
+		$valuesTemplate = "(?,?,?,?,?,?,?)";
 		$valuesStringArray = array();
-		$sql = "insert into barker_playlist_template (playlist_id,transaction_id,offset,repeat_times,start_seconds,end_seconds) VALUES ";
-		$typeStirngTemplate="iiiiii";
+		$sql = "insert into barker_playlist_template (playlist_id,transaction_id,offset,repeat_times,start_seconds,end_seconds,tag) VALUES ";
+		$typeStirngTemplate="iiiiiis";
 		$parameter = array();
 		$typeStirng="";
 		$parameter[]=&$sql;
@@ -379,6 +379,7 @@ class PlayListRepository
 			$parameter[]=$record["repeat_times"];
             $parameter[]=$record["start_seconds"];
             $parameter[]=$record["end_seconds"];
+            $parameter[]=isset($record["tag"])?$record["tag"]:null;
 		}
 		$sql.= implode(",",$valuesStringArray);
 		$result=call_user_func_array(array($this->mydb,"execute"),$parameter);
