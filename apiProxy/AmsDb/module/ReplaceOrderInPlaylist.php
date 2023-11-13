@@ -104,7 +104,8 @@ class ReplaceOrderInPlaylist
             }
             else{
                 //有設定開始取代位置和開始取代區間，將用實際播表取代排播樣版
-                $playlistInfo[$pid]["template"] = $playlistInfo[$pid]["record"];
+                //$playlistInfo[$pid]["template"] = $playlistInfo[$pid]["record"];
+                $playlistInfo[$pid]["template"] = $this->overWriteTemplatesWithRecrods($playlistInfo[$pid]["template"], $playlistInfo[$pid]["record"]);
             }
 		}
         //開始取代並更新資料庫
@@ -171,6 +172,24 @@ class ReplaceOrderInPlaylist
         else{
             $origin["transaction_id"] = $newTransactionId;
         }
+    }
+
+    private function overWriteTemplatesWithRecrods($templates,$records){
+        $newTemplate = [];
+        $oldTemlpateSize = count($templates);
+        $oldTemplatePoniter = 0;
+        $newTemplatePoniter = 0;
+        foreach($records as $record ){
+            if($oldTemplatePoniter < $oldTemlpateSize && $templates[$oldTemplatePoniter]["tag"] != NULL){
+                array_push($newTemplate,$templates[$oldTemplatePoniter]);
+                $newTemplatePoniter++;
+                $oldTemplatePoniter++;
+            }
+            $record["offset"] = $newTemplatePoniter++;
+            array_push($newTemplate,$record);
+            $oldTemplatePoniter++;
+        }
+        return $newTemplate;
     }
     /***
      * 檢查要用以取代的託播單是否完整包含要取代的頻道
