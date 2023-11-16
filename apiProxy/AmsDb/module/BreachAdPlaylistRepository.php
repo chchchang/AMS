@@ -28,7 +28,7 @@ class BreachAdPlaylistRepository
         $this->mydb->rollback();
     }
    
-    public function getBreachAdExcelDataBySchedule($channel,$date,$hour){
+    public function getBreachAdExcelDataBySchedule($channel,$date,$hour = "all"){
         $exelRows = [];
         array_push( $exelRows,
             [
@@ -47,33 +47,47 @@ class BreachAdPlaylistRepository
                 "備註",
             ]
         );
-        $rows = $this->getBreachAdPlaylistBySchedule($channel,$date,$hour);
-        foreach($rows as $i=>$row){
-            $tmp = array_fill(0,13,"");
-            if($i == 0){
-                //first rows
-                $tmp[0] = $date;
-                $tmp[1] = $hour.":00:00.000";
+        $palylistSch = $this->getBreachAdPlaylistBySchedule($channel,$date,$hour);
+        foreach($palylistSch as $h=>$playlist){
+            $playlistHour = $h;
+            foreach($playlist as $i => $row){
+                $tmp = array_fill(0,13,"");
+                if($i == 0){
+                    //first rows
+                    $tmp[0] = $date;
+                    $tmp[1] = $playlistHour.":00:00.000";
+                }
+                $tmp[9] = $row[0];
+                $tmp[10] = $row[1];
+                $tmp[12] = $row[2];
+                array_push( $exelRows,$tmp);
             }
-            $tmp[9] = $row[0];
-            $tmp[10] = $row[1];
-            $tmp[12] = $row[2];
-            array_push( $exelRows,$tmp);
+            
         }
         return $exelRows;
     }
 
-    public function getBreachAdPlaylistBySchedule($channel,$date,$hour){
-        $sql = "SELECT playlist_id FROM `barker_playlist_schedule` WHERE `channel_id`=? AND `date`=? AND `hour`=?";
-        $res = array_values($this->mydb->getResultArray($sql,"iss",$channel,$date,$hour));
+    public function getBreachAdPlaylistBySchedule($channel,$date,$hour = "all"){
         
-        if(!is_array($res) || !count($res)>0){
+        $sql = "SELECT * FROM `barker_playlist_schedule` WHERE `channel_id`=? AND `date`=?";
+        $queryString = "is";
+        $queryParas = [$channel,$date];
+        if($hour !== "all"){
+            $sql .= " AND `hour`=?";
+            $queryString .= "s";
+            array_push($queryParas,$hour);
+        }
+        $playlistIds = $this->mydb->getResultArray($sql,$queryString,...$queryParas);
+        $playlistIds = array_values($playlistIds);
+        if(!is_array($playlistIds) || !count($playlistIds)>0){
             return [];
         }
-
-        $tid = $res[0]["playlist_id"];
-            return $this->getBreahAdPlaylistById($tid);
-        
+        $res = [];
+        foreach($playlistIds as $row){
+            $tid = $row["playlist_id"];
+            $res[$row["hour"]] = $this->getBreahAdPlaylistById($tid);
+        }
+        return $res;
     }
 
 

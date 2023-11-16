@@ -18,12 +18,12 @@
 		}
 
 		private function checkParas(){
-			if(!isset($_POST["date"]) || !isset($_POST["hour"]) || !isset($_POST["channel"])){
+			if(!isset($_POST["date"]) || !isset($_POST["channel"])){
 				$this->exitWithMessage(false,"缺少必要參數");
 			}
 			$this->date = $_POST["date"];
 			$this->channel = $_POST["channel"];
-			$this->hour = $_POST["hour"];
+			$this->hour = isset($_POST["hour"])? $_POST["hour"] : "all";
 		}
 
 		private function getBreachExcelDataFromDb(){
