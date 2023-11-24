@@ -15,6 +15,8 @@ class TransactionRepository
     public  function getTransactionBasicInfo($transactionId) {
         $sql = "SELECT * FROM `託播單` WHERE `託播單識別碼`=? ";
         $result = array_values($this->mydb->getResultArray($sql,"i",$transactionId));
+        if(!is_array($result) || count($result) == 0)
+            return null;
         return $result[0];
     }
 

@@ -55,7 +55,7 @@ class BreachAdPlaylistRepository
                 if($i == 0){
                     //first rows
                     $tmp[0] = $date;
-                    $tmp[1] = $playlistHour.":00:00.000";
+                    $tmp[1] = $playlistHour.":00:00";
                 }
                 $tmp[9] = $row[0];
                 $tmp[10] = $row[1];

@@ -8,6 +8,8 @@
 	require '../tool/OutputExcel.php';
 	require '../tool/phpExtendFunction.php';
 	require '../tool/FTP.php';
+	require_once dirname(__FILE__)."/../apiProxy/AmsDb/module/ReplaceOrderInPlaylist.php";
+
 	$API852Url=Config::GET_API_SERVER_852();
 	//判斷api與動作
 	if( isset($_POST['action']) && $_POST['action'] != '' ){
@@ -75,10 +77,11 @@
 				require_once 'ajaxToAPIMoudle/ajaxToAPI_CSMS.php';
 				produceFile_851('send');
 				break;
-			case "barker頻道":
+			/*case "barker頻道":
 				require_once 'ajaxToAPIMoudle/ajaxToAPI_CAMPS.php';
 				sendOrder_CAMPS($_POST["託播單識別碼"]);
-				break;
+				break;*/
+			//2023 11 23 使用新pumping server後不需向CAMPS送出託播
 			case "單一平台banner":
 			case "單一平台barker_vod":
 			case "單一平台EPG":
@@ -263,7 +266,7 @@
 		$row=$res->fetch_assoc();
 		
 		//barker頻道不檢查素材
-		if($row['版位類型名稱']=='barker頻道' || $row['版位類型名稱']=='三碼快速鍵'){
+		if($row['版位類型名稱']=='barker頻道' || $row['版位類型名稱']=='破口廣告' || $row['版位類型名稱']=='三碼快速鍵'){
 			return array("success"=>true,"message"=>'success');
 		}
 		
@@ -473,9 +476,20 @@
 				produceFile_851('delete');
 				break;
 			case 'barker頻道':
-				require_once 'ajaxToAPIMoudle/ajaxToAPI_CAMPS.php';
-				cancelOrder_CAMPS($_POST["託播單識別碼"]);
+			case '破口廣告':
+				//2023 11 23 使用新pumping server後不需向CAMPS送出託播單，但需修正palylist重疊走期
+				/*require_once 'ajaxToAPIMoudle/ajaxToAPI_CAMPS.php';
+				cancelOrder_CAMPS($_POST["託播單識別碼"]);*/
+				$replacer = new ReplaceOrderInPlaylist();
+				if(	$replacer->fixBarkerPlaylistOverlapPeroid($_POST["託播單識別碼"])){
+					recordResult('delete',1,"修正重疊走期失敗",null);
+					changeOrderSate('取消送出',array($_POST["託播單識別碼"]));
+				}
+				else{
+					recordResult('delete',false,"修正重疊走期重疊失敗",null);
+				}
 				break;
+			
 			case "單一平台banner":
 			case "單一平台barker_vod":
 			case "單一平台marquee":

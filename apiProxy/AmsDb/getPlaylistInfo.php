@@ -32,7 +32,7 @@
 		exit(json_encode($result,JSON_UNESCAPED_UNICODE));
 	}
 	else if(isset($_POST["getPlaylistInfo"])){
-		$sql = "SELECT 託播單名稱,託播單識別碼,start_seconds,廣告期間開始時間,廣告期間結束時間,廣告可被播出小時時段
+		$sql = "SELECT 託播單名稱,託播單識別碼,start_seconds,廣告期間開始時間,廣告期間結束時間,廣告可被播出小時時段,託播單狀態識別碼
 		FROM
 			barker_playlist_record 
 			JOIN 託播單 ON 託播單識別碼 = transaction_id  
@@ -68,6 +68,7 @@
 			$result[$id]["廣告期間開始時間"]=$orderBasicInfoHash[$record["transaction_id"]]["廣告期間開始時間"];
 			$result[$id]["廣告期間結束時間"]=$orderBasicInfoHash[$record["transaction_id"]]["廣告期間結束時間"];
 			$result[$id]["廣告可被播出小時時段"]=$orderBasicInfoHash[$record["transaction_id"]]["廣告可被播出小時時段"];
+			$result[$id]["託播單狀態識別碼"]=$orderBasicInfoHash[$record["transaction_id"]]["託播單狀態識別碼"];
 			foreach($orderDataHash[$record["transaction_id"]] as $key=>$value)
 				$result[$id][$key]=$value;
 		}

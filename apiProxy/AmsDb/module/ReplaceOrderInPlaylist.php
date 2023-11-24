@@ -45,19 +45,20 @@ class ReplaceOrderInPlaylist
         if($newTransactionId != "" || $newTransactionId != null)
         {
             $repalceOrderData = $this->transactionRepository->getTransactionBasicInfo($newTransactionId);
-            //檢查走期
-            $startDateTime = explode(" ",$repalceOrderData["廣告期間開始時間"]);
-            $endDateTime = explode(" ",$repalceOrderData["廣告期間結束時間"]);
-            if($startDateTime[0]>$dateRange[0]||$endDateTime[0]<$dateRange[1]){
-                $this->setExecuteMessage(false,"用來取代的託播單走期無法覆蓋取代日期範圍");
-                return false;
-            }
-            //檢查頻道是否可涵蓋
-            if(!$this->checkIfChannelValid($newTransactionId,$playlistSchedule)){
-                $this->setExecuteMessage(false,"用來取代的託播單無法涵蓋所選頻道");
-                return false;
-            }    
-            
+            if($repalceOrderData != null){
+                //檢查走期
+                $startDateTime = explode(" ",$repalceOrderData["廣告期間開始時間"]);
+                $endDateTime = explode(" ",$repalceOrderData["廣告期間結束時間"]);
+                if($startDateTime[0]>$dateRange[0]||$endDateTime[0]<$dateRange[1]){
+                    $this->setExecuteMessage(false,"用來取代的託播單走期無法覆蓋取代日期範圍");
+                    return false;
+                }
+                //檢查頻道是否可涵蓋
+                if(!$this->checkIfChannelValid($newTransactionId,$playlistSchedule)){
+                    $this->setExecuteMessage(false,"用來取代的託播單無法涵蓋所選頻道");
+                    return false;
+                }    
+            }   
         }
        
 		$playlistInfo =[];
@@ -228,6 +229,18 @@ class ReplaceOrderInPlaylist
         }
         //exit(json_encode(array("success"=>false,"message"=>$message),JSON_UNESCAPED_UNICODE));
     }
+
+    public function fixBarkerPlaylistOverlapPeroid($orderId){
+		if(!$plaslistIds = $this->playListRepository->getDistinctPlaylistIdByTransactionId($orderId)){
+			return false;
+		}
+		foreach($plaslistIds as $row){
+			//更新barker播表的重疊時間。
+			if(!$this->playListRepository->caculateOverlapPeriod($row["playlist_id"],true))
+				return false;
+		}
+		return true;
+	}
 }
 
 ?>
