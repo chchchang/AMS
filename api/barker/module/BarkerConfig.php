@@ -17,8 +17,10 @@ class BarkerConfig{
 
     public static $remoteMaterialFolder = "VIDEO";//pro
     public static $remotePlaylistFolder = "JSON";//pro
-    //public static $remoteMaterialFolder = "barkertest/VIDEO";//pro
-    //public static $remotePlaylistFolder = "barkertest/JSON";//pro
+    public static $remoteMaterialFolderBreachAd = "MAM";//pro
+    public static $remotePlaylistFolderBreachAd = "XLSX";//pro
+    //public static $remoteMaterialFolder = "barkertest/VIDEO";
+    //public static $remotePlaylistFolder = "barkertest/JSON";
 
     public static $doneMaterialFolder = "material_done";
     public static $donePlaylistFolder = "playlist_data_done";

@@ -105,13 +105,14 @@ class BreachAdPlaylistRepository
             $tag = "";
             if($row["transaction_id"] == -1){
                 if(preg_match($BreachPattern,$row["tag"])){
-                    $playlName = "破口";
                     $BreachCount++;
+                    $playlName = "破口";
+                    $tag = "[note]破口||[敘述]".$row["tag"].$BreachCount;
                 }
                 else if(preg_match($LivePattern,$row["tag"])){
-                    $playlName = "live";
+                    $playlName = "Live實況";
+                    $tag = "[敘述]".$row["tag"].$BreachCount;
                 }
-                $tag = $row["tag"].$BreachCount;
             }
             else{
                 $tinfo = $this->getTransactionInfo($row["transaction_id"]);

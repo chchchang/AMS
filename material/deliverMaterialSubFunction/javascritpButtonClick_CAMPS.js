@@ -103,6 +103,12 @@ var buttonOnClick=function(event){
 						showReordersAlert(getReordersJson);
 					},'json');
 				}
+				else if(buttonName == "上傳到破口廣告"){
+					$.post("../api/barker/sendMaterialToPumping.php",{素材識別碼:value素材識別碼,adType:"破口"},function(json){
+						node執行結果.innerHTML=json.message;
+						showReordersAlert(getReordersJson);
+					},'json');
+				}
 				$(event.target).unmask();
 				$(node影片派送時間).unmask();
 				$(node影片媒體編號).unmask();

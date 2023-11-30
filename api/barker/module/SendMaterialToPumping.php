@@ -15,6 +15,7 @@ class SendMaterialToPumping{
     private $logWriter;
     private $rawMaterialFolder;
     private $remoteMaterialFolder;
+    private $remoteMaterialFolderBreachAd;
     public $message;
 
     function __construct($logger = null) {
@@ -33,6 +34,7 @@ class SendMaterialToPumping{
         $this->mydb=new MyDB(true);
         $this->rawMaterialFolder = Config::GET_MATERIAL_FOLDER();
         $this->remoteMaterialFolder = BarkerConfig::$remoteMaterialFolder;
+        $this->remoteMaterialFolderBreachAd = BarkerConfig::$remoteMaterialFolderBreachAd;
         $this->message ="";
     }
 
@@ -49,7 +51,7 @@ class SendMaterialToPumping{
     }
 
 
-    public function uploadByMaterialId($mid){
+    public function uploadByMaterialId($mid,$adType = null){
         $sftp = new PutToWatchFolder();
     
         //取的素材原始檔名
@@ -66,7 +68,7 @@ class SendMaterialToPumping{
         $tmp = explode(".",$fliename);
         $mtype = end($tmp);
         $rawFileName = $mid.".".$mtype;
-        $remoteFile = $this->remoteMaterialFolder."/".$fliename;
+        $remoteFile = ($adType == "破口")?$this->remoteMaterialFolderBreachAd."/".$fliename:$this->remoteMaterialFolder."/".$fliename;
         if($this->checkLocalMaterial($this->rawMaterialFolder.$rawFileName)){
             if($sftp->uploadedMaterial($this->rawMaterialFolder.$rawFileName, $remoteFile)){
                 $nameParse = explode('_',$fliename);

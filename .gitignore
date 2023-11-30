@@ -8,6 +8,7 @@ predict/export/*
 *.txt
 *.json
 *.dat
+*.zip
 deploy/VERSION
 deploy/DEPLOY
 deploy/UPDATE_LIST-*

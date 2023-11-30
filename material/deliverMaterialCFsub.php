@@ -198,8 +198,7 @@
 
 <select id="deliverAction" class ="pretty-select">
 <option value="PMS">自動派片系統</option>
-<option value="CAMPS">CAMPS系統</option>
-<option value="POINT">端點Barker系統</option>
+<option value="CAMPS">barker系統</option>
 </select>
 
 <?php include('_searchMaterialUI.php'); ?>

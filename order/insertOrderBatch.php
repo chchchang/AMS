@@ -529,7 +529,12 @@
 					const hours = String(value.getHours()).padStart(2, '0');
 					const minutes = String(value.getMinutes()).padStart(2, '0');
 					const seconds = String(value.getSeconds()).padStart(2, '0');
-					return `${year}-${month}-${day} ${hours}:${minutes}:${seconds}`;
+					let datestr = `${year}-${month}-${day} ${hours}:${minutes}:${seconds}`;
+					if( colId === 5 ){
+						return datestr.replace("00:00:00","23:59:59");//若結束時間為00:00:00 置換為當天結束
+					}
+
+					return datestr;	
 				}
 				else if( colId === 0 ){
 					return this.getPositionName(value,rowId,colId);
@@ -601,7 +606,6 @@
 		},
 		watch:{
 			originalData: function(){
-				console.log("original data changed");
 				let rowNum = this.originalData.length;
 				let colNUm = this.originalData[0].length;
 				this.rows = Array.from({length:rowNum},()=>(new Array(colNUm)));

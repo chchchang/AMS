@@ -22,6 +22,7 @@ class PutToWatchFolder{
     private $donePlaylistFolder;
     private $remoteMaterialFolder;
     private $remotePlaylistFolder;
+    private $remotePlaylistFolderBreachAd;
     public $message;
 
     function __construct() {
@@ -33,6 +34,7 @@ class PutToWatchFolder{
 
         $this->remoteMaterialFolder = BarkerConfig::$remoteMaterialFolder;
         $this->remotePlaylistFolder = BarkerConfig::$remotePlaylistFolder;
+        $this->remotePlaylistFolderBreachAd = BarkerConfig::$remotePlaylistFolderBreachAd;
 
         $this->doneMaterialFolder = BarkerConfig::$doneMaterialFolder;
         $this->donePlaylistFolder = BarkerConfig::$donePlaylistFolder;
@@ -135,6 +137,12 @@ class PutToWatchFolder{
         return true;
     }
 
+    public function uploadedBreachAdPlayList($localFile,$remoteFile){
+        if(!$this->putToSftpServer($localFile,$this->remotePlaylistFolderBreachAd."/".$remoteFile)){
+            return false;
+        }
+        return true;
+    }
      
 }
 
