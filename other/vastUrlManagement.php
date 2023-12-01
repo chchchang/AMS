@@ -181,6 +181,7 @@
 	<script type="text/javascript" src="../tool/jquery-3.4.1.min.js"></script>
 	<link rel="stylesheet" href="<?=$SERVER_SITE.Config::PROJECT_ROOT?>tool/jquery-ui1.2/jquery-ui.css">
 	<script src="../tool/jquery-ui1.2/jquery-ui.min.js"></script>
+	<script src="../tool/HtmlSanitizer.js"></script>
 	<script type="text/javascript" src="../tool/ajax/ajaxToDB.js"></script> 
 	<script type="text/javascript" src="../tool/jquery-plugin/jquery.form.js"></script> 
 	<link rel='stylesheet' type='text/css' href='<?=$SERVER_SITE.Config::PROJECT_ROOT?>external-stylesheet.css'/>
@@ -194,7 +195,6 @@
 		}
 		table {
 			border-collapse:separate;
-			//border-collapse: collapse;
 			width:100%
 		}
 		td{
@@ -235,27 +235,27 @@ function refreshtable(){
 				//更新table資料
 				for(var i =0;i<data.length;i++){
 					tr = $(document.createElement('tr'));
-					tr.append("<td>"+data[i]["聯播網廣告來源識別碼"]+"</td>"
-					+"<td><input id='url_"+data[i]["聯播網廣告來源識別碼"]+"' value='"+data[i]["聯播網廣告URL"]+"' disabled></input></td>"
-					+"<td><input id='name_"+data[i]["聯播網廣告來源識別碼"]+"' value='"+data[i]["聯播網廣告來源名稱"]+"' disabled></input></td>"
-					+"<td>"+data[i]["是否為預設來源"]+"</input></td>"
-					+"<td><button id='setdefault_"+data[i]["聯播網廣告來源識別碼"]+"' class='urlDefaultBtn' urlid = '"+data[i]["聯播網廣告來源識別碼"]+"' >設為預設來源</button>"
-					+"<button id='cancledefault_"+data[i]["聯播網廣告來源識別碼"]+"' class='urlCancleDefaultBtn' urlid = '"+data[i]["聯播網廣告來源識別碼"]+"' >取消預設來源</button></td>"
-					+"<td><button id='edit_"+data[i]["聯播網廣告來源識別碼"]+"' class='urlEditBtn' urlid = '"+data[i]["聯播網廣告來源識別碼"]+"' >修改</button>"
-					+"<button id='submit_"+data[i]["聯播網廣告來源識別碼"]+"' class='urlSumbitBtn' urlid = '"+data[i]["聯播網廣告來源識別碼"]+"' >提交</button></td>"
-					+"<td><button id='delete_"+data[i]["聯播網廣告來源識別碼"]+"' class='urlDeletBtn' urlid = '"+data[i]["聯播網廣告來源識別碼"]+"' >刪除</button></td>"
+					tr.append("<td>"+HtmlSanitizer.SanitizeHtml(data[i]["聯播網廣告來源識別碼"])+"</td>"
+					+"<td><input id='url_"+HtmlSanitizer.SanitizeHtml(data[i]["聯播網廣告來源識別碼"])+"' value='"+HtmlSanitizer.SanitizeHtml(data[i]["聯播網廣告URL"])+"' disabled></input></td>"
+					+"<td><input id='name_"+HtmlSanitizer.SanitizeHtml(data[i]["聯播網廣告來源識別碼"])+"' value='"+HtmlSanitizer.SanitizeHtml(data[i]["聯播網廣告來源名稱"])+"' disabled></input></td>"
+					+"<td>"+HtmlSanitizer.SanitizeHtml(data[i]["是否為預設來源"])+"</input></td>"
+					+"<td><button id='setdefault_"+HtmlSanitizer.SanitizeHtml(data[i]["聯播網廣告來源識別碼"])+"' class='urlDefaultBtn' urlid = '"+HtmlSanitizer.SanitizeHtml(data[i]["聯播網廣告來源識別碼"])+"' >設為預設來源</button>"
+					+"<button id='cancledefault_"+HtmlSanitizer.SanitizeHtml(data[i]["聯播網廣告來源識別碼"])+"' class='urlCancleDefaultBtn' urlid = '"+HtmlSanitizer.SanitizeHtml(data[i]["聯播網廣告來源識別碼"])+"' >取消預設來源</button></td>"
+					+"<td><button id='edit_"+HtmlSanitizer.SanitizeHtml(data[i]["聯播網廣告來源識別碼"])+"' class='urlEditBtn' urlid = '"+HtmlSanitizer.SanitizeHtml(data[i]["聯播網廣告來源識別碼"])+"' >修改</button>"
+					+"<button id='submit_"+HtmlSanitizer.SanitizeHtml(data[i]["聯播網廣告來源識別碼"])+"' class='urlSumbitBtn' urlid = '"+HtmlSanitizer.SanitizeHtml(data[i]["聯播網廣告來源識別碼"])+"' >提交</button></td>"
+					+"<td><button id='delete_"+HtmlSanitizer.SanitizeHtml(data[i]["聯播網廣告來源識別碼"])+"' class='urlDeletBtn' urlid = '"+HtmlSanitizer.SanitizeHtml(data[i]["聯播網廣告來源識別碼"])+"' >刪除</button></td>"
 					);
 					if(i%2 == 1){
 						tr.css({"background-color": "#F0F8FF"});
 					}
 					$("#soursetablebody").append(tr);
 					if(data[i]["是否為預設來源"]=="是"){
-						$("#setdefault_"+data[i]["聯播網廣告來源識別碼"]).hide();
-						$("#cancledefault_"+data[i]["聯播網廣告來源識別碼"]).show();
+						$("#setdefault_"+HtmlSanitizer.SanitizeHtml(data[i]["聯播網廣告來源識別碼"])).hide();
+						$("#cancledefault_"+HtmlSanitizer.SanitizeHtml(data[i]["聯播網廣告來源識別碼"])).show();
 					}
 					else{
-						$("#setdefault_"+data[i]["聯播網廣告來源識別碼"]).show();
-						$("#cancledefault_"+data[i]["聯播網廣告來源識別碼"]).hide();
+						$("#setdefault_"+HtmlSanitizer.SanitizeHtml(data[i]["聯播網廣告來源識別碼"])).show();
+						$("#cancledefault_"+HtmlSanitizer.SanitizeHtml(data[i]["聯播網廣告來源識別碼"])).hide();
 					}
 				}
 				//設定設為預設按鈕動作

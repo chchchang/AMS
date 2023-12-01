@@ -568,9 +568,9 @@
 						//連動廣告客制化
 						var paraName = config['版位其他參數名稱'];
 						if(paraName.startsWith('bannerTransactionId')){
-							var connectIndex = paraName.replace('bannerTransactionId','');
+							var connectIndex = HtmlSanitizer.SanitizeHtml(paraName.replace('bannerTransactionId',''));
 							
-							var $連動 = $('<select  id="連動廣告'+connectIndex+'"  multiple="multiple"  class ="tokenize configValue" order='+i+' />').val(config['版位其他參數預設值']);
+							var $連動 = $('<select  id="連動廣告'+connectIndex+'"  multiple="multiple"  class ="tokenize configValue" order='+i+' />').val(HtmlSanitizer.SanitizeHtml(config['版位其他參數預設值']));
 							$inputtd.append($連動);
 							$('#連動廣告'+connectIndex).tokenize({
 									placeholder:"輸入CSMS群組識別碼或關鍵字選擇可連動的託播單"
@@ -1187,7 +1187,7 @@
 									check=true;
 							});
 							if(check){
-								$('#uploadResult_f').append('<p>託播單'+json.託播單識別碼+' 修改失敗: 確定狀態的託播單只能重新指定素材</p>');
+								$('#uploadResult_f').append('<p>託播單'+HtmlSanitizer.SanitizeHtml(json.託播單識別碼)+' 修改失敗: 確定狀態的託播單只能重新指定素材</p>');
 								return 0 ;
 							}
 						}
@@ -1311,13 +1311,13 @@
 						
 						//日期檢察
 						if(json.廣告期間結束時間<=json.廣告期間開始時間){
-							$('#uploadResult_f').append('<p>託播單'+json.託播單識別碼+' 修改失敗: 廣告開始時間必須小於結束時間</p>');
+							$('#uploadResult_f').append('<p>託播單'+HtmlSanitizer.SanitizeHtml(json.託播單識別碼)+' 修改失敗: 廣告開始時間必須小於結束時間</p>');
 							return 0;
 						}
 						
 						//日期檢察
 						if(json.預約到期時間.split(' ')[0]>json.廣告期間結束時間.split(' ')[0]){
-							$('#uploadResult_f').append('<p>託播單'+json.託播單識別碼+' 修改失敗:預約到期時間必須小於等於廣告期間結束時間</p>');
+							$('#uploadResult_f').append('<p>託播單'+HtmlSanitizer.SanitizeHtml(json.託播單識別碼)+' 修改失敗:預約到期時間必須小於等於廣告期間結束時間</p>');
 							return 0;
 						}
 						
@@ -1337,7 +1337,7 @@
 							else if (hoursArray.length==1){
 							}
 							else{
-								$('#uploadResult_f').append('<p>託播單'+json.託播單識別碼+' 修改失敗: 修改CSMS託播單時段必須連續</p>');
+								$('#uploadResult_f').append('<p>託播單'+HtmlSanitizer.SanitizeHtml(json.託播單識別碼)+' 修改失敗: 修改CSMS託播單時段必須連續</p>');
 								return 0;
 							}
 							$.ajax({
@@ -1350,7 +1350,7 @@
 								success:
 								function(data){
 									if(!data.success)
-										$('#uploadResult_f').append('<p>託播單'+json.託播單識別碼+' 修改失敗: '+data.message+'</p>');
+										$('#uploadResult_f').append('<p>託播單'+HtmlSanitizer.SanitizeHtml(json.託播單識別碼)+' 修改失敗: '+HtmlSanitizer.SanitizeHtml(data.message)+'</p>');
 									else
 										updatedOrders.push(json);
 								}
@@ -1360,7 +1360,7 @@
 						else if(json.版位類型名稱  == '前置廣告投放系統'){
 							json = splitOrder_852(json);
 							if(json.length != 1){
-								$('#uploadResult_f').append('<p>託播單'+json[0].託播單識別碼+' 修改失敗: 修改前置廣告投放系統之託播單時必須不拆單</p>');
+								$('#uploadResult_f').append('<p>託播單'+HtmlSanitizer.SanitizeHtml(json[0].託播單識別碼)+' 修改失敗: 修改前置廣告投放系統之託播單時必須不拆單</p>');
 								return 0;
 							}
 							json =json[0];
@@ -1375,7 +1375,7 @@
 									json['素材'][id]['素材識別碼']='';
 							}
 							if(mcount>1){
-								$('#uploadResult_f').append('<p>託播單'+json.託播單識別碼+' 修改失敗: 修改CAMPS投放系統之託播單時不可同時設定HD與SD影片素材</p>');
+								$('#uploadResult_f').append('<p>託播單'+HtmlSanitizer.SanitizeHtml(json.託播單識別碼)+' 修改失敗: 修改CAMPS投放系統之託播單時不可同時設定HD與SD影片素材</p>');
 								return 0;
 							}
 							else

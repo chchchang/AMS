@@ -194,11 +194,11 @@
 			for(var i=0;i<24;i++){
 				table+='<tr><td>時段'+i+'</td>';
 				for(var j=0;j<7;j++){
-					table+='<td><input type="text" name="'+j+i+'" maxlength="4" size="4" value="'+(typeof rows[j]==='undefined'?'':rows[j]['曝光數'+i])+'"></td>';
+					table+='<td><input type="text" name="'+j+i+'" maxlength="4" size="4" value="'+(typeof rows[j]==='undefined'?'':HtmlSanitizer.SanitizeHtml(rows[j]['曝光數'+i]))+'"></td>';
 				}
 				table+='</tr>';
 			}
-			table+='</table><input type="hidden" name="method" value="寫入資料庫"><input type="hidden" name="版位識別碼" value="'+版位識別碼+'"></form>';
+			table+='</table><input type="hidden" name="method" value="寫入資料庫"><input type="hidden" name="版位識別碼" value="'+HtmlSanitizer.SanitizeHtml(版位識別碼)+'"></form>';
 			$('#div1').html(table);
 			$('#div2').html(table);
 			$('#div2 form input[type=text]').val('');

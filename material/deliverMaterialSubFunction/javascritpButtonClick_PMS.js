@@ -41,10 +41,8 @@ var buttonOnClick=function(event){
 						alert(json.error);
 					else{
 						var 狀態=['未開始','已完成','失敗','已刪除'];
-						//node影片媒體編號北.innerHTML=HtmlSanitizer.SanitizeHtml(json.chtnIapId);
-						//node影片媒體編號南.innerHTML=HtmlSanitizer.SanitizeHtml(json.chtsIapId);
-						node影片媒體編號北.innerHTML=json.chtnIapId;
-						node影片媒體編號南.innerHTML=json.chtsIapId;
+						node影片媒體編號北.innerHTML=HtmlSanitizer.SanitizeHtml(json.chtnIapId);
+						node影片媒體編號南.innerHTML=HtmlSanitizer.SanitizeHtml(json.chtsIapId);
 						if(json.mediaId===''){
 							//node影片媒體編號.innerHTML=HtmlSanitizer.SanitizeHtml(json.mediaId);
 							node影片媒體編號.innerHTML=json.mediaId;
@@ -52,8 +50,8 @@ var buttonOnClick=function(event){
 							
 						}
 						else{
-							//node影片媒體編號.innerHTML=HtmlSanitizer.SanitizeHtml(json.mediaId)+'，北區：'+狀態[parseInt(json.chtnStatus,10)]+'、中區：'+狀態[parseInt(json.chtcStatus,10)]+'、南區：'+狀態[parseInt(json.chtsStatus,10)]+'。';
-							node影片媒體編號.innerHTML=json.mediaId+'，北區：'+狀態[parseInt(json.chtnStatus,10)]+'、中區：'+狀態[parseInt(json.chtcStatus,10)]+'、南區：'+狀態[parseInt(json.chtsStatus,10)]+'。';
+							node影片媒體編號.innerHTML=HtmlSanitizer.SanitizeHtml(json.mediaId)+'，北區：'+狀態[parseInt(json.chtnStatus,10)]+'、中區：'+狀態[parseInt(json.chtcStatus,10)]+'、南區：'+狀態[parseInt(json.chtsStatus,10)]+'。';
+							//node影片媒體編號.innerHTML=json.mediaId+'，北區：'+狀態[parseInt(json.chtnStatus,10)]+'、中區：'+狀態[parseInt(json.chtcStatus,10)]+'、南區：'+狀態[parseInt(json.chtsStatus,10)]+'。';
 							//if(buttonName==='派送影片') alert('已派送，請檢視各欄位結果，不可重覆派送！');
 							//取得結果成功後，若mediaId原先不為空且新的mediaId不同於原先的值，則表示重覆派送需進行提醒重送已送出託播單。
 							//if(buttonName==='取得結果'&&value影片媒體編號!==''&&value影片媒體編號.search(json.mediaId)==-1) 
@@ -66,12 +64,12 @@ var buttonOnClick=function(event){
 				$.post(null,{action:'uploadCF',素材識別碼:value素材識別碼,副檔名:副檔名,ajaxTarget:"PMS"},function(json){
 					if(!json.success){
 						//20220516 改變錯誤訊息的顯示方式，顯示在派送時間欄位
-						//node影片媒體編號.innerHTML=HtmlSanitizer.SanitizeHtml(json.error);
-						node影片媒體編號.innerHTML=json.error;
+						node影片媒體編號.innerHTML=HtmlSanitizer.SanitizeHtml(json.error);
+						//node影片媒體編號.innerHTML=json.error;
 					}
 					else{
-						//node影片派送時間.innerHTML=HtmlSanitizer.SanitizeHtml(json.影片派送時間);
-						node影片派送時間.innerHTML=json.影片派送時間;
+						node影片派送時間.innerHTML=HtmlSanitizer.SanitizeHtml(json.影片派送時間);
+						//node影片派送時間.innerHTML=json.影片派送時間;
 						//20220516 改變錯誤訊息的顯示方式，顯示在派送時間欄位
 						node影片媒體編號.innerHTML="上傳影片成功，請等待PMS自動派片。";
 						//alert('上傳影片成功，請等待PMS自動派片。');

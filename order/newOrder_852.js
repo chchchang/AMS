@@ -326,8 +326,8 @@
 							//增加UI
 							var order = orders[i];
 							$('<tr></tr>').appendTo('#_weightTbody'+corder)
-							.append($('<td>'+order.版位名稱+'</td>'+'<td>'+order.廣告期間開始時間+'</td>'+'<td>'+order.廣告期間結束時間+'</td><td>'+data.percentage[i]+'</td>'
-							+'<td><input id =_weightInput'+i+' order='+i+' corder='+corder+' type="number" min=0></td>'));
+							.append($('<td>'+HtmlSanitizer.SanitizeHtml(order.版位名稱)+'</td>'+'<td>'+HtmlSanitizer.SanitizeHtml(order.廣告期間開始時間)+'</td>'+'<td>'+HtmlSanitizer.SanitizeHtml(order.廣告期間結束時間)+'</td><td>'+HtmlSanitizer.SanitizeHtml(data.percentage[i])+'</td>'
+							+'<td><input id =_weightInput'+i+' order='+i+' corder='+HtmlSanitizer.SanitizeHtml(corder)+' type="number" min=0></td>'));
 							
 							//拆單結果被分配投放次數上限是件
 							$('#_weightTbody'+corder+'>tr>td>#_weightInput'+i).change(function(){

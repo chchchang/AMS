@@ -86,7 +86,7 @@
 									//console.log(data);
 									$select = $('#連動廣告'+key);
 									for(var i in data){
-										if($('#連動廣告'+key+' option[value="'+data[i]['託播單CSMS群組識別碼']+'"]').length == 0){
+										if($('#連動廣告'+HtmlSanitizer.SanitizeHtml(key)+' option[value="'+HtmlSanitizer.SanitizeHtml(data[i]['託播單CSMS群組識別碼'])+'"]').length == 0){
 											var area = data[i]['區域'].join(',');
 											var opt = $(document.createElement("option"));
 											opt.text(data[i]['託播單CSMS群組識別碼']+':'+data[i]['託播單名稱']+'('+area+')')

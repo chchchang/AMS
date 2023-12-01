@@ -7,7 +7,7 @@
 		var rwoCount=true;
 		var output='<table style="width:100%;border-style:solid;border-color:#DDDDDD">'
 		+'<thead><tr><th>no</th>'
-		+'<th>'+(typeof(data['託播單代碼標題文字'])!='undefined'?data['託播單代碼標題文字']:'託播單識別碼')
+		+'<th>'+(typeof(data['託播單代碼標題文字'])!='undefined'?HtmlSanitizer.SanitizeHtml(data['託播單代碼標題文字']):'託播單識別碼')
 		+'</th><th>00</th><th>01</th><th>02</th><th>03</th><th>04</th><th>05</th><th>06</th><th>07</th><th>08</th><th>09</th><th>10</th><th>11</th><th>12</th><th>13</th><th>14</th><th>15</th><th>16</th><th>17</th><th>18</th><th>19</th><th>20</th><th>21</th><th>22</th><th>23</th></tr></thead>'
 		var sum=[0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0];
 		output+='<tbody>';
@@ -19,12 +19,12 @@
 			else
 				bgcolor ='rgb(230, 230, 250)';
 			if(typeof(orders[i].upTitle)!='undefined'){
-				output+='<tr style="background-color:'+bgcolor+'"><th rowspan=2>'+(i+1)+'</th><th rowspan=2>'+(typeof(orders[i].託播單代碼替換文字)=='undefined'?orders[i].託播單代碼:orders[i].託播單代碼替換文字)+
-				'</th><td colspan=24>'+orders[i].upTitle+'</td></tr><tr style="background-color:'+bgcolor+'" value='+orders[i].託播單代碼+'>';
+				output+='<tr style="background-color:'+bgcolor+'"><th rowspan=2>'+(i+1)+'</th><th rowspan=2>'+(typeof(orders[i].託播單代碼替換文字)=='undefined'?HtmlSanitizer.SanitizeHtml(orders[i].託播單代碼):HtmlSanitizer.SanitizeHtml(orders[i].託播單代碼替換文字))+
+				'</th><td colspan=24>'+HtmlSanitizer.SanitizeHtml(orders[i].upTitle)+'</td></tr><tr style="background-color:'+bgcolor+'" value='+HtmlSanitizer.SanitizeHtml(orders[i].託播單代碼)+'>';
 			}
 			else{
-				output+='<tr style="background-color:'+bgcolor+'" value='+orders[i].託播單代碼+'><th>'+(i+1)+'</th><th>'
-				+(typeof(orders[i].託播單代碼替換文字)=='undefined'?orders[i].託播單代碼:orders[i].託播單代碼替換文字)+'</th>';
+				output+='<tr style="background-color:'+bgcolor+'" value='+HtmlSanitizer.SanitizeHtml(orders[i].託播單代碼)+'><th>'+(i+1)+'</th><th>'
+				+(typeof(orders[i].託播單代碼替換文字)=='undefined'?HtmlSanitizer.SanitizeHtml(orders[i].託播單代碼):HtmlSanitizer.SanitizeHtml(orders[i].託播單代碼替換文字))+'</th>';
 			}
 			var dataLength=0;
 			var highlight = false;
@@ -68,7 +68,7 @@
 			output+='</tr>';
 			
 		}
-		output+='<tr class = "sumTr"><th></th><th>合計</th><th class = "sum">'+sum.join('</th><th class = "sum">')+'</th></tr></tbody></table>';
+		output+='<tr class = "sumTr"><th></th><th>合計</th><th class = "sum">'+HtmlSanitizer.SanitizeHtml(sum.join('</th><th class = "sum">'))+'</th></tr></tbody></table>';
 		document.getElementById(outputId).innerHTML=output;
 				
 		if(typeof(data['素材'])!='undefined')

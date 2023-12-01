@@ -463,7 +463,7 @@ function materialTypeAdd(jobject,disable){
 		jobject.素材類型 ='圖片';
 	else if(jobject.素材類型識別碼==3)
 		jobject.素材類型 ='影片';
-	$c.append(jobject.素材類型+' 每小時上限:'+((jobject.每小時最大素材筆數==''||jobject.每小時最大素材筆數==null)?'無':HtmlSanitizer.SanitizeHtml(jobject.每小時最大素材筆數)));
+	$c.append(HtmlSanitizer.SanitizeHtml(jobject.素材類型)+' 每小時上限:'+((jobject.每小時最大素材筆數==''||jobject.每小時最大素材筆數==null)?'無':HtmlSanitizer.SanitizeHtml(jobject.每小時最大素材筆數)));
 	switch(jobject.素材類型){
 		case '文字':
 			$c.append(' 字數上限:'+((jobject.每則文字素材最大字數==''||jobject.每小時最大素材筆數==null)?'無':HtmlSanitizer.SanitizeHtml(jobject.每則文字素材最大字數)));

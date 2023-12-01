@@ -232,6 +232,7 @@
 	<script type="text/javascript" src="../tool/jquery-3.4.1.min.js"></script>
 	<link rel="stylesheet" href="<?=$SERVER_SITE.Config::PROJECT_ROOT?>tool/jquery-ui1.2/jquery-ui.css">
 	<script src="../tool/jquery-ui1.2/jquery-ui.min.js"></script>
+	<script src="../tool/HtmlSanitizer.js"></script>
 	<script type="text/javascript" src="../tool/ajax/ajaxToDB.js"></script> 
 	<script type="text/javascript" src="../tool/jquery-plugin/jquery.form.js"></script> 
 	<link rel='stylesheet' type='text/css' href='<?=$SERVER_SITE.Config::PROJECT_ROOT?>external-stylesheet.css'/>
@@ -287,11 +288,11 @@ function refreshtable(){
 				//更新table資料
 				for(var i =0;i<data.length;i++){
 					tr = $(document.createElement('tr'));
-					tr.append("<td>"+data[i]["頻道號碼"]+"</td>"
-					+"<td>"+data[i]["頻道名稱"]+"</input></td>"
-					+"<td><input id='limit_"+data[i]["頻道號碼"]+"' value='"+data[i]["投放上限"]+"' disabled></input></td>"
-					+"<td><button id='edit_"+data[i]["頻道號碼"]+"' class='limitEditBtn' chnum="+data[i]["頻道號碼"]+">修改</button>"
-					+"<button id='submit_"+data[i]["頻道號碼"]+"' class='limitSubmitBtn' chnum="+data[i]["頻道號碼"]+">提交</button></td>"
+					tr.append("<td>"+HtmlSanitizer.SanitizeHtml(data[i]["頻道號碼"])+"</td>"
+					+"<td>"+HtmlSanitizer.SanitizeHtml(data[i]["頻道名稱"])+"</input></td>"
+					+"<td><input id='limit_"+HtmlSanitizer.SanitizeHtml(data[i]["頻道號碼"])+"' value='"+HtmlSanitizer.SanitizeHtml(data[i]["投放上限"])+"' disabled></input></td>"
+					+"<td><button id='edit_"+HtmlSanitizer.SanitizeHtml(data[i]["頻道號碼"])+"' class='limitEditBtn' chnum="+HtmlSanitizer.SanitizeHtml(data[i]["頻道號碼"])+">修改</button>"
+					+"<button id='submit_"+HtmlSanitizer.SanitizeHtml(data[i]["頻道號碼"])+"' class='limitSubmitBtn' chnum="+HtmlSanitizer.SanitizeHtml(data[i]["頻道號碼"])+">提交</button></td>"
 					);
 					if(i%2 == 1){
 						tr.css({"background-color": "#F0F8FF"});

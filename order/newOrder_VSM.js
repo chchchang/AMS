@@ -39,7 +39,7 @@
 								//console.log(data);
 								$select = $('#連動廣告');
 								for(var i in data){
-									if($('#連動廣告 option[value="'+data[i]['託播單CSMS群組識別碼']+'"]').length == 0){
+									if($('#連動廣告 option[value="'+HtmlSanitizer.SanitizeHtml(data[i]['託播單CSMS群組識別碼'])+'"]').length == 0){
 										var opt = $(document.createElement("option"));
 										opt.text(data[i]['託播單識別碼'],data[i]['託播單識別碼']+':'+data[i]['託播單名稱']+'('+data[i]['版位名稱']+')')
 										.val(data[i]['託播單識別碼'])

@@ -136,6 +136,7 @@
 <link rel="stylesheet" href="<?=$SERVER_SITE.Config::PROJECT_ROOT?>tool/jquery-ui1.2/jquery-ui.css"></link>
 <link rel='stylesheet' type='text/css' href='<?=$SERVER_SITE.Config::PROJECT_ROOT?>external-stylesheet.css'/>
 <script type="text/javascript" src="../order/newOrder_851.js?<?=time()?>"></script>
+<script src="../tool/HtmlSanitizer.js"></script>
 <style type="text/css">
   	.Center{
 		position:absolute;

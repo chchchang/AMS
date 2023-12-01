@@ -21,8 +21,7 @@ var buttonOnClick=function(event){
 		
 		if(buttonName==='刪除遠端影片'){
 			$.post("deliverMaterialCF_CAMPS.php",{action:'deleteRemote',素材識別碼:value素材識別碼,ajaxTarget:"CAMPS"},function(json){
-					//node執行結果.innerHTML=HtmlSanitizer.SanitizeHtml(json.message);
-					node執行結果.innerHTML=json.message;
+					node執行結果.innerHTML=HtmlSanitizer.SanitizeHtml(json.message);
 					$(event.target).unmask();
 					$(node影片派送時間).unmask();
 					$(node影片媒體編號).unmask();
@@ -45,12 +44,11 @@ var buttonOnClick=function(event){
 				if (buttonName == "取得結果"){
 					$.post(null,{action:'getAndPutStatus',素材識別碼:value素材識別碼,副檔名:副檔名,素材原始檔名:value素材原始檔名,ajaxTarget:"CAMPS"},function(json){
 						if(!json.success)
-							//node執行結果.innerHTML=HtmlSanitizer.SanitizeHtml(json.error);
-							node執行結果.innerHTML=json.error;
+							node執行結果.innerHTML=HtmlSanitizer.SanitizeHtml(json.error);
 						else{
 							if(json.mediaId===''){
 								//node影片媒體編號.innerHTML=HtmlSanitizer.SanitizeHtml(json.mediaId);
-								node影片媒體編號.innerHTML=json.mediaId;
+								node影片媒體編號.innerHTML=HtmlSanitizer.SanitizeHtml(json.mediaId);
 								node執行結果.innerHTML='查無資料，請重新派送影片。';
 								/*if(buttonName==='取得結果') node執行結果.innerHTML='查無資料，請重新派送影片。';
 								if(buttonName==='派送影片'){
@@ -67,8 +65,7 @@ var buttonOnClick=function(event){
 								}*/
 							}
 							else{
-								//node影片媒體編號.innerHTML=HtmlSanitizer.SanitizeHtml(json.mediaId);
-								node影片媒體編號.innerHTML=json.mediaId;
+								node影片媒體編號.innerHTML=HtmlSanitizer.SanitizeHtml(json.mediaId);
 								/*if(buttonName==='派送影片') node執行結果.innerHTML='已派送，請檢視各欄位結果，不可重覆派送！';
 								//取得結果成功後，若mediaId原先不為空且新的mediaId不同於原先的值，則表示重覆派送需進行提醒重送已送出託播單。
 								if(buttonName==='取得結果'&&value影片媒體編號!==''&&value影片媒體編號.search(json.mediaId)==-1) showReordersAlert(getReordersJson);*/
@@ -93,19 +90,19 @@ var buttonOnClick=function(event){
 					//上方是CAMPS派送，目前已不使用
 					//下方式端點barker派送程式碼
 					$.post("../api/barker/sendMaterialToPumping.php",{素材識別碼:value素材識別碼},function(json){
-						node執行結果.innerHTML=json.message;
+						node執行結果.innerHTML=HtmlSanitizer.SanitizeHtml(json.message);
 						showReordersAlert(getReordersJson);
 					},'json');
 				}
 				else if(buttonName == "上傳到端點barker"){
 					$.post("../api/barker/sendMaterialToPumping.php",{素材識別碼:value素材識別碼},function(json){
-						node執行結果.innerHTML=json.message;
+						node執行結果.innerHTML=HtmlSanitizer.SanitizeHtml(json.message);
 						showReordersAlert(getReordersJson);
 					},'json');
 				}
 				else if(buttonName == "上傳到破口廣告"){
 					$.post("../api/barker/sendMaterialToPumping.php",{素材識別碼:value素材識別碼,adType:"破口"},function(json){
-						node執行結果.innerHTML=json.message;
+						node執行結果.innerHTML=HtmlSanitizer.SanitizeHtml(json.message);
 						showReordersAlert(getReordersJson);
 					},'json');
 				}

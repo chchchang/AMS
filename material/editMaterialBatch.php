@@ -738,7 +738,7 @@ function saveToDb(){
 										}
 										else
 											message ='。素材檔案更動，請重新派送素材';
-										$('#uploadResult_s').append('<p>素材編號'+HtmlSanitizer.SanitizeHtml(json['id'])+' 修改成功'+message+'</p>');
+										$('#uploadResult_s').append('<p>素材編號'+HtmlSanitizer.SanitizeHtml(json['id'])+' 修改成功'+HtmlSanitizer.SanitizeHtml(message)+'</p>');
 									}
 									else
 										$('#uploadResult_s').append('<p>素材編號'+HtmlSanitizer.SanitizeHtml(json['id'])+' 修改成功。素材檔案更動，請重新派送素材</p>');

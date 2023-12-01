@@ -483,6 +483,7 @@
 <script type="text/javascript" src="../tool/autoCompleteComboBox.js"></script>
 <script type="text/javascript" src="../tool/jquery-plugin/jquery.placeholder.min.js"></script>
 <script type="text/javascript" src="../tool/jquery-plugin/jquery.tokenize.js"></script>
+<script src="../tool/HtmlSanitizer.js"></script>
 <script type="text/javascript" src="newOrder_852.js?<?=time()?>"></script>
 <script type="text/javascript" src="newOrder_851.js?<?=time()?>"></script>
 
