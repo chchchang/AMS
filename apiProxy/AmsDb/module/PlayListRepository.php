@@ -56,7 +56,7 @@ class PlayListRepository
             $overlapDateStart = $overlapDateStart===""?$tinfo["廣告期間開始時間"]:max($overlapDateStart,$tinfo["廣告期間開始時間"]);
             $overlapDateEnd = $overlapDateEnd===""?$tinfo["廣告期間結束時間"]:min($overlapDateEnd,$tinfo["廣告期間結束時間"]);
             $hours =  explode(",",$tinfo["廣告可被播出小時時段"]);
-            if($tinfo["託播單狀態識別碼"] != 1){
+            if($tinfo["託播單狀態識別碼"] != 2){
                 $overlapHour =[];
             }
             else{

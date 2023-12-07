@@ -77,10 +77,17 @@
 				require_once 'ajaxToAPIMoudle/ajaxToAPI_CSMS.php';
 				produceFile_851('send');
 				break;
-			/*case "barker頻道":
-				require_once 'ajaxToAPIMoudle/ajaxToAPI_CAMPS.php';
-				sendOrder_CAMPS($_POST["託播單識別碼"]);
-				break;*/
+			case 'barker頻道':
+			case '破口廣告':
+				$replacer = new ReplaceOrderInPlaylist();
+				if(	$replacer->fixBarkerPlaylistOverlapPeroid($_POST["託播單識別碼"])){
+					recordResult('insert',1,null,null);
+					changeOrderSate('送出',array($_POST["託播單識別碼"]));
+				}
+				else{
+					recordResult('insert',false,"修正重疊走期重疊失敗",null);
+				}
+				break;
 			//2023 11 23 使用新pumping server後不需向CAMPS送出託播
 			case "單一平台banner":
 			case "單一平台barker_vod":
