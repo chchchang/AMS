@@ -1,6 +1,7 @@
 <?php
 require_once dirname(__FILE__)."/../../../tool/MyDB.php";
 require_once dirname(__FILE__)."/TransactionRepository.php";
+require_once dirname(__FILE__).'../../../../api/barker/module/PutToWatchFolder.php';
 //print_r("test");
 //print_r($test->genPlaylistRecord(158,true));
 //$test->begin_transaction();
@@ -110,7 +111,7 @@ class BreachAdPlaylistRepository
                     $tag = "[note]破口||[敘述]".$row["tag"].$BreachCount;
                 }
                 else if(preg_match($LivePattern,$row["tag"])){
-                    $playlName = "Live實況";
+                    $playlName = "Live 實況";
                     $tag = "[敘述]".$row["tag"].$BreachCount;
                 }
             }

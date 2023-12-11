@@ -18,10 +18,9 @@
 		public function handle(){
 			$this->checkParas();
 			$this->excelData  = $this->getBreachExcelDataFromDb();
-			if(isset($_POST["uploadToPointServer"]) && isset($_POST["uploadToPointServer"])){
+			if(isset($_POST["uploadToPointServer"]) && $_POST["uploadToPointServer"] ){
 				$this->saveTempFileAndPutToSftp($this->excelData);
 			}
-			
 			$this->exitWithMessage(true,"success");
 		
 		}
@@ -45,7 +44,6 @@
 		private function saveTempFileAndPutToSftp($excelData){
 			$tmpfname = tempnam("", "bAd").".xlsx";
 			$this->saveTempXslxFile($excelData,$tmpfname);
-			print_r($tmpfname);
 			$this->sendXslxFile($tmpfname);
 			unlink($tmpfname);
 		}
@@ -54,8 +52,26 @@
 			// 創建一個新的 Spreadsheet 對象
 			$spreadsheet = new Spreadsheet();
 			// 選擇活動工作表並將數據設置為單元格值
-			$spreadsheet->getActiveSheet()->fromArray($excelData, null, 'A1');
-			// 創建一個 Xlsx 寫入器並保存 Excel 檔案
+			// 創建一個新的 Spreadsheet 對象
+			$spreadsheet = new Spreadsheet();
+
+			// 取得活動工作表
+			$sheet = $spreadsheet->getActiveSheet();
+
+			// 將數據填充到工作表
+			$sheet->fromArray($excelData, null, 'A1');
+
+			// 取得活動工作表的樣式對象
+			$styleArray = $sheet->getStyle($sheet->calculateWorksheetDimension());
+
+			// 取得框線對象
+			$borders = $styleArray->getBorders();
+
+			// 設置框線
+			$borders->getAllBorders()->setBorderStyle(\PhpOffice\PhpSpreadsheet\Style\Border::BORDER_THIN);
+			$borders->getAllBorders()->getColor()->setRGB('000000'); // 設置框線顏色
+
+			// 將 Spreadsheet 寫入檔案
 			$writer = new Xlsx($spreadsheet);
 			$writer->save($tmpfname);
 		}

@@ -16,14 +16,14 @@ else{
 	$mid = $_POST["素材識別碼"];
 }
 
-if(isset($argv[2]) || isset($_POST["破口"])){
-	$adType = $_POST["破口"];
+if(isset($argv[2]) || isset($_POST["adType"])){
+	$adType = $_POST["adType"];
 }
 
 if(!$sender->uploadByMaterialId($mid,$adType)){
 	exit(json_encode(["seccess"=>false,"message"=>$sender->message],JSON_UNESCAPED_UNICODE));
 }
-exit(json_encode(["seccess"=>true,"message"=>"上傳到端點barker成功"],JSON_UNESCAPED_UNICODE));
+exit(json_encode(["seccess"=>true,"message"=>$adType=="破口"?"上傳到破口廣告成功":"上傳到端點barker成功"],JSON_UNESCAPED_UNICODE));
 
 ?>
  
