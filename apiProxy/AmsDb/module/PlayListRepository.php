@@ -56,12 +56,7 @@ class PlayListRepository
             $overlapDateStart = $overlapDateStart===""?$tinfo["廣告期間開始時間"]:max($overlapDateStart,$tinfo["廣告期間開始時間"]);
             $overlapDateEnd = $overlapDateEnd===""?$tinfo["廣告期間結束時間"]:min($overlapDateEnd,$tinfo["廣告期間結束時間"]);
             $hours =  explode(",",$tinfo["廣告可被播出小時時段"]);
-            if($tinfo["託播單狀態識別碼"] != 2){
-                $overlapHour =[];
-            }
-            else{
-                $overlapHour =$overlapHour===null?$hours:array_intersect($hours,$overlapHour);
-            }
+            $overlapHour =$overlapHour===null?$hours:array_intersect($hours,$overlapHour);
             $overlapCh = $overlapCh===null?$tinfo["channelId"]:array_intersect($overlapCh,$tinfo["channelId"]);
         }
         $overlapHour = $this->fixLeadingZero($overlapHour);
@@ -628,9 +623,6 @@ class PlayListRepository
     public function getDistinctPlaylistIdByTransactionId($transactionId){
         $sql="select distinct playlist_id from barker_playlist_template where transaction_id =? ";
 		$result = $this->mydb->getResultArray($sql,"i",$transactionId);
-		if(!$result){
-			return false;
-		}
 		return $result;
     }
 
@@ -656,6 +648,15 @@ class PlayListRepository
 			return false;
 		}
 		return ["start_seconds"=>$result[0]["smax"],"end_seconds"=>$result[0]["emax"]];
+    }
+
+    public function markAsNoOverlappingPeroid($playlist_id) {
+        $sql = "update barker_playlist set overlap_hours='' WHERE playlist_id =?";
+        $result = $this->mydb->execute($sql,"i",$playlist_id);
+        if(!$result){
+			throw new RuntimeException("新增播表失敗");
+		}
+        return true;
     }
 
 
