@@ -287,7 +287,6 @@
 					try{
 						sendOrder_VSM_batch("insertAdTargetRelationOnly",$bypostOrder,$orderId,"S");
 						sendOrder_VSM_batch($action,$bypostOrder,$orderId);
-						changeOrderSate('送出',array($orderId));
 					}catch(Exception $e){
 						exit(json_encode(array("success"=>false,"message"=>'託播單送出失敗:'.$e->getMessage(),'id'=>$orderId),JSON_UNESCAPED_UNICODE));
 					}
@@ -300,7 +299,6 @@
 				try{
 					sendOrder_VSM_batch("insertAdTargetRelationOnly",$bypostOrder,$orderId,"S");
 					sendOrder_VSM_batch($action,$bypostOrder,$orderId);
-					changeOrderSate('送出',array($orderId));
 				}catch(Exception $e){
 					exit(json_encode(array("success"=>false,"message"=>'託播單送出失敗:'.$e->getMessage(),'id'=>$orderId),JSON_UNESCAPED_UNICODE));
 				}
