@@ -80,12 +80,13 @@
 			case 'barker頻道':
 			case '破口廣告':
 				$replacer = new ReplaceOrderInPlaylist();
-				if(	$replacer->fixBarkerPlaylistOverlapPeroid($_POST["託播單識別碼"])){
+				if(	$replacer->fixBarkerPlaylistOverlapPeroidByOrderId($_POST["託播單識別碼"])){
 					recordResult('insert',1,null,null);
 					changeOrderSate('送出',array($_POST["託播單識別碼"]));
 				}
 				else{
 					recordResult('insert',false,"修正重疊走期重疊失敗",null);
+					exit(json_encode(array("success"=>false,"message"=>'修正重疊走期重疊失敗','id'=>$_POST["託播單識別碼"]),JSON_UNESCAPED_UNICODE));
 				}
 				break;
 			//2023 11 23 使用新pumping server後不需向CAMPS送出託播
@@ -488,12 +489,13 @@
 				/*require_once 'ajaxToAPIMoudle/ajaxToAPI_CAMPS.php';
 				cancelOrder_CAMPS($_POST["託播單識別碼"]);*/
 				$replacer = new ReplaceOrderInPlaylist();
-				if(	$replacer->fixBarkerPlaylistOverlapPeroid($_POST["託播單識別碼"])){
-					recordResult('delete',1,"修正重疊走期失敗",null);
+				if(	$replacer->markPlaylistAsNoOverlappingPeriodByOrderId($_POST["託播單識別碼"])){
+					recordResult('delete',1,null,null);
 					changeOrderSate('取消送出',array($_POST["託播單識別碼"]));
 				}
 				else{
 					recordResult('delete',false,"修正重疊走期重疊失敗",null);
+					exit(json_encode(array("success"=>false,"message"=>'修正重疊走期重疊失敗','id'=>$_POST["託播單識別碼"]),JSON_UNESCAPED_UNICODE));
 				}
 				break;
 			
