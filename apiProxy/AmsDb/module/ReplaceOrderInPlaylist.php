@@ -230,13 +230,39 @@ class ReplaceOrderInPlaylist
         //exit(json_encode(array("success"=>false,"message"=>$message),JSON_UNESCAPED_UNICODE));
     }
 
-    public function fixBarkerPlaylistOverlapPeroid($orderId){
-		if(!$plaslistIds = $this->playListRepository->getDistinctPlaylistIdByTransactionId($orderId)){
+    public function fixBarkerPlaylistOverlapPeroidByOrderId($orderId){
+        $plaslistIds = $this->playListRepository->getDistinctPlaylistIdByTransactionId($orderId);
+		if($plaslistIds === false){
 			return false;
 		}
+
+        if($plaslistIds === null){
+            //no playlistId to fix
+            return true;
+        }
+
 		foreach($plaslistIds as $row){
 			//更新barker播表的重疊時間。
 			if(!$this->playListRepository->caculateOverlapPeriod($row["playlist_id"],true))
+				return false;
+		}
+		return true;
+	}
+
+    public function markPlaylistAsNoOverlappingPeriodByOrderId($orderId){
+        $plaslistIds = $this->playListRepository->getDistinctPlaylistIdByTransactionId($orderId);
+		if($plaslistIds === false){
+			return false;
+		}
+
+        if($plaslistIds === null){
+            //no playlistId to mark
+            return true;
+        }
+
+		foreach($plaslistIds as $row){
+			//更新barker播表的重疊時間。
+			if(!$this->playListRepository->markAsNoOverlappingPeroid($row["playlist_id"]))
 				return false;
 		}
 		return true;
