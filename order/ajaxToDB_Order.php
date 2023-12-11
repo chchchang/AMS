@@ -2,6 +2,7 @@
 	include('../tool/auth/authAJAX.php');
 	include('ajax_checkOrder.php');
 	require_once dirname(__FILE__)."/../apiProxy/AmsDb/module/PlayListRepository.php";
+	require_once dirname(__FILE__)."/../apiProxy/AmsDb/module/ReplaceOrderInPlaylist.php";
 	$CSMSPTNAME = array('首頁banner','專區banner','頻道short EPG banner','專區vod');
 	if ( isset($_POST['query']) && $_POST['query'] != '' )
 		do_query();
@@ -939,8 +940,13 @@
 				}
 				//end of 檢查多版位投放
 				//20230504 增加barker播表重疊走期計算
-				fix_barker_playlist_overlap_peroid($edit["託播單識別碼"]);
-				array_push($editIds,$edit["託播單識別碼"]);
+				$replacer = new ReplaceOrderInPlaylist();
+				if(	$replacer->markPlaylistAsNoOverlappingPeriodByOrderId($edit["託播單識別碼"])){
+					array_push($editIds,$edit["託播單識別碼"]);
+				}
+				else{
+					exit(json_encode(array("dbError"=>'更新重疊走期失敗'),JSON_UNESCAPED_UNICODE));
+				}
 			}
 			//刪除現有訂單
 			if(isset($edits["delete"]))
@@ -1937,20 +1943,6 @@
 			exit(json_encode($res[0]['版位其他參數預設值']));
 		else
 			exit(json_encode($defaultPercentage));
-	}
-	//2023 05 04新增若是barker的託播單，
-	function fix_barker_playlist_overlap_peroid($orderId){
-		global $my;
-		$PlayListRepository = new PlayListRepository($my);
-		if(!$plaslistIds = $PlayListRepository->getDistinctPlaylistIdByTransactionId($orderId)){
-			return false;
-		}
-		foreach($plaslistIds as $row){
-			//更新barker播表的重疊時間。
-			if(!$PlayListRepository->caculateOverlapPeriod($row["playlist_id"],true))
-				return false;
-		}
-		return true;
 	}
 
 	function check_material_paras($paras){
