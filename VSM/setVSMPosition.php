@@ -431,7 +431,7 @@
 		if(count($result)>0){
 			echo '已建立過版位'.$result[0]['版位識別碼'].'<br>';
 			$pid = $result[0]['版位識別碼'];
-			$sql = "UPDATE 版位 SET 版位名稱 = ?, 版位說明 = ? WHERE 版位識別碼 = ?";
+			$sql = "UPDATE 版位 SET 版位名稱 = ?, 版位說明 = ?, DELETED_TIME = NULL  WHERE 版位識別碼 = ?";
 			if(!$my->execute($sql,'ssi',$ptn,$pinfo,$pid)){
 				echo '修改EPG版位名稱失敗'.$ptn.'<br>';
 			}
