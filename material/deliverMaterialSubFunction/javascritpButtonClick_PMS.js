@@ -44,8 +44,8 @@ var buttonOnClick=function(event){
 						node影片媒體編號北.innerHTML=HtmlSanitizer.SanitizeHtml(json.chtnIapId);
 						node影片媒體編號南.innerHTML=HtmlSanitizer.SanitizeHtml(json.chtsIapId);
 						if(json.mediaId===''){
-							//node影片媒體編號.innerHTML=HtmlSanitizer.SanitizeHtml(json.mediaId);
-							node影片媒體編號.innerHTML=json.mediaId;
+							node影片媒體編號.innerHTML=HtmlSanitizer.SanitizeHtml(json.mediaId);
+							//node影片媒體編號.innerHTML=json.mediaId;
 							alert('查無資料，請重新派送影片。');
 							
 						}

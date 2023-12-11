@@ -36,7 +36,7 @@
 		sort($positions);
 		
 		header('Content-Type: application/json; charset=UTF-8');
-		echo json_encode($positions,JSON_UNESCAPED_UNICODE);
+		echo htmlspecialchars(json_encode($positions,JSON_UNESCAPED_UNICODE));
 		exit;
 	}
 	

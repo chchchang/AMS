@@ -197,7 +197,7 @@
 
 <script>
 	var ajaxToApi="ajaxToAPI.php";
-	var 版位類型名稱='<?=$positionTypeName?>';
+	var 版位類型名稱='<?=htmlspecialchars($positionTypeName)?>';
 	var id= <?php echo htmlspecialchars($orderId, ENT_QUOTES, 'UTF-8');?>;
 	var change= <?=$change?>, apiInfo= <?=$apiInfo?>;
 	if(apiInfo==1)
@@ -209,7 +209,7 @@
 		$("#sendBtn,#checkBtn").remove();
 	}
 	
-	var fromparent = "<?=$parent?>";
+	var fromparent = "<?=htmlspecialchars($parent)?>";
 	if(fromparent=="訂單管理"){
 		$("#sendBtn").remove();
 	}
@@ -225,11 +225,11 @@
 	}
 	
 	$('#ownerIfoButton').click(function(e){	
-		parent.openOnwerInfoDialog(<?=$adOwnerId?>);
+		parent.openOnwerInfoDialog(<?=htmlspecialchars($adOwnerId)?>);
 	});
 	
 	$('#orderListIfoButton').click(function(e){	
-		parent.openOrderListInfoDialog(<?=$orderListId?>);
+		parent.openOrderListInfoDialog(<?=htmlspecialchars($orderListId)?>);
 	});
 	
 	//DB要資料

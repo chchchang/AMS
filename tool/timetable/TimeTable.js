@@ -318,9 +318,9 @@
 		var sum =[];
 		//逐一增加row
 		for(var i in material){
-			$tr = $('<tr class ="timetable-extend-dg"/>').append($('<th>'+material[i]['素材識別碼']+'</th>'));
+			$tr = $('<tr class ="timetable-extend-dg"/>').append($('<th>'+HtmlSanitizer.SanitizeHtml(material[i]['素材識別碼'])+'</th>'));
 			for(var j in material[i]['個數']){
-				$tr.append($('<td>'+material[i]['個數'][j]+'</td>'));
+				$tr.append($('<td>'+HtmlSanitizer.SanitizeHtml(material[i]['個數'][j])+'</td>'));
 				if(typeof(sum[j])=='undefined')
 					sum[j]=parseInt(material[i]['個數'][j],10);
 				else
