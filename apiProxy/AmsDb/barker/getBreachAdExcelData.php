@@ -19,7 +19,8 @@
 			$this->checkParas();
 			$this->excelData  = $this->getBreachExcelDataFromDb();
 			if(isset($_POST["uploadToPointServer"]) && $_POST["uploadToPointServer"] ){
-				$this->saveTempFileAndPutToSftp($this->excelData);
+				if(!$this->saveTempFileAndPutToSftp($this->excelData))
+					$this->exitWithMessage(false,"上傳檔案失敗");
 			}
 			$this->exitWithMessage(true,"success");
 		
@@ -44,8 +45,10 @@
 		private function saveTempFileAndPutToSftp($excelData){
 			$tmpfname = tempnam("", "bAd").".xlsx";
 			$this->saveTempXslxFile($excelData,$tmpfname);
-			$this->sendXslxFile($tmpfname);
+			if(!$this->sendXslxFile($tmpfname))
+				return false;
 			unlink($tmpfname);
+			return true;
 		}
 
 		private function saveTempXslxFile($excelData,$tmpfname){
@@ -79,8 +82,8 @@
 		private function sendXslxFile($tmpfname){
 			//upload files
 			$remoteFileName = $this->date."_".$this->hour."破口廣告.xlsx";
-			$sftp = new PutToWatchFolder();
-			$sftp->uploadedBreachAdPlayList($tmpfname,$remoteFileName);
+			$sftp = new PutToWatchFolder("breachAd");
+			return $sftp->uploadedBreachAdPlayList($tmpfname,$remoteFileName);
 		}
 
 		private function exitWithMessage($success,$message = ""){

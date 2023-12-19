@@ -92,7 +92,7 @@
 			$data = array(
 				"material_id"=>$material_id,
 				"file_name"=>$file_name,
-				"import_time"=>$_POST["import_time"],
+				"import_time"=>$_POST["import_time"]?$_POST["import_time"]:date("Y-m-d H:i:s", time()),
 				"import_result"=>(strtolower($_POST["import_result"])=="true"||$_POST["import_result"]==1)?true:false,
 				"message"=>$_POST["import_message"],
 			);

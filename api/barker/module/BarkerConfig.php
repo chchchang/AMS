@@ -26,4 +26,17 @@ class BarkerConfig{
     public static $donePlaylistFolder = "playlist_data_done";
 
 }
+
+class BreachAdConfig extends BarkerConfig{
+    public static $sftpInfo=
+    [
+        'host'=>"172.17.233.25",
+        'username'=>"Pumping",
+        "password"=>"1qaz@WSX3edc"
+    ];
+
+    public static $remoteMaterialFolder = "MAM";
+    public static $remotePlaylistFolder = "XLSX";
+
+}
 ?>

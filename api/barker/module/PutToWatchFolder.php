@@ -15,25 +15,26 @@ class PutToWatchFolder{
     private $mydb;
     private $logWriter;
     private $sftpInfo;
+    private $breachSftpInfo;
     private $date;
     private $materialFolder;
     private $playlistFolder;
     private $doneMaterialFolder;
     private $donePlaylistFolder;
     private $remoteMaterialFolder;
+    private $remoteMaterialFolderBreachAd;
     private $remotePlaylistFolder;
     private $remotePlaylistFolderBreachAd;
     public $message;
 
-    function __construct() {
+    function __construct($adType=null) {
         $this->mydb=new MyDB(true);
         $this->logWriter = fopen("log/putToWatcherFolder".date('Y-m-d').".log","a");
         
         $this->materialFolder = BarkerConfig::$materialFolder;
         $this->playlistFolder = BarkerConfig::$playlistFolder;
 
-        $this->remoteMaterialFolder = BarkerConfig::$remoteMaterialFolder;
-        $this->remotePlaylistFolder = BarkerConfig::$remotePlaylistFolder;
+        $this->remoteMaterialFolderBreachAd = BarkerConfig::$remoteMaterialFolderBreachAd;
         $this->remotePlaylistFolderBreachAd = BarkerConfig::$remotePlaylistFolderBreachAd;
 
         $this->doneMaterialFolder = BarkerConfig::$doneMaterialFolder;
@@ -44,8 +45,17 @@ class PutToWatchFolder{
         //$this->chdir($this->materialFolder);
         $this->chdir($this->playlistFolder);
         
-
-        $this->sftpInfo=BarkerConfig::$sftpInfo;
+        if($adType == "breachAd"){
+            $this->sftpInfo=BreachAdConfig::$sftpInfo;
+            $this->remoteMaterialFolder = BreachAdConfig::$remoteMaterialFolder;
+            $this->remotePlaylistFolder = BreachAdConfig::$remotePlaylistFolder;
+        }
+        else{
+            $this->sftpInfo=BarkerConfig::$sftpInfo;
+            $this->remoteMaterialFolder = BarkerConfig::$remoteMaterialFolder;
+            $this->remotePlaylistFolder = BarkerConfig::$remotePlaylistFolder;
+        }
+        
         $this->message ="";
     }
 
@@ -74,7 +84,6 @@ class PutToWatchFolder{
      * 將檔案送到sftp
      */
     private function putToSftpServer($local,$remote){
-        
         if(!SFTP::put($this->sftpInfo['host'],$this->sftpInfo['username'],$this->sftpInfo['password'],$local,$remote)){
             $this->dolog("upload $local to $remote fail");
             return false;

@@ -16,6 +16,7 @@ class SendMaterialToPumping{
     private $rawMaterialFolder;
     private $remoteMaterialFolder;
     private $remoteMaterialFolderBreachAd;
+	private $mInfo;
     public $message;
 
     function __construct($logger = null) {
@@ -52,9 +53,9 @@ class SendMaterialToPumping{
 
 
     public function uploadByMaterialId($mid,$adType = null){
-        $sftp = new PutToWatchFolder();
+        $sftp = new PutToWatchFolder(($adType == "breachAd")?"breachAd":null);
     
-        //取的素材原始檔名
+        /*//取的素材原始檔名
         $sql = "select 素材原始檔名 from  素材  where 素材識別碼 = ?";
         $data = $this->mydb->getResultArray($sql,'i',$mid);
 
@@ -62,13 +63,17 @@ class SendMaterialToPumping{
         if($data[0] != null){
             $mname = $data[0]["素材原始檔名"];
             $fliename =$mid."_".$mname;
-        }
+        }*/
 
-
+        $materialRepo = new MaterialRepository();
+		$this->mInfo = $materialRepo->getMaterialInfo($mid);
+        $mname = $this->mInfo["素材原始檔名"];
+        $fliename =$mid."_".$mname;
         $tmp = explode(".",$fliename);
         $mtype = end($tmp);
         $rawFileName = $mid.".".$mtype;
-        $remoteFile = ($adType == "破口")?$this->remoteMaterialFolderBreachAd."/".$fliename:$this->remoteMaterialFolder."/".$fliename;
+        $this->dolog("嘗試上查看檔案:$fliename ,AMS端檔案:$rawFileName");
+        $remoteFile = ($adType == "breachAd")?$this->remoteMaterialFolderBreachAd."/".$fliename:$this->remoteMaterialFolder."/".$fliename;
         if($this->checkLocalMaterial($this->rawMaterialFolder.$rawFileName)){
             if($sftp->uploadedMaterial($this->rawMaterialFolder.$rawFileName, $remoteFile)){
                 $nameParse = explode('_',$fliename);
@@ -79,6 +84,8 @@ class SendMaterialToPumping{
                 UPDATE import_time=null,import_result=null,message='已上傳，等待barker系統回報',last_updated_time=now()"
                 ;
                 $this->mydb->execute($sql,'is',$material_id,$fliename);
+                $sql = "UPDATE 素材 set CAMPS影片派送時間 = now(),CAMPS影片媒體編號=999 WHERE 素材識別碼 = ?";
+                $this->mydb->execute($sql,'i',$material_id);
                 $this->mydb->close();
                 $this->message ="上傳到端點barker成功";
                 return true;
@@ -105,10 +112,8 @@ class SendMaterialToPumping{
             $file_name = str_replace($this->rawMaterialFolder,"",$filepath);
             $nameParse = explode('.',$file_name);
             $material_id = array_shift($nameParse);
-            $materialRepo = new MaterialRepository();
-			$mInfo = $materialRepo->getMaterialInfo($material_id);
             $mailer = new MyMailer();
-			$mailer->sendMail("barker素材:".$material_id." 檔案匯入失敗","barker素材檔案匯入失敗\n素材識別碼:".$material_id." 素材名稱:".$mInfo["素材名稱"]."\n失敗原因:AMS端檔案不存在");
+			$mailer->sendMail("barker素材:".$material_id." 檔案匯入失敗","barker素材檔案匯入失敗\n素材識別碼:".$material_id." 素材名稱:".$this->mInfo["素材名稱"]."\n失敗原因:AMS端檔案不存在\n預期檔案路徑:$filepath");
             $sql = "
             INSERT INTO barker_material_import_result (material_id,file_name,import_time,import_result) VALUES (?,?,now(),0)	
             ON DUPLICATE KEY
