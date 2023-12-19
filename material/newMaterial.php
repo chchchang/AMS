@@ -68,7 +68,7 @@ button{
 			<p>
 			</td></tr>
 			<tr><th>上傳的素材檔案:</th><td><form action="ajaxUploadingFile.php" method="post" enctype="multipart/form-data" id="uploadFileForm">
-							<input type="hidden" name="MAX_FILE_SIZE" value="800000000">
+							<input type="hidden" name="MAX_FILE_SIZE" value="3000000000">
 							<input type="file" name="fileToUpload" id="fileToUpload"></form><button id="clearFile">取消素材</button><a id = 'mtypeMessage'></a></form></td></tr>
 			</table>
 		</fieldset>

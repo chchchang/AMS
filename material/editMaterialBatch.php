@@ -670,12 +670,12 @@ function saveToDb(){
 			data['素材說明']=$("#素材說明").val();
 			if($('#素材類型設定CB').prop('checked')){
 				if(data['素材類型識別碼']!=material[$("input[name='materailRadio']:checked").val()]){
-					$('#uploadResult_f').append('<p>素材'+HtmlSanitizer.SanitizeHtml(data.素材識別碼)+' 修改失敗: 素材類型不符</p>');
+					$('#uploadResult_f').append('<p>素材'+HtmlSanitizer.SanitizeHtml(""+data.素材識別碼)+' 修改失敗: 素材類型不符</p>');
 					doneCheck();
 					return 0;
 				}
 				if(data['素材類型識別碼']==material['圖片'] && (data['素材原始檔名']!=''||data['素材原始檔名']!=null) && !$('#素材原始檔名CB').prop('checked') && $("#fileToUpload").val()==''){
-					$('#uploadResult_f').append('<p>素材'+HtmlSanitizer.SanitizeHtml(data.素材識別碼)+' 修改失敗: 圖片素材已存在，若非新上傳檔案則無法修改寬高</p>');
+					$('#uploadResult_f').append('<p>素材'+HtmlSanitizer.SanitizeHtml(""+data.素材識別碼)+' 修改失敗: 圖片素材已存在，若非新上傳檔案則無法修改寬高</p>');
 					doneCheck();
 					return 0;
 				}
@@ -698,7 +698,7 @@ function saveToDb(){
 				var newname = ($("#fileToUpload").val()=='')?$("#素材原始檔名").val():$("#fileToUpload").val().split('\\').pop();
 				var ftype =$("input[name='fileRadio']:checked").val();
 				if(data['素材類型識別碼']!=material[ftype]){
-					$('#uploadResult_f').append('<p>素材編號'+HtmlSanitizer.SanitizeHtml(data.素材識別碼)+' 修改失敗: 檔案類型不符</p>');
+					$('#uploadResult_f').append('<p>素材編號'+HtmlSanitizer.SanitizeHtml(""+data.素材識別碼)+' 修改失敗: 檔案類型不符</p>');
 					doneCheck();
 					return 0;
 				}
@@ -707,7 +707,7 @@ function saveToDb(){
 				var type2 = newname.split('.').pop();
 				if(ftype == '圖片')
 					if(type1!=''&&type1!=type2){
-						$('#uploadResult_f').append('<p>素材編號'+HtmlSanitizer.SanitizeHtml(data.素材識別碼)+' 修改失敗: 圖片副檔名不同</p>');
+						$('#uploadResult_f').append('<p>素材編號'+HtmlSanitizer.SanitizeHtml(""+data.素材識別碼)+' 修改失敗: 圖片副檔名不同</p>');
 						doneCheck();
 						return 0;
 					}
