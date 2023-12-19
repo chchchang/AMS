@@ -11,8 +11,9 @@
 	$my=new MyDB(true);
 	$PlayListRepository = new PlayListRepository($my);
 	//setMessageAndExit(true,"設定實際播表失敗","warning");//test
+	$defaultPostVar = ["overlapHour"=>[],"overlapChannelId"=>[],"playlistTemplate"=>[],"playlistRecord"=>[],"overlapStartTime"=>null,"overlapEndTime"=>null];
 	if(isset($_POST["replace"])){
-		$postvar = $_POST["replace"];
+		$postvar = array_merge($defaultPostVar, $_POST["replace"]);
 		if(!validatePlaylistSchColumn($postvar["channel_id"],$postvar["date"],$postvar["hour"]))
 			exit(json_encode(array("success"=>false,"message"=>"參數不正確"),JSON_UNESCAPED_UNICODE));
 		$PlayListRepository->begin_transaction();
@@ -52,7 +53,7 @@
 		setMessageAndExit(true,"單一時段播表設定成功");
 	}
 	else if(isset($_POST["edit"])){
-		$postvar = $_POST["edit"];
+		$postvar = array_merge($defaultPostVar, $_POST["edit"]);
 		$PlayListRepository->begin_transaction();
 		foreach($postvar["overlapHour"] as $id => $h){
 			$postvar["overlapHour"][$id]=str_pad($h, 2, '0', STR_PAD_LEFT);

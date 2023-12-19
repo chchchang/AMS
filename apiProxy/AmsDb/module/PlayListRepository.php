@@ -59,6 +59,12 @@ class PlayListRepository
             $overlapHour =$overlapHour===null?$hours:array_intersect($hours,$overlapHour);
             $overlapCh = $overlapCh===null?$tinfo["channelId"]:array_intersect($overlapCh,$tinfo["channelId"]);
         }
+        if($overlapHour == null){
+            $overlapHour = ["0","1","2","3","4","5","6","7","8","9","10","11","12","13","14","15","16","17","18","19","20","21","22","23"];
+        }
+        if($overlapCh == null){
+            $overlapCh = [];
+        }
         $overlapHour = $this->fixLeadingZero($overlapHour);
 
         //若有設定要更新資料，update db
@@ -316,7 +322,9 @@ class PlayListRepository
     /**
 	*設定playlist record，會先刪除現有的資料再重新匯入
 	**/
-	public function setPlaylistRecord($playlist_id,$records){
+	public function setPlaylistRecord($playlist_id,$records=[]){
+        if($records == null || count($records) == 0)
+            return true;
 		//先刪除現有playlist
 		$sql = "delete from barker_playlist_record WHERE playlist_id =? ";
 		$result = $this->mydb->execute($sql,"i",$playlist_id);
