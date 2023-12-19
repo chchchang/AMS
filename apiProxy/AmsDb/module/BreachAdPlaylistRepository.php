@@ -58,8 +58,8 @@ class BreachAdPlaylistRepository
                     $tmp[0] = $date;
                     $tmp[1] = $playlistHour.":00:00";
                 }
-                $tmp[9] = $row[0];
-                $tmp[10] = $row[1];
+                $tmp[8] = $row[0];
+                $tmp[9] = $row[1];
                 $tmp[12] = $row[2];
                 array_push( $exelRows,$tmp);
             }
@@ -111,14 +111,14 @@ class BreachAdPlaylistRepository
                     $tag = "[note]破口||[敘述]".$row["tag"].$BreachCount;
                 }
                 else if(preg_match($LivePattern,$row["tag"])){
-                    $playlName = "Live 實況";
+                    $playlName = $playVIdeoFile = "Live 實況";
                     $tag = "[敘述]".$row["tag"].$BreachCount;
                 }
             }
             else{
                 $tinfo = $this->getTransactionInfo($row["transaction_id"]);
                 $playlName = $tinfo["託播單名稱"];
-                $playVIdeoFile = $tinfo["material"]["素材原始檔名"];
+                $playVIdeoFile = $tinfo["material"]["素材識別碼"]."_".$tinfo["material"]["素材原始檔名"];
                 $tag = $row["transaction_id"];
             }
 
