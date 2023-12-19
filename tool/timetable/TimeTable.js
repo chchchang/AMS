@@ -19,12 +19,12 @@
 			else
 				bgcolor ='rgb(230, 230, 250)';
 			if(typeof(orders[i].upTitle)!='undefined'){
-				output+='<tr style="background-color:'+bgcolor+'"><th rowspan=2>'+(i+1)+'</th><th rowspan=2>'+(typeof(orders[i].託播單代碼替換文字)=='undefined'?HtmlSanitizer.SanitizeHtml(orders[i].託播單代碼):HtmlSanitizer.SanitizeHtml(orders[i].託播單代碼替換文字))+
-				'</th><td colspan=24>'+HtmlSanitizer.SanitizeHtml(orders[i].upTitle)+'</td></tr><tr style="background-color:'+bgcolor+'" value='+HtmlSanitizer.SanitizeHtml(orders[i].託播單代碼)+'>';
+				output+='<tr style="background-color:'+bgcolor+'"><th rowspan=2>'+(i+1)+'</th><th rowspan=2>'+HtmlSanitizer.SanitizeHtml(String(orders[i].託播單代碼替換文字 ? orders[i].託播單代碼替換文字:orders[i].託播單代碼 ))+
+				'</th><td colspan=24>'+HtmlSanitizer.SanitizeHtml(orders[i].upTitle)+'</td></tr><tr style="background-color:'+bgcolor+'" value='+HtmlSanitizer.SanitizeHtml(""+orders[i].託播單代碼)+'>';
 			}
 			else{
-				output+='<tr style="background-color:'+bgcolor+'" value='+HtmlSanitizer.SanitizeHtml(orders[i].託播單代碼)+'><th>'+(i+1)+'</th><th>'
-				+(typeof(orders[i].託播單代碼替換文字)=='undefined'?HtmlSanitizer.SanitizeHtml(orders[i].託播單代碼):HtmlSanitizer.SanitizeHtml(orders[i].託播單代碼替換文字))+'</th>';
+				output+='<tr style="background-color:'+bgcolor+'" value='+HtmlSanitizer.SanitizeHtml(""+orders[i].託播單代碼)+'><th>'+(i+1)+'</th><th>'
+				+HtmlSanitizer.SanitizeHtml(String(orders[i].託播單代碼替換文字 ? orders[i].託播單代碼替換文字:orders[i].託播單代碼 )) +'</th>';
 			}
 			var dataLength=0;
 			var highlight = false;
@@ -68,7 +68,7 @@
 			output+='</tr>';
 			
 		}
-		output+='<tr class = "sumTr"><th></th><th>合計</th><th class = "sum">'+HtmlSanitizer.SanitizeHtml(sum.join('</th><th class = "sum">'))+'</th></tr></tbody></table>';
+		output+='<tr class = "sumTr"><th></th><th>合計</th><th class = "sum">'+sum.join('</th><th class = "sum">')+'</th></tr></tbody></table>';
 		document.getElementById(outputId).innerHTML=output;
 				
 		if(typeof(data['素材'])!='undefined')

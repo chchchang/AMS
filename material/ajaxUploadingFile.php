@@ -15,7 +15,7 @@
 	if(isset($_FILES['fileToUpload'])){
 		if($_FILES['fileToUpload']['error']>0){
 			$logger->error('原始檔案上傳失敗,錯誤訊息('.json_encode($_FILES['fileToUpload']['error'],JSON_UNESCAPED_UNICODE).')。');
-			exit(json_encode(array("success" => false,"message" => "原始檔案上傳失敗"),JSON_UNESCAPED_UNICODE));
+			exit(json_encode(array("success" => false,"message" => "原始檔案上傳失敗".json_encode($_FILES['fileToUpload']['error'],JSON_UNESCAPED_UNICODE)),JSON_UNESCAPED_UNICODE));
 		}
 		$fileNameA=explode(".",$_FILES['fileToUpload']['name']);
 		$type = end($fileNameA);

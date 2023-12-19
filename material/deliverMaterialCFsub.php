@@ -302,30 +302,59 @@ $(document).ready(function(){
 				json.body[tr].splice(0,0,['<input type="checkbox">','html'])
 			}
 			var DG = new DataGrid('DG',json.header,json.body);
-			$('#DG').prepend('<button id="getAll">取得結果</button><button id="putAll">派送影片</button>')
-						$('#getAll').click(function(event){
-				$(this).mask('...');
-				var selected=$('#DG tr').has('input[type=checkbox]:checked').children('td').children('button:contains("取得")');
-				selected.click()
-				var interval=setInterval(function(){
-					if(!selected.isMasked()){
-						clearInterval(interval);
-						$(event.target).unmask();
-					}
-				},1000);
-			});
-			
-			$('#putAll').click(function(event){
-				$(this).mask('...');
-				var selected=$('#DG tr').has('input[type=checkbox]:checked').children('td').children('button:contains("派送")');
-				selected.click()
-				var interval=setInterval(function(){
-					if(!selected.isMasked()){
-						clearInterval(interval);
-						$(event.target).unmask();
-					}
-				},1000);
-			});
+			if($("#deliverAction").val() == "CAMPS"){
+				$('#DG').prepend('<button id="putAllToBaker">上傳到barker</button><button id="putAllToBreach">上傳到破口</button>')
+				$('#putAllToBaker').click(function(event){
+					$(this).mask('...');
+					var selected=$('#DG tr').has('input[type=checkbox]:checked').children('td').children('button:contains("上傳到端點barker")');
+					selected.click()
+					var interval=setInterval(function(){
+						if(!selected.isMasked()){
+							clearInterval(interval);
+							$(event.target).unmask();
+						}
+					},1000);
+				});
+				
+				$('#putAllToBreach').click(function(event){
+					$(this).mask('...');
+					var selected=$('#DG tr').has('input[type=checkbox]:checked').children('td').children('button:contains("上傳到破口廣告")');
+					selected.click()
+					var interval=setInterval(function(){
+						if(!selected.isMasked()){
+							clearInterval(interval);
+							$(event.target).unmask();
+						}
+					},1000);
+				});
+			}
+			else{
+				$('#DG').prepend('<button id="getAll">取得結果</button><button id="putAll">派送影片</button>')
+				$('#getAll').click(function(event){
+					$(this).mask('...');
+					var selected=$('#DG tr').has('input[type=checkbox]:checked').children('td').children('button:contains("取得")');
+					selected.click()
+					var interval=setInterval(function(){
+						if(!selected.isMasked()){
+							clearInterval(interval);
+							$(event.target).unmask();
+						}
+					},1000);
+				});
+				
+				$('#putAll').click(function(event){
+					$(this).mask('...');
+					var selected=$('#DG tr').has('input[type=checkbox]:checked').children('td').children('button:contains("派送")');
+					selected.click()
+					var interval=setInterval(function(){
+						if(!selected.isMasked()){
+							clearInterval(interval);
+							$(event.target).unmask();
+						}
+					},1000);
+				});
+			}
+
 			setDgBtn();
 			DG.set_page_info(json.pageNo,json.maxPageNo);
 			DG.set_sortable(json.sortable,true);
@@ -370,9 +399,6 @@ $(document).ready(function(){
 				clickFunctionUrl += "javascritpButtonClick_PMS.js";
 			}else if (deliverAction == "CAMPS"){
 				clickFunctionUrl += "javascritpButtonClick_CAMPS.js";
-			}
-			else if (deliverAction == "POINT"){
-				clickFunctionUrl += "javascritpButtonClick_POINT.js";
 			}
 			
 			$.getScript(clickFunctionUrl).done(function( script, textStatus ) {
