@@ -67,7 +67,7 @@
 				<td><input id="fPicRadio" type="radio" name="fileRadio" value="圖片" checked>圖片<input type="radio" name="fileRadio" value="影片">影片
 				<input type="text" id="素材原始檔名" value = "" style="width:200px" readonly><img id="fileExist" src=""><a id ="fileCheckText" style="font-size:9px"></a>
 				<form action="ajaxUploadingFile.php" method="post" enctype="multipart/form-data"  class="fileM" id ="uploadFileForm">
-					<input type="hidden" name="max_file_size" value="800000000">
+					<input type="hidden" name="max_file_size" value="3000000000">
 					<input type="file" name="fileToUpload" id="fileToUpload"></form>
 				<button id="clearFile">取消素材</button>
 				<a id = 'mtypeMessage'>(接受gif/jpeg/png/jpg檔案)</a>
