@@ -133,7 +133,7 @@ class PutToWatchFolder{
             return false;
         }
         else{
-            $sql = "
+            /*$sql = "
             INSERT INTO barker_playlist_import_result (channel_id ,file_name) VALUES (?,?)	
             ON DUPLICATE KEY
             UPDATE import_time=NULL,import_result=NULL,message=NULL,last_updated_time=now()"
@@ -141,7 +141,10 @@ class PutToWatchFolder{
             if(!$this->mydb->execute($sql,'is',$channel_id ,$file_name)){
                 $this->mydb->close();
                 return false;
-            }            
+            }*/
+            if(!$this->markUploadedPlaylist($channel_id ,$file_name)){
+                return false;
+            }
         }
         return true;
     }
@@ -150,6 +153,19 @@ class PutToWatchFolder{
         if(!$this->putToSftpServer($localFile,$this->remotePlaylistFolderBreachAd."/".$remoteFile)){
             return false;
         }
+        return true;
+    }
+
+    public function markUploadedPlaylist($channelId, $fileName){
+        $sql = "
+        INSERT INTO barker_playlist_import_result (channel_id ,file_name) VALUES (?,?)	
+        ON DUPLICATE KEY
+        UPDATE import_time=NULL,import_result=NULL,message=NULL,last_updated_time=now()"
+        ;
+        if(!$this->mydb->execute($sql,'is',$channelId ,$fileName)){
+            $this->mydb->close();
+            return false;
+        }   
         return true;
     }
      

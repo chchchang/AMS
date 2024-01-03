@@ -83,7 +83,13 @@
 			//upload files
 			$remoteFileName = $this->date."_".$this->hour."破口廣告.xlsx";
 			$sftp = new PutToWatchFolder("breachAd");
-			return $sftp->uploadedBreachAdPlayList($tmpfname,$remoteFileName);
+			if(!$sftp->uploadedBreachAdPlayList($tmpfname,$remoteFileName)){
+				return false;
+			}
+			if(!$sftp->markUploadedPlaylist($this->channel,$tmpfname)){
+				return false;
+			}
+			return true;
 		}
 
 		private function exitWithMessage($success,$message = ""){
