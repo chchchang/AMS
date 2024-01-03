@@ -23,7 +23,7 @@ var HtmlSanitizer = new (function () {
 	var uriAttributes_ = { 'href': true, 'action': true };
 
 	this.SanitizeHtml = function(input) {
-		input = input.trim();
+		input = (input+"").trim();
 		if (input == "") return ""; //to save performance and not create iframe
 
 		//firefox "bogus node" workaround

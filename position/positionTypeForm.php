@@ -478,7 +478,7 @@ function materialTypeAdd(jobject,disable){
 			break;
 	}
 
-	$c.attr('index',HtmlSanitizer.SanitizeHtml(materialArray.length));
+	$c.attr('index',HtmlSanitizer.SanitizeHtml(materialArray.length+""));
 	$li.append($c);
     $("#sortableMaterial").append($li);
 	materialArray.push(jobject);

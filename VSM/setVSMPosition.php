@@ -441,7 +441,7 @@
 		}
 		else{
 			//建立版位類型資料
-			$sql='INSERT INTO 版位 (版位名稱,版位說明,上層版位識別碼,CREATED_PEOPLE) VALUES (?,?,1)';
+			$sql='INSERT INTO 版位 (版位名稱,版位說明,上層版位識別碼,CREATED_PEOPLE) VALUES (?,?,?,1)';
 			if(!$stmt=$my->prepare($sql)) {
 				exit('錯誤代碼('.$my->errno.')、錯誤訊息('.$my->error.')。');
 			}
